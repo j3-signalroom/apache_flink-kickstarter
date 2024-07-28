@@ -1,0 +1,94 @@
+package data_stream_api;
+
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
+import org.apache.flink.connector.base.DeliveryGuarantee;
+import org.apache.flink.connector.datagen.source.DataGeneratorSource;
+import org.apache.flink.connector.kafka.sink.*;
+import org.apache.flink.formats.json.JsonSerializationSchema;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.flink.streaming.api.datastream.*;
+import org.apache.flink.streaming.api.environment.*;
+import java.io.*;
+import java.util.*;
+import org.slf4j.*;
+
+import data_stream_api.model.*;
+
+
+public class DataGeneratorJob {
+	private static final Logger logger = LoggerFactory.getLogger(DataGeneratorJob.class);
+
+
+	public static void main(String[] args) throws Exception {
+		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+		// --- Kafka Producer Config
+        Properties producerProperties = new Properties();
+        try (InputStream stream = DataGeneratorJob.class.getClassLoader().getResourceAsStream("producer.properties")) {
+			producerProperties.load(stream);
+		}
+		
+		DataGeneratorSource<SkyOneAirlinesFlightData> skyOneSource =
+			new DataGeneratorSource<>(
+				index -> DataGenerator.generateSkyOneAirlinesFlightData(),
+				Long.MAX_VALUE,
+				RateLimiterStrategy.perSecond(1),
+				Types.POJO(SkyOneAirlinesFlightData.class)
+			);
+
+		DataStream<SkyOneAirlinesFlightData> skyOneStream = env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
+
+		KafkaRecordSerializationSchema<SkyOneAirlinesFlightData> skyOneSerializer = 
+			KafkaRecordSerializationSchema.<SkyOneAirlinesFlightData>builder()
+				.setTopic("skyone")
+				.setValueSerializationSchema(new JsonSerializationSchema<>(DataGeneratorJob::getMapper))
+				.build();
+
+		KafkaSink<SkyOneAirlinesFlightData> skyOneSink = 
+			KafkaSink.<SkyOneAirlinesFlightData>builder()
+				.setKafkaProducerConfig(producerProperties)
+				.setRecordSerializer(skyOneSerializer)
+				.setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+				.build();
+
+		skyOneStream.sinkTo(skyOneSink).name("skyone_sink");
+
+		DataGeneratorSource<SunsetAirFlightData> sunsetSource =
+			new DataGeneratorSource<>(
+				index -> DataGenerator.generateSunsetAirFlightData(),
+				Long.MAX_VALUE,
+				RateLimiterStrategy.perSecond(1),
+				Types.POJO(SunsetAirFlightData.class)
+			);
+
+		DataStream<SunsetAirFlightData> sunsetStream = env.fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
+
+		KafkaRecordSerializationSchema<SunsetAirFlightData> sunSetSerializer = 
+			KafkaRecordSerializationSchema.<SunsetAirFlightData>builder()
+				.setTopic("sunset")
+				.setValueSerializationSchema(new JsonSerializationSchema<>(DataGeneratorJob::getMapper))
+				.build();
+
+		KafkaSink<SunsetAirFlightData> sunsetSink = 
+			KafkaSink.<SunsetAirFlightData>builder()
+				.setKafkaProducerConfig(producerProperties)
+				.setRecordSerializer(sunSetSerializer)
+				.setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+				.build();
+
+		sunsetStream.sinkTo(sunsetSink).name("sunset_sink");
+
+		try {
+			env.execute("DataGeneratorJob");
+		} catch (Exception e) {
+			logger.error("The Job stopped early due to the following: {}", e.getMessage());
+		}
+	}
+
+	private static ObjectMapper getMapper() {
+		return new ObjectMapper().registerModule(new JavaTimeModule());
+	}
+}

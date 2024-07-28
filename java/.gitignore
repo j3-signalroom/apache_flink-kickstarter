@@ -1,0 +1,16 @@
+bin/
+target/
+build/
+.classpath/
+.project/
+.vscode/
+.settings/
+.gradle/
+.DS_Store
+!gradle/wrapper/gradle-wrapper.jar
+j3-kickstarter-apache_flink.log
+gradle.properties
+application.properties
+error.log
+app/src/main/resources/consumer.properties
+app/src/main/resources/producer.properties
