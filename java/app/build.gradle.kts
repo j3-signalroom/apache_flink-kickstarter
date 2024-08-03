@@ -36,11 +36,7 @@ dependencies {
 }
 
 // --- If the version is not provided, use the default
-if (appVersion.isNullOrEmpty()) {
-    version = "x.xx.xx.xxx"
-} else {
-    version = appVersion
-}
+version = appVersion ?: "x.xx.xx.xxx"
 
 description = rootProject.name
 
