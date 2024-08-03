@@ -48,14 +48,12 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
-group = "apache_flink.kickstarter"
-
 application {
     // --- If the main class is not provided, use the default
     if (appMainClass.isNullOrEmpty()) {
-        mainClass.set(group + ".UserStatisticsJob")
+        mainClass.set("apache_flink.kickstarter.UserStatisticsJob")
     } else {
-        mainClass.set(group + "." + appMainClass)
+        mainClass.set("apache_flink.kickstarter." + appMainClass)
     }    
 }
 
