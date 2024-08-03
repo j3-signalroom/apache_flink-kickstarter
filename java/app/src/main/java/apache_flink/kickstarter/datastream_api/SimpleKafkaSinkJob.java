@@ -1,4 +1,11 @@
-package data_stream_api;
+/**
+ * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * 
+ * @author Jeffrey Jonathan Jennings (J3)
+ * 
+ * 
+ */
+package apache_flink.kickstarter.datastream_api;
 
 import java.io.*;
 import java.util.*;

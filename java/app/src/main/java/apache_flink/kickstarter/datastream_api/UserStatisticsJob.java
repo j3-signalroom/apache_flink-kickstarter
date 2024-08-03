@@ -1,4 +1,11 @@
-package data_stream_api;
+/**
+ * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * 
+ * @author Jeffrey Jonathan Jennings (J3)
+ * 
+ * 
+ */
+package apache_flink.kickstarter.datastream_api;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.base.DeliveryGuarantee;
@@ -11,12 +18,13 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.Ja
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import java.io.*;
 import java.time.*;
 import java.util.*;
 import org.slf4j.*;
 
-import data_stream_api.model.*;
+import apache_flink.*;
+import apache_flink.helper.*;
+import apache_flink.kickstarter.datastream_api.model.*;
 
 
 public class UserStatisticsJob {
@@ -27,20 +35,22 @@ public class UserStatisticsJob {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // --- Kafka Consumer Config
-        Properties consumerProperties = new Properties();
-        try (InputStream stream = DataGeneratorJob.class.getClassLoader().getResourceAsStream("consumer.properties")) {
-			consumerProperties.load(stream);
+        ObjectResult<Properties> consumerProperties = Common.getKafkaClientProperties(true, args);
+		if(!consumerProperties.isSuccessful()) {
+			logger.error("The Consumer Kafka Client properties could not be retrieved because {} {}", consumerProperties.getErrorMessageCode(), consumerProperties.getErrorMessage());
+			System.exit(1);
 		}
 
         // --- Kafka Producer Config
-        Properties producerProperties = new Properties();
-        try (InputStream stream = DataGeneratorJob.class.getClassLoader().getResourceAsStream("producer.properties")) {
-			producerProperties.load(stream);
+        ObjectResult<Properties> producerProperties = Common.getKafkaClientProperties(false, args);
+		if(!producerProperties.isSuccessful()) {
+			logger.error("The Producer Kafka Client properties could not be retrieved because {} {}", producerProperties.getErrorMessageCode(), producerProperties.getErrorMessage());
+			System.exit(1);
 		}
 
         KafkaSource<FlightData> flightDataSource = 
             KafkaSource.<FlightData>builder()
-                .setProperties(consumerProperties)
+                .setProperties(consumerProperties.get())
                 .setTopics("flightdata")
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new JsonDeserializationSchema<>(FlightData.class))
@@ -58,7 +68,7 @@ public class UserStatisticsJob {
 
         KafkaSink<UserStatisticsData> statsSink = 
             KafkaSink.<UserStatisticsData>builder()
-                .setKafkaProducerConfig(producerProperties)
+                .setKafkaProducerConfig(producerProperties.get())
                 .setRecordSerializer(statisticsSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
                 .build();

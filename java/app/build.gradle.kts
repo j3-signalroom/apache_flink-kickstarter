@@ -24,6 +24,10 @@ dependencies {
     implementation("org.apache.flink:flink-connector-datagen:1.19.1")
     implementation("org.apache.flink:flink-json:1.19.1")
     implementation("org.slf4j:slf4j-log4j12:2.0.7")
+    implementation("com.amazonaws:aws-java-sdk-s3:1.12.765")
+    implementation("com.amazonaws:aws-java-sdk-secretsmanager:1.12.765")
+    implementation("com.amazonaws:aws-java-sdk-ssm:1.12.765")
+    implementation("org.json:json:20240303")
     testImplementation("org.apache.flink:flink-test-utils:1.19.1")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
@@ -44,12 +48,14 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
+group = "apache_flink.kickstarter"
+
 application {
     // --- If the main class is not provided, use the default
     if (appMainClass.isNullOrEmpty()) {
-        mainClass.set("data_stream_api.UserStatisticsJob")
+        mainClass.set(group + ".UserStatisticsJob")
     } else {
-        mainClass.set("data_stream_api." + appMainClass)
+        mainClass.set(group + "." + appMainClass)
     }    
 }
 

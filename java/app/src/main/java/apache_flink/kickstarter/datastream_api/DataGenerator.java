@@ -1,11 +1,18 @@
-package data_stream_api;
+/**
+ * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * 
+ * @author Jeffrey Jonathan Jennings (J3)
+ * 
+ * 
+ */
+package apache_flink.kickstarter.datastream_api;
 
 import java.math.*;
 import java.time.*;
 import java.util.*;
 import java.util.stream.*;
 
-import data_stream_api.model.*;
+import apache_flink.kickstarter.datastream_api.model.*;
 
 
 public class DataGenerator {

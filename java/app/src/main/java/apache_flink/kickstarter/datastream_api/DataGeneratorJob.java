@@ -1,4 +1,11 @@
-package data_stream_api;
+/**
+ * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * 
+ * @author Jeffrey Jonathan Jennings (J3)
+ * 
+ * 
+ */
+package apache_flink.kickstarter.datastream_api;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -11,11 +18,12 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMap
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.*;
-import java.io.*;
 import java.util.*;
 import org.slf4j.*;
 
-import data_stream_api.model.*;
+import apache_flink.*;
+import apache_flink.kickstarter.datastream_api.model.*;
+import apache_flink.helper.*;
 
 
 public class DataGeneratorJob {
@@ -26,11 +34,12 @@ public class DataGeneratorJob {
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
 		// --- Kafka Producer Config
-        Properties producerProperties = new Properties();
-        try (InputStream stream = DataGeneratorJob.class.getClassLoader().getResourceAsStream("producer.properties")) {
-			producerProperties.load(stream);
+		ObjectResult<Properties> producerProperties = Common.getKafkaClientProperties(false, args);
+		if(!producerProperties.isSuccessful()) {
+			logger.error("The Producer Kafka Client properties could not be retrieved because {} {}", producerProperties.getErrorMessageCode(), producerProperties.getErrorMessage());
+			System.exit(1);
 		}
-		
+        
 		DataGeneratorSource<SkyOneAirlinesFlightData> skyOneSource =
 			new DataGeneratorSource<>(
 				index -> DataGenerator.generateSkyOneAirlinesFlightData(),
@@ -49,7 +58,7 @@ public class DataGeneratorJob {
 
 		KafkaSink<SkyOneAirlinesFlightData> skyOneSink = 
 			KafkaSink.<SkyOneAirlinesFlightData>builder()
-				.setKafkaProducerConfig(producerProperties)
+				.setKafkaProducerConfig(producerProperties.get())
 				.setRecordSerializer(skyOneSerializer)
 				.setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
 				.build();
@@ -74,7 +83,7 @@ public class DataGeneratorJob {
 
 		KafkaSink<SunsetAirFlightData> sunsetSink = 
 			KafkaSink.<SunsetAirFlightData>builder()
-				.setKafkaProducerConfig(producerProperties)
+				.setKafkaProducerConfig(producerProperties.get())
 				.setRecordSerializer(sunSetSerializer)
 				.setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
 				.build();
