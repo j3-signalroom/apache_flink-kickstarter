@@ -21,15 +21,15 @@ $ brew install apache-flink
 
 Homebrew will will typically install Apache Flink in the following folder location:
 ```
-$ /opt/homebrew/Cellar/apache-flink/1.19.1/
+$ /opt/homebrew/Cellar/apache-flink/1.20.0/
 ```
 
-> At the time of this writing (July 2024), version 1.19.1 was publically avaiable.
+> At the time of this writing (July 2024), version 1.20.0 was publically avaiable.
 
 ### Start Cluster
 To start Apache Flink locally on your machine execute the following executable script: 
 ```
-$ /opt/homebrew/Cellar/apache-flink/1.19.1/libexec/bin/start-cluster.sh
+$ /opt/homebrew/Cellar/apache-flink/1.20.0/libexec/bin/start-cluster.sh
 ```
 
 ### Lanuch the Apache Flink Dashboard
@@ -41,7 +41,7 @@ http://localhost:8081/
 ### Stop Cluster
 To stop Apache Flink locally on your machine execute the following executable script: 
 ```
-$ /opt/homebrew/Cellar/apache-flink/1.19.1/libexec/bin/stop-cluster.sh
+$ /opt/homebrew/Cellar/apache-flink/1.20.0/libexec/bin/stop-cluster.sh
 ```
 
 ## Java Examples
