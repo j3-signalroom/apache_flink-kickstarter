@@ -15,24 +15,24 @@ repositories {
 }
 
 dependencies {
-    implementation("org.apache.kafka:kafka-clients:3.7.0")
-    implementation("org.apache.flink:flink-java:1.19.1")
-    compileOnly("org.apache.flink:flink-streaming-java:1.19.1")
-    implementation("org.apache.flink:flink-clients:1.19.1")
-    implementation("org.apache.flink:flink-connector-base:1.19.1")
+    implementation("org.apache.kafka:kafka-clients:3.8.0")
+    implementation("org.apache.flink:flink-java:1.20.0")
+    compileOnly("org.apache.flink:flink-streaming-java:1.20.0")
+    implementation("org.apache.flink:flink-clients:1.20.0")
+    implementation("org.apache.flink:flink-connector-base:1.20.0")
     implementation("org.apache.flink:flink-connector-kafka:3.2.0-1.19")
-    implementation("org.apache.flink:flink-connector-datagen:1.19.1")
-    implementation("org.apache.flink:flink-json:1.19.1")
+    implementation("org.apache.flink:flink-connector-datagen:1.20.0")
+    implementation("org.apache.flink:flink-json:1.20.0")
     implementation("org.slf4j:slf4j-log4j12:2.0.7")
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.765")
     implementation("com.amazonaws:aws-java-sdk-secretsmanager:1.12.765")
     implementation("com.amazonaws:aws-java-sdk-ssm:1.12.765")
     implementation("org.json:json:20240303")
-    testImplementation("org.apache.flink:flink-test-utils:1.19.1")
+    testImplementation("org.apache.flink:flink-test-utils:1.20.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-    testImplementation("org.apache.flink:flink-test-utils-junit:1.19.1")
+    testImplementation("org.apache.flink:flink-test-utils-junit:1.20.0")
 }
 
 // --- If the version is not provided, use the default
