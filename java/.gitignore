@@ -8,7 +8,7 @@ build/
 .gradle/
 .DS_Store
 !gradle/wrapper/gradle-wrapper.jar
-j3-kickstarter-apache_flink.log
+apache_flink-kickstarter.log
 gradle.properties
 application.properties
 error.log

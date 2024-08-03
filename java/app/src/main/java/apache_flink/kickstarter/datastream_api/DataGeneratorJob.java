@@ -36,6 +36,7 @@ public class DataGeneratorJob {
 		// --- Kafka Producer Config
 		ObjectResult<Properties> producerProperties = Common.getKafkaClientProperties(false, args);
 		if(!producerProperties.isSuccessful()) {
+			System.out.println("The Producer Kafka Client properties could not be retrieved because " + producerProperties.getErrorMessageCode() + " " + producerProperties.getErrorMessage());
 			logger.error("The Producer Kafka Client properties could not be retrieved because {} {}", producerProperties.getErrorMessageCode(), producerProperties.getErrorMessage());
 			System.exit(1);
 		}
