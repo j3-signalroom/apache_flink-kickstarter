@@ -1,4 +1,11 @@
-package data_stream_api;
+/**
+ * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * 
+ * @author Jeffrey Jonathan Jennings (J3)
+ * 
+ * 
+ */
+package apache_flink.kickstarter.datastream_api;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.base.DeliveryGuarantee;
@@ -11,12 +18,11 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.Ja
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import java.io.*;
 import java.time.*;
 import java.util.*;
 import org.slf4j.*;
 
-import data_stream_api.model.*;
+import apache_flink.kickstarter.datastream_api.model.*;
 
 
 public class UserStatisticsJob {
@@ -26,17 +32,31 @@ public class UserStatisticsJob {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        // --- Kafka Consumer Config
-        Properties consumerProperties = new Properties();
-        try (InputStream stream = DataGeneratorJob.class.getClassLoader().getResourceAsStream("consumer.properties")) {
-			consumerProperties.load(stream);
-		}
+        /*
+		 * --- Kafka Consumer Config
+		 * Add the Producder Properties Source to the environment, and then
+		 * extract the properties from the data stream
+		 */
+        DataStream<Properties> dataStreamConsumerProperties = env.addSource(new KafkaClientPropertiesSource(true, args));
+		Properties consumerProperties = new Properties();
+		dataStreamConsumerProperties
+			.executeAndCollect()
+				.forEachRemaining(typeValue -> {
+					consumerProperties.putAll(typeValue);
+				});
 
-        // --- Kafka Producer Config
-        Properties producerProperties = new Properties();
-        try (InputStream stream = DataGeneratorJob.class.getClassLoader().getResourceAsStream("producer.properties")) {
-			producerProperties.load(stream);
-		}
+        /*
+		 * --- Kafka Producer Config
+		 * Add the Producder Properties Source to the environment, and then
+		 * extract the properties from the data stream
+		 */
+        DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
+		Properties producerProperties = new Properties();
+		dataStreamProducerProperties
+			.executeAndCollect()
+				.forEachRemaining(typeValue -> {
+					producerProperties.putAll(typeValue);
+				});
 
         KafkaSource<FlightData> flightDataSource = 
             KafkaSource.<FlightData>builder()

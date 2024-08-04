@@ -1,2 +1,2 @@
-rootProject.name = "j3-kickstarter-apache_flink"
+rootProject.name = "apache_flink-kickstarter"
 include("app")

@@ -1,4 +1,11 @@
-package data_stream_api;
+/**
+ * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * 
+ * @author Jeffrey Jonathan Jennings (J3)
+ * 
+ * 
+ */
+package apache_flink.kickstarter.datastream_api;
 
 import org.apache.flink.api.common.state.*;
 import org.apache.flink.configuration.Configuration;
@@ -6,7 +13,7 @@ import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.*;
 
-import data_stream_api.model.*;
+import apache_flink.kickstarter.datastream_api.model.*;
 
 
 class ProcessUserStatisticsDataFunction extends ProcessWindowFunction<UserStatisticsData, UserStatisticsData, String, TimeWindow> {

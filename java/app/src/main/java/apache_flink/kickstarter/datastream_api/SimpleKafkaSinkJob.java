@@ -1,6 +1,12 @@
-package data_stream_api;
+/**
+ * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * 
+ * @author Jeffrey Jonathan Jennings (J3)
+ * 
+ * 
+ */
+package apache_flink.kickstarter.datastream_api;
 
-import java.io.*;
 import java.util.*;
 import javax.annotation.Nullable;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -12,6 +18,7 @@ import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.formats.json.JsonSerializationSchema;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.*;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
@@ -25,11 +32,18 @@ public class SimpleKafkaSinkJob {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-		// --- Kafka Producer Config 
+		/*
+		 * --- Kafka Producer Config
+		 * Add the Producder Properties Source to the environment, and then
+		 * extract the properties from the data stream
+		 */
+        DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
 		Properties producerProperties = new Properties();
-		try (InputStream stream = DataGeneratorJob.class.getClassLoader().getResourceAsStream("producer.properties")) {
-			producerProperties.load(stream);
-		}
+		dataStreamProducerProperties
+			.executeAndCollect()
+				.forEachRemaining(typeValue -> {
+					producerProperties.putAll(typeValue);
+				});
 
         // --- 
         GeneratorFunction<Long, Long> generatorFunction = index -> index;
