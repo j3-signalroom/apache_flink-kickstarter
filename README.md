@@ -32,7 +32,7 @@ To start Apache Flink locally on your machine execute the following executable s
 $ /opt/homebrew/Cellar/apache-flink/1.20.0/libexec/bin/start-cluster.sh
 ```
 
-### Lanuch the Apache Flink Dashboard
+### Launch the Apache Flink Dashboard
 To launch the Apache Flink Dashboard from your web browser, go to this URL:
 ```
 http://localhost:8081/
