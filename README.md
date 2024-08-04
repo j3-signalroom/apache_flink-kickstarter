@@ -24,7 +24,7 @@ Homebrew will will typically install Apache Flink in the following folder locati
 $ /opt/homebrew/Cellar/apache-flink/1.20.0/
 ```
 
-> At the time of this writing (July 2024), version 1.20.0 was publically avaiable.
+> At the time of this writing (August 2024), version 1.20.0 was publically avaiable.
 
 ### Start Cluster
 To start Apache Flink locally on your machine execute the following executable script: 
