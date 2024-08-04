@@ -31,17 +31,19 @@ public class DataGeneratorJob {
 	public static void main(String[] args) throws Exception {
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-		// --- Kafka Producer Config
-		// Add the custom source to the environment
-        DataStream<Properties> producerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
-
-		Properties properties = new Properties();
-		producerProperties
+		/*
+		 * --- Kafka Producer Config
+		 * Add the Producder Properties Source to the environment, and then
+		 * extract the properties from the data stream
+		 */
+        DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
+		Properties producProperties = new Properties();
+		dataStreamProducerProperties
 			.executeAndCollect()
-				.forEachRemaining(typeValue -> {properties.putAll(typeValue);});
-		System.out.println(properties.toString());
+				.forEachRemaining(typeValue -> {
+					producProperties.putAll(typeValue);
+				});
 
-		
 		DataGeneratorSource<SkyOneAirlinesFlightData> skyOneSource =
 			new DataGeneratorSource<>(
 				index -> DataGenerator.generateSkyOneAirlinesFlightData(),
@@ -60,7 +62,7 @@ public class DataGeneratorJob {
 
 		KafkaSink<SkyOneAirlinesFlightData> skyOneSink = 
 			KafkaSink.<SkyOneAirlinesFlightData>builder()
-				.setKafkaProducerConfig(properties)
+				.setKafkaProducerConfig(producProperties)
 				.setRecordSerializer(skyOneSerializer)
 				.setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
 				.build();
@@ -85,7 +87,7 @@ public class DataGeneratorJob {
 
 		KafkaSink<SunsetAirFlightData> sunsetSink = 
 			KafkaSink.<SunsetAirFlightData>builder()
-				.setKafkaProducerConfig(properties)
+				.setKafkaProducerConfig(producProperties)
 				.setRecordSerializer(sunSetSerializer)
 				.setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
 				.build();

@@ -158,7 +158,7 @@ public class AwsHelper {
 					// --- Ignore
 				}
 			}
-			properties.setProperty(parameter.name(), paramValue);
+			properties.setProperty(parameter.name().replace(prefix + "/", ""), paramValue);
         }
 
         // Close the client

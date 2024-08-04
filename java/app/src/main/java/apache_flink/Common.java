@@ -23,8 +23,8 @@ public final class Common {
     public static final String CONFLUENT_CLOUD_RESOURCE_PATH = "/confluent_cloud_resource/";
     public static final String KAFKA_CLUSTER_SECRETS_PATH = CONFLUENT_CLOUD_RESOURCE_PATH + "kafka_cluster/java_client";
     public static final String SCHEMA_REGISTRY_CLUSTER_SECRETS_PATH = CONFLUENT_CLOUD_RESOURCE_PATH + "schema_registry_cluster/java_client";
-    public static final String KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH = CONFLUENT_CLOUD_RESOURCE_PATH + "kafka_client_consumer";
-    public static final String KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH = CONFLUENT_CLOUD_RESOURCE_PATH + "kafka_client_producer";
+    public static final String KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH = CONFLUENT_CLOUD_RESOURCE_PATH + "consumer_kafka_client";
+    public static final String KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH = CONFLUENT_CLOUD_RESOURCE_PATH + "producer_kafka_client";
     
 
     /**
