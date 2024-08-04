@@ -37,11 +37,11 @@ public class DataGeneratorJob {
 		 * extract the properties from the data stream
 		 */
         DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
-		Properties producProperties = new Properties();
+		Properties producerProperties = new Properties();
 		dataStreamProducerProperties
 			.executeAndCollect()
 				.forEachRemaining(typeValue -> {
-					producProperties.putAll(typeValue);
+					producerProperties.putAll(typeValue);
 				});
 
 		DataGeneratorSource<SkyOneAirlinesFlightData> skyOneSource =
@@ -62,7 +62,7 @@ public class DataGeneratorJob {
 
 		KafkaSink<SkyOneAirlinesFlightData> skyOneSink = 
 			KafkaSink.<SkyOneAirlinesFlightData>builder()
-				.setKafkaProducerConfig(producProperties)
+				.setKafkaProducerConfig(producerProperties)
 				.setRecordSerializer(skyOneSerializer)
 				.setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
 				.build();
@@ -87,7 +87,7 @@ public class DataGeneratorJob {
 
 		KafkaSink<SunsetAirFlightData> sunsetSink = 
 			KafkaSink.<SunsetAirFlightData>builder()
-				.setKafkaProducerConfig(producProperties)
+				.setKafkaProducerConfig(producerProperties)
 				.setRecordSerializer(sunSetSerializer)
 				.setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
 				.build();

@@ -22,8 +22,6 @@ import java.time.*;
 import java.util.*;
 import org.slf4j.*;
 
-import apache_flink.*;
-import apache_flink.helper.*;
 import apache_flink.kickstarter.datastream_api.model.*;
 
 
@@ -34,23 +32,35 @@ public class UserStatisticsJob {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        // --- Kafka Consumer Config
-        ObjectResult<Properties> consumerProperties = Common.getKafkaClientProperties(true, args);
-		if(!consumerProperties.isSuccessful()) {
-			logger.error("The Consumer Kafka Client properties could not be retrieved because {} {}", consumerProperties.getErrorMessageCode(), consumerProperties.getErrorMessage());
-			System.exit(1);
-		}
+        /*
+		 * --- Kafka Consumer Config
+		 * Add the Producder Properties Source to the environment, and then
+		 * extract the properties from the data stream
+		 */
+        DataStream<Properties> dataStreamConsumerProperties = env.addSource(new KafkaClientPropertiesSource(true, args));
+		Properties consumerProperties = new Properties();
+		dataStreamConsumerProperties
+			.executeAndCollect()
+				.forEachRemaining(typeValue -> {
+					consumerProperties.putAll(typeValue);
+				});
 
-        // --- Kafka Producer Config
-        ObjectResult<Properties> producerProperties = Common.getKafkaClientProperties(false, args);
-		if(!producerProperties.isSuccessful()) {
-			logger.error("The Producer Kafka Client properties could not be retrieved because {} {}", producerProperties.getErrorMessageCode(), producerProperties.getErrorMessage());
-			System.exit(1);
-		}
+        /*
+		 * --- Kafka Producer Config
+		 * Add the Producder Properties Source to the environment, and then
+		 * extract the properties from the data stream
+		 */
+        DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
+		Properties producerProperties = new Properties();
+		dataStreamProducerProperties
+			.executeAndCollect()
+				.forEachRemaining(typeValue -> {
+					producerProperties.putAll(typeValue);
+				});
 
         KafkaSource<FlightData> flightDataSource = 
             KafkaSource.<FlightData>builder()
-                .setProperties(consumerProperties.get())
+                .setProperties(consumerProperties)
                 .setTopics("flightdata")
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new JsonDeserializationSchema<>(FlightData.class))
@@ -68,7 +78,7 @@ public class UserStatisticsJob {
 
         KafkaSink<UserStatisticsData> statsSink = 
             KafkaSink.<UserStatisticsData>builder()
-                .setKafkaProducerConfig(producerProperties.get())
+                .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(statisticsSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
                 .build();
