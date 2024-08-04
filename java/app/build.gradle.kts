@@ -24,9 +24,8 @@ dependencies {
     implementation("org.apache.flink:flink-connector-datagen:1.20.0")
     implementation("org.apache.flink:flink-json:1.20.0")
     implementation("org.slf4j:slf4j-log4j12:2.0.7")
-    implementation("com.amazonaws:aws-java-sdk-s3:1.12.765")
-    implementation("com.amazonaws:aws-java-sdk-secretsmanager:1.12.765")
-    implementation("com.amazonaws:aws-java-sdk-ssm:1.12.765")
+    implementation("software.amazon.awssdk:secretsmanager:2.26.29")
+    implementation("software.amazon.awssdk:ssm:2.26.29")
     implementation("org.json:json:20240303")
     testImplementation("org.apache.flink:flink-test-utils:1.20.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
@@ -47,7 +46,7 @@ java {
 application {
     // --- If the main class is not provided, use the default
     if (appMainClass.isNullOrEmpty()) {
-        mainClass.set("apache_flink.kickstarter.datastream_api.HelloWorldJob")
+        mainClass.set("apache_flink.kickstarter.datastream_api.DataGeneratorJob")
     } else {
         mainClass.set("apache_flink.kickstarter." + appMainClass)
     }    

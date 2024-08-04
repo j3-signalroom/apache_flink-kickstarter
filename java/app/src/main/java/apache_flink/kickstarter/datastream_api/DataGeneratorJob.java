@@ -21,9 +21,7 @@ import org.apache.flink.streaming.api.environment.*;
 import java.util.*;
 import org.slf4j.*;
 
-import apache_flink.*;
 import apache_flink.kickstarter.datastream_api.model.*;
-import apache_flink.helper.*;
 
 
 public class DataGeneratorJob {
@@ -34,13 +32,16 @@ public class DataGeneratorJob {
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
 		// --- Kafka Producer Config
-		ObjectResult<Properties> producerProperties = Common.getKafkaClientProperties(false, args);
-		if(!producerProperties.isSuccessful()) {
-			System.out.println("The Producer Kafka Client properties could not be retrieved because " + producerProperties.getErrorMessageCode() + " " + producerProperties.getErrorMessage());
-			logger.error("The Producer Kafka Client properties could not be retrieved because {} {}", producerProperties.getErrorMessageCode(), producerProperties.getErrorMessage());
-			System.exit(1);
-		}
-        
+		// Add the custom source to the environment
+        DataStream<Properties> producerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
+
+		Properties properties = new Properties();
+		producerProperties
+			.executeAndCollect()
+				.forEachRemaining(typeValue -> {properties.putAll(typeValue);});
+		System.out.println(properties.toString());
+
+		
 		DataGeneratorSource<SkyOneAirlinesFlightData> skyOneSource =
 			new DataGeneratorSource<>(
 				index -> DataGenerator.generateSkyOneAirlinesFlightData(),
@@ -59,7 +60,7 @@ public class DataGeneratorJob {
 
 		KafkaSink<SkyOneAirlinesFlightData> skyOneSink = 
 			KafkaSink.<SkyOneAirlinesFlightData>builder()
-				.setKafkaProducerConfig(producerProperties.get())
+				.setKafkaProducerConfig(properties)
 				.setRecordSerializer(skyOneSerializer)
 				.setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
 				.build();
@@ -84,7 +85,7 @@ public class DataGeneratorJob {
 
 		KafkaSink<SunsetAirFlightData> sunsetSink = 
 			KafkaSink.<SunsetAirFlightData>builder()
-				.setKafkaProducerConfig(producerProperties.get())
+				.setKafkaProducerConfig(properties)
 				.setRecordSerializer(sunSetSerializer)
 				.setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
 				.build();

@@ -53,12 +53,12 @@ public class KafkaClient {
 				return new ObjectResult<>(ErrorEnum.ERR_CODE_MISSING_OR_INVALID_FIELD.getCode(), e.getMessage());
 			}
 
-			ObjectResult<Map<String, String>> parameters = AwsHelper.getParameters(this.kafkaClientParametersPath);
+			ObjectResult<Properties> parameters = AwsHelper.getParameters(this.kafkaClientParametersPath);
 			if(parameters.isSuccessful()) {
-				for (Map.Entry<String, String> entry : parameters.get().entrySet()) {
-					properties.put(entry.getKey(), entry.getValue());
-				}
-				return new ObjectResult<>(properties);
+				Properties merged = new Properties();
+				merged.putAll(properties);
+				merged.putAll(parameters.get());
+				return new ObjectResult<>(merged);
 			} else {
 				return new ObjectResult<>(parameters.getErrorMessageCode(), parameters.getErrorMessage());	
 			}

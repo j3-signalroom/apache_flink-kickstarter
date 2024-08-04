@@ -8,18 +8,14 @@
  */
 package apache_flink.helper;
 
-
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.secretsmanager.*;
-import com.amazonaws.services.secretsmanager.model.*;
-import com.amazonaws.services.secretsmanager.model.ResourceNotFoundException;
-import com.amazonaws.services.simplesystemsmanagement.*;
-import com.amazonaws.services.simplesystemsmanagement.model.*;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.secretsmanager.*;
+import software.amazon.awssdk.services.secretsmanager.model.*;
+import software.amazon.awssdk.services.ssm.*;
+import software.amazon.awssdk.services.ssm.model.*;
 import org.json.*;
 import java.security.InvalidParameterException;
 import java.util.*;
-import java.util.stream.*;
-import org.apache.commons.lang3.tuple.*;
 
 import apache_flink.*;
 import apache_flink.enums.*;
@@ -57,27 +53,33 @@ public class AwsHelper {
 		if(awsRegion == null) {
 			awsRegion = Common.DEFAULT_AWS_REGION;
 		}
+		Region region = Region.of(awsRegion);
 
-		AwsClientBuilder.EndpointConfiguration config = new AwsClientBuilder.EndpointConfiguration("secretsmanager." + awsRegion + ".amazonaws.com", awsRegion);
-		AWSSecretsManagerClientBuilder clientBuilder = AWSSecretsManagerClientBuilder.standard();
-		clientBuilder.setEndpointConfiguration(config);
-      	AWSSecretsManager manager = clientBuilder.build();
-		GetSecretValueRequest getSecretValueRequest = new GetSecretValueRequest().withSecretId(secretName).withVersionStage(secretVersionId);
-      	GetSecretValueResult getSecretValueResult = null;
+		SecretsManagerClient client = 
+			SecretsManagerClient.builder()
+				.region(region)
+				.build();
+
+		GetSecretValueRequest getSecretValueRequest = 
+			GetSecretValueRequest.builder()
+				.secretId(secretName)
+				.build();
+
+		GetSecretValueResponse getSecretValueResponse;
       	try {
-          	getSecretValueResult = manager.getSecretValue(getSecretValueRequest);
+			getSecretValueResponse = client.getSecretValue(getSecretValueRequest);
 
 			// ---
-			if(getSecretValueResult != null) {
-				if(getSecretValueResult.getSecretString() != null) {
-					return new ObjectResult<>(new JSONObject(getSecretValueResult.getSecretString()));
+			if(getSecretValueResponse != null) {
+				if(getSecretValueResponse.secretString() != null) {
+					return new ObjectResult<>(new JSONObject(getSecretValueResponse.secretString()));
 				} else {
 					return new ObjectResult<>(ErrorEnum.ERR_CODE_AWS_REQUESTED_SECRET_DOES_HAVE_NOT_STRING.getCode(), String.format("%s does not contain a string value.", secretName));
 				}
 			} else {
 				return new ObjectResult<>(ErrorEnum.ERR_CODE_AWS_REQUESTED_SECRET_HAS_NO_VALUE.getCode(), String.format("%s has no value.", secretName));
 			}
-      	} catch(ResourceNotFoundException e) {
+      	} catch(software.amazon.awssdk.services.secretsmanager.model.ResourceNotFoundException e) {
 			return new ObjectResult<>(ErrorEnum.ERR_CODE_AWS_REQUESTED_SECRET_NOT_FOUND.getCode(), e.getMessage());
       	} catch (InvalidRequestException e) {
 			return new ObjectResult<>(ErrorEnum.ERR_CODE_AWS_INVALID_REQUEST.getCode(), e.getMessage());
@@ -92,7 +94,7 @@ public class AwsHelper {
 	 * @param prefix 
 	 * @return The list of AWS Systems Manager parameters in the Parameter Store.
 	 */
-	public static ObjectResult<Map<String, String>> getParameters(final String prefix){
+	public static ObjectResult<Properties> getParameters(final String prefix){
 		return getParameters(prefix, System.getenv("AWS_REGION"));
 	}
 
@@ -103,7 +105,8 @@ public class AwsHelper {
 	 * @param awsRegion
 	 * @return The list of AWS Systems Manager parameters in the Parameter Store.
 	 */
-	public static ObjectResult<Map<String, String>> getParameters(final String prefix, String awsRegion){
+	public static ObjectResult<Properties> getParameters(final String prefix, String awsRegion){
+		Properties properties = new Properties();
 		/*
 		 * Default to 'us-east-1' if region is null
 		 * 
@@ -114,64 +117,53 @@ public class AwsHelper {
 			awsRegion = Common.DEFAULT_AWS_REGION;
 		}
 
-		AwsClientBuilder.EndpointConfiguration config = new AwsClientBuilder.EndpointConfiguration("ssm." + awsRegion + ".amazonaws.com", awsRegion);
-		AWSSimpleSystemsManagementClientBuilder clientBuilder = AWSSimpleSystemsManagementClientBuilder.standard();
-		clientBuilder.setEndpointConfiguration(config);
-		AWSSimpleSystemsManagement manager = clientBuilder.build();
-		GetParametersByPathRequest getParametersByPathRequest = new GetParametersByPathRequest().withPath(prefix).withRecursive(true);
+		Region region = Region.of(awsRegion);
+		SsmClient ssmClient = 
+			SsmClient.builder()
+				.region(region)
+				.build();
 
-		try {
-			String token = null;
-			Map<String, String> params = new HashMap<>();
-			do {
-				getParametersByPathRequest.setNextToken(token);
-				GetParametersByPathResult parameterResult = manager.getParametersByPath
-						(getParametersByPathRequest);
-				token = parameterResult.getNextToken();
-				params.putAll(addParamsToMap(parameterResult.getParameters()));
-			} while (token != null);
-			return new ObjectResult<>(params);
-      	} catch(ResourceNotFoundException | AWSSimpleSystemsManagementException e) {
-			return new ObjectResult<>(ErrorEnum.ERR_CODE_AWS_REQUESTED_PARAMETER_PREFIX_NOT_FOUND.getCode(), e.getMessage());
-      	} catch (InvalidRequestException e) {
-			return new ObjectResult<>(ErrorEnum.ERR_CODE_AWS_INVALID_REQUEST.getCode(), e.getMessage());
-      	} catch (InvalidParameterException e) {
-			return new ObjectResult<>(ErrorEnum.ERR_CODE_AWS_INVALID_PARAMETERS.getCode(), e.getMessage());
-      	}
-	}
+		GetParametersByPathRequest getParametersByPathRequest = 
+			GetParametersByPathRequest.builder()
+				.path(prefix)
+				.recursive(true)
+				.withDecryption(true)
+				.build();
 
-	/**
-	 * 
-	 * @param parameters
-	 * @return
-	 */
-	private static Map<String,String> addParamsToMap(List<Parameter> parameters) {
-        return parameters.stream().map( param -> {
+		GetParametersByPathResponse response = ssmClient.getParametersByPath(getParametersByPathRequest);
+
+        // Process the response
+        for (Parameter parameter : response.parameters()) {
 			// By default assume the parameter value is a string data type
-			String paramValue = param.getValue();
+			String paramValue = parameter.value();
 
 			/*
 			 * Check if the value has zero decimal points, if so, maybe it's an integer
 			 * if not, go with the default string value
 			 */
-			if(param.getValue().chars().filter(ch -> ch == '.').count() == 0) {
+			if(parameter.value().chars().filter(ch -> ch == '.').count() == 0) {
 				try {
-					paramValue = String.valueOf(Integer.parseInt(param.getValue().replace("," ,"")));
+					paramValue = String.valueOf(Integer.parseInt(parameter.value().replace("," ,"")));
 				} catch (Exception e) {
 					// --- Ignore
 				}
-			} else if (param.getValue().chars().filter(ch -> ch == '.').count() == 1) {
+			} else if (parameter.value().chars().filter(ch -> ch == '.').count() == 1) {
 				/*
 				 * Check if the value has only one decimal point, if so, maybe it's a float
 				 * if not, go with the default string value
 				 */
 				try {
-					paramValue = String.valueOf(Float.parseFloat(param.getValue().replace("[^\\d.]", "")));
+					paramValue = String.valueOf(Float.parseFloat(parameter.value().replace("[^\\d.]", "")));
 				} catch (Exception e) {
 					// --- Ignore
 				}
 			}
-           return new ImmutablePair<>(param.getName().substring(param.getName().lastIndexOf('/') + 1), paramValue);
-        }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
-    }
+			properties.setProperty(parameter.name(), paramValue);
+        }
+
+        // Close the client
+        ssmClient.close();
+
+		return new ObjectResult<>(properties);
+	}
 }
