@@ -33,7 +33,7 @@ public class DataGeneratorJob {
 
 		/*
 		 * --- Kafka Producer Config
-		 * Add the Producder Properties Source to the environment, and then
+		 * Add the Producer Properties Source to the environment, and then
 		 * extract the properties from the data stream
 		 */
         DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));

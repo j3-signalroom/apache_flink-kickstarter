@@ -32,7 +32,7 @@ public class FlightImporterJob {
 
         /*
 		 * --- Kafka Consumer Config
-		 * Add the Producder Properties Source to the environment, and then
+		 * Add the Producer Properties Source to the environment, and then
 		 * extract the properties from the data stream
 		 */
         DataStream<Properties> dataStreamConsumerProperties = env.addSource(new KafkaClientPropertiesSource(true, args));
@@ -45,7 +45,7 @@ public class FlightImporterJob {
 
         /*
 		 * --- Kafka Producer Config
-		 * Add the Producder Properties Source to the environment, and then
+		 * Add the Producer Properties Source to the environment, and then
 		 * extract the properties from the data stream
 		 */
         DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
