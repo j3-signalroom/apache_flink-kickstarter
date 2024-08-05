@@ -33,8 +33,9 @@ public class DataGeneratorJob {
 
 		/*
 		 * --- Kafka Producer Config
-		 * Add the Producer Properties Source to the environment, and then
-		 * extract the properties from the data stream
+		 * Retrieve the properties from the local properties files, or from AWS
+         * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
+		 * properties into the Flink job
 		 */
         DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
 		Properties producerProperties = new Properties();
