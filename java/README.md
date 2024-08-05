@@ -49,5 +49,5 @@ acks=all
 
 ### Run Jobs
 ```
-$ flink run app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar
+flink run app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar
 ```
