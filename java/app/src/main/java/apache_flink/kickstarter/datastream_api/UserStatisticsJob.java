@@ -89,7 +89,7 @@ public class UserStatisticsJob {
                         .uid("userstatistics_sink");
 
         try {
-            env.execute("UserStatisticsData");
+            env.execute("UserStatisticsJob");
         } catch (Exception e) {
             logger.error("The Job stopped early due to the following: {}", e.getMessage());
         }        

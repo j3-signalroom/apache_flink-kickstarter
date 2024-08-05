@@ -93,7 +93,7 @@ public class FlightImporterJob {
             .name("flightdata_sink");
 
         try {
-            env.execute("FlightImporter");
+            env.execute("FlightImporterJob");
         } catch (Exception e) {
             logger.error("The Job stopped early due to the following: {}", e.getMessage());
         }
