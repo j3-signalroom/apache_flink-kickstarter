@@ -1,19 +1,23 @@
-# Java Examples
+# Java
 
-## Jobs
+## DataStream API
+[DataStream API](https://nightlies.apache.org/flink/flink-docs-master/docs/learn-flink/datastream_api/)
 
-Job Examples|Description
+### Job Examples
+[Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/), author the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/)
+
+Spoiler Alert
+
+Job|Description
 -|-
-`HellowWorldJob`|
-`DataGeneratorJob`|
-`SimpleKafkaSinkJob`|
-`FlightImporterJob`|
-`UserStatisticsJob`|
+`DataGeneratorJob`|This job creates fake flight data for fictional airlines **Sunset Air** and **Sky One** Airlines," and sends it to the Kafka topics `sunset` and `skyone` respectively.
+`FlightImporterJob`|This job imports flight data from `sunset` and `skyone` Kafka topics and converts it to a unified format for the `flightdata` Kafka topic.
+`UserStatisticsJob`|This job processes data from the `flightdata` Kafka topic to aggregate user statistics in the `userstatistics` Kafka topic.
 
-### Configuration
+#### Configuration
 
 
-#### `consumer.properties`
+##### `consumer.properties`
 ```
 bootstrap.servers=<KAFKA CLUSTER URI>
 security.protocol=SASL_SSL
@@ -33,7 +37,7 @@ request.timeout.ms=30000
 max.poll.interval.ms=300000
 ```
 
-#### `producer.properties`
+##### `producer.properties`
 ```
 bootstrap.servers=<KAFKA CLUSTER URI>
 security.protocol=SASL_SSL
@@ -43,7 +47,7 @@ client.dns.lookup=use_all_dns_ips
 acks=all
 ```
 
-## Run Jobs
+### Run Jobs
 ```
 $ flink run app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar
 ```
