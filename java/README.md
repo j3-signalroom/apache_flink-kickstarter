@@ -59,6 +59,8 @@ acks=all
 ```
 
 ##### Read from the AWS Secrets Manager and AWS Systems Manager Parameter Store
+> **Tip**:  Checkout [iac-confluent_cloud_resources-tf](https://github.com/j3-signalroom/iac-confluent_cloud_resources-tf/blob/main/README.md) Terraform configuration that leverages the IaC Confluent Cloud Resource API Key Rotation Terraform module to create and rotate the API Keys. It then uses AWS Secrets Manager to store the current active API Key for the Schema Registry Cluster and Kafka Cluster. Plus add parameters to the AWS System Manager Parameter Store for a Kafka Consumer and Producer.
+
 **AWS Secrets Manager --- `/confluent_cloud_resource/schema_registry_cluster/java_client`**
 > Key|Description
 > -|-
