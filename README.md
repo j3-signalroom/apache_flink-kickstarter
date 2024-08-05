@@ -6,6 +6,7 @@
 + [Local MacOS Installation](#local-macos-installation)
     - [Install Apache Flink on MacOS](#install-apache-flink-on-macos)
     - [Start Cluster](#start-cluster)
+    - [Start Task Manager](#start-task-manager)
     - [Lanuch the Apache Flink Dashboard](#lanuch-the-apache-flink-dashboard)
     - [Stop Cluster](#stop-cluster)
 + [Java Examples](#java-examples)
@@ -30,6 +31,11 @@ Homebrew will will typically install Apache Flink in the following folder locati
 To start Apache Flink locally on your machine execute the following executable script: 
 ```
 /opt/homebrew/Cellar/apache-flink/1.20.0/libexec/bin/start-cluster.sh
+```
+
+### Start Task Manager
+```
+/opt/homebrew/Cellar/apache-flink/1.20.0/libexec/bin/taskmanager.sh start
 ```
 
 ### Launch the Apache Flink Dashboard
