@@ -4,6 +4,8 @@
  * @author Jeffrey Jonathan Jennings (J3)
  * 
  * 
+ * This class processes data from the `flightdata` Kafka topic to aggregate user
+ * statistics in the `userstatistics` Kafka topic.
  */
 package apache_flink.kickstarter.datastream_api;
 

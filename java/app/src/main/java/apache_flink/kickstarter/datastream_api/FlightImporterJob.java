@@ -4,6 +4,8 @@
  * @author Jeffrey Jonathan Jennings (J3)
  * 
  * 
+ * This class imports flight data from `sunset` and `skyone` Kafka topics
+ * and converts it to a unified format for the `flightdata` Kafka topic.
  */
 package apache_flink.kickstarter.datastream_api;
 
