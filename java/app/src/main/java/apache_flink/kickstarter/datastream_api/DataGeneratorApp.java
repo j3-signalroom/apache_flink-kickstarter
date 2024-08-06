@@ -31,6 +31,17 @@ public class DataGeneratorApp {
 	private static final Logger logger = LoggerFactory.getLogger(DataGeneratorApp.class);
 
 
+	/**
+	 * The main method in a Flink application serves as the entry point of the program, where
+	 * the Flink DAG is defined.  That is, the execution environment, the creation of the data
+	 * streams or datasets, apply transformations, and trigger the execution of the application (by
+	 * sending it to the Flink JobManager).
+	 * 
+	 * @param args list of strings passed to the main method from the command line.
+	 * @throws Exception - The exceptions are forwarded, and are caught by the runtime.  
+     * When the runtime catches an exception, it aborts the task and lets the fail-over logic
+	 * decide whether to retry the task execution.
+	 */
 	public static void main(String[] args) throws Exception {
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
