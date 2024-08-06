@@ -110,7 +110,7 @@ By calling Flink jobs "Flink applications," it emphasizes the comprehensive, com
 
 ## Resources
 
-[Apache Flink Glossary](Glossary.md)
+[Apache Flink Glossary](https://github.com/j3-signalroom/j3-techstack-lexicon/blob/main/apache-flink-glossary.md)
 
 [Apache Flink's Core is Dataflow Programming](https://en.wikipedia.org/wiki/Dataflow_programming)
 
