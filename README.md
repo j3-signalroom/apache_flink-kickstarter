@@ -109,4 +109,13 @@ By calling Flink jobs "Flink applications," it emphasizes the comprehensive, com
 [Python examples](python/README.md)
 
 ## Resources
+
 [Apache Flink Glossary](Glossary.md)
+
+[Apache Flink's Core is Dataflow Programming](https://en.wikipedia.org/wiki/Dataflow_programming)
+
+[What is Apache Flink? — Architecture](https://flink.apache.org/what-is-flink/flink-architecture/)
+
+[Apache Flink Use Cases](https://flink.apache.org/what-is-flink/use-cases/)
+
+[Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/)
