@@ -5,6 +5,8 @@
 <!-- toc -->
 + [Local MacOS Installation](#local-macos-installation)
     - [Install Apache Flink on MacOS](#install-apache-flink-on-macos)
+    - [Apache Iceberg Setup](#apache-iceberg-setup)
++ [Start up Apache Flink](#start-up-apache-flink)
     - [Start Cluster](#start-cluster)
     - [Start Task Manager](#start-task-manager)
     - [Lanuch the Apache Flink Dashboard](#lanuch-the-apache-flink-dashboard)
@@ -29,12 +31,19 @@
 brew install apache-flink
 ```
 
-Homebrew will will typically install Apache Flink in the following folder location:
+Homebrew will will typically install Apache Flink in the following folder location, i.e., `FLINK_HOME`:
 ```
 /opt/homebrew/Cellar/apache-flink/1.20.0/
 ```
 
 > At the time of this writing (August 2024), version [1.20.0](https://www.confluent.io/blog/exploring-apache-flink-1-20-features-improvements-and-more/) was publically avaiable.
+
+### Apache Iceberg Setup
+Download the compatible Iceberg runtime JAR file and place it in your `FLINK_HOME/libexec/lib` directory.  This runtime library enables Iceberg integration with Flink. If you want to download the latest JAR,  you can get it from the icebergflink-runtime [JAR page on the Maven repository website](). We will use icebergflink-
+runtime-1.16 here. Table 9-1 highlights the supported Flink version with
+Iceberg and the corresponding runtime
+
+## Start up Apache Flink
 
 ### Start Cluster
 To start Apache Flink locally on your machine execute the following executable script: 
