@@ -4,6 +4,9 @@
  * @author Jeffrey Jonathan Jennings (J3)
  * 
  * 
+ * This class creates fake flight data for fictional airlines <b>Sunset Air</b> and 
+ * <b>Sky One</b> Airlines," and sends it to the Kafka topics `sunset` and `skyone`,
+ * respectively.
  */
 package apache_flink.kickstarter.datastream_api;
 

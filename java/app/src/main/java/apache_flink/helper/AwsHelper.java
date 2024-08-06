@@ -17,11 +17,12 @@ import org.json.*;
 import java.security.InvalidParameterException;
 import java.util.*;
 
-import apache_flink.*;
 import apache_flink.enums.*;
 
 
 public class AwsHelper {
+	public static final String DEFAULT_AWS_REGION = "us-east-1";
+
 	private AwsHelper() {}
 
 	/**
@@ -51,7 +52,7 @@ public class AwsHelper {
 		 * debugging, the AWS_REGION environment variable is not being read propertly
 		 */
 		if(awsRegion == null) {
-			awsRegion = Common.DEFAULT_AWS_REGION;
+			awsRegion = DEFAULT_AWS_REGION;
 		}
 		Region region = Region.of(awsRegion);
 
@@ -114,7 +115,7 @@ public class AwsHelper {
 		 * debugging, the AWS_REGION environment variable is not being read propertly
 		 */
 		if(awsRegion == null) {
-			awsRegion = Common.DEFAULT_AWS_REGION;
+			awsRegion = DEFAULT_AWS_REGION;
 		}
 
 		Region region = Region.of(awsRegion);
