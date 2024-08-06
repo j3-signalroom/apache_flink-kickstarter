@@ -1,31 +1,32 @@
 # Java
+Examples of Flink Apps written in Java.
 
 ## DataStream API
 [DataStream API](https://nightlies.apache.org/flink/flink-docs-master/docs/learn-flink/datastream_api/)
 
-### Flink Job (Application) Examples
-J3 completed the three main DataStream Job exercises from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
+### Flink App (Application) Examples
+J3 completed the three main DataStream app exercises from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
 
-Job|Description
+App|Description
 -|-
-`DataGeneratorJob`|This job creates fake flight data for fictional airlines **Sunset Air** and **Sky One** Airlines," and sends it to the Kafka topics `sunset` and `skyone` respectively.
-`FlightImporterJob`|This job imports flight data from `sunset` and `skyone` Kafka topics and converts it to a unified format for the `flightdata` Kafka topic.
-`UserStatisticsJob`|This job processes data from the `flightdata` Kafka topic to aggregate user statistics in the `userstatistics` Kafka topic.
+`DataGeneratorApp`|This app creates fake flight data for fictional airlines **Sunset Air** and **Sky One** Airlines," and sends it to the Kafka topics `sunset` and `skyone` respectively.
+`FlightImporterApp`|This app imports flight data from `sunset` and `skyone` Kafka topics and converts it to a unified format for the `flightdata` Kafka topic.
+`UserStatisticsApp`|This app processes data from the `flightdata` Kafka topic to aggregate user statistics in the `userstatistics` Kafka topic.
 
  Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/), and adapted them to showcase two capabilities:
 
 Capability|Description
 -|-
 Read AWS Secrets Manager and AWS Systems Manager Parameter Store|Instead of relying on the local consumer and producer properties file, the Kafka Cluster API Key, and Kafka Consumer and Kafka Producer client configuration properties are read from the AWS Secrets Manager and AWS Systems Manager Parameter Store.
-Custom Source Data Stream|An Apache Flink custom source data stream is a user-defined source of data that is integrated into a Flink application to read and process data from non-standard or custom sources. This custom source can be anything that isn't supported by Flink out of the box, such as proprietary REST APIs, specialized databases, custom hardware interfaces, etc. J3 utilizes a Custom Source Data Stream to read the AWS Secrets Manager secrets and AWS Systems Manager Parameter Store properties during the initial start of a Job, then caches the properties for use by any subsequent events that need these properties.
+Custom Source Data Stream|An Apache Flink custom source data stream is a user-defined source of data that is integrated into a Flink application to read and process data from non-standard or custom sources. This custom source can be anything that isn't supported by Flink out of the box, such as proprietary REST APIs, specialized databases, custom hardware interfaces, etc. J3 utilizes a Custom Source Data Stream to read the AWS Secrets Manager secrets and AWS Systems Manager Parameter Store properties during the initial start of a App, then caches the properties for use by any subsequent events that need these properties.
 
-#### To **`run`** anyone of the Flink Jobs
+#### To **`run`** anyone of the Flink Apps
 From your terminal prompt enter:
-Job|Run Job reading from local properties files|Run Job reading from AWS
+App|Run App reading from local properties files|Run App reading from AWS
 -|-|-
-**`DataGeneratorJob`**|`flink run --class apache_flink.kickstarter.datastream_api.DataGeneratorJob app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar`|`flink run --class apache_flink.kickstarter.datastream_api.DataGeneratorJob app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
-**`FlightImporterJob`**|`flink run --class apache_flink.kickstarter.datastream_api.FlightImporterJob app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar`|`flink run --class apache_flink.kickstarter.datastream_api.FlightImporterJob app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
-**`UserStatisticsJob`**|`flink run --class apache_flink.kickstarter.datastream_api.UserStatisticsJob app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar`|`flink run --class apache_flink.kickstarter.datastream_api.UserStatisticsJob app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
+**`DataGeneratorApp`**|`flink run --class apache_flink.kickstarter.datastream_api.DataGeneratorApp app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar`|`flink run --class apache_flink.kickstarter.datastream_api.DataGeneratorApp app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
+**`FlightImporterApp`**|`flink run --class apache_flink.kickstarter.datastream_api.FlightImporterApp app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar`|`flink run --class apache_flink.kickstarter.datastream_api.FlightImporterApp app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
+**`UserStatisticsApp`**|`flink run --class apache_flink.kickstarter.datastream_api.UserStatisticsApp app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar`|`flink run --class apache_flink.kickstarter.datastream_api.UserStatisticsApp app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
 
 ##### Local Consumer and Producer Properties file configuration
 **`consumer.properties`**

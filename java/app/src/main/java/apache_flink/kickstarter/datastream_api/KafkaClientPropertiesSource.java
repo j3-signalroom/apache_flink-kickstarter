@@ -10,7 +10,7 @@
  * out of the box, such as proprietary REST APIs, specialized databases, custom hardware 
  * interfaces, etc. J3 utilizes a Custom Source Data Stream to read the AWS Secrets Manager 
  * secrets and AWS Systems Manager Parameter Store properties during the initial start of a 
- * Job, then caches the properties for use by any subsequent events that need these properties.
+ * App, then caches the properties for use by any subsequent events that need these properties.
  */
 package apache_flink.kickstarter.datastream_api;
 
@@ -95,7 +95,7 @@ public class KafkaClientPropertiesSource extends RichSourceFunction<Properties>{
      * so any interruption handler can rely on the fact that this method has completed
      * (for example to ignore exceptions that happen after cancellation).
      * 
-     * During graceful shutdown (for example stopping a job with a savepoint), the
+     * During graceful shutdown (for example stopping an app with a savepoint), the
      * program must cleanly exit the run(SourceContext) method soon after this method
      * was called.  The Flink runtime will NOT interrupt the source thread during graceful
      * shutdown. Source implementors must ensure that no thread interruption happens on
@@ -141,7 +141,7 @@ public class KafkaClientPropertiesSource extends RichSourceFunction<Properties>{
     private ObjectResult<Properties> getKafkaClientProperties(final boolean consumerKafkaClient, final String[] args) {
 		if(checkForFlagGetFromAws(args)) {
 			/*
-			 * The flag was passed to the Job, and therefore the properties will be fetched
+			 * The flag was passed to the App, and therefore the properties will be fetched
 			 * from AWS Systems Manager Parameter Store and Secrets Manager, respectively.
 			 */
             final String kakfaClientParametersPath = consumerKafkaClient ? KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH : KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH;
@@ -150,8 +150,8 @@ public class KafkaClientPropertiesSource extends RichSourceFunction<Properties>{
             return kafkaClient.getKafkaClusterPropertiesFromAws();
 		} else {
 			/*
-			 * The flag was NOT passed to the Job, therefore the all the properties will be
-			 * fetched from the producer.properties file.
+			 * The flag was NOT passed to the App, therefore the properties will be fetched
+			 * from a local properties file.
 			 */
             try {
                 Properties properties = new Properties();
