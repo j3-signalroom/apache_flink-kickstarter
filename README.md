@@ -19,6 +19,7 @@
 + [Examples to get you kickstarted!](#examples-to-get-you-kickstarted)
     - [Java Examples](#java-examples)
     - [Python Examples](#python-examples)
++ [Resources](#resources)
 <!-- tocstop -->
 
 ## Local MacOS Installation
@@ -99,3 +100,6 @@ By calling Flink jobs "Flink applications," it emphasizes the comprehensive, com
 
 ### Python Examples
 [Python examples](python/README.md)
+
+## Resources
+[Apache Flink Glossary](Glossary.md)
