@@ -27,8 +27,8 @@ import org.slf4j.*;
 import apache_flink.kickstarter.datastream_api.model.*;
 
 
-public class UserStatisticsJob {
-    private static final Logger logger = LoggerFactory.getLogger(UserStatisticsJob.class);
+public class UserStatisticsApp {
+    private static final Logger logger = LoggerFactory.getLogger(UserStatisticsApp.class);
 
 
     public static void main(String[] args) throws Exception {
@@ -38,7 +38,7 @@ public class UserStatisticsJob {
 		 * --- Kafka Consumer Config
 		 * Retrieve the properties from the local properties files, or from AWS
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
-		 * properties into the Flink job
+		 * properties into the Flink app
 		 */
         DataStream<Properties> dataStreamConsumerProperties = env.addSource(new KafkaClientPropertiesSource(true, args));
 		Properties consumerProperties = new Properties();
@@ -52,7 +52,7 @@ public class UserStatisticsJob {
 		 * --- Kafka Producer Config
 		 * Retrieve the properties from the local properties files, or from AWS
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
-		 * properties into the Flink job
+		 * properties into the Flink app
 		 */
         DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
 		Properties producerProperties = new Properties();
@@ -93,9 +93,9 @@ public class UserStatisticsJob {
                         .uid("userstatistics_sink");
 
         try {
-            env.execute("UserStatisticsJob");
+            env.execute("UserStatisticsApp");
         } catch (Exception e) {
-            logger.error("The Job stopped early due to the following: {}", e.getMessage());
+            logger.error("The App stopped early due to the following: {}", e.getMessage());
         }        
     }
 

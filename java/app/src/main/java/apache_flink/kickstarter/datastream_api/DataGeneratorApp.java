@@ -27,8 +27,8 @@ import org.slf4j.*;
 import apache_flink.kickstarter.datastream_api.model.*;
 
 
-public class DataGeneratorJob {
-	private static final Logger logger = LoggerFactory.getLogger(DataGeneratorJob.class);
+public class DataGeneratorApp {
+	private static final Logger logger = LoggerFactory.getLogger(DataGeneratorApp.class);
 
 
 	public static void main(String[] args) throws Exception {
@@ -38,7 +38,7 @@ public class DataGeneratorJob {
 		 * --- Kafka Producer Config
 		 * Retrieve the properties from the local properties files, or from AWS
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
-		 * properties into the Flink job
+		 * properties into the Flink app
 		 */
         DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
 		Properties producerProperties = new Properties();
@@ -61,7 +61,7 @@ public class DataGeneratorJob {
 		KafkaRecordSerializationSchema<SkyOneAirlinesFlightData> skyOneSerializer = 
 			KafkaRecordSerializationSchema.<SkyOneAirlinesFlightData>builder()
 				.setTopic("skyone")
-				.setValueSerializationSchema(new JsonSerializationSchema<>(DataGeneratorJob::getMapper))
+				.setValueSerializationSchema(new JsonSerializationSchema<>(DataGeneratorApp::getMapper))
 				.build();
 
 		KafkaSink<SkyOneAirlinesFlightData> skyOneSink = 
@@ -86,7 +86,7 @@ public class DataGeneratorJob {
 		KafkaRecordSerializationSchema<SunsetAirFlightData> sunSetSerializer = 
 			KafkaRecordSerializationSchema.<SunsetAirFlightData>builder()
 				.setTopic("sunset")
-				.setValueSerializationSchema(new JsonSerializationSchema<>(DataGeneratorJob::getMapper))
+				.setValueSerializationSchema(new JsonSerializationSchema<>(DataGeneratorApp::getMapper))
 				.build();
 
 		KafkaSink<SunsetAirFlightData> sunsetSink = 
@@ -99,9 +99,9 @@ public class DataGeneratorJob {
 		sunsetStream.sinkTo(sunsetSink).name("sunset_sink");
 
 		try {
-			env.execute("DataGeneratorJob");
+			env.execute("DataGeneratorApp");
 		} catch (Exception e) {
-			logger.error("The Job stopped early due to the following: {}", e.getMessage());
+			logger.error("The App stopped early due to the following: {}", e.getMessage());
 		}
 	}
 

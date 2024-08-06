@@ -25,8 +25,8 @@ import org.slf4j.*;
 import apache_flink.kickstarter.datastream_api.model.*;
 
 
-public class FlightImporterJob {
-    private static final Logger logger = LoggerFactory.getLogger(FlightImporterJob.class);
+public class FlightImporterApp {
+    private static final Logger logger = LoggerFactory.getLogger(FlightImporterApp.class);
 
     @SuppressWarnings("rawtypes")
     public static void main(String[] args) throws Exception {
@@ -36,7 +36,7 @@ public class FlightImporterJob {
 		 * --- Kafka Consumer Config
 		 * Retrieve the properties from the local properties files, or from AWS
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
-		 * properties into the Flink job
+		 * properties into the Flink app
 		 */
         DataStream<Properties> dataStreamConsumerProperties = env.addSource(new KafkaClientPropertiesSource(true, args));
 		Properties consumerProperties = new Properties();
@@ -50,7 +50,7 @@ public class FlightImporterJob {
 		 * --- Kafka Producer Config
 		 * Retrieve the properties from the local properties files, or from AWS
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
-		 * properties into the Flink job
+		 * properties into the Flink app
 		 */
         DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
 		Properties producerProperties = new Properties();
@@ -84,7 +84,7 @@ public class FlightImporterJob {
 
 		KafkaRecordSerializationSchema<FlightData> flightSerializer = KafkaRecordSerializationSchema.<FlightData>builder()
             .setTopic("flightdata")
-			.setValueSerializationSchema(new JsonSerializationSchema<FlightData>(FlightImporterJob::getMapper))
+			.setValueSerializationSchema(new JsonSerializationSchema<FlightData>(FlightImporterApp::getMapper))
             .build();
 
         KafkaSink<FlightData> flightSink = KafkaSink.<FlightData>builder()
@@ -97,9 +97,9 @@ public class FlightImporterJob {
             .name("flightdata_sink");
 
         try {
-            env.execute("FlightImporterJob");
+            env.execute("FlightImporterApp");
         } catch (Exception e) {
-            logger.error("The Job stopped early due to the following: {}", e.getMessage());
+            logger.error("The App stopped early due to the following: {}", e.getMessage());
         }
     }
 
