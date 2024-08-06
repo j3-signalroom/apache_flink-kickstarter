@@ -9,7 +9,7 @@
     - [Start Task Manager](#start-task-manager)
     - [Lanuch the Apache Flink Dashboard](#lanuch-the-apache-flink-dashboard)
     - [Stop Cluster](#stop-cluster)
-+ [Call it a Flink Job or a Flink Application?](#call-it-a-flink-job-or-a-flink-application)
++ [You can call it a Flink Job or a Flink Application?](#you-can-call-it-a-flink-job-or-a-flink-application)
     - [Comprehensive Nature](#comprehensive-nature)
     - [Execution Context](#execution-context)
     - [Deployment and Operations](#deployment-and-operations)
@@ -58,7 +58,7 @@ To stop Apache Flink locally on your machine execute the following executable sc
 /opt/homebrew/Cellar/apache-flink/1.20.0/libexec/bin/stop-cluster.sh
 ```
 
-## Call it a Flink Job or a Flink Application?
+## You can call it a Flink Job or a Flink Application?
 
 > _"What's in a name? That which we call a rose by any other name would smell just as sweet." -- William Shakespeare_
 
