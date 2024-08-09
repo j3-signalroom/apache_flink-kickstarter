@@ -3,14 +3,6 @@
 **Table of Contents**
 
 <!-- toc -->
-+ [Local MacOS Installation](#local-macos-installation)
-    - [Install Apache Flink on MacOS](#install-apache-flink-on-macos)
-    - [Apache Iceberg Setup](#apache-iceberg-setup)
-+ [Start up Apache Flink](#start-up-apache-flink)
-    - [Start Cluster](#start-cluster)
-    - [Start Task Manager](#start-task-manager)
-    - [Lanuch the Apache Flink Dashboard](#lanuch-the-apache-flink-dashboard)
-    - [Stop Cluster](#stop-cluster)
 + [You can call it a Flink Job or a Flink Application?](#you-can-call-it-a-flink-job-or-a-flink-application)
     - [Comprehensive Nature](#comprehensive-nature)
     - [Execution Context](#execution-context)
@@ -21,50 +13,12 @@
 + [Examples to get you kickstarted!](#examples-to-get-you-kickstarted)
     - [Java Examples](#java-examples)
     - [Python Examples](#python-examples)
++ [How to use this repo?]()
+    + [Rev up Apache Flink]()
+        - [On a Mac with the M silicon chip]()
+        - [Or Not]()
 + [Resources](#resources)
 <!-- tocstop -->
-
-## Local MacOS Installation
-
-### Install Apache Flink on MacOS
-```
-brew install apache-flink
-```
-
-Homebrew will will typically install Apache Flink in the following folder location, i.e., `FLINK_HOME`:
-```
-/opt/homebrew/Cellar/apache-flink/1.20.0/
-```
-
-> At the time of this writing (August 2024), version [1.20.0](https://www.confluent.io/blog/exploring-apache-flink-1-20-features-improvements-and-more/) was publically avaiable.
-
-### Apache Iceberg Setup
-Download the compatible Iceberg runtime JAR file and place it in your `FLINK_HOME/libexec/lib` directory.  This runtime library enables Iceberg integration with Flink.  If you want to download the latest JAR, you can get it from the icebergflink-runtime [JAR page on the Maven repository website](https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.19/1.6.0/), which is `iceberg-flink-runtime-1.19-1.6.0`.
-
-## Start up Apache Flink
-
-### Start Cluster
-To start Apache Flink locally on your machine execute the following executable script: 
-```
-/opt/homebrew/Cellar/apache-flink/1.20.0/libexec/bin/start-cluster.sh
-```
-
-### Start Task Manager 3 times
-```
-/opt/homebrew/Cellar/apache-flink/1.20.0/libexec/bin/taskmanager.sh start
-```
-
-### Launch the Apache Flink Dashboard
-To launch the Apache Flink Dashboard from your web browser, go to this URL:
-```
-http://localhost:8081/
-```
-
-### Stop Cluster
-To stop Apache Flink locally on your machine execute the following executable script: 
-```
-/opt/homebrew/Cellar/apache-flink/1.20.0/libexec/bin/stop-cluster.sh
-```
 
 ## You can call it a Flink Job or a Flink Application?
 
