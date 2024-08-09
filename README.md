@@ -3,14 +3,10 @@
 **Table of Contents**
 
 <!-- toc -->
-+ [Local MacOS Installation](#local-macos-installation)
-    - [Install Apache Flink on MacOS](#install-apache-flink-on-macos)
-    - [Apache Iceberg Setup](#apache-iceberg-setup)
-+ [Start up Apache Flink](#start-up-apache-flink)
-    - [Start Cluster](#start-cluster)
-    - [Start Task Manager](#start-task-manager)
-    - [Lanuch the Apache Flink Dashboard](#lanuch-the-apache-flink-dashboard)
-    - [Stop Cluster](#stop-cluster)
++ [How to use this repo?]()
+    + [Rev up Apache Flink]()
+        - [On a Mac with the M silicon chip]()
+        - [Or Not]()
 + [You can call it a Flink Job or a Flink Application?](#you-can-call-it-a-flink-job-or-a-flink-application)
     - [Comprehensive Nature](#comprehensive-nature)
     - [Execution Context](#execution-context)
