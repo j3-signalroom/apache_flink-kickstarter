@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.2"
 services:
   # Nessie Catalog Server Using In-Memory Store
   catalog:
@@ -16,8 +16,8 @@ services:
       - MINIO_ROOT_USER=admin
       - MINIO_ROOT_PASSWORD=password
       - MINIO_DOMAIN=storage
-      - MINIO_REGION_NAME=us-east-1
-      - MINIO_REGION=us-east-1
+      - MINIO_REGION_NAME=$AWS_REGION
+      - MINIO_REGION=$AWS_REGION
     networks:
       flink-nessie-iceberg-net:
     ports:
@@ -35,10 +35,10 @@ services:
         aliases:
           - minio.storage
     environment:
-      - AWS_ACCESS_KEY_ID=admin
-      - AWS_SECRET_ACCESS_KEY=password
-      - AWS_REGION=us-east-1
-      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      - AWS_REGION=$AWS_REGION
+      - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
     entrypoint: >
       /bin/sh -c "
       until (/usr/bin/mc config host add minio http://storage:9000 admin password) do echo '...waiting...' && sleep 1; done;
@@ -61,10 +61,10 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-      - AWS_ACCESS_KEY_ID=admin
-      - AWS_SECRET_ACCESS_KEY=password
-      - AWS_REGION=us-east-1
-      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      - AWS_REGION=$AWS_REGION
+      - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
       - S3_ENDPOINT=http://minio.storage:9000
       - S3_PATH_STYLE_ACCESS=true        
   # Apache Flink Task Manager
@@ -81,10 +81,10 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 2
-      - AWS_ACCESS_KEY_ID=admin
-      - AWS_SECRET_ACCESS_KEY=password
-      - AWS_REGION=us-east-1
-      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      - AWS_REGION=$AWS_REGION
+      - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
       - S3_ENDPOINT=http://minio.storage:9000
       - S3_PATH_STYLE_ACCESS=true
   # Containers' shared network
