@@ -2,16 +2,16 @@
 
 #
 # *** Script Syntax ***
-# script/set-aws-env-vars.sh --profile=<PROFILE_NAME>
+# scripts/run-docker-compose.sh --profile=<PROFILE_NAME>
 #
 # *** Example Call ***
-# script/set-aws-env-vars.sh --profile=dev
+# scripts/run-docker-compose.sh --profile=dev
 #
 # Check if arguments were supplied; otherwise exit script
 if [ ! -n "$1" ]
 then
     echo
-    echo "Usage:  Require at least two arguments ---> `basename $0` --profile=<PROFILE_NAME>"
+    echo "Usage:  Require one argument ---> `basename $0` --profile=<PROFILE_NAME>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -37,7 +37,7 @@ then
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
 
-# Get the SSO AWS_ACCESS_KEY_ID, AWS_ACCESS_SECRET_KEY, AWS_SESSION_TOKEN, AWS_REGION and AWS_ACCOUNT_ID, and
+# Get the SSO AWS_ACCESS_KEY_ID, AWS_ACCESS_SECRET_KEY, AWS_SESSION_TOKEN, and AWS_REGION, and
 # set them as an environmental variables
 aws sso login $AWS_PROFILE
 eval $(aws2-wrap $AWS_PROFILE --export)
