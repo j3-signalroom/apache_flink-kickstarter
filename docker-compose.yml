@@ -1,4 +1,4 @@
-version: "3"
+version: "3.9"
 services:
   jobmanager:
     image: j3signalroom/mac_flink-with_hadoop_iceberg:latest
@@ -8,16 +8,28 @@ services:
     environment:
       - |
         FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager        
+        jobmanager.rpc.address: jobmanager
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
+      - AWS_DEFAULT_REGION=us-east-1
+      - S3_ENDPOINT=http://minio.storage:9000
+      - S3_PATH_STYLE_ACCESS=true        
 
   taskmanager:
     image: j3signalroom/mac_flink-with_hadoop_iceberg:latest
     depends_on:
       - jobmanager
     command: taskmanager
-    scale: 1
+    scale: 3
     environment:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 2     
+        taskmanager.numberOfTaskSlots: 2
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
+      - AWS_DEFAULT_REGION=us-east-1
+      - S3_ENDPOINT=http://minio.storage:9000
+      - S3_PATH_STYLE_ACCESS=true 
