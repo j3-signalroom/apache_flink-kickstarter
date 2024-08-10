@@ -13,10 +13,8 @@
 + [Examples to get you kickstarted!](#examples-to-get-you-kickstarted)
     - [Java Examples](#java-examples)
     - [Python Examples](#python-examples)
-+ [How to use this repo?]()
-    + [Rev up Apache Flink]()
-        - [On a Mac with the M silicon chip]()
-        - [Or Not]()
++ [How to use this repo?](#how-to-use-this-repo)
+    + [Start your engines!  The Apache Flink compute engine for Data Stream Processing!](#start-your-engines--the-apache-flink-compute-engine-for-data-stream-processing)
 + [Resources](#resources)
 <!-- tocstop -->
 
@@ -61,6 +59,23 @@ By calling Flink jobs "Flink applications," it emphasizes the comprehensive, com
 
 ### Python Examples
 [Python examples](python/README.md)
+
+## How to use this repo?
+This section guides you through the local setup (on one machine but in separate containers) of the Apache Flink cluster in Session mode using Docker containers with support Apache Iceberg.  [Docker](https://www.docker.com/) is a popular container runtime that we will use to run Apache Flink on our local machine.
+
+I created a `bash` script that executes docker-compose, a tool for defining and running multi-container applications, like our Apache Flink cluster.
+
+### Start your engines!  The Apache Flink compute engine for Data Stream Processing!
+
+If you are using a Mac with the M chip and it is configured with SSO to log into your AWS services, then pass these arguments using this script:
+```
+scripts/run-flink-locally.sh --aws-sso --chip=arm64 --profile=<PROFILE_NAME>
+```
+
+Or, for any other machine type (i.e., Linux, or PC), then pass these arguments using this script:
+```
+scripts/run-flink-locally.sh --aws-sso --chip=amd64 --profile=<PROFILE_NAME>
+```
 
 ## Resources
 

@@ -15,8 +15,8 @@ services:
       - MINIO_ROOT_USER=admin
       - MINIO_ROOT_PASSWORD=password
       - MINIO_DOMAIN=storage
-      - MINIO_REGION_NAME=${AWS_REGION}
-      - MINIO_REGION=${AWS_REGION}
+      - MINIO_REGION_NAME=${AWS_REGION:-us-east-1}
+      - MINIO_REGION=${AWS_REGION:-us-east-1}
     networks:
       flink-nessie-iceberg-net:
     ports:
@@ -41,16 +41,13 @@ services:
     entrypoint: >
       /bin/sh -c "
       until (/usr/bin/mc config host add minio http://storage:9000 admin password) do echo '...waiting...' && sleep 1; done;
-      /usr/bin/mc rm -r --force minio/warehouse;
-      /usr/bin/mc mb minio/warehouse;
       /usr/bin/mc mb minio/iceberg;
-      /usr/bin/mc policy set public minio/warehouse;
       /usr/bin/mc policy set public minio/iceberg;
       tail -f /dev/null
       "
   # Apache Flink Job Manager
   jobmanager:
-    image: j3signalroom/mac_flink-with_hadoop_iceberg:latest
+    image: ${FLINK_DOCKER_IMAGE:-j3signalroom/mac_flink-with_hadoop_iceberg:latest}
     ports:
       - "8081:8081"
     command: jobmanager
@@ -68,7 +65,7 @@ services:
       - S3_PATH_STYLE_ACCESS=true        
   # Apache Flink Task Manager
   taskmanager:
-    image: j3signalroom/mac_flink-with_hadoop_iceberg:latest
+    image: ${FLINK_DOCKER_IMAGE:-j3signalroom/mac_flink-with_hadoop_iceberg:latest}
     depends_on:
       - jobmanager
     command: taskmanager
