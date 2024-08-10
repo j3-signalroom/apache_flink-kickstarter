@@ -5,7 +5,7 @@
  * 
  * 
  * This class creates fake flight data for fictional airlines <b>Sunset Air</b> and 
- * <b>Sky One</b> Airlines," and sends it to the Kafka topics `sunset` and `skyone`,
+ * <b>Sky One</b> Airlines," and sends it to the Kafka topics `airline.sunset` and `airline.skyone`,
  * respectively.
  */
 package apache_flink.kickstarter.datastream_api;
@@ -71,7 +71,7 @@ public class DataGeneratorApp {
 
 		KafkaRecordSerializationSchema<SkyOneAirlinesFlightData> skyOneSerializer = 
 			KafkaRecordSerializationSchema.<SkyOneAirlinesFlightData>builder()
-				.setTopic("skyone")
+				.setTopic("airline.skyone")
 				.setValueSerializationSchema(new JsonSerializationSchema<>(DataGeneratorApp::getMapper))
 				.build();
 
@@ -96,7 +96,7 @@ public class DataGeneratorApp {
 
 		KafkaRecordSerializationSchema<SunsetAirFlightData> sunSetSerializer = 
 			KafkaRecordSerializationSchema.<SunsetAirFlightData>builder()
-				.setTopic("sunset")
+				.setTopic("airline.sunset")
 				.setValueSerializationSchema(new JsonSerializationSchema<>(DataGeneratorApp::getMapper))
 				.build();
 
