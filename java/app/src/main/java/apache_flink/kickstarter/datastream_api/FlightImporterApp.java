@@ -4,8 +4,8 @@
  * @author Jeffrey Jonathan Jennings (J3)
  * 
  * 
- * This class imports flight data from `sunset` and `skyone` Kafka topics
- * and converts it to a unified format for the `flightdata` Kafka topic.
+ * This class imports flight data from `airline.sunset` and `airline.skyone` Kafka topics
+ * and converts it to a unified format for the `airline.all_airlines` Kafka topic.
  */
 package apache_flink.kickstarter.datastream_api;
 
@@ -75,7 +75,7 @@ public class FlightImporterApp {
         @SuppressWarnings("unchecked")
         KafkaSource<SkyOneAirlinesFlightData> skyOneSource = KafkaSource.<SkyOneAirlinesFlightData>builder()
             .setProperties(consumerProperties)
-            .setTopics("skyone")
+            .setTopics("airline.skyone")
             .setStartingOffsets(OffsetsInitializer.earliest())
             .setValueOnlyDeserializer(new JsonDeserializationSchema(SkyOneAirlinesFlightData.class))
             .build();
@@ -86,7 +86,7 @@ public class FlightImporterApp {
 		@SuppressWarnings("unchecked")
         KafkaSource<SunsetAirFlightData> sunsetSource = KafkaSource.<SunsetAirFlightData>builder()
             .setProperties(consumerProperties)
-            .setTopics("sunset")
+            .setTopics("airline.sunset")
             .setStartingOffsets(OffsetsInitializer.earliest())
             .setValueOnlyDeserializer(new JsonDeserializationSchema(SunsetAirFlightData.class))
             .build();
@@ -95,7 +95,7 @@ public class FlightImporterApp {
             .fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
 		KafkaRecordSerializationSchema<FlightData> flightSerializer = KafkaRecordSerializationSchema.<FlightData>builder()
-            .setTopic("flightdata")
+            .setTopic("airline.all_airlines")
 			.setValueSerializationSchema(new JsonSerializationSchema<FlightData>(FlightImporterApp::getMapper))
             .build();
 
