@@ -2,10 +2,10 @@
 
 #
 # *** Script Syntax ***
-# scripts/run-docker-compose.sh --profile=<PROFILE_NAME>
+# scripts/run-flink-locally.sh --profile=<PROFILE_NAME>
 #
 # *** Example Call ***
-# scripts/run-docker-compose.sh --profile=dev
+# scripts/run-flink-locally.sh --profile=dev
 #
 # Check if arguments were supplied; otherwise exit script
 if [ ! -n "$1" ]
@@ -48,5 +48,6 @@ export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output t
 printf "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}\
 \nAWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}\
 \nAWS_REGION=${AWS_REGION}\
-\nAWS_DEFAULT_REGION=${AWS_REGION}" > .env
+\nAWS_DEFAULT_REGION=${AWS_REGION}\
+\nFLINK_DOCKER_IMAGE='j3signalroom/mac_flink-with_hadoop_iceberg:latest'" > .env
 docker-compose up 
