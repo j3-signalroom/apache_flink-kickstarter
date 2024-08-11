@@ -1,6 +1,6 @@
 terraform {
     cloud {
-        organization ="<TERRAFORM CLOUD ORGANIZATION NAME>"
+      organization ="<TERRAFORM CLOUD ORGANIZATION NAME>"
 
         workspaces {
             name = "<TERRAFORM CLOUD ORGANIZATION's WORKSPACE NAME>"
