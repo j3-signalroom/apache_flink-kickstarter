@@ -14,6 +14,14 @@
     - [Java Examples](#java-examples)
     - [Python Examples](#python-examples)
 + [How to use this repo?](#how-to-use-this-repo)
+    - [Set up your Terraform Cloud environment](#set-up-your-terraform-cloud-environment)
+        + [Terraform Cloud API token](#terraform-cloud-api-token)
+            - [Set up your Confluent Cloud environment](#set-up-your-confluent-cloud-environment)
+                + [Create a `terraform.tfvars` file in the root of the repo](#create-a-terraformtfvars-file-in-the-root-of-the-repo)
+                + [AWS Secrets Manager](#aws-secrets-manager)
+                + [AWS Systems Manager Parameter Store](#aws-systems-manager-parameter-store)
+        + [Run the Terraform configuration](#run-the-terraform-configuration)
+    - [Power up the Apache Flink Docker containers](#power-up-the-apache-flink-docker-containers)
 + [Resources](#resources)
 <!-- tocstop -->
 
@@ -60,17 +68,45 @@ By calling Flink jobs "Flink applications," it emphasizes the comprehensive, com
 [Python examples](python/README.md)
 
 ## How to use this repo?
+As of August 2024, Confluent’s Serverless Flink offering does not yet support the DataStream API and Table API for writing Flink Apps in Java or Python. Therefore, this repo uses cloud resources for Confluent Cloud Services (i.e., Kafka and Schema Registry), AWS (i.e., Secrets Manager and Systems Manager Parameter Store),  Terraform Cloud for CI/CD, and your local machine to run Apache Flink and Apache Iceberg Docker containers.
 
-### Start by executing the Confluent Cloud Resources Terraform Configuration
+**To start using the repo**
+
+1. Set up your Terraform Cloud environment, so you can:
+
+    a. Set up your Confluent Cloud environment with a Kafka Cluster that uses the example Kafka topics and their schemas in the Schema Registry.
+
+    b. Set up your AWS Secrets Manager to store Kafka Cluster and Schema Registry Cluster API Key Secrets, respectively, along with the Consumer and Producer Kafka properties in the AWS Systems Parameter Store.
+
+2. Power up the Docker containers that run Apache Flink and Apache Iceberg locally on your machine.
+
+### Set up your Terraform Cloud environment
+Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your local machine. Then ensure you have an [HCP Terraform account](https://app.terraform.io/session) to run the Terraform configuration provided in the cloud.
+
+#### Terraform Cloud API token
+In order to authenticate with HCP Terraform, run the terraform login subcommand.  Enter `yes` to the prompt to confirm that you want to authenticate.
+
+![terraform-cli-login](.blog/images/terraform-cli-login.png)
+
+**Generate token**
+A browser window will automatically open to the HCP Terraform login screen.  Enter a token name in the web UI, or leave the default name, `terraform login`:
+![terraform-cli-login-generate-token](.blog/images/terraform-cli-login-generate-token.png)
+
+Click Create API token to generate the authentication token:
+
+![terraform-cli-login-generated-token](.blog/images/terraform-cli-login-generated-token.png)
+
+Save a copy of the token in a secure location. It provides access to your HCP Terraform organization. Terraform will also store your token locally at the file path specified in the command output.
+
+**Add the token to the CLI**
+When the Terraform CLI prompts you, paste the user token exactly once into your terminal. Terraform will hide the token for security when you paste it into your terminal. Press Enter to complete the authentication process:
+
+![terraform-cli-login-completed](.blog/images/terraform-cli-login-completed.png)
+
+##### Set up your Confluent Cloud environment
 But, first in the [main.tf](main.tf) replace **`<TERRAFORM CLOUD ORGANIZATION NAME>`** in the `terraform.cloud` block with your [Terraform Cloud Organization Name](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/organizations) and **`<TERRAFORM CLOUD ORGANIZATION's WORKSPACE NAME>`** in the `terraform.cloud.workspaces` block with your [Terraform Cloud Organization's Workspaces Name](https://developer.hashicorp.com/terraform/cloud-docs/workspaces).
 
-#### GitHub Setup
-In order to run the Terraform configuration, the Terraform Cloud API token is required as a GitHub Secret variable:
-
-##### Terraform Cloud API token
-From the [Tokens page](https://app.terraform.io/app/settings/tokens), create/update the API token and store it in the [AWS Secrets Manager](https://us-east-1.console.aws.amazon.com/secretsmanager/secret?name=%2Fsi-iac-confluent_cloud_kafka_api_key_rotation-tf%2Fconfluent&region=us-east-1).  Then add/update the `TF_API_TOKEN` secret on the [GitHub Action secrets and variables, secret tab](https://github.com/signalroom/si-iac-confluent_cloud_kafka_api_key_rotation-tf/settings/secrets/actions).
-
-#### Create a `terraform.tfvars` file in the root of the repo
+###### Create a `terraform.tfvars` file in the root of the repo
 ```
 confluent_cloud_api_key = "<CONFLUENT_CLOUD_API_KEY>"
 confluent_cloud_api_secret = "<CONFLUENT_CLOUD_API_SECRETS>"
@@ -94,32 +130,32 @@ auto_offset_reset = "earliest"
 The configuration leverages the [IaC Confluent Cloud Resource API Key Rotation Terraform module](https://github.com/j3-signalroom/iac-confluent_cloud_resource_api_key_rotation-tf_module) to handle the creation and rotation of each of the Confluent Cloud Resource API Key for each of the Confluent Cloud Resources:
 - [Schema Registry Cluster](https://registry.terraform.io/providers/confluentinc/confluent/latest/docs/resources/confluent_schema_registry_cluster)
 - [Kafka Cluster](https://registry.terraform.io/providers/confluentinc/confluent/latest/docs/resources/confluent_kafka_cluster)
-- [Kafka Topics]()
+- [Kafka Topics](https://registry.terraform.io/providers/confluentinc/confluent/latest/docs/resources/confluent_kafka_topics)
 
 Along with the Schema Registry Cluster REST endpoint, and Kafka Cluster's Bootstrap URI are stored in the [AWS Secrets Manager](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret).
 
 In addition, the [consumer](https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html) and [producer]() Kafka client configuration parameters are stored in the [AWS Systems Manager Parameter Store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter).
 
-#### AWS Secrets Manager
+###### AWS Secrets Manager
 Here is the list of secrets generated by the Terraform configuration:
 
-##### `/confluent_cloud_resource/schema_registry_cluster/java_client`
+**`/confluent_cloud_resource/schema_registry_cluster/java_client`**
 > Key|Description
 > -|-
 > `basic.auth.credentials.source`|Specifies the the format used in the `basic.auth.user.info` property.
 > `basic.auth.user.info`|Specifies the API Key and Secret for the Schema Registry Cluster.
 > `schema.registry.url`|The HTTP endpoint of the Schema Registry cluster.
 
-##### `/confluent_cloud_resource/kafka_cluster/java_client`
+**`/confluent_cloud_resource/kafka_cluster/java_client`**
 > Key|Description
 > -|-
 > `sasl.jaas.config`|Java Authentication and Authorization Service (JAAS) for SASL configuration.
 > `bootstrap.servers`|The bootstrap endpoint used by Kafka clients to connect to the Kafka cluster.
 
-#### AWS Systems Manager Parameter Store
+###### AWS Systems Manager Parameter Store
 Here is the list of parameters generated by the Terraform configuration:
 
-##### `/confluent_cloud_resource/consumer_kafka_client`
+**`/confluent_cloud_resource/consumer_kafka_client`**
 > Key|Description
 > -|-
 > `auto.commit.interval.ms`|The `auto.commit.interval.ms` property in Apache Kafka defines the frequency (in milliseconds) at which the Kafka consumer automatically commits offsets. This is relevant when `enable.auto.commit` is set to true, which allows Kafka to automatically commit the offsets periodically without requiring the application to do so explicitly.
@@ -133,7 +169,7 @@ Here is the list of parameters generated by the Terraform configuration:
 > `security.protocol`|This property specifies the protocol used to communicate with Kafka brokers.
 > `session.timeout.ms`|This property sets the timeout for detecting consumer failures when using Kafka's group management. If the consumer does not send a heartbeat to the broker within this period, it will be considered dead, and its partitions will be reassigned to other consumers in the group.
 
-##### `/confluent_cloud_resource/producer_kafka_client`
+**`/confluent_cloud_resource/producer_kafka_client`**
 > Key|Description
 > -|-
 > `sasl.mechanism`|This property specifies the SASL mechanism to be used for authentication.
@@ -141,9 +177,21 @@ Here is the list of parameters generated by the Terraform configuration:
 > `client.dns.lookup`|This property specifies how the client should resolve the DNS name of the Kafka brokers.
 > `acks`|This property specifies the number of acknowledgments the producer requires the leader to have received before considering a request complete.
 
-This section guides you through the local setup (on one machine but in separate containers) of the Apache Flink cluster in Session mode using Docker containers with support Apache Iceberg.  [Docker](https://www.docker.com/) is a popular container runtime that we will use to run Apache Flink on our local machine.
+#### Run the Terraform configuration
+```
+terraform init
+```
 
-I created a `bash` script that sets environment variables and executes a docker-compose file in detach mode, which runs Apache Flink cluster locally:
+```
+terraform plan -var-file=terraform.tfvars
+```
+
+```
+terraform apply -var-file=terraform.tfvars -no-approve
+```
+
+### Power up the Apache Flink Docker containers
+This section guides you through the local setup (on one machine but in separate containers) of the Apache Flink cluster in Session mode using Docker containers with support for Apache Iceberg.  Run the `bash` script below to start the Apache Flink cluster in Session Mode on your machine:
 
 ```
 scripts/run-flink-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64>
