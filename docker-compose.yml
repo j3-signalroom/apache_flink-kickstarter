@@ -53,6 +53,8 @@ services:
     command: jobmanager
     networks:
       flink-nessie-iceberg-net:
+    volumes:
+      - ~/flink/apps:/opt/flink/apps
     environment:
       - |
         FLINK_PROPERTIES=
@@ -72,6 +74,8 @@ services:
     networks:
       flink-nessie-iceberg-net:
     scale: 3
+    volumes:
+      - ~/flink/apps:/opt/flink/apps
     environment:
       - |
         FLINK_PROPERTIES=

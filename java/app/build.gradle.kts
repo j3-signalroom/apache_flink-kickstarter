@@ -46,7 +46,7 @@ java {
 application {
     // --- If the main class is not provided, use the default
     if (appMainClass.isNullOrEmpty()) {
-        mainClass.set("apache_flink.kickstarter.datastream_api.UserStatisticsApp")
+        mainClass.set("apache_flink.kickstarter.datastream_api.DataGeneratorApp")
     } else {
         mainClass.set("apache_flink.kickstarter." + appMainClass)
     }    
