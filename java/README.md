@@ -29,7 +29,7 @@ App|Run App reading from local properties files|Run App reading from AWS
 **`FlightImporterApp`**|`flink run --class apache_flink.kickstarter.datastream_api.FlightImporterApp app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar`|`flink run --class apache_flink.kickstarter.datastream_api.FlightImporterApp app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
 **`UserStatisticsApp`**|`flink run --class apache_flink.kickstarter.datastream_api.UserStatisticsApp app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar`|`flink run --class apache_flink.kickstarter.datastream_api.UserStatisticsApp app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
 
-##### Local Consumer and Producer Properties file configuration
+##### Local Consumer and Producer Properties file configuration (if not using AWS Secrets Manager and AWS Systems Manager Parameter Store)
 **`consumer.properties`**
 ```
 bootstrap.servers=<KAFKA CLUSTER URI>
@@ -59,41 +59,3 @@ sasl.mechanism=PLAIN
 client.dns.lookup=use_all_dns_ips
 acks=all
 ```
-
-##### Read from the AWS Secrets Manager and AWS Systems Manager Parameter Store
-> **Tip**:  Checkout [iac-confluent_cloud_resources-tf](https://github.com/j3-signalroom/iac-confluent_cloud_resources-tf/blob/main/README.md) Terraform configuration that leverages the IaC Confluent Cloud Resource API Key Rotation Terraform module to create and rotate the API Keys. It then uses AWS Secrets Manager to store the current active API Key for the Schema Registry Cluster and Kafka Cluster. Plus add parameters to the AWS System Manager Parameter Store for a Kafka Consumer and Producer.
-
-**AWS Secrets Manager --- `/confluent_cloud_resource/schema_registry_cluster/java_client`**
-> Key|Description
-> -|-
-> `basic.auth.credentials.source`|Specifies the the format used in the `basic.auth.user.info` property.
-> `basic.auth.user.info`|Specifies the API Key and Secret for the Schema Registry Cluster.
-> `schema.registry.url`|The HTTP endpoint of the Schema Registry cluster.
-
-**AWS Secrets Manager --- `/confluent_cloud_resource/kafka_cluster/java_client`**
-> Key|Description
-> -|-
-> `sasl.jaas.config`|Java Authentication and Authorization Service (JAAS) for SASL configuration.
-> `bootstrap.servers`|The bootstrap endpoint used by Kafka clients to connect to the Kafka cluster.
-
-**AWS Systems Manager Parameter Store --- `/confluent_cloud_resource/consumer_kafka_client`**
-> Key|Description
-> -|-
-> `auto.commit.interval.ms`|The `auto.commit.interval.ms` property in Apache Kafka defines the frequency (in milliseconds) at which the Kafka consumer automatically commits offsets. This is relevant when `enable.auto.commit` is set to true, which allows Kafka to automatically commit the offsets periodically without requiring the application to do so explicitly.
-> `auto.offset.reset`|Specifies the behavior of the consumer when there is no committed position (which occurs when the group is first initialized) or when an offset is out of range. You can choose either to reset the position to the `earliest` offset or the `latest` offset (the default).
-> `basic.auth.credentials.source`|This property specifies the source of the credentials for basic authentication.
-> `client.dns.lookup`|This property specifies how the client should resolve the DNS name of the Kafka brokers.
-> `enable.auto.commit`|When set to true, the Kafka consumer automatically commits the offsets of messages it has processed at regular intervals, specified by the `auto.commit.interval.ms` property. If set to false, the application is responsible for committing offsets manually.
-> `max.poll.interval.ms`|This property defines the maximum amount of time (in milliseconds) that can pass between consecutive calls to poll() on a consumer. If this interval is exceeded, the consumer will be considered dead, and its partitions will be reassigned to other consumers in the group.
-> `request.timeout.ms`|This property sets the maximum amount of time the client will wait for a response from the Kafka broker. If the server does not respond within this time, the client will consider the request as failed and handle it accordingly.
-> `sasl.mechanism`|This property specifies the SASL mechanism to be used for authentication.
-> `security.protocol`|This property specifies the protocol used to communicate with Kafka brokers.
-> `session.timeout.ms`|This property sets the timeout for detecting consumer failures when using Kafka's group management. If the consumer does not send a heartbeat to the broker within this period, it will be considered dead, and its partitions will be reassigned to other consumers in the group.
-
-**AWS Systems Manager Parameter Store --- `/confluent_cloud_resource/producer_kafka_client`**
-> Key|Description
-> -|-
-> `sasl.mechanism`|This property specifies the SASL mechanism to be used for authentication.
-> `security.protocol`|This property specifies the protocol used to communicate with Kafka brokers.
-> `client.dns.lookup`|This property specifies how the client should resolve the DNS name of the Kafka brokers.
-> `acks`|This property specifies the number of acknowledgments the producer requires the leader to have received before considering a request complete.
