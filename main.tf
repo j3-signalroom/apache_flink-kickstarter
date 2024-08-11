@@ -1,9 +1,11 @@
 terraform {
     cloud {
-      organization ="<TERRAFORM CLOUD ORGANIZATION NAME>"
+       organization = "signalroom"
+      #organization ="<TERRAFORM CLOUD ORGANIZATION NAME>"
 
         workspaces {
-            name = "<TERRAFORM CLOUD ORGANIZATION's WORKSPACE NAME>"
+            name = "confluent-cloud-us-east"
+            #name = "<TERRAFORM CLOUD ORGANIZATION's WORKSPACE NAME>"
         }
   }
 
@@ -39,10 +41,6 @@ data "confluent_organization" "env" {}
 # Create the Confluent Cloud Environment
 resource "confluent_environment" "env" {
     display_name = "${var.aws_profile}"
-
-    #lifecycle {
-    #  prevent_destroy = true
-    #}
 }
 
 # Create the Service Account for the Kafka Cluster API
@@ -73,10 +71,6 @@ resource "confluent_schema_registry_cluster" "env" {
     # domains to limit the impact of a failure to a specific number of components.
     id = data.confluent_schema_registry_region.env.id
   }
-
-  #lifecycle {
-  #  prevent_destroy = true
-  #}
 }
 
 # Create the Environment API Key Pairs, rotate them in accordance to a time schedule, and provide the current
@@ -302,10 +296,6 @@ resource "confluent_kafka_topic" "airline_skyone" {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
   }
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "confluent_kafka_topic" "airline_sunset" {
@@ -324,7 +314,7 @@ resource "confluent_kafka_topic" "airline_all_airlines" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
-  topic_name         = "airline.all_airlines"
+  topic_name         = "airline.all"
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
   credentials {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
@@ -336,7 +326,7 @@ resource "confluent_kafka_topic" "airlines_user_statistics" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
-  topic_name         = "airlines.user_statistics"
+  topic_name         = "airline.user_statistics"
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
   credentials {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id

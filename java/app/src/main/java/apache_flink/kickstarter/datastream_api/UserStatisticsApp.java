@@ -4,8 +4,8 @@
  * @author Jeffrey Jonathan Jennings (J3)
  * 
  * 
- * This class processes data from the `airline.all_airlines` Kafka topic to aggregate user
- * statistics in the `airlines.user_statistics` Kafka topic.
+ * This class processes data from the `airline.all` Kafka topic to aggregate user
+ * statistics in the `airline.user_statistics` Kafka topic.
  */
 package apache_flink.kickstarter.datastream_api;
 
@@ -76,7 +76,7 @@ public class UserStatisticsApp {
         KafkaSource<FlightData> flightDataSource = 
             KafkaSource.<FlightData>builder()
                 .setProperties(consumerProperties)
-                .setTopics("airline.all_airlines")
+                .setTopics("airline.all")
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new JsonDeserializationSchema<>(FlightData.class))
                 .build();
@@ -87,7 +87,7 @@ public class UserStatisticsApp {
         KafkaRecordSerializationSchema<UserStatisticsData> statisticsSerializer = 
             KafkaRecordSerializationSchema
                 .<UserStatisticsData>builder()
-                .setTopic("airlines.user_statistics")
+                .setTopic("airline.user_statistics")
                 .setValueSerializationSchema(new JsonSerializationSchema<>(() -> new ObjectMapper().registerModule(new JavaTimeModule())))
                 .build();
 

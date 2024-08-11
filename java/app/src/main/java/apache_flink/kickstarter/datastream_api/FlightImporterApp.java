@@ -5,7 +5,7 @@
  * 
  * 
  * This class imports flight data from `airline.sunset` and `airline.skyone` Kafka topics
- * and converts it to a unified format for the `airline.all_airlines` Kafka topic.
+ * and converts it to a unified format for the `airline.all` Kafka topic.
  */
 package apache_flink.kickstarter.datastream_api;
 
@@ -95,7 +95,7 @@ public class FlightImporterApp {
             .fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
 		KafkaRecordSerializationSchema<FlightData> flightSerializer = KafkaRecordSerializationSchema.<FlightData>builder()
-            .setTopic("airline.all_airlines")
+            .setTopic("airline.all")
 			.setValueSerializationSchema(new JsonSerializationSchema<FlightData>(FlightImporterApp::getMapper))
             .build();
 
