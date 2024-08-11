@@ -10,10 +10,10 @@ J3 completed the three main DataStream app exercises from the blog series on [Bu
 App|Description
 -|-
 `DataGeneratorApp`|This app creates fake flight data for fictional airlines **Sunset Air** and **Sky One** Airlines," and sends it to the Kafka topics `airline.sunset` and `airline.skyone` respectively.
-`FlightImporterApp`|This app imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and converts it to a unified format for the `airline.all_airlines` Kafka topic.
-`UserStatisticsApp`|This app processes data from the `airline.all_airlines` Kafka topic to aggregate user statistics in the `airlines.user_statistics` Kafka topic.
+`FlightImporterApp`|This app imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and converts it to a unified format for the `airline.all` Kafka topic.
+`UserStatisticsApp`|This app processes data from the `airline.all` Kafka topic to aggregate user statistics in the `airline.user_statistics` Kafka topic.
 
- Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/), and adapted them to showcase three capabilities:
+ Originally created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/), and adapted them to showcase three capabilities:
 
 No.|Capability|Description
 -|-|-
