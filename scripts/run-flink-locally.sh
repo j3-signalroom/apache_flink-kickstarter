@@ -2,7 +2,7 @@
 
 #
 # *** Script Syntax ***
-# scripts/run-flink-locally.sh --profile=<AWS_SSO_PROFILE_NAME  > --chip=<amd64 | arm64>
+# scripts/run-flink-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64>
 #
 # *** Example Call ***
 # scripts/run-flink-locally.sh --profile=AdministratorAccess-0123456789 --chip=arm64
