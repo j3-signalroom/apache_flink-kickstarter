@@ -310,7 +310,7 @@ resource "confluent_kafka_topic" "airline_sunset" {
   }
 }
 
-resource "confluent_kafka_topic" "airline_all_airlines" {
+resource "confluent_kafka_topic" "airline_all" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
@@ -322,7 +322,7 @@ resource "confluent_kafka_topic" "airline_all_airlines" {
   }
 }
 
-resource "confluent_kafka_topic" "airlines_user_statistics" {
+resource "confluent_kafka_topic" "airline_user_statistics" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }

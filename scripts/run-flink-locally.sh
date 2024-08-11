@@ -34,7 +34,7 @@ do
     let "arg_count+=1"
 done
 
-# Check if the required --chip argument was supplied
+# Check required --profile argument was supplied
 if [ -z $AWS_PROFILE ]
 then
     echo
@@ -45,6 +45,7 @@ then
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
 
+# Check all required arguments were supplied
 if [ "$arg_count" -lt "2" ]
 then
     echo
@@ -55,7 +56,7 @@ then
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
 
-# Check if the required --chip argument was supplied
+# Check required --chip argument was supplied
 if [ -z $flink_docker_image ]
 then
     echo
@@ -66,26 +67,19 @@ then
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
 
-# Check if --profile=<PROFILE_NAME> argument was supplied
-if [ -n "$AWS_PROFILE" ]
-then
-    # Get the SSO AWS_ACCESS_KEY_ID, AWS_ACCESS_SECRET_KEY, AWS_SESSION_TOKEN, and AWS_REGION, and
-    # set them as an environmental variables
-    aws sso login $AWS_PROFILE
-    eval $(aws2-wrap $AWS_PROFILE --export)
-    export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
-    export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+# Get the SSO AWS_ACCESS_KEY_ID, AWS_ACCESS_SECRET_KEY, AWS_SESSION_TOKEN, and AWS_REGION, and
+# set them as an environmental variables
+aws sso login $AWS_PROFILE
+eval $(aws2-wrap $AWS_PROFILE --export)
+export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 
-    # Create and then pass the AWS environment variables to docker-compose
-    printf "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}\
-    \nAWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}\
-    \nAWS_REGION=${AWS_REGION}\
-    \nAWS_DEFAULT_REGION=${AWS_REGION}\
-    \nFLINK_DOCKER_IMAGE=${flink_docker_image}" > .env
-else
-    # Create and then pass the AWS environment variables to docker-compose
-    printf "FLINK_DOCKER_IMAGE=${flink_docker_image}" > .env
-fi
+# Create and then pass the AWS environment variables to docker-compose
+printf "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}\
+\nAWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}\
+\nAWS_REGION=${AWS_REGION}\
+\nAWS_DEFAULT_REGION=${AWS_REGION}\
+\nFLINK_DOCKER_IMAGE=${flink_docker_image}" > .env
 
-# Run the Apache Flink cluster containers in the background
+# Run the Apache Flink cluster containers in the background (i.e., detach execution from the Termial window)
 docker-compose up -d
