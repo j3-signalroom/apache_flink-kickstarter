@@ -22,7 +22,22 @@ No.|Capability|Description
 3.|Sinking to Apache Iceberg **(COMING SOON)**|The combination of Apache Flink and Apache Iceberg provides several advantages. Iceberg’s capabilities, including snapshot isolation for reads and writes, the ability to handle multiple concurrent operations, ACID-compliant queries, and incremental reads, enable Flink to perform operations that were traditionally challenging with older table formats. Together, they offer an efficient and scalable platform for processing large-scale data, especially for streaming use cases.
 
 #### To **`run`** anyone of the Flink Apps
-From your terminal prompt enter:
+Open the repo from the `Java` subfolder.  Then run:
+
+> *This command ensures a pristine build environment.  By removing previous build artifacts, this command guarantees that developers initiate their projects from a clean slate, minimizing inconsistencies and fostering a more reliable build process.*
+
+```
+./gradlew app:clean
+```
+
+Now build JAR file that contains all the Flink Apps on it, by running:
+
+```
+./gradlew app:build
+```
+
+Finally, to run any of the Flink Apps, enter any one of the commands on the command-line below:
+
 App|Run App reading from local properties files|Run App reading from AWS
 -|-|-
 **`DataGeneratorApp`**|`flink run --class apache_flink.kickstarter.datastream_api.DataGeneratorApp app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar`|`flink run --class apache_flink.kickstarter.datastream_api.DataGeneratorApp app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
