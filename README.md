@@ -194,13 +194,13 @@ terraform apply -var-file=terraform.tfvars -no-approve
 ### Power up the Apache Flink Docker containers
 This section guides you through the local setup (on one machine but in separate containers) of the Apache Flink cluster in Session mode using Docker containers with support for Apache Iceberg.  Run the `bash` script below to start the Apache Flink cluster in Session Mode on your machine:
 
+> *If you are running Docker on a Mac with M1, M2, or M3 chip, set the `--chip` argument to `--chip=arm64`.  Otherwise, set it to `--chip=amd64`.  As for the `--profile` argument, specify your AWS SSO Profile Name (e.g., `--profile=AdministratorAccess-0123456789`.*
+
 ```
 scripts/run-flink-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64>
 ```
 
 ## Resources
-
-[Apache Flink Glossary](https://github.com/j3-signalroom/j3-techstack-lexicon/blob/main/apache-flink-glossary.md)
 
 [Apache Flink's Core is Dataflow Programming](https://en.wikipedia.org/wiki/Dataflow_programming)
 
@@ -209,3 +209,5 @@ scripts/run-flink-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | ar
 [Apache Flink Use Cases](https://flink.apache.org/what-is-flink/use-cases/)
 
 [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/)
+
+[J3's techStack Lexicon](https://github.com/j3-signalroom/j3-techstack-lexicon/blob/main/README.md)
