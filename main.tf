@@ -332,18 +332,6 @@ resource "confluent_kafka_topic" "airline_all_airlines" {
   }
 }
 
-resource "confluent_kafka_topic" "airline_all_airlines" {
-  kafka_cluster {
-    id = confluent_kafka_cluster.kafka_cluster.id
-  }
-  topic_name         = "airline.all_airlines"
-  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
-  credentials {
-    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
-    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
-  }
-}
-
 resource "confluent_kafka_topic" "airlines_user_statistics" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
