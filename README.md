@@ -81,7 +81,7 @@ As of August 2024, Confluent’s Serverless Flink offering does not yet support 
 2. Power up the Docker containers that run Apache Flink and Apache Iceberg locally on your machine.
 
 ### Set up your Terraform Cloud environment
-Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your local machine. Then ensure you have an [HCP Terraform account](https://app.terraform.io/session) to run the Terraform configuration provided in the cloud.
+Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your local machine.  Then ensure you have an [HCP Terraform account](https://app.terraform.io/session) to run the Terraform configuration provided in the cloud.
 
 #### Terraform Cloud API token
 In order to authenticate with HCP Terraform, run the terraform login subcommand.  Enter `yes` to the prompt to confirm that you want to authenticate.
@@ -90,21 +90,22 @@ In order to authenticate with HCP Terraform, run the terraform login subcommand.
 
 **Generate token**
 A browser window will automatically open to the HCP Terraform login screen.  Enter a token name in the web UI, or leave the default name, `terraform login`:
+
 ![terraform-cli-login-generate-token](.blog/images/terraform-cli-login-generate-token.png)
 
 Click Create API token to generate the authentication token:
 
 ![terraform-cli-login-generated-token](.blog/images/terraform-cli-login-generated-token.png)
 
-Save a copy of the token in a secure location. It provides access to your HCP Terraform organization. Terraform will also store your token locally at the file path specified in the command output.
+Save a copy of the token in a secure location.  It provides access to your HCP Terraform organization.  Terraform will also store your token locally at the file path specified in the command output (see the picture above).
 
-**Add the token to the CLI**
-When the Terraform CLI prompts you, paste the user token exactly once into your terminal. Terraform will hide the token for security when you paste it into your terminal. Press Enter to complete the authentication process:
+**Add the token to the CLI prompt**
+When the Terraform CLI prompts you, paste the user token exactly once into your terminal.  Terraform will hide the token for security when you paste it into your terminal.  Press `Enter` to complete the authentication process:
 
 ![terraform-cli-login-completed](.blog/images/terraform-cli-login-completed.png)
 
 ##### Set up your Confluent Cloud environment
-But, first in the [main.tf](main.tf) replace **`<TERRAFORM CLOUD ORGANIZATION NAME>`** in the `terraform.cloud` block with your [Terraform Cloud Organization Name](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/organizations) and **`<TERRAFORM CLOUD ORGANIZATION's WORKSPACE NAME>`** in the `terraform.cloud.workspaces` block with your [Terraform Cloud Organization's Workspaces Name](https://developer.hashicorp.com/terraform/cloud-docs/workspaces).
+Then in the [main.tf](main.tf) replace **`<TERRAFORM CLOUD ORGANIZATION NAME>`** in the `terraform.cloud` block with your [Terraform Cloud Organization Name](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/organizations) and **`<TERRAFORM CLOUD ORGANIZATION's WORKSPACE NAME>`** in the `terraform.cloud.workspaces` block with your [Terraform Cloud Organization's Workspaces Name](https://developer.hashicorp.com/terraform/cloud-docs/workspaces).
 
 ###### Create a `terraform.tfvars` file in the root of the repo
 ```
