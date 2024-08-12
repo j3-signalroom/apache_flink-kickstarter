@@ -208,6 +208,19 @@ terraform apply -var-file=terraform.tfvars -auto-approve
 ```
 
 ### Power up the Apache Flink Docker containers
+
+> **Prerequisite**
+> 
+> Before you can run `scripts/run-flink-locally.sh` Bash script, you need to install the [`aws2aws2-wrap`](https://pypi.org/project/aws2-wrap/#description) utility.  If you have a Mac machine, run this command from your Terminal:
+> ````
+> brew install aws2-wrap
+> ````
+>
+> Or, make sure you have Python3.x installed on your machine, and run this command from your Terminal:
+> ```
+> pip install aws2-wrap
+> ```
+
 This section guides you through the local setup (on one machine but in separate containers) of the Apache Flink cluster in Session mode using Docker containers with support for Apache Iceberg.  Run the `bash` script below to start the Apache Flink cluster in Session Mode on your machine:
 
 > *If you are running Docker on a Mac with M1, M2, or M3 chip, set the `--chip` argument to `--chip=arm64`.  Otherwise, set it to `--chip=amd64`.  As for the `--profile` argument, specify your AWS SSO Profile Name (e.g., `--profile=AdministratorAccess-0123456789`.*
