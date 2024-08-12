@@ -43,6 +43,7 @@ public class UserStatisticsApp {
 	 * decide whether to retry the task execution.
 	 */
     public static void main(String[] args) throws Exception {
+        // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         /*
@@ -104,12 +105,20 @@ public class UserStatisticsApp {
                         .uid("userstatistics_sink");
 
         try {
+            // --- Execute the Flink job graph (DAG)
             env.execute("UserStatisticsApp");
         } catch (Exception e) {
             logger.error("The App stopped early due to the following: {}", e.getMessage());
         }        
     }
 
+    /**
+     * This method defines the workflow for the Flink application.  It maps the data from the
+     * `airline.all` Kafka topic to the `airline.user_statistics` Kafka topic.
+     * 
+     * @param flightDataSource the data stream from the `airline.all` Kafka topic.
+     * @return the data stream to the `airline.user_statistics` Kafka topic.
+     */
     public static DataStream<UserStatisticsData> defineWorkflow(DataStream<FlightData> flightDataSource) {
         return flightDataSource
             .map(UserStatisticsData::new)

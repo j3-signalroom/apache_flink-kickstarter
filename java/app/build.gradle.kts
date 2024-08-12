@@ -27,6 +27,8 @@ dependencies {
     implementation("software.amazon.awssdk:secretsmanager:2.26.29")
     implementation("software.amazon.awssdk:ssm:2.26.29")
     implementation("org.json:json:20240303")
+    runtimeOnly("org.apache.iceberg:iceberg-core:1.6.0")
+    implementation("org.apache.iceberg:iceberg-flink-runtime-1.19:1.6.0")
     testImplementation("org.apache.flink:flink-test-utils:1.20.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")

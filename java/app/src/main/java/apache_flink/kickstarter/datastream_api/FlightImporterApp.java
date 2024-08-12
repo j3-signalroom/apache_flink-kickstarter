@@ -10,6 +10,7 @@
 package apache_flink.kickstarter.datastream_api;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
@@ -42,6 +43,7 @@ public class FlightImporterApp {
 	 */
     @SuppressWarnings("rawtypes")
     public static void main(String[] args) throws Exception {
+        // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         /*
@@ -72,6 +74,9 @@ public class FlightImporterApp {
 					producerProperties.putAll(typeValue);
 				});
 
+        /*
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
+         */
         @SuppressWarnings("unchecked")
         KafkaSource<SkyOneAirlinesFlightData> skyOneSource = KafkaSource.<SkyOneAirlinesFlightData>builder()
             .setProperties(consumerProperties)
@@ -80,9 +85,16 @@ public class FlightImporterApp {
             .setValueOnlyDeserializer(new JsonDeserializationSchema(SkyOneAirlinesFlightData.class))
             .build();
 
+        /*
+         * Takes the results of the Kafka source and attaches the unbounded data stream to the Flink
+         * environment (a.k.a. the Flink job graph -- the DAG)
+         */
         DataStream<SkyOneAirlinesFlightData> skyOneStream = env
             .fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
+        /*
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset`
+         */
 		@SuppressWarnings("unchecked")
         KafkaSource<SunsetAirFlightData> sunsetSource = KafkaSource.<SunsetAirFlightData>builder()
             .setProperties(consumerProperties)
@@ -91,30 +103,55 @@ public class FlightImporterApp {
             .setValueOnlyDeserializer(new JsonDeserializationSchema(SunsetAirFlightData.class))
             .build();
 
+        /*
+         * Takes the results of the Kafka source and attaches the unbounded data stream to the Flink
+         * environment (a.k.a. the Flink job graph -- the DAG)
+         */
         DataStream<SunsetAirFlightData> sunsetStream = env
             .fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
+        /*
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.all` with the
+         * specified serializer
+         */
 		KafkaRecordSerializationSchema<FlightData> flightSerializer = KafkaRecordSerializationSchema.<FlightData>builder()
             .setTopic("airline.all")
 			.setValueSerializationSchema(new JsonSerializationSchema<FlightData>(FlightImporterApp::getMapper))
             .build();
 
+        /*
+         * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
+         * environment (a.k.a. the Flink job graph -- the DAG)
+         */
         KafkaSink<FlightData> flightSink = KafkaSink.<FlightData>builder()
             .setKafkaProducerConfig(producerProperties)
             .setRecordSerializer(flightSerializer)
             .build();
 
+        /*
+         * Defines the workflow for the Flink job graph (DAG) by connecting the data streams and
+         * applying transformations to the data streams
+         */
         defineWorkflow(skyOneStream, sunsetStream)
             .sinkTo(flightSink)
             .name("flightdata_sink");
 
         try {
+            // --- Execute the Flink job graph (DAG)
             env.execute("FlightImporterApp");
         } catch (Exception e) {
             logger.error("The App stopped early due to the following: {}", e.getMessage());
         }
     }
 
+    /**
+     * Defines the workflow for the Flink job graph (DAG) by connecting the data streams and applying
+     * transformations to the data streams.
+     * 
+     * @param skyOneSource - The data stream source for the `airline.skyone` Kafka topic
+     * @param sunsetSource - The data stream source for the `airline.sunset` Kafka topic
+     * @return The data stream that is the result of the transformations
+     */
 	public static DataStream<FlightData> defineWorkflow(DataStream<SkyOneAirlinesFlightData> skyOneSource, DataStream<SunsetAirFlightData> sunsetSource) {
         DataStream<FlightData> skyOneFlightStream =  skyOneSource
 			.filter(flight -> flight.getFlightArrivalTime().isAfter(ZonedDateTime.now()))
@@ -127,6 +164,10 @@ public class FlightImporterApp {
 		return skyOneFlightStream.union(sunsetFlightStream);
     }
 
+    /**
+     * @return returns a new instance of the Jackson ObjectMapper with the JavaTimeModule
+     * registered.
+     */
 	private static ObjectMapper getMapper() {
 		return new ObjectMapper().registerModule(new JavaTimeModule());
 	}
