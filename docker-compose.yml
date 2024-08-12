@@ -36,6 +36,7 @@ services:
     environment:
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
       - AWS_REGION=${AWS_REGION}
       - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
     entrypoint: >
@@ -48,20 +49,22 @@ services:
   # Apache Flink Job Manager
   jobmanager:
     image: ${FLINK_DOCKER_IMAGE:-j3signalroom/mac_flink-with_hadoop_iceberg:latest}
-    ports:
-      - 8081:8081
-      - 80:80
-    command: jobmanager
     networks:
       flink-nessie-iceberg-net:
+    ports:
+      - 8081:8081
+      - 9092:9092
+      - 443:443
+    command: jobmanager
     volumes:
-      - ~/flink/apps:/opt/flink/apps
+      - ./java/app/build/libs:/opt/flink/apps
     environment:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
       - AWS_REGION=${AWS_REGION}
       - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
       - S3_ENDPOINT=http://minio.storage:9000
@@ -74,11 +77,9 @@ services:
     command: taskmanager
     networks:
       flink-nessie-iceberg-net:
-    ports:
-      80:80
     scale: 3
     volumes:
-      - ~/flink/apps:/opt/flink/apps
+      - ./java/app/build/libs:/opt/flink/apps
     environment:
       - |
         FLINK_PROPERTIES=
@@ -86,6 +87,7 @@ services:
         taskmanager.numberOfTaskSlots: 2
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
       - AWS_REGION=${AWS_REGION}
       - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
       - S3_ENDPOINT=http://minio.storage:9000
