@@ -49,7 +49,8 @@ services:
   jobmanager:
     image: ${FLINK_DOCKER_IMAGE:-j3signalroom/mac_flink-with_hadoop_iceberg:latest}
     ports:
-      - "8081:8081"
+      - 8081:8081
+      - 80:80
     command: jobmanager
     networks:
       flink-nessie-iceberg-net:
@@ -73,6 +74,8 @@ services:
     command: taskmanager
     networks:
       flink-nessie-iceberg-net:
+    ports:
+      80:80
     scale: 3
     volumes:
       - ~/flink/apps:/opt/flink/apps
@@ -91,3 +94,4 @@ services:
 # Containers' shared network
 networks:
   flink-nessie-iceberg-net:
+    driver: bridge        # Use the default bridge network driver
