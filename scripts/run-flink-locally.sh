@@ -76,6 +76,7 @@ export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
 # Create and then pass the AWS environment variables to docker-compose
 printf "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}\
 \nAWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}\
+\nAWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
 \nAWS_REGION=${AWS_REGION}\
 \nAWS_DEFAULT_REGION=${AWS_REGION}\
 \nFLINK_DOCKER_IMAGE=${flink_docker_image}" > .env
