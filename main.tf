@@ -255,6 +255,13 @@ resource "aws_ssm_parameter" "consumer_kafka_client_session_timeout_ms" {
   value       = "90000"
 }
 
+resource "aws_ssm_parameter" "consumer_kafka_client_group_id" {
+  name        = "/confluent_cloud_resource/consumer_kafka_client/group.id"
+  description = "This property sets what group a consumer belongs to."
+  type        = "String"
+  value       = "apache-flink-kickstarter-consumer"
+}
+
 resource "aws_ssm_parameter" "producer_kafka_client_sasl_mechanism" {
   name        = "/confluent_cloud_resource/producer_kafka_client/sasl.mechanism"
   description = "This property specifies the SASL mechanism to be used for authentication."
