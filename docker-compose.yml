@@ -57,7 +57,7 @@ services:
       - 443:443
     command: jobmanager
     volumes:
-      - ~/flink/apps:/opt/flink/apps
+      - .flink-apps:/opt/flink/apps
     environment:
       - |
         FLINK_PROPERTIES=
@@ -79,7 +79,7 @@ services:
       flink-nessie-iceberg-net:
     scale: 3
     volumes:
-      - ~/flink/apps:/opt/flink/apps
+      - .flink-apps:/opt/flink/apps
     environment:
       - |
         FLINK_PROPERTIES=
