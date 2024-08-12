@@ -56,6 +56,7 @@ tasks {
     val fatJar = register<Jar>("fatJar") {
         dependsOn.addAll(listOf("compileJava", "processResources"))
         archiveBaseName.set(rootProject.name)
+        destinationDirectory.set(file("../../.flink-apps"))
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         manifest {
             attributes["Main-Class"] = application.mainClass
