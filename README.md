@@ -188,7 +188,7 @@ terraform plan -var-file=terraform.tfvars
 ```
 
 ```
-terraform apply -var-file=terraform.tfvars -no-approve
+terraform apply -var-file=terraform.tfvars -auto-approve
 ```
 
 ### Power up the Apache Flink Docker containers
