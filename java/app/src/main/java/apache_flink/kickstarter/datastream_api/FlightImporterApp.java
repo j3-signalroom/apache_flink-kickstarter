@@ -72,6 +72,10 @@ public class FlightImporterApp {
 					producerProperties.putAll(typeValue);
 				});
 
+
+        /*
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
+         */
         @SuppressWarnings("unchecked")
         KafkaSource<SkyOneAirlinesFlightData> skyOneSource = KafkaSource.<SkyOneAirlinesFlightData>builder()
             .setProperties(consumerProperties)
@@ -80,9 +84,16 @@ public class FlightImporterApp {
             .setValueOnlyDeserializer(new JsonDeserializationSchema(SkyOneAirlinesFlightData.class))
             .build();
 
+        /*
+         * Takes the results of the Kafka source and attaches the unbounded data stream to the Flink
+         * environment (a.k.a. the Flink job graph -- the DAG)
+         */
         DataStream<SkyOneAirlinesFlightData> skyOneStream = env
             .fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
+        /*
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset`
+         */
 		@SuppressWarnings("unchecked")
         KafkaSource<SunsetAirFlightData> sunsetSource = KafkaSource.<SunsetAirFlightData>builder()
             .setProperties(consumerProperties)
@@ -91,9 +102,14 @@ public class FlightImporterApp {
             .setValueOnlyDeserializer(new JsonDeserializationSchema(SunsetAirFlightData.class))
             .build();
 
+        /*
+         * Takes the results of the Kafka source and attaches the unbounded data stream to the Flink
+         * environment (a.k.a. the Flink job graph -- the DAG)
+         */
         DataStream<SunsetAirFlightData> sunsetStream = env
             .fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
+        
 		KafkaRecordSerializationSchema<FlightData> flightSerializer = KafkaRecordSerializationSchema.<FlightData>builder()
             .setTopic("airline.all")
 			.setValueSerializationSchema(new JsonSerializationSchema<FlightData>(FlightImporterApp::getMapper))
