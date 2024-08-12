@@ -21,15 +21,7 @@
                 + [AWS Secrets Manager](#aws-secrets-manager)
                 + [AWS Systems Manager Parameter Store](#aws-systems-manager-parameter-store)
         + [Run the Terraform configuration](#run-the-terraform-configuration)
-    + [Local MacOS Installation](#local-macos-installation)
-        - [Install Apache Flink on MacOS](#install-apache-flink-on-macos)
-        - [Apache Iceberg Setup](#apache-iceberg-setup)
-    + [Locally start up Apache Flink](#locally-start-up-apache-flink)
-        - [Start Cluster](#start-cluster)
-        - [Start Task Manager](#start-task-manager)
-        - [Lanuch the Apache Flink Dashboard](#lanuch-the-apache-flink-dashboard)
-        - [Stop Cluster](#stop-cluster)
-    - [Or, power up the Apache Flink Docker containers](#or-power-up-the-apache-flink-docker-containers)
+    - [Power up the Apache Flink Docker containers](#power-up-the-apache-flink-docker-containers)
 + [Resources](#resources)
 <!-- tocstop -->
 
@@ -198,49 +190,8 @@ terraform plan -var-file=terraform.tfvars
 ```
 terraform apply -var-file=terraform.tfvars -no-approve
 ```
-### Local MacOS Installation
 
-#### Install Apache Flink on MacOS
-```
-brew install apache-flink
-```
-
-Homebrew will will typically install Apache Flink in the following folder location, i.e., `FLINK_HOME`:
-```
-/opt/homebrew/Cellar/apache-flink/1.20.0/
-```
-
-> At the time of this writing (August 2024), version [1.20.0](https://www.confluent.io/blog/exploring-apache-flink-1-20-features-improvements-and-more/) was publically avaiable.
-
-#### Apache Iceberg Setup
-Download the compatible Iceberg runtime JAR file and place it in your `FLINK_HOME/libexec/lib` directory.  This runtime library enables Iceberg integration with Flink.  If you want to download the latest JAR, you can get it from the icebergflink-runtime [JAR page on the Maven repository website](https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.19/1.6.0/), which is `iceberg-flink-runtime-1.19-1.6.0`.
-
-### Locally start up Apache Flink
-
-#### Start Cluster
-To start Apache Flink locally on your machine execute the following executable script: 
-```
-/opt/homebrew/Cellar/apache-flink/1.20.0/libexec/bin/start-cluster.sh
-```
-
-#### Start Task Manager 3 times
-```
-/opt/homebrew/Cellar/apache-flink/1.20.0/libexec/bin/taskmanager.sh start
-```
-
-#### Launch the Apache Flink Dashboard
-To launch the Apache Flink Dashboard from your web browser, go to this URL:
-```
-http://localhost:8081/
-```
-
-#### Stop Cluster
-To stop Apache Flink locally on your machine execute the following executable script: 
-```
-/opt/homebrew/Cellar/apache-flink/1.20.0/libexec/bin/stop-cluster.sh
-```
-
-### Or, power up the Apache Flink Docker containers
+### Power up the Apache Flink Docker containers
 This section guides you through the local setup (on one machine but in separate containers) of the Apache Flink cluster in Session mode using Docker containers with support for Apache Iceberg.  Run the `bash` script below to start the Apache Flink cluster in Session Mode on your machine:
 
 > *If you are running Docker on a Mac with M1, M2, or M3 chip, set the `--chip` argument to `--chip=arm64`.  Otherwise, set it to `--chip=amd64`.  As for the `--profile` argument, specify your AWS SSO Profile Name (e.g., `--profile=AdministratorAccess-0123456789`.*
