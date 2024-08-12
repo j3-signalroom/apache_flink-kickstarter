@@ -3,7 +3,7 @@
 **Table of Contents**
 
 <!-- toc -->
-+ [What do we call these examples, Fink Jobs or Flink Applications?](#what-do-we-call-these-examples-fink-jobs-or-flink-applications)
++ [What do we call these examples, Flink Jobs or Flink Applications?](#what-do-we-call-these-examples-flink-jobs-or-flink-applications)
     - [Comprehensive Nature](#comprehensive-nature)
     - [Execution Context](#execution-context)
     - [Deployment and Operations](#deployment-and-operations)
@@ -25,7 +25,7 @@
 + [Resources](#resources)
 <!-- tocstop -->
 
-## What do we call these examples, Fink Jobs or Flink Applications?
+## What do we call these examples, Flink Jobs or Flink Applications?
 
 > _"What's in a name? That which we call a rose by any other name would smell just as sweet." -- William Shakespeare_
 
