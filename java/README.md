@@ -36,7 +36,13 @@ Now build JAR file that contains all the Flink Apps on it, by running:
 ./gradlew app:build
 ```
 
-Finally, to run any of the Flink Apps, enter any one of the commands on the command-line below:
+Logon to the `apache_flink-kickstarter-jobmanager-1` container's Interative Shell:
+> *This allows you to interact with the container as if you were inside its terminal, enabling you to run commands, inspect the file system, or perform other tasks interactively within the container.*
+```
+docker exec -it -w /opt/flink/apps apache_flink-kickstarter-jobmanager-1 /bin/bash
+```
+
+Finally, to run any of the Flink Apps, choose the app and then enter the corresponding CLI command:
 
 App|Commands for CLI
 -|-
