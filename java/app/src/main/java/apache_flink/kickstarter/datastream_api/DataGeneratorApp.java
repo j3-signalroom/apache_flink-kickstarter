@@ -43,6 +43,7 @@ public class DataGeneratorApp {
 	 * decide whether to retry the task execution.
 	 */
 	public static void main(String[] args) throws Exception {
+		// --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
 		/*
@@ -110,12 +111,17 @@ public class DataGeneratorApp {
 		sunsetStream.sinkTo(sunsetSink).name("sunset_sink");
 
 		try {
+			// --- Execute the Flink job graph (DAG)
 			env.execute("DataGeneratorApp");
 		} catch (Exception e) {
 			logger.error("The App stopped early due to the following: {}", e.getMessage());
 		}
 	}
 
+	/**
+     * @return returns a new instance of the Jackson ObjectMapper with the JavaTimeModule
+     * registered.
+     */
 	private static ObjectMapper getMapper() {
 		return new ObjectMapper().registerModule(new JavaTimeModule());
 	}
