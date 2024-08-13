@@ -74,6 +74,10 @@ public class UserStatisticsApp {
 					producerProperties.putAll(typeValue);
 				});
 
+        /*
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.all` with the
+         * specified deserializer
+         */
         KafkaSource<FlightData> flightDataSource = 
             KafkaSource.<FlightData>builder()
                 .setProperties(consumerProperties)
@@ -82,6 +86,10 @@ public class UserStatisticsApp {
                 .setValueOnlyDeserializer(new JsonDeserializationSchema<>(FlightData.class))
                 .build();
 
+        /*
+         * Takes the results of the Kafka source and attaches the unbounded data stream to the Flink
+         * environment (a.k.a. the Flink job graph -- the DAG)
+         */
         DataStreamSource<FlightData> flightDataStream = 
             env.fromSource(flightDataSource, WatermarkStrategy.forMonotonousTimestamps(), "flightdata_source");
 
@@ -96,6 +104,10 @@ public class UserStatisticsApp {
                 .setValueSerializationSchema(new JsonSerializationSchema<>(() -> new ObjectMapper().registerModule(new JavaTimeModule())))
                 .build();
 
+        /*
+         * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
+         * environment (a.k.a. the Flink job graph -- the DAG)
+         */
         KafkaSink<UserStatisticsData> statsSink = 
             KafkaSink.<UserStatisticsData>builder()
                 .setKafkaProducerConfig(producerProperties)
