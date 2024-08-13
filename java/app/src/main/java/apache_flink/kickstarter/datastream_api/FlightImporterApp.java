@@ -29,6 +29,9 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMap
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.*;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import static org.apache.flink.table.api.Expressions.$;
 import java.util.*;
 import java.time.*;
 import org.slf4j.*;
@@ -56,6 +59,9 @@ public class FlightImporterApp {
         // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         
+        // --- Set up the table environment
+        final StreamTableEnvironment tableEnv = 
+            StreamTableEnvironment.create(env, EnvironmentSettings.newInstance().inStreamingMode().build());
 
         /*
 		 * --- Kafka Consumer Config
