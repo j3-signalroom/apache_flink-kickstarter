@@ -59,9 +59,27 @@ public class FlightImporterApp {
         // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         
-        // --- Set up the table environment
+        // --- Set up the table environment to work with the Table and SQL API in Flink using Java
         final StreamTableEnvironment tableEnv = 
             StreamTableEnvironment.create(env, EnvironmentSettings.newInstance().inStreamingMode().build());
+
+        // --- Create the Project Nessie Catalog
+        tableEnv.executeSql(
+                "CREATE CATALOG iceberg WITH ("
+                        + "'type'='iceberg',"
+                        + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
+                        + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
+                        + "'uri'='http://catalog:19120/api/v1',"
+                        + "'authentication.type'='none',"
+                        + "'ref'='main',"
+                        + "'client.assume-role.region'='us-east-1',"
+                        + "'iceberg' = 's3://iceberg',"
+                        + "'s3.endpoint'='http://{id-address}:9000'"
+                        + ")");
+
+        // --- List all catalogs
+        TableResult result = tableEnv.executeSql("SHOW CATALOGS");
+        result.print();
 
         /*
 		 * --- Kafka Consumer Config
