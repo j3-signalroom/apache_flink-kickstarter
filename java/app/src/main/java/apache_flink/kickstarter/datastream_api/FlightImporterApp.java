@@ -67,8 +67,10 @@ public class FlightImporterApp {
         tableEnv.executeSql(
                 "CREATE CATALOG iceberg WITH ("
                         + "'type'='iceberg',"
-                        + "'catalog-impl'='com.my.custom.CatalogImpl',"
-                        + "'my-additional-catalog-config'='my-value'"
+                        + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
+                        + "'uri'='http://localhost:19120/api/v1',"
+                        + "'ref'='main',"
+                        + "'warehouse' = '/opt/flink/data/warehouse'"
                         + ")");
 
         // --- List all catalogs
