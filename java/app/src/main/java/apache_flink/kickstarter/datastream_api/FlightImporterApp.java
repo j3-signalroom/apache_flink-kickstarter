@@ -67,14 +67,8 @@ public class FlightImporterApp {
         tableEnv.executeSql(
                 "CREATE CATALOG iceberg WITH ("
                         + "'type'='iceberg',"
-                        + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
-                        + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
-                        + "'uri'='http://catalog:19120/api/v1',"
-                        + "'authentication.type'='none',"
-                        + "'ref'='main',"
-                        + "'client.assume-role.region'='us-east-1',"
-                        + "'iceberg' = 's3://iceberg',"
-                        + "'s3.endpoint'='http://{id-address}:9000'"
+                        + "'catalog-impl'='com.my.custom.CatalogImpl',"
+                        + "'my-additional-catalog-config'='my-value'"
                         + ")");
 
         // --- List all catalogs
