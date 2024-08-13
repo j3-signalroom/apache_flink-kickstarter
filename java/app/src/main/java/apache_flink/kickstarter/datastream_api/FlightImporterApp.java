@@ -145,8 +145,8 @@ public class FlightImporterApp {
     }
 
     /**
-     * Defines the workflow for the Flink job graph (DAG) by connecting the data streams and applying
-     * transformations to the data streams.
+     * This method defines the workflow for the Flink job graph (DAG) by connecting the 
+     * data streams and applying transformations to the data streams.
      * 
      * @param skyOneSource - The data stream source for the `airline.skyone` Kafka topic
      * @param sunsetSource - The data stream source for the `airline.sunset` Kafka topic

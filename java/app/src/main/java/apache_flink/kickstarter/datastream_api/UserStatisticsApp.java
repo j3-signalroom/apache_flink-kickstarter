@@ -85,6 +85,10 @@ public class UserStatisticsApp {
         DataStreamSource<FlightData> flightDataStream = 
             env.fromSource(flightDataSource, WatermarkStrategy.forMonotonousTimestamps(), "flightdata_source");
 
+        /*
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.user_statistics` with the
+         * specified serializer
+         */
         KafkaRecordSerializationSchema<UserStatisticsData> statisticsSerializer = 
             KafkaRecordSerializationSchema
                 .<UserStatisticsData>builder()
@@ -99,6 +103,10 @@ public class UserStatisticsApp {
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
                 .build();
 
+        /*
+         * Defines the workflow for the Flink job graph (DAG) by connecting the data streams and
+         * applying transformations to the data streams
+         */
         defineWorkflow(flightDataStream)
                         .sinkTo(statsSink)
                         .name("userstatistics_sink")
