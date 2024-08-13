@@ -74,6 +74,10 @@ public class UserStatisticsApp {
 					producerProperties.putAll(typeValue);
 				});
 
+        /*
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.all` with the
+         * specified deserializer
+         */
         KafkaSource<FlightData> flightDataSource = 
             KafkaSource.<FlightData>builder()
                 .setProperties(consumerProperties)
@@ -82,9 +86,17 @@ public class UserStatisticsApp {
                 .setValueOnlyDeserializer(new JsonDeserializationSchema<>(FlightData.class))
                 .build();
 
+        /*
+         * Takes the results of the Kafka source and attaches the unbounded data stream to the Flink
+         * environment (a.k.a. the Flink job graph -- the DAG)
+         */
         DataStreamSource<FlightData> flightDataStream = 
             env.fromSource(flightDataSource, WatermarkStrategy.forMonotonousTimestamps(), "flightdata_source");
 
+        /*
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.user_statistics` with the
+         * specified serializer
+         */
         KafkaRecordSerializationSchema<UserStatisticsData> statisticsSerializer = 
             KafkaRecordSerializationSchema
                 .<UserStatisticsData>builder()
@@ -92,6 +104,10 @@ public class UserStatisticsApp {
                 .setValueSerializationSchema(new JsonSerializationSchema<>(() -> new ObjectMapper().registerModule(new JavaTimeModule())))
                 .build();
 
+        /*
+         * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
+         * environment (a.k.a. the Flink job graph -- the DAG)
+         */
         KafkaSink<UserStatisticsData> statsSink = 
             KafkaSink.<UserStatisticsData>builder()
                 .setKafkaProducerConfig(producerProperties)
@@ -99,6 +115,10 @@ public class UserStatisticsApp {
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
                 .build();
 
+        /*
+         * Defines the workflow for the Flink job graph (DAG) by connecting the data streams and
+         * applying transformations to the data streams
+         */
         defineWorkflow(flightDataStream)
                         .sinkTo(statsSink)
                         .name("userstatistics_sink")

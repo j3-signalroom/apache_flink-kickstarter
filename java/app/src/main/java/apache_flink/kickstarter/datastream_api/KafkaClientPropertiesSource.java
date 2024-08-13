@@ -72,10 +72,10 @@ public class KafkaClientPropertiesSource extends RichSourceFunction<Properties>{
 			throw new RuntimeException("Failed to retrieve the Kafka Client properties could not be retrieved because " + properties.getErrorMessageCode() + " " + properties.getErrorMessage());
 		}
         
-        // Emit the properties to the downstream operators
+        // --- Emit the properties to the downstream operators
         ctx.collect(properties.get());
         
-        // Stop the source after emitting the data once
+        // --- Stop the source after emitting the data once
         isRunning = false;
     }
 
@@ -114,7 +114,7 @@ public class KafkaClientPropertiesSource extends RichSourceFunction<Properties>{
     }
 
     /**
-     * Loops through the `args` parameter and checks for the `FLAG_GET_FROM_AWS` flag.
+     * This method Loops through the `args` parameter and checks for the`FLAG_GET_FROM_AWS` flag.
      * 
      * @param args list of strings passed to the main method.
      * @return true if the flag is found, false otherwise.
