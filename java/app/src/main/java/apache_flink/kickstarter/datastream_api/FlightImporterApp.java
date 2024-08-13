@@ -6,6 +6,17 @@
  * 
  * This class imports flight data from `airline.sunset` and `airline.skyone` Kafka topics
  * and converts it to a unified format for the `airline.all` Kafka topic.
+ * 
+ * ------------------------------------------------------------------------------------------
+ * I had a question, can you combine the Flink DataStream API and Table API in the same DAG?
+ * 
+ * The answer is yes, you can combine the Flink DataStream API and Table API in the same 
+ * Directed Acyclic Graph (DAG) to leverage the strengths of both APIs within a single Flink
+ * application.  This is particularly useful when you want to perform some complex event 
+ * processing that is more naturally expressed in the DataStream API, and then switch to the 
+ * Table API for more declarative and SQL-like processing, or vice versa.  This where I bring
+ * Apache Iceberg into the mix.  Apache Iceberg is a table format that is designed to be used
+ * with the Flink Table API.
  */
 package apache_flink.kickstarter.datastream_api;
 
@@ -44,6 +55,7 @@ public class FlightImporterApp {
     public static void main(String[] args) throws Exception {
         // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        
 
         /*
 		 * --- Kafka Consumer Config
