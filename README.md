@@ -1,4 +1,5 @@
 # Apache Flink Kickstarter
+![apache-flink-logo](.blog/images/flink_squirrel_100_color.png)
 To kickstart your journey in the wonderful world that the creators of Apache Flink have created for us all.  J3 started with the three primary DataStream apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
 
 App|Description

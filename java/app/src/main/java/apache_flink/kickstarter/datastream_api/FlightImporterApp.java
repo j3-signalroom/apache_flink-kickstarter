@@ -21,6 +21,7 @@
 package apache_flink.kickstarter.datastream_api;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
@@ -63,7 +64,13 @@ public class FlightImporterApp {
         final StreamTableEnvironment tableEnv = 
             StreamTableEnvironment.create(env, EnvironmentSettings.newInstance().inStreamingMode().build());
 
-        // --- Create the Project Nessie Catalog
+        /*
+         * --- Create an Apache Iceberg Catalog using Project Nessie
+         * 
+         * Project Nessie brings this Git-like workflow and benefits to your data stack.  Nessie is a 
+         * transactional metastore that tracks the state and changes of all tables in the catalog 
+         * through metadata via commits and alternate isolated branches like Git.
+         */
         tableEnv.executeSql(
                 "CREATE CATALOG iceberg WITH ("
                         + "'type'='iceberg',"
@@ -73,9 +80,23 @@ public class FlightImporterApp {
                         + "'warehouse' = '/opt/flink/data/warehouse'"
                         + ")");
 
-        // --- List all catalogs
+        // --- List all avialable Apache Iceberg Catalogs
         TableResult result = tableEnv.executeSql("SHOW CATALOGS");
         result.print();
+
+        // --- Set the current Apache Iceberg Catalog to the new Catalog
+        tableEnv.useCatalog("iceberg");
+
+        // --- Create a database in the current Catalog
+        tableEnv.executeSql("CREATE DATABASE IF NOT EXISTS db_example");
+
+        // --- Create the Apache Iceberg Table
+        tableEnv.executeSql(
+                "CREATE TABLE IF NOT EXISTS db_example.employees ("
+                        + "id BIGINT COMMENT 'unique id',"
+                        + "department STRING,"
+                        + "salary BIGINT"
+                        + ")");
 
         /*
 		 * --- Kafka Consumer Config
