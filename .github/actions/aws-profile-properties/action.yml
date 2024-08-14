@@ -1,0 +1,37 @@
+name: "Initialize workflow of the AWS Profile properties"
+description: 'Reads the file that contains the environment properties to run within the workflow.'
+
+inputs:
+  aws_profile:
+    required: true
+  aws_region:
+    required: true
+  number_of_api_keys_to_retain:
+    required: false
+  day_count:
+    required: false
+
+outputs:
+  aws_account_id:
+    value: ${{ steps.aws-profile-property.outputs.AWS_ACCOUNT_ID }}
+
+runs:
+  using: composite
+  steps:
+    - name: "Read in the AWS Profile Properties file into the GitHub Workflow, and output the inputs from the dialog box"
+      shell: bash
+      working-directory: ./.github/aws-profile/
+      id: aws-profile-property
+      run: |
+        export $(grep -v '^#' ${{ inputs.aws_profile }}.env | xargs)        
+        echo "AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID" >> $GITHUB_OUTPUT
+        echo "### AWS Profile Properities and Workflow Inputs" >> $GITHUB_STEP_SUMMARY
+        echo `date` >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "aws_account_id: $AWS_ACCOUNT_ID" >> $GITHUB_STEP_SUMMARY
+        echo "aws_profile: ${{ inputs.aws_profile }}" >> $GITHUB_STEP_SUMMARY
+        echo "aws_region: ${{ inputs.aws_region }}" >> $GITHUB_STEP_SUMMARY
+        echo "auto_offset_reset: ${{ inputs.auto_offset_reset }}" >> $GITHUB_STEP_SUMMARY
+        echo "number_of_api_keys_to_retain: ${{ inputs.number_of_api_keys_to_retain }}" >> $GITHUB_STEP_SUMMARY
+        echo "day_count: ${{ inputs.day_count }}" >> $GITHUB_STEP_SUMMARY
+        
