@@ -1,9 +1,9 @@
 terraform {
     cloud {
-      organization ="<TERRAFORM CLOUD ORGANIZATION NAME>"
+      organization ="signalroom"
 
         workspaces {
-            name = "<TERRAFORM CLOUD ORGANIZATION's WORKSPACE NAME>"
+            name = "confluent-cloud-us-east-002"
         }
   }
 
@@ -255,13 +255,6 @@ resource "aws_ssm_parameter" "consumer_kafka_client_session_timeout_ms" {
   value       = "90000"
 }
 
-resource "aws_ssm_parameter" "consumer_kafka_client_group_id" {
-  name        = "/confluent_cloud_resource/consumer_kafka_client/group.id"
-  description = "This property sets what group a consumer belongs to."
-  type        = "String"
-  value       = "apache-flink-kickstarter-consumer"
-}
-
 resource "aws_ssm_parameter" "producer_kafka_client_sasl_mechanism" {
   name        = "/confluent_cloud_resource/producer_kafka_client/sasl.mechanism"
   description = "This property specifies the SASL mechanism to be used for authentication."
@@ -296,7 +289,13 @@ resource "confluent_kafka_topic" "airline_skyone" {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
   topic_name         = "airline.skyone"
+  partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
   credentials {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
@@ -308,7 +307,13 @@ resource "confluent_kafka_topic" "airline_sunset" {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
   topic_name         = "airline.sunset"
+  partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
   credentials {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
@@ -320,7 +325,13 @@ resource "confluent_kafka_topic" "airline_all" {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
   topic_name         = "airline.all"
+  partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
   credentials {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
@@ -332,7 +343,13 @@ resource "confluent_kafka_topic" "airline_user_statistics" {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
   topic_name         = "airline.user_statistics"
+  partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
   credentials {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret

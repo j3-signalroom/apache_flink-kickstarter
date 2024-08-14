@@ -58,6 +58,7 @@ services:
     command: jobmanager
     volumes:
       - ./java/app/build/libs:/opt/flink/apps
+      - ./java/app/warehouse:/opt/flink/data/warehouse
     environment:
       - |
         FLINK_PROPERTIES=
@@ -80,6 +81,7 @@ services:
     scale: 3
     volumes:
       - ./java/app/build/libs:/opt/flink/apps
+      - ./java/app/warehouse:/opt/flink/data/warehouse
     environment:
       - |
         FLINK_PROPERTIES=
