@@ -50,7 +50,7 @@ run-name: ${{ github.workflow }} ${{ github.ref_name }} branch to the ${{ github
 jobs:
   deploy:
     name: "deploy terraform configuration"
-    runs-on: ${{ github.event.inputs.aws_profile }}
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
