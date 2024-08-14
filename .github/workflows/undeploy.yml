@@ -1,0 +1,82 @@
+name: Undeploy
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout  
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_profile:
+        type: choice
+        description: AWS Landing Zone Profile
+        required: true
+        default: dev
+        options:
+          - dev
+          - test
+          - prod
+      aws_region:
+        type: choice
+        description: AWS Region
+        required: true
+        default: us-east-1
+        options:
+          - us-east-1
+          - us-east-2
+          - us-west-1
+          - us-west-2
+
+run-name: ${{ github.workflow }} ${{ github.ref_name }} branch to the ${{ github.event.inputs.aws_region }} ${{ github.event.inputs.aws_profile }} environment
+
+jobs:
+    deploy:
+      name: "Undeploy terraform configuration"
+      runs-on: ${{ github.event.inputs.aws_profile }}
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Get AWS Profile Properties
+          id: aws-profile-properties
+          uses: ./.github/actions/aws-profile-properties
+          with:
+            aws_profile: ${{ github.event.inputs.aws_profile }}
+            aws_region: ${{ github.event.inputs.aws_region }}
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            role-to-assume: arn:aws:iam::${{ steps.aws-profile-properties.outputs.aws_account_id }}:role/GitHubActionsRole
+            aws-region: ${{ github.event.inputs.aws_region }}
+
+        - uses: hashicorp/setup-terraform@v3
+          with:
+            cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+  
+        - name: Terraform Init
+          id: terraform-init
+          run: terraform init
+
+        - name: Terraform Validate
+          id: validate
+          run: terraform validate -no-color
+
+        - name: Terraform Destroy Plan
+          id: plan_destroy
+          run: terraform plan -destroy
+          env:
+            TF_VAR_confluent_cloud_api_key: ${{ secrets.CONFLUENT_CLOUD_API_KEY }}
+            TF_VAR_confluent_cloud_api_secret: ${{ secrets.CONFLUENT_CLOUD_API_SECRET }}
+            TF_VAR_aws_account_id: ${{ steps.aws-profile-properties.outputs.aws_account_id }}
+            TF_VAR_aws_profile: ${{ github.event.inputs.aws_profile }}
+            TF_VAR_aws_region: ${{ github.event.inputs.aws_region }}
+  
+        - name: Terraform Destroy Apply
+          id: apply_destroy
+          run: terraform apply -destroy -auto-approve
+          env:
+            TF_VAR_confluent_cloud_api_key: ${{ secrets.CONFLUENT_CLOUD_API_KEY }}
+            TF_VAR_confluent_cloud_api_secret: ${{ secrets.CONFLUENT_CLOUD_API_SECRET }}
+            TF_VAR_aws_account_id: ${{ steps.aws-profile-properties.outputs.aws_account_id }}
+            TF_VAR_aws_profile: ${{ github.event.inputs.aws_profile }}
+            TF_VAR_aws_region: ${{ github.event.inputs.aws_region }}
