@@ -122,12 +122,6 @@ resource "confluent_service_account" "kafka_cluster_api" {
     description  = "Kafka Cluster API Service Account"
 }
 
-resource "confluent_role_binding" "kafka_cluster_api_environment_admin" {
-  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
-  role_name   = "EnvironmentAdmin"
-  crn_pattern = confluent_environment.env.resource_name
-}
-
 # Create the Kafka Cluster API Key Pairs, rotate them in accordance to a time schedule, and provide the current acitve API Key Pair
 # to use
 module "kafka_cluster_api_key_rotation" {
@@ -296,11 +290,29 @@ resource "confluent_kafka_topic" "airline_skyone" {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
   topic_name         = "airline.skyone"
+  partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
   credentials {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
   }
+}
+
+resource "confluent_role_binding" "topic-airline_skyone-write" {
+  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
+  role_name   = "DeveloperWrite"
+  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.airline_skyone.topic_name}"
+}
+
+resource "confluent_role_binding" "topic-airline_skyone-read" {
+  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
+  role_name   = "DeveloperRead"
+  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.airline_skyone.topic_name}"
 }
 
 resource "confluent_kafka_topic" "airline_sunset" {
@@ -308,23 +320,60 @@ resource "confluent_kafka_topic" "airline_sunset" {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
   topic_name         = "airline.sunset"
+  partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
   credentials {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
   }
 }
 
+resource "confluent_role_binding" "topic-airline_sunset-write" {
+  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
+  role_name   = "DeveloperWrite"
+  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.airline_sunset.topic_name}"
+}
+
+resource "confluent_role_binding" "topic-airline_sunset-read" {
+  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
+  role_name   = "DeveloperRead"
+  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.airline_sunset.topic_name}"
+}
+
+
 resource "confluent_kafka_topic" "airline_all" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
   topic_name         = "airline.all"
+  partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
   credentials {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
   }
+}
+
+resource "confluent_role_binding" "topic-airline_all-write" {
+  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
+  role_name   = "DeveloperWrite"
+  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.airline_all.topic_name}"
+}
+
+resource "confluent_role_binding" "topic-airline_all-read" {
+  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
+  role_name   = "DeveloperRead"
+  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.airline_all.topic_name}"
 }
 
 resource "confluent_kafka_topic" "airline_user_statistics" {
@@ -332,9 +381,27 @@ resource "confluent_kafka_topic" "airline_user_statistics" {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
   topic_name         = "airline.user_statistics"
+  partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
   credentials {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
   }
+}
+
+resource "confluent_role_binding" "topic-user_statistics-write" {
+  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
+  role_name   = "DeveloperWrite"
+  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.user_statistics.topic_name}"
+}
+
+resource "confluent_role_binding" "topic-user_statistics-read" {
+  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
+  role_name   = "DeveloperRead"
+  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.user_statistics.topic_name}"
 }
