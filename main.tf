@@ -1,9 +1,9 @@
 terraform {
     cloud {
-      organization ="<TERRAFORM CLOUD ORGANIZATION NAME>"
+      organization ="signalroom"
 
         workspaces {
-            name = "<TERRAFORM CLOUD ORGANIZATION's WORKSPACE NAME>"
+            name = "confluent-cloud-us-east-002"
         }
   }
 
@@ -120,6 +120,12 @@ resource "confluent_kafka_cluster" "kafka_cluster" {
 resource "confluent_service_account" "kafka_cluster_api" {
     display_name = "${var.aws_profile}-kafka_cluster-api"
     description  = "Kafka Cluster API Service Account"
+}
+
+resource "confluent_role_binding" "kafka_cluster_api_environment_admin" {
+  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
+  role_name   = "EnvironmentAdmin"
+  crn_pattern = confluent_environment.env.resource_name
 }
 
 # Create the Kafka Cluster API Key Pairs, rotate them in accordance to a time schedule, and provide the current acitve API Key Pair
@@ -249,13 +255,6 @@ resource "aws_ssm_parameter" "consumer_kafka_client_session_timeout_ms" {
   value       = "90000"
 }
 
-resource "aws_ssm_parameter" "consumer_kafka_client_group_id" {
-  name        = "/confluent_cloud_resource/consumer_kafka_client/group.id"
-  description = "This property sets what group a consumer belongs to."
-  type        = "String"
-  value       = "apache-flink-kickstarter-consumer"
-}
-
 resource "aws_ssm_parameter" "producer_kafka_client_sasl_mechanism" {
   name        = "/confluent_cloud_resource/producer_kafka_client/sasl.mechanism"
   description = "This property specifies the SASL mechanism to be used for authentication."
@@ -303,18 +302,6 @@ resource "confluent_kafka_topic" "airline_skyone" {
   }
 }
 
-resource "confluent_role_binding" "topic-airline_skyone-write" {
-  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
-  role_name   = "DeveloperWrite"
-  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.airline_skyone.topic_name}"
-}
-
-resource "confluent_role_binding" "topic-airline_skyone-read" {
-  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
-  role_name   = "DeveloperRead"
-  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.airline_skyone.topic_name}"
-}
-
 resource "confluent_kafka_topic" "airline_sunset" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
@@ -332,19 +319,6 @@ resource "confluent_kafka_topic" "airline_sunset" {
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
   }
 }
-
-resource "confluent_role_binding" "topic-airline_sunset-write" {
-  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
-  role_name   = "DeveloperWrite"
-  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.airline_sunset.topic_name}"
-}
-
-resource "confluent_role_binding" "topic-airline_sunset-read" {
-  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
-  role_name   = "DeveloperRead"
-  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.airline_sunset.topic_name}"
-}
-
 
 resource "confluent_kafka_topic" "airline_all" {
   kafka_cluster {
@@ -364,18 +338,6 @@ resource "confluent_kafka_topic" "airline_all" {
   }
 }
 
-resource "confluent_role_binding" "topic-airline_all-write" {
-  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
-  role_name   = "DeveloperWrite"
-  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.airline_all.topic_name}"
-}
-
-resource "confluent_role_binding" "topic-airline_all-read" {
-  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
-  role_name   = "DeveloperRead"
-  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.airline_all.topic_name}"
-}
-
 resource "confluent_kafka_topic" "airline_user_statistics" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
@@ -392,16 +354,4 @@ resource "confluent_kafka_topic" "airline_user_statistics" {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
   }
-}
-
-resource "confluent_role_binding" "topic-user_statistics-write" {
-  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
-  role_name   = "DeveloperWrite"
-  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.user_statistics.topic_name}"
-}
-
-resource "confluent_role_binding" "topic-user_statistics-read" {
-  principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
-  role_name   = "DeveloperRead"
-  crn_pattern = "${confluent_kafka_cluster.kafka_cluster.rbac_crn}/kafka=${confluent_kafka_cluster.kafka_cluster.id}/topic=${confluent_kafka_topic.user_statistics.topic_name}"
 }
