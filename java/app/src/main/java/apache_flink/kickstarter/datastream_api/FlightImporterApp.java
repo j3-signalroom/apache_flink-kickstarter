@@ -21,7 +21,6 @@
 package apache_flink.kickstarter.datastream_api;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
@@ -32,7 +31,6 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.*;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import static org.apache.flink.table.api.Expressions.$;
 import java.util.*;
 import java.time.*;
 import org.slf4j.*;
@@ -92,10 +90,14 @@ public class FlightImporterApp {
 
         // --- Create the Apache Iceberg Table
         tableEnv.executeSql(
-                "CREATE TABLE IF NOT EXISTS db_example.employees ("
-                        + "id BIGINT COMMENT 'unique id',"
-                        + "department STRING,"
-                        + "salary BIGINT"
+                "CREATE TABLE IF NOT EXISTS db_example.airline_flight_data ("
+                        + "email_address STRING,"
+                        + "departure_time STRING,"
+                        + "departure_airport_code STRING,"
+                        + "arrival_time STRING,"
+                        + "arrival_airport_code STRING,"
+                        + "flight_number STRING,"
+                        + "confirmation_code STRING"
                         + ")");
 
         /*
