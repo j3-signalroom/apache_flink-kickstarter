@@ -30,13 +30,16 @@ No.|Capability|Description
     - [Java Examples](#java-examples)
     - [Python Examples](#python-examples)
 + [How to use this repo?](#how-to-use-this-repo)
-    - [Set up your Terraform Cloud environment](#set-up-your-terraform-cloud-environment)
+    - [Set up your Terraform Cloud environment locally](#set-up-your-terraform-cloud-environment-locally)
         + [Terraform Cloud API token](#terraform-cloud-api-token)
             - [Set up your Confluent Cloud environment](#set-up-your-confluent-cloud-environment)
                 + [Create a `terraform.tfvars` file in the root of the repo](#create-a-terraformtfvars-file-in-the-root-of-the-repo)
                 + [AWS Secrets Manager](#aws-secrets-manager)
                 + [AWS Systems Manager Parameter Store](#aws-systems-manager-parameter-store)
         + [Run the Terraform configuration](#run-the-terraform-configuration)
+    - [GitHub set up](#github-set-up)
+        + [Terraform Cloud API token for GitHub set up](#terraform-cloud-api-token-for-github-set-up)
+        + [Confluent Cloud API for GitHub set up](#confluent-cloud-api-for-github-set-up)
     - [Power up the Apache Flink Docker containers](#power-up-the-apache-flink-docker-containers)
 + [Resources](#resources)
 <!-- tocstop -->
@@ -88,15 +91,15 @@ As of August 2024, Confluent’s Serverless Flink offering does not yet support 
 
 **To start using the repo**
 
-1. Set up your Terraform Cloud environment, so you can:
+1. Set up your Terraform Cloud environment locally, or use [GitHub workflow/actions](.github/workflows/deploy.yml), so you can:
 
-    a. Set up your Confluent Cloud environment with a Kafka Cluster that uses the example Kafka topics and their schemas in the Schema Registry.
+    a. Have your Confluent Cloud environment with a Kafka Cluster that uses the example Kafka topics and their schemas in the Schema Registry set up for you.
 
-    b. Set up your AWS Secrets Manager to store Kafka Cluster and Schema Registry Cluster API Key Secrets, respectively, along with the Consumer and Producer Kafka properties in the AWS Systems Parameter Store.
+    b. Have your AWS Secrets Manager to store Kafka Cluster and Schema Registry Cluster API Key Secrets, respectively, along with the Consumer and Producer Kafka properties in the AWS Systems Parameter Store set up for you.
 
 2. Run Apache Flink on your Mac locally, or Power up the Docker containers that run Apache Flink and Apache Iceberg locally on your machine.
 
-### Set up your Terraform Cloud environment
+### Set up your Terraform Cloud environment locally
 Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your local machine.  Then ensure you have an [HCP Terraform account](https://app.terraform.io/session) to run the Terraform configuration provided in the cloud.
 
 #### Terraform Cloud API token
@@ -206,6 +209,21 @@ terraform plan -var-file=terraform.tfvars
 ```
 terraform apply -var-file=terraform.tfvars -auto-approve
 ```
+
+### GitHub set up
+In order to run the Terraform configuration, the Terraform Cloud API token and Confluent Cloud API Key are required as GitHub Secret variables:
+
+#### Terraform Cloud API token for GitHub set up
+From the [Tokens page](https://app.terraform.io/app/settings/tokens), create/update the API token and store it in the [AWS Secrets Manager](https://us-east-1.console.aws.amazon.com/secretsmanager/secret?name=%2Fsi-iac-confluent_cloud_kafka_api_key_rotation-tf%2Fconfluent&region=us-east-1).  Then add/update the `TF_API_TOKEN` secret on the [GitHub Action secrets and variables, secret tab](https://github.com/j3-signalroom/apache_flink-kickstarter/settings/secrets/actions).
+
+#### Confluent Cloud API for GitHub set up
+Confluent Cloud requires API keys to manage access and authentication to different parts of the service.  An API key consists of a key and a secret.  You can create and manage API keys by using the [Confluent Cloud CLI](https://docs.confluent.io/confluent-cli/current/overview.html).  Learn more about Confluent Cloud API Key access [here](https://docs.confluent.io/cloud/current/access-management/authenticate/api-keys/api-keys.html#ccloud-api-keys).
+
+Using the Confluent CLI, execute the follow command to generate the Cloud API Key:
+```
+confluent api-key create --resource "cloud" 
+```
+Then, for instance, copy-and-paste the API Key and API Secret values to the respective, `CONFLUENT_CLOUD_API_KEY` and `CONFLUENT_CLOUD_API_SECRET` secrets, that need to be created/updated on the [J3 repository Actions secrets and variables page](https://github.com/j3-signalroom/apache_flink-kickstarter/settings/secrets/actions).
 
 ### Power up the Apache Flink Docker containers
 
