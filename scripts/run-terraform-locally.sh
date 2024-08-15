@@ -31,7 +31,7 @@ do
             arg_length=26
             confluent_cloud_api_key=${arg:$arg_length:$(expr ${#arg} - $arg_length)};;
         *"--confluent_cloud_api_secret="*)
-            arg_length=10
+            arg_length=29
             confluent_cloud_api_secret=${arg:$arg_length:$(expr ${#arg} - $arg_length)};;
     esac
     let "arg_count+=1"
@@ -56,18 +56,18 @@ export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 
 # Create terraform.tfvars file
-printf "confluent_cloud_api_key=\"${confluent_cloud_api}\"\
+printf "confluent_cloud_api_key=\"${confluent_cloud_api_key}\"\
 \nconfluent_cloud_api_secret=\"${confluent_cloud_api_secret}\"\
-\naws_access_key=\"${AWS_ACCESS_KEY_ID}\"\
+\naws_account_id=\"${AWS_ACCOUNT_ID}\"\
 \naws_profile=\"${environment_name}\"\
-\naws_access_key=\"${AWS_SECRET_ACCESS_KEY}\"\
+\naws_access_key_id=\"${AWS_ACCESS_KEY_ID}\"\
+\naws_secret_access_key=\"${AWS_SECRET_ACCESS_KEY}\"\
 \naws_session_token=\"${AWS_SESSION_TOKEN}\"\
 \naws_region=\"${AWS_REGION}\"\
-\naws_account_id=\"${AWS_ACCOUNT_ID}\"\
 \nnumber_of_api_keys_to_retain = 2\
 \nday_count=30\
 \nauto_offset_reset=\"earliest\"" > terraform.tfvars
 
-#terraform init
-#terraform plan -var-file=terraform.tfvars
-#terraform apply -var-file=terraform.tfvars
+terraform init
+terraform plan -var-file=terraform.tfvars
+terraform apply -var-file=terraform.tfvars -auto-approve
