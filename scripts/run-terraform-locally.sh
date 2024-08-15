@@ -48,4 +48,4 @@ export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
 
 terraform init
 terraform plan -var-file=terraform.tfvars
-terraform apply -var-file=terraform.tfvars -auto-approve
+terraform apply -var-file=terraform.tfvars
