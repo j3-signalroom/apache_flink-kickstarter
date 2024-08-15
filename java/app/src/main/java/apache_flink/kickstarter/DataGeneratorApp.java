@@ -8,7 +8,7 @@
  * <b>Sky One</b> Airlines," and sends it to the Kafka topics `airline.sunset` and `airline.skyone`,
  * respectively.
  */
-package apache_flink.kickstarter.datastream_api;
+package apache_flink.kickstarter;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -24,7 +24,7 @@ import org.apache.flink.streaming.api.environment.*;
 import java.util.*;
 import org.slf4j.*;
 
-import apache_flink.kickstarter.datastream_api.model.*;
+import apache_flink.kickstarter.model.*;
 
 
 public class DataGeneratorApp {

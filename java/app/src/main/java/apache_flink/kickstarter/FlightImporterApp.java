@@ -16,9 +16,10 @@
  * processing that is more naturally expressed in the DataStream API, and then switch to the 
  * Table API for more declarative and SQL-like processing, or vice versa.  This where I bring
  * Apache Iceberg into the mix.  Apache Iceberg is a table format that is designed to be used
- * with the Flink Table API.
+ * with the Flink Table API.  In this DAG, I use Apache Iceberg to store the unified flight
+ * data in the `db_example.airline_flight_data` table.
  */
-package apache_flink.kickstarter.datastream_api;
+package apache_flink.kickstarter;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.sink.*;
@@ -35,7 +36,7 @@ import java.util.*;
 import java.time.*;
 import org.slf4j.*;
 
-import apache_flink.kickstarter.datastream_api.model.*;
+import apache_flink.kickstarter.model.*;
 
 
 public class FlightImporterApp {

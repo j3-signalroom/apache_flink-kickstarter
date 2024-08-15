@@ -5,7 +5,7 @@
  * 
  * 
  */
-package apache_flink.kickstarter.datastream_api.model;
+package apache_flink.kickstarter.model;
 
 import java.time.*;
 import java.util.*;

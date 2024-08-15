@@ -5,14 +5,14 @@
  * 
  * 
  */
-package apache_flink.kickstarter.datastream_api;
+package apache_flink.kickstarter;
 
 import java.math.*;
 import java.time.*;
 import java.util.*;
 import java.util.stream.*;
 
-import apache_flink.kickstarter.datastream_api.model.*;
+import apache_flink.kickstarter.model.*;
 
 
 public class DataGenerator {
