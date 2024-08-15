@@ -24,7 +24,15 @@ for arg in "$@" # $@ sees arguments as separate words
 do
     case $arg in
         *"--profile="*)
+            arg_length=10
+            environment_name=${arg:$arg_length:$(expr ${#arg} - $arg_length)}
             AWS_PROFILE=$arg;;
+        *"--confluent_cloud_api_key="*)
+            arg_length=26
+            confluent_cloud_api_key=${arg:$arg_length:$(expr ${#arg} - $arg_length)};;
+        *"--confluent_cloud_api_secret="*)
+            arg_length=10
+            confluent_cloud_api_secret=${arg:$arg_length:$(expr ${#arg} - $arg_length)};;
     esac
     let "arg_count+=1"
 done
@@ -45,7 +53,21 @@ fi
 aws sso login $AWS_PROFILE
 eval $(aws2-wrap $AWS_PROFILE --export)
 export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 
-terraform init
-terraform plan -var-file=terraform.tfvars
-terraform apply -var-file=terraform.tfvars
+# Create terraform.tfvars file
+printf "confluent_cloud_api_key=\"${confluent_cloud_api}\"\
+\nconfluent_cloud_api_secret=\"${confluent_cloud_api_secret}\"\
+\naws_access_key=\"${AWS_ACCESS_KEY_ID}\"\
+\naws_profile=\"${environment_name}\"\
+\naws_access_key=\"${AWS_SECRET_ACCESS_KEY}\"\
+\naws_session_token=\"${AWS_SESSION_TOKEN}\"\
+\naws_region=\"${AWS_REGION}\"\
+\naws_account_id=\"${AWS_ACCOUNT_ID}\"\
+\nnumber_of_api_keys_to_retain = 2\
+\nday_count=30\
+\nauto_offset_reset=\"earliest\"" > terraform.tfvars
+
+#terraform init
+#terraform plan -var-file=terraform.tfvars
+#terraform apply -var-file=terraform.tfvars

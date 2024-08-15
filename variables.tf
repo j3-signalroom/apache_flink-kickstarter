@@ -24,6 +24,20 @@ variable "aws_account_id" {
     type        = string
 }
 
+variable "aws_access_key" {
+    description = "The AWS Access Key."
+    type        = string
+}
+
+variable "aws_secret_key" {
+    description = "The AWS Secret Key."
+    type        = string
+}
+
+variable "aws_session_token" {
+    description = "The AWS Session Token."
+    type        = string
+}
 variable "day_count" {
     description = "How many day(s) should the API Key be rotated for."
     type        = number
