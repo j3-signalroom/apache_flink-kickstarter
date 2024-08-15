@@ -67,4 +67,4 @@ printf "confluent_cloud_api_key=\"${confluent_cloud_api_key}\"\
 
 terraform init
 terraform plan -var-file=terraform.tfvars
-terraform apply -var-file=terraform.tfvars -auto-approve
+terraform apply -var-file=terraform.tfvars
