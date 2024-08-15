@@ -1,10 +1,7 @@
-# Java
-Examples of Flink Apps written in Java.
+# Writing Flink Apps in Java
+Examples of Apache Flink® applications showcasing the [DataStream API](https://nightlies.apache.org/flink/flink-docs-master/docs/learn-flink/datastream_api/) and [Table API](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/overview/) in Java, featuring AWS, GitHub, Terraform, and Apache Iceberg.  What's the difference between the DataStream API and Table API?  Click to learn [how](../.blog/datastream-vs-table-api.md). 
 
-## DataStream API
-[DataStream API](https://nightlies.apache.org/flink/flink-docs-master/docs/learn-flink/datastream_api/)
-
-#### To **`run`** anyone of the Flink Apps
+## Try out these Flink Apps
 Open the repo from the `Java` subfolder.  Then run:
 
 > *This command ensures a pristine build environment.  By removing previous build artifacts, this command guarantees that developers initiate their projects from a clean slate, minimizing inconsistencies and fostering a more reliable build process.*
@@ -29,6 +26,6 @@ Finally, to run any of the Flink Apps, choose the app and then enter the corresp
 
 App|Commands for CLI
 -|-
-**`DataGeneratorApp`**|`flink run --class apache_flink.kickstarter.datastream_api.DataGeneratorApp apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
-**`FlightImporterApp`**|`flink run --class apache_flink.kickstarter.datastream_api.FlightImporterApp apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
-**`UserStatisticsApp`**|`flink run --class apache_flink.kickstarter.datastream_api.UserStatisticsApp apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
+**`DataGeneratorApp`**|`flink run --class apache_flink.kickstarter.DataGeneratorApp apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
+**`FlightImporterApp`**|`flink run --class apache_flink.kickstarter.FlightImporterApp apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
+**`UserStatisticsApp`**|`flink run --class apache_flink.kickstarter.UserStatisticsApp apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`

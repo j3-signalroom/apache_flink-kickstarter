@@ -12,7 +12,7 @@
  * secrets and AWS Systems Manager Parameter Store properties during the initial start of a 
  * App, then caches the properties for use by any subsequent events that need these properties.
  */
-package apache_flink.kickstarter.datastream_api;
+package apache_flink.kickstarter;
 
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
 import org.apache.flink.configuration.Configuration;
