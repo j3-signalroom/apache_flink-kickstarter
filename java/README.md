@@ -25,7 +25,7 @@ docker exec -it -w /opt/flink/apps apache_flink-kickstarter-jobmanager-1 /bin/ba
 
 > *This allows you to interact with the container as if you were inside its terminal, enabling you to run commands, inspect the file system, or perform other tasks interactively within the container.*
 
-Finally, to run any of the Flink Apps, choose the app and then enter the corresponding CLI command:
+Finally, to run any of the Flink Apps, choose the app and then enter the corresponding CLI command from the table below:
 
 App|Commands for CLI
 -|-
