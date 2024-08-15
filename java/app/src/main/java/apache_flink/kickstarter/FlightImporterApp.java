@@ -82,7 +82,7 @@ public class FlightImporterApp {
         // --- List all avialable Apache Iceberg Catalogs
         TableResult result = tableEnv.executeSql("SHOW CATALOGS");
         result.print();
-
+/*
         // --- Set the current Apache Iceberg Catalog to the new Catalog
         tableEnv.useCatalog("iceberg");
 
@@ -100,7 +100,7 @@ public class FlightImporterApp {
                         + "flight_number STRING,"
                         + "confirmation_code STRING"
                         + ")");
-
+*/
         /*
 		 * --- Kafka Consumer Config
 		 * Retrieve the properties from the local properties files, or from AWS
