@@ -1,9 +1,11 @@
 terraform {
     cloud {
-      organization = "<TERRAFORM CLOUD ORGANIZATION NAME>"
+      organization = "signalroom"
+      #organization = "<TERRAFORM CLOUD ORGANIZATION NAME>"
 
         workspaces {
-            name = "<TERRAFORM CLOUD ORGANIZATION's WORKSPACE NAME>"
+            name = "confluent-cloud-us-east-005"
+            #name = "<TERRAFORM CLOUD ORGANIZATION's WORKSPACE NAME>"
         }
   }
 
@@ -25,7 +27,10 @@ provider "confluent" {
 }
 
 provider "aws" {
-    region  = var.aws_region
+    region     = var.aws_region
+    access_key = var.aws_access_key_id
+    secret_key = var.aws_secret_access_key
+    token      = var.aws_session_token
 }
 
 locals {
