@@ -19,6 +19,7 @@ val flinkVersion: String = "1.19.1"
 val kafkaVersion: String = "3.7.0"
 val junitVersion: String = "5.10.0"
 val awssdkVersion: String = "2.26.29"
+var icebergVersion String = "1.6.0"
 
 dependencies {
     implementation("org.apache.kafka:kafka-clients:${kafkaVersion}")
@@ -36,8 +37,8 @@ dependencies {
     implementation("software.amazon.awssdk:secretsmanager:${awssdkVersion}")
     implementation("software.amazon.awssdk:ssm:${awssdkVersion}")
     implementation("org.json:json:20240303")
-    runtimeOnly("org.apache.iceberg:iceberg-core:1.6.0")
-    implementation("org.apache.iceberg:iceberg-flink-runtime-1.19:1.6.0")   
+    runtimeOnly("org.apache.iceberg:iceberg-core:${icebergVersion}")
+    implementation("org.apache.iceberg:iceberg-flink-runtime-1.19:${icebergVersion}")
     testImplementation("org.apache.flink:flink-test-utils:${flinkVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
@@ -57,7 +58,7 @@ java {
 application {
     // --- If the main class is not provided, use the default
     if (appMainClass.isNullOrEmpty()) {
-        mainClass.set("apache_flink.kickstarter.datastream_api.DataGeneratorApp")
+        mainClass.set("apache_flink.kickstarter.DataGeneratorApp")
     } else {
         mainClass.set("apache_flink.kickstarter." + appMainClass)
     }    
