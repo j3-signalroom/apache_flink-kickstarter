@@ -4,11 +4,12 @@ Examples of Apache Flink® applications showcasing the [DataStream API](https://
 ## Try out these Flink Apps
 Open the repo from the `Java` subfolder.  Then run:
 
-> *This command ensures a pristine build environment.  By removing previous build artifacts, this command guarantees that developers initiate their projects from a clean slate, minimizing inconsistencies and fostering a more reliable build process.*
-
 ```
 ./gradlew app:clean
 ```
+
+> *This command ensures a pristine build environment.  By removing previous build artifacts, this command guarantees that developers initiate their projects from a clean slate, minimizing inconsistencies and fostering a more reliable build process.*
+
 
 Now build JAR file that contains all the Flink Apps on it, by running:
 
@@ -17,10 +18,12 @@ Now build JAR file that contains all the Flink Apps on it, by running:
 ```
 
 Logon to the `apache_flink-kickstarter-jobmanager-1` container's Interative Shell:
-> *This allows you to interact with the container as if you were inside its terminal, enabling you to run commands, inspect the file system, or perform other tasks interactively within the container.*
+
 ```
 docker exec -it -w /opt/flink/apps apache_flink-kickstarter-jobmanager-1 /bin/bash
 ```
+
+> *This allows you to interact with the container as if you were inside its terminal, enabling you to run commands, inspect the file system, or perform other tasks interactively within the container.*
 
 Finally, to run any of the Flink Apps, choose the app and then enter the corresponding CLI command:
 
