@@ -122,3 +122,7 @@ resource "aws_ssm_parameter" "producer_kafka_client_acks" {
   type        = "String"
   value       = "all"
 }
+
+resource "aws_s3_bucket" "iceberg_bucket" {
+  bucket = "iceberg-bucket"
+}
