@@ -1,7 +1,7 @@
 .DS_Store
 .env
 .vscode/
-run-local-notes.md
+scratchpad.md
 
 # Local .terraform directories
 **/.terraform/*
