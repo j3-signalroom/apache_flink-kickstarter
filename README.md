@@ -82,7 +82,7 @@ By calling Flink jobs "Flink applications," it emphasizes the comprehensive, com
 
 > **Cloud and Local Environment Prequisities**
 >
-> You need to have the following cloud services accounts to run any of the examples:
+> You need to have the following cloud accounts to run any of the examples:
 > - [AWS Account](https://signin.aws.amazon.com/)
 > - [Confluent Cloud Account](https://confluent.cloud/)
 > - [Docker Account](https://docker.com)
