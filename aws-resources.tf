@@ -124,5 +124,5 @@ resource "aws_ssm_parameter" "producer_kafka_client_acks" {
 }
 
 resource "aws_s3_bucket" "iceberg_bucket" {
-  bucket = "iceberg-bucket"
+  bucket = "apache-flink-kickstarter-iceberg-bucket"
 }
