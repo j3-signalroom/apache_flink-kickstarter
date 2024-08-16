@@ -159,6 +159,78 @@ module "kafka_cluster_api_key_rotation" {
     day_count = var.day_count
 }
 
+resource "confluent_kafka_topic" "airline_skyone" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.kafka_cluster.id
+  }
+  topic_name         = "airline.skyone"
+  partitions_count   = 1
+  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
+  credentials {
+    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
+    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
+  }
+}
+
+resource "confluent_kafka_topic" "airline_sunset" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.kafka_cluster.id
+  }
+  topic_name         = "airline.sunset"
+  partitions_count   = 1
+  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
+  credentials {
+    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
+    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
+  }
+}
+
+resource "confluent_kafka_topic" "airline_all" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.kafka_cluster.id
+  }
+  topic_name         = "airline.all"
+  partitions_count   = 1
+  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
+  credentials {
+    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
+    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
+  }
+}
+
+resource "confluent_kafka_topic" "airline_user_statistics" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.kafka_cluster.id
+  }
+  topic_name         = "airline.user_statistics"
+  partitions_count   = 1
+  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
+  credentials {
+    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
+    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
+  }
+}
+
 # Create the Schema Registry Cluster Secrets: API Key Pair and REST endpoint
 resource "aws_secretsmanager_secret" "schema_registry_cluster_api_key" {
     name = "${local.secrets_prefix}/schema_registry_cluster/java_client"
@@ -282,76 +354,4 @@ resource "aws_ssm_parameter" "producer_kafka_client_acks" {
   description = "This property specifies the number of acknowledgments the producer requires the leader to have received before considering a request complete."
   type        = "String"
   value       = "all"
-}
-
-resource "confluent_kafka_topic" "airline_skyone" {
-  kafka_cluster {
-    id = confluent_kafka_cluster.kafka_cluster.id
-  }
-  topic_name         = "airline.skyone"
-  partitions_count   = 1
-  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
-
-  config = {
-    "retention.bytes" = "-1"
-    "retention.ms"    = "-1"
-  }
-  credentials {
-    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
-    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
-  }
-}
-
-resource "confluent_kafka_topic" "airline_sunset" {
-  kafka_cluster {
-    id = confluent_kafka_cluster.kafka_cluster.id
-  }
-  topic_name         = "airline.sunset"
-  partitions_count   = 1
-  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
-
-  config = {
-    "retention.bytes" = "-1"
-    "retention.ms"    = "-1"
-  }
-  credentials {
-    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
-    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
-  }
-}
-
-resource "confluent_kafka_topic" "airline_all" {
-  kafka_cluster {
-    id = confluent_kafka_cluster.kafka_cluster.id
-  }
-  topic_name         = "airline.all"
-  partitions_count   = 1
-  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
-
-  config = {
-    "retention.bytes" = "-1"
-    "retention.ms"    = "-1"
-  }
-  credentials {
-    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
-    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
-  }
-}
-
-resource "confluent_kafka_topic" "airline_user_statistics" {
-  kafka_cluster {
-    id = confluent_kafka_cluster.kafka_cluster.id
-  }
-  topic_name         = "airline.user_statistics"
-  partitions_count   = 1
-  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
-
-  config = {
-    "retention.bytes" = "-1"
-    "retention.ms"    = "-1"
-  }
-  credentials {
-    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
-    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
-  }
 }
