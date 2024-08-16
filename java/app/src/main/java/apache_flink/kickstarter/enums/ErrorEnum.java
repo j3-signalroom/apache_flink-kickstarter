@@ -5,7 +5,7 @@
  * 
  * Defined enumerators
  */
-package apache_flink.enums;
+package apache_flink.kickstarter.enums;
 
 
 import java.util.*;

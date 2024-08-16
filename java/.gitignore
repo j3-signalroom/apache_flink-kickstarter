@@ -6,6 +6,7 @@ build/
 .vscode/
 .settings/
 .gradle/
+warehouse/
 .DS_Store
 !gradle/wrapper/gradle-wrapper.jar
 apache_flink-kickstarter.log

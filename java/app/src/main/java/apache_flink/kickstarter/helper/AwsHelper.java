@@ -6,7 +6,7 @@
  * 
  * AWS helper functions.
  */
-package apache_flink.helper;
+package apache_flink.kickstarter.helper;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.*;
@@ -14,10 +14,11 @@ import software.amazon.awssdk.services.secretsmanager.model.*;
 import software.amazon.awssdk.services.ssm.*;
 import software.amazon.awssdk.services.ssm.model.*;
 import org.json.*;
+
+import apache_flink.kickstarter.enums.*;
+
 import java.security.InvalidParameterException;
 import java.util.*;
-
-import apache_flink.enums.*;
 
 
 public class AwsHelper {

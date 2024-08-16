@@ -19,8 +19,8 @@ import org.apache.flink.configuration.Configuration;
 import java.io.*;
 import java.util.*;
 
-import apache_flink.enums.*;
-import apache_flink.helper.*;
+import apache_flink.kickstarter.enums.*;
+import apache_flink.kickstarter.helper.*;
 
 
 
