@@ -24,9 +24,10 @@ for arg in "$@" # $@ sees arguments as separate words
 do
     case $arg in
         *"--profile="*)
-            arg_length=10
-            environment_name=${arg:$arg_length:$(expr ${#arg} - $arg_length)}
             AWS_PROFILE=$arg;;
+        *"--environment="*)
+            arg_length=14
+            environment_name=${arg:$arg_length:$(expr ${#arg} - $arg_length)};;
         *"--confluent_cloud_api_key="*)
             arg_length=26
             confluent_cloud_api_key=${arg:$arg_length:$(expr ${#arg} - $arg_length)};;
