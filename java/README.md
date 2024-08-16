@@ -1,4 +1,4 @@
-# Writing Flink Apps in Java
+# Flink Apps written in Java
 Examples of Apache Flink® applications showcasing the [DataStream API](https://nightlies.apache.org/flink/flink-docs-master/docs/learn-flink/datastream_api/) and [Table API](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/overview/) in Java, featuring AWS, GitHub, Terraform, and Apache Iceberg.  What's the difference between the DataStream API and Table API?  Click [how](../.blog/datastream-vs-table-api.md) to learn the differences. 
 
 ## Try out these Flink Apps
