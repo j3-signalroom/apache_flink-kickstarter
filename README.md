@@ -79,6 +79,25 @@ Flink jobs are often called Flink applications because they encompass more than 
 By calling Flink jobs "Flink applications," it emphasizes the comprehensive, complex, and integrated nature of the work, aligning it more closely with how we think about and manage software applications in general.
 
 ## How to use this repo?
+
+> **Cloud and Local Environment Prequisities**
+>
+> You need to have the following cloud services accounts to run any of the examples:
+> - AWS Account
+> - Confluent Cloud Account
+> - Docker Account
+> - GitHub Account
+> - Snowflake Account
+> - Terraform Cloud Account
+> 
+> On your local machine you need the following installed:
+> - AWS CLI version 2
+> - Confluent CLI version 3
+> - Docker Desktop
+> - Java JDK (Java Development Kit) 11
+> - Python 3.11
+> - Terraform CLI version 1.85 or higher
+
 As of August 2024, Confluent’s Serverless Flink offering does not yet support the DataStream API and Table API for writing Flink Apps in Java or Python.  Therefore, this repo restricts the use of cloud resources to the _Confluent Cloud Kafka Cluster and Schema Registry_ only.  It utilizes _AWS Secrets Manager_ to store Kafka Cluster and Schema Registry API Key secrets, _AWS Systems Manager Parameter Store_ to store Consumer and Producer Kafka configuration properties, and _Terraform Cloud for Infrastructure as Code (IaC) DevOps CI/CD_.  Locally, we will utilize Docker containers to run Apache Flink and Apache Iceberg.
 
 **To start using the repo**
