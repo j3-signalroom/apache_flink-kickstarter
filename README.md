@@ -83,12 +83,12 @@ By calling Flink jobs "Flink applications," it emphasizes the comprehensive, com
 > **Cloud and Local Environment Prequisities**
 >
 > You need to have the following cloud services accounts to run any of the examples:
-> - AWS Account
-> - Confluent Cloud Account
-> - Docker Account
-> - GitHub Account
-> - Snowflake Account
-> - Terraform Cloud Account
+> - [AWS Account](https://signin.aws.amazon.com/)
+> - [Confluent Cloud Account](https://confluent.cloud/)
+> - [Docker Account](https://docker.com)
+> - [GitHub Account](https://github.com)
+> - [Snowflake Account](https://app.snowflake.com/)
+> - [Terraform Cloud Account](https://app.terraform.io/)
 > 
 > On your local machine you need the following installed:
 > - AWS CLI version 2
