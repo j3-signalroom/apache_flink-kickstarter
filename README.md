@@ -30,7 +30,6 @@ No.|Capability|Description
     - [Set up your Terraform Cloud environment locally](#set-up-your-terraform-cloud-environment-locally)
         + [Terraform Cloud API token](#terraform-cloud-api-token)
             - [Set up your Confluent Cloud environment](#set-up-your-confluent-cloud-environment)
-                + [Create a `terraform.tfvars` file in the root of the repo](#create-a-terraformtfvars-file-in-the-root-of-the-repo)
                 + [AWS Secrets Manager](#aws-secrets-manager)
                 + [AWS Systems Manager Parameter Store](#aws-systems-manager-parameter-store)
         + [Run the Terraform configuration](#run-the-terraform-configuration)
@@ -136,18 +135,6 @@ When the Terraform CLI prompts you, paste the user token exactly once into your 
 
 ##### Set up your Confluent Cloud environment
 Then in the [main.tf](main.tf) replace **`<TERRAFORM CLOUD ORGANIZATION NAME>`** in the `terraform.cloud` block with your [Terraform Cloud Organization Name](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/organizations) and **`<TERRAFORM CLOUD ORGANIZATION's WORKSPACE NAME>`** in the `terraform.cloud.workspaces` block with your [Terraform Cloud Organization's Workspaces Name](https://developer.hashicorp.com/terraform/cloud-docs/workspaces).
-
-###### Create a `terraform.tfvars` file in the root of the repo
-```
-confluent_cloud_api_key = "<CONFLUENT_CLOUD_API_KEY>"
-confluent_cloud_api_secret = "<CONFLUENT_CLOUD_API_SECRETS>"
-aws_account_id = "<AWS_ACCOUNT_ID>"
-aws_profile = "<AWS_PROFILE_NAME>"
-aws_region  = "<AWS_REGION_NAME>"
-number_of_api_keys_to_retain = 2
-day_count = 30
-auto_offset_reset = "earliest"
-```
 
 > **Confluent Cloud API**
 >
