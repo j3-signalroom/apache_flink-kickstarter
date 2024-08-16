@@ -7,7 +7,7 @@
  * Generic class object used to return an object, error message or both, and a success 
  * indicator back from a method call.
  */
-package apache_flink.helper;
+package apache_flink.kickstarter.helper;
 
 
 public class ObjectResult<T> {
