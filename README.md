@@ -90,7 +90,7 @@ By calling Flink jobs "Flink applications," it emphasizes the comprehensive, com
 > - [Snowflake Account](https://app.snowflake.com/)
 > - [Terraform Cloud Account](https://app.terraform.io/)
 > 
-> On your local machine you need the following installed:
+> On your local machine, you need to have the following installed:
 > - AWS CLI version 2
 > - Confluent CLI version 3
 > - Docker Desktop
