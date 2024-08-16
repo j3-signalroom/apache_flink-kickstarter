@@ -106,7 +106,7 @@ As of August 2024, Confluent’s Serverless Flink offering does not yet support 
 
     a. Have your Confluent Cloud environment with a Kafka Cluster that uses the example Kafka topics and their schemas in the Schema Registry set up for you.
 
-    b. Have your AWS Secrets Manager to store Kafka Cluster and Schema Registry Cluster API Key Secrets, respectively, along with the Consumer and Producer Kafka properties in the AWS Systems Parameter Store set up for you.
+    b. Have your AWS Secrets Manager to store Kafka Cluster and Schema Registry Cluster API Key Secrets, respectively, along with the Consumer and Producer Kafka properties in the AWS Systems Parameter Store set up for you.  Also, a S3 Bucket is created for the Apache Iceberg files.
 
 2. Run Apache Flink on your Mac locally, or Power up the Docker containers that run Apache Flink and Apache Iceberg locally on your machine.
 

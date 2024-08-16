@@ -24,9 +24,10 @@ for arg in "$@" # $@ sees arguments as separate words
 do
     case $arg in
         *"--profile="*)
-            arg_length=10
-            environment_name=${arg:$arg_length:$(expr ${#arg} - $arg_length)}
             AWS_PROFILE=$arg;;
+        *"--environment="*)
+            arg_length=14
+            environment_name=${arg:$arg_length:$(expr ${#arg} - $arg_length)};;
         *"--confluent_cloud_api_key="*)
             arg_length=26
             confluent_cloud_api_key=${arg:$arg_length:$(expr ${#arg} - $arg_length)};;
@@ -61,6 +62,9 @@ printf "confluent_cloud_api_key=\"${confluent_cloud_api_key}\"\
 \naws_account_id=\"${AWS_ACCOUNT_ID}\"\
 \naws_profile=\"${environment_name}\"\
 \naws_region=\"${AWS_REGION}\"\
+\naws_access_key_id=\"${AWS_ACCESS_KEY_ID}\"\
+\naws_secret_access_key=\"${AWS_SECRET_ACCESS_KEY}\"\
+\naws_session_token=\"${AWS_SESSION_TOKEN}\"\
 \nnumber_of_api_keys_to_retain = 2\
 \nday_count=30\
 \nauto_offset_reset=\"earliest\"" > terraform.tfvars
