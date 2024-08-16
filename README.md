@@ -26,7 +26,7 @@ No.|Capability|Description
     - [Development Perspective](#development-perspective)
     - [Ecosystem Integration](#ecosystem-integration)
     - [Terminology and Communication](#terminology-and-communication)
-+ [How to use this repo?](#how-to-use-this-repo)
++ [Let's get started](#lets-get-started)
     - [Set up your Terraform Cloud environment locally](#set-up-your-terraform-cloud-environment-locally)
         + [Terraform Cloud API token](#terraform-cloud-api-token)
             - [Set up your Confluent Cloud environment](#set-up-your-confluent-cloud-environment)
@@ -77,7 +77,7 @@ Flink jobs are often called Flink applications because they encompass more than 
 
 By calling Flink jobs "Flink applications," it emphasizes the comprehensive, complex, and integrated nature of the work, aligning it more closely with how we think about and manage software applications in general.
 
-## How to use this repo?
+## Let's get started
 
 > **Cloud and Local Environment Prequisities**
 >
@@ -99,7 +99,7 @@ By calling Flink jobs "Flink applications," it emphasizes the comprehensive, com
 
 As of August 2024, Confluent’s Serverless Flink offering does not yet support the DataStream API and Table API for writing Flink Apps in Java or Python.  Therefore, this repo restricts the use of cloud resources to the _Confluent Cloud Kafka Cluster and Schema Registry_ only.  It utilizes _AWS Secrets Manager_ to store Kafka Cluster and Schema Registry API Key secrets, _AWS Systems Manager Parameter Store_ to store Consumer and Producer Kafka configuration properties, and _Terraform Cloud for Infrastructure as Code (IaC) DevOps CI/CD_.  Locally, we will utilize Docker containers to run Apache Flink and Apache Iceberg.
 
-**To start using the repo**
+**These are the steps**
 
 1. Set up your Terraform Cloud environment locally, or use [GitHub workflow/actions](.github/workflows/deploy.yml), so you can:
 
