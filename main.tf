@@ -4,7 +4,7 @@ terraform {
       #organization = "<TERRAFORM CLOUD ORGANIZATION NAME>"
 
         workspaces {
-            name = "confluent-cloud-us-east-004"
+            name = "confluent-cloud-us-east-005"
             #name = "<TERRAFORM CLOUD ORGANIZATION's WORKSPACE NAME>"
         }
   }
