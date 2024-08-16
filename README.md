@@ -91,12 +91,12 @@ By calling Flink jobs "Flink applications," it emphasizes the comprehensive, com
 > - [Terraform Cloud Account](https://app.terraform.io/)
 > 
 > On your local machine, you need to have the following installed:
-> - AWS CLI version 2
-> - Confluent CLI version 3
-> - Docker Desktop
-> - Java JDK (Java Development Kit) 11
-> - Python 3.11
-> - Terraform CLI version 1.85 or higher
+> - [AWS CLI version 2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+> - [Confluent CLI version 3 or higher](https://docs.confluent.io/confluent-cli/4.0/overview.html)
+> - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+> - [Java JDK (Java Development Kit) 11](https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html)
+> - [Python 3.11](https://www.python.org/downloads/release/python-3119/)
+> - [Terraform CLI version 1.85 or higher](https://developer.hashicorp.com/terraform/install)
 
 As of August 2024, Confluent’s Serverless Flink offering does not yet support the DataStream API and Table API for writing Flink Apps in Java or Python.  Therefore, this repo restricts the use of cloud resources to the _Confluent Cloud Kafka Cluster and Schema Registry_ only.  It utilizes _AWS Secrets Manager_ to store Kafka Cluster and Schema Registry API Key secrets, _AWS Systems Manager Parameter Store_ to store Consumer and Producer Kafka configuration properties, and _Terraform Cloud for Infrastructure as Code (IaC) DevOps CI/CD_.  Locally, we will utilize Docker containers to run Apache Flink and Apache Iceberg.
 
