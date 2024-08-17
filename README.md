@@ -20,15 +20,9 @@ No.|Capability|Description
 
 <!-- toc -->
 + [What do we call these examples, Flink Jobs or Flink Applications?](#what-do-we-call-these-examples-flink-jobs-or-flink-applications)
-    - [Comprehensive Nature](#comprehensive-nature)
-    - [Execution Context](#execution-context)
-    - [Deployment and Operations](#deployment-and-operations)
-    - [Development Perspective](#development-perspective)
-    - [Ecosystem Integration](#ecosystem-integration)
-    - [Terminology and Communication](#terminology-and-communication)
 + [Let's get started](#lets-get-started)
-    - [DevOps using Terraform Cloud](#devops-using-terraform-cloud)
-        + [Terraform Cloud API token](#terraform-cloud-api-token)
+    - [DevOps in Action with Terraform Cloud](#devops-in-action-with-terraform-cloud)
+        + [Get Terraform Cloud API token](#get-terraform-cloud-api-token)
             - [Set up your Confluent Cloud environment](#set-up-your-confluent-cloud-environment)
                 + [AWS Secrets Manager](#aws-secrets-manager)
                 + [AWS Systems Manager Parameter Store](#aws-systems-manager-parameter-store)
@@ -45,7 +39,9 @@ No.|Capability|Description
 
 ## What do we call these examples, Flink Jobs or Flink Applications?
 
-> _"What's in a name? That which we call a rose by any other name would smell just as sweet." -- William Shakespeare_
+> _"What's in a name? That which we call a rose by any other name would smell just as sweet."_
+>
+> -- _William Shakespeare_
 
 Flink jobs are often called Flink applications because they encompass more than just a single task or computation. The term "application" better reflects the nature and scope of what is being developed and executed in Apache Flink.  (See [here](.blog/rationale-behind-calling-it-flink-app.md) for the rationale behind this reasoning.)  By calling Flink jobs "Flink applications," it emphasizes the comprehensive, complex, and integrated nature of the work, aligning it more closely with how we think about and manage software applications in general.
 
@@ -85,10 +81,10 @@ As of August 2024, Confluent’s Serverless Flink offering does not yet support 
 
 4. Run Apache Flink on your Mac locally, or Power up the Docker containers that run Apache Flink and Apache Iceberg locally on your machine.
 
-### DevOps using Terraform Cloud
+### DevOps in Action with Terraform Cloud
 Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your local machine, and obtain an [HCP Terraform account](https://app.terraform.io/session) to run the Terraform configuration.
 
-#### Terraform Cloud API token
+#### Get Terraform Cloud API token
 In order to authenticate with HCP Terraform, run the `terraform login` CLI command.  Enter `yes` to the prompt to confirm that you want to authenticate.
 
 ![terraform-cli-login](.blog/images/terraform-cli-login-screenshot.png)
