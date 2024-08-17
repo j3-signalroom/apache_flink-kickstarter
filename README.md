@@ -27,7 +27,7 @@ No.|Capability|Description
     - [Ecosystem Integration](#ecosystem-integration)
     - [Terminology and Communication](#terminology-and-communication)
 + [Let's get started](#lets-get-started)
-    - [Set up your Terraform Cloud environment locally](#set-up-your-terraform-cloud-environment-locally)
+    - [DevOps using Terraform Cloud](#devops-using-terraform-cloud)
         + [Terraform Cloud API token](#terraform-cloud-api-token)
             - [Set up your Confluent Cloud environment](#set-up-your-confluent-cloud-environment)
                 + [AWS Secrets Manager](#aws-secrets-manager)
@@ -109,11 +109,11 @@ As of August 2024, Confluent’s Serverless Flink offering does not yet support 
 
 2. Run Apache Flink on your Mac locally, or Power up the Docker containers that run Apache Flink and Apache Iceberg locally on your machine.
 
-### Set up your Terraform Cloud environment locally
-Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your local machine.  Then ensure you have an [HCP Terraform account](https://app.terraform.io/session) to run the Terraform configuration provided in the cloud.
+### DevOps using Terraform Cloud
+Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your local machine, and obtain an [HCP Terraform account](https://app.terraform.io/session) to run the Terraform configuration.
 
 #### Terraform Cloud API token
-In order to authenticate with HCP Terraform, run the terraform login subcommand.  Enter `yes` to the prompt to confirm that you want to authenticate.
+In order to authenticate with HCP Terraform, run the `terraform login` CLI command.  Enter `yes` to the prompt to confirm that you want to authenticate.
 
 ![terraform-cli-login](.blog/images/terraform-cli-login-screenshot.png)
 
