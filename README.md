@@ -60,7 +60,7 @@ As of August 2024, Confluent’s Serverless Flink offering does not yet support 
     > - [Snowflake Account](https://app.snowflake.com/)
     > - [Terraform Cloud Account](https://app.terraform.io/)
     > 
-    > You installed your local::
+    > You installed your local:
     > - [AWS CLI version 2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
     > - [Confluent CLI version 3 or higher](https://docs.confluent.io/confluent-cli/4.0/overview.html)
     > - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
