@@ -11,9 +11,9 @@
 if [ ! -n "$1" ]
 then
     echo
-    echo "(Error Message 001)  You did not include an argument in the call."
+    echo "(Error Message 001)  You did not include all four arguments in the call."
     echo
-    echo "Usage:  Require at least two arguments ---> `basename $0` --profile=<AWS_SSO_PROFILE_NAME>"
+    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -38,13 +38,46 @@ do
     let "arg_count+=1"
 done
 
+# Check required --environment argument was supplied
+if [ -z $environment_name ]
+then
+    echo
+    echo "(Error Message 002)  You did not include the proper use of the --environment=<ENVIRONMENT_NAME> argument in the call."
+    echo
+    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS>"
+    echo
+    exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
+fi
+
 # Check required --profile argument was supplied
 if [ -z $AWS_PROFILE ]
 then
     echo
-    echo "(Error Message 002)  You did not include the proper use of the --profile=<AWS_SSO_PROFILE_NAME> argument in the call."
+    echo "(Error Message 003)  You did not include the proper use of the --profile=<AWS_SSO_PROFILE_NAME> argument in the call."
     echo
-    echo "Usage:  Require at least two arguments ---> `basename $0` --profile=<AWS_SSO_PROFILE_NAME>"
+    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS>"
+    echo
+    exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
+fi
+
+# Check required --confluent_cloud_api_key argument was supplied
+if [ -z $confluent_cloud_api_key ]
+then
+    echo
+    echo "(Error Message 004)  You did not include the proper use of the --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> argument in the call."
+    echo
+    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS>"
+    echo
+    exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
+fi
+
+# Check required --confluent_cloud_api_secret argument was supplied
+if [ -z $confluent_cloud_api_secret ]
+then
+    echo
+    echo "(Error Message 005)  You did not include the proper use of the --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> argument in the call."
+    echo
+    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
