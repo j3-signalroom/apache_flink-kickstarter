@@ -2,7 +2,9 @@
 Examples of Apache Flink® applications showcasing the [DataStream API](https://nightlies.apache.org/flink/flink-docs-master/docs/learn-flink/datastream_api/) and [Table API](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/overview/) in Java, featuring AWS, GitHub, Terraform, and Apache Iceberg.  What's the difference between the DataStream API and Table API?  Click [how](../.blog/datastream-vs-table-api.md) to learn the differences. 
 
 ## Try out these Flink Apps
-Open the repo from the `Java` subfolder.  Then run:
+Before we start, I wanted to mention that in the project, I used [Gradle](https://gradle.com/) instead of Maven for the build automation.  Gradle is more straightforward, flexible, and powerful than its counterpart, Maven.  For instance, I use the Kotlin-supported version of Gradle to write the build because Kotlin offers type safety, IDE support, modern language features (i.e., not an XML derivative you'll find with Maven), and faster builds.
+
+Okay, let's start by opening the project from the `Java` subfolder. Then run:
 
 ```
 ./gradlew app:clean
