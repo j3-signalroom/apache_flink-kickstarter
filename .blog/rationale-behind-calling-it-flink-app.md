@@ -1,5 +1,16 @@
 # Rationale behind calling it a Flink App
 
+**Table of Contents**
+
+<!-- toc -->
++ [Comprehensive Nature](#comprehensive-nature)
++ [Execution Context](#execution-context)
++ [Deployment and Operations](#deployment-and-operations)
++ [Development Perspective](#development-perspective)
++ [Ecosystem Integration](#ecosystem-integration)
++ [Terminology and Communication](#terminology-and-communication)
+<!-- tocstop -->
+
 ## Comprehensive Nature
 1. **Complex Workflows**: Flink jobs often represent complex workflows that include multiple stages of data processing, such as data ingestion, transformation, aggregation, and output. These workflows can be intricate and involve various interconnected operations, similar to a traditional application.
 
