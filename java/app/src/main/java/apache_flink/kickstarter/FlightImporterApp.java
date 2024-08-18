@@ -26,8 +26,6 @@ import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.formats.json.*;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.*;
@@ -107,13 +105,15 @@ public class FlightImporterApp {
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
 		 * properties into the Flink app
 		 */
-        DataStream<Properties> dataStreamConsumerProperties = env.addSource(new KafkaClientPropertiesSource(true, args));
+        DataStream<Properties> dataStreamConsumerProperties = 
+			env.fromData(new Properties())
+			   .map(new KafkaClientPropertiesLookup(true, Common.checkForFlagGetFromAws(args)))
+			   .name("kafka_consumer_properties");
 		Properties consumerProperties = new Properties();
-		dataStreamConsumerProperties
-			.executeAndCollect()
-				.forEachRemaining(typeValue -> {
-					consumerProperties.putAll(typeValue);
-				});
+		dataStreamConsumerProperties.executeAndCollect()
+                                    .forEachRemaining(typeValue -> {
+                                        consumerProperties.putAll(typeValue);
+                                    });
 
         /*
 		 * --- Kafka Producer Config
@@ -121,13 +121,15 @@ public class FlightImporterApp {
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
 		 * properties into the Flink app
 		 */
-        DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
+        DataStream<Properties> dataStreamProducerProperties = 
+			env.fromData(new Properties())
+			   .map(new KafkaClientPropertiesLookup(false, Common.checkForFlagGetFromAws(args)))
+			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
-		dataStreamProducerProperties
-			.executeAndCollect()
-				.forEachRemaining(typeValue -> {
-					producerProperties.putAll(typeValue);
-				});
+		dataStreamProducerProperties.executeAndCollect()
+                                    .forEachRemaining(typeValue -> {
+                                        producerProperties.putAll(typeValue);
+                                    });
 
         /*
          * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
@@ -171,7 +173,7 @@ public class FlightImporterApp {
          */
 		KafkaRecordSerializationSchema<FlightData> flightSerializer = KafkaRecordSerializationSchema.<FlightData>builder()
             .setTopic("airline.all")
-			.setValueSerializationSchema(new JsonSerializationSchema<FlightData>(FlightImporterApp::getMapper))
+			.setValueSerializationSchema(new JsonSerializationSchema<FlightData>(Common::getMapper))
             .build();
 
         /*
@@ -218,12 +220,4 @@ public class FlightImporterApp {
 
 		return skyOneFlightStream.union(sunsetFlightStream);
     }
-
-    /**
-     * @return returns a new instance of the Jackson ObjectMapper with the JavaTimeModule
-     * registered.
-     */
-	private static ObjectMapper getMapper() {
-		return new ObjectMapper().registerModule(new JavaTimeModule());
-	}
 }

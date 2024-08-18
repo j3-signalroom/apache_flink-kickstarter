@@ -52,13 +52,15 @@ public class UserStatisticsApp {
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
 		 * properties into the Flink app
 		 */
-        DataStream<Properties> dataStreamConsumerProperties = env.addSource(new KafkaClientPropertiesSource(true, args));
+        DataStream<Properties> dataStreamConsumerProperties = 
+			env.fromData(new Properties())
+			   .map(new KafkaClientPropertiesLookup(true, Common.checkForFlagGetFromAws(args)))
+			   .name("kafka_consumer_properties");
 		Properties consumerProperties = new Properties();
-		dataStreamConsumerProperties
-			.executeAndCollect()
-				.forEachRemaining(typeValue -> {
-					consumerProperties.putAll(typeValue);
-				});
+		dataStreamConsumerProperties.executeAndCollect()
+                                    .forEachRemaining(typeValue -> {
+                                        consumerProperties.putAll(typeValue);
+                                    });
 
         /*
 		 * --- Kafka Producer Config
@@ -66,13 +68,15 @@ public class UserStatisticsApp {
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
 		 * properties into the Flink app
 		 */
-        DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
+        DataStream<Properties> dataStreamProducerProperties = 
+			env.fromData(new Properties())
+			   .map(new KafkaClientPropertiesLookup(false, Common.checkForFlagGetFromAws(args)))
+			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
-		dataStreamProducerProperties
-			.executeAndCollect()
-				.forEachRemaining(typeValue -> {
-					producerProperties.putAll(typeValue);
-				});
+		dataStreamProducerProperties.executeAndCollect()
+                                    .forEachRemaining(typeValue -> {
+                                        producerProperties.putAll(typeValue);
+                                    });
 
         /*
          * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.all` with the

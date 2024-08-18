@@ -17,10 +17,9 @@ import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.formats.json.JsonSerializationSchema;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.*;
+
 import java.util.*;
 import org.slf4j.*;
 
@@ -52,13 +51,15 @@ public class DataGeneratorApp {
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
 		 * properties into the Flink app
 		 */
-        DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
+        DataStream<Properties> dataStreamProducerProperties = 
+			env.fromData(new Properties())
+			   .map(new KafkaClientPropertiesLookup(false, Common.checkForFlagGetFromAws(args)))
+			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
-		dataStreamProducerProperties
-			.executeAndCollect()
-				.forEachRemaining(typeValue -> {
-					producerProperties.putAll(typeValue);
-				});
+		dataStreamProducerProperties.executeAndCollect()
+									.forEachRemaining(typeValue -> {
+										producerProperties.putAll(typeValue);
+									});
 
 		/*
 		 * Create a data generator source
@@ -84,7 +85,7 @@ public class DataGeneratorApp {
 		KafkaRecordSerializationSchema<SkyOneAirlinesFlightData> skyOneSerializer = 
 			KafkaRecordSerializationSchema.<SkyOneAirlinesFlightData>builder()
 				.setTopic("airline.skyone")
-				.setValueSerializationSchema(new JsonSerializationSchema<>(DataGeneratorApp::getMapper))
+				.setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
 				.build();
 
 		/*
@@ -125,7 +126,7 @@ public class DataGeneratorApp {
 		KafkaRecordSerializationSchema<SunsetAirFlightData> sunsetSerializer = 
 			KafkaRecordSerializationSchema.<SunsetAirFlightData>builder()
 				.setTopic("airline.sunset")
-				.setValueSerializationSchema(new JsonSerializationSchema<>(DataGeneratorApp::getMapper))
+				.setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
 				.build();
 
 		/*
@@ -151,13 +152,5 @@ public class DataGeneratorApp {
 		} catch (Exception e) {
 			logger.error("The App stopped early due to the following: {}", e.getMessage());
 		}
-	}
-
-	/**
-     * @return returns a new instance of the Jackson ObjectMapper with the JavaTimeModule
-     * registered.
-     */
-	private static ObjectMapper getMapper() {
-		return new ObjectMapper().registerModule(new JavaTimeModule());
 	}
 }
