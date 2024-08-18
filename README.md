@@ -98,7 +98,7 @@ Using the Confluent CLI, execute the follow command to generate the Cloud API Ke
 ```
 confluent api-key create --resource "cloud" 
 ```
-Then, for instance, copy-and-paste the API Key and API Secret values to the respective, `CONFLUENT_CLOUD_API_KEY` and `CONFLUENT_CLOUD_API_SECRET` secrets, that need to be created/updated on the [J3 repository Actions secrets and variables page](https://github.com/j3-signalroom/apache_flink-kickstarter/settings/secrets/actions).
+Then, for instance, copy-and-paste the API Key and API Secret values to the respective, `CONFLUENT_CLOUD_API_KEY` and `CONFLUENT_CLOUD_API_SECRET` secrets, that need to be created/updated on the [GitHub Action secrets and variables, secret tab](https://github.com/j3-signalroom/apache_flink-kickstarter/settings/secrets/actions).
 
 ### Power up the Apache Flink Docker containers
 
