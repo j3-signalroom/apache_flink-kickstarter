@@ -13,17 +13,12 @@ package apache_flink.kickstarter;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.formats.json.JsonSerializationSchema;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.*;
-import org.apache.iceberg.flink.FlinkConfigOptions;
 
 import java.util.*;
 import org.slf4j.*;
@@ -50,20 +45,16 @@ public class DataGeneratorApp {
 		// --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-		// --- Create a configuration instance
-        Configuration configuration = new Configuration();
-
-        // --- Set some configuration values
-        configuration.set(KafkaClientPropertiesLookupConfigOptions.JOB_FOR_CONSUMER_KAFKA_CLIENT, false);
-        configuration.set(KafkaClientPropertiesLookupConfigOptions.JOB_USE_AWS, Common.checkForFlagGetFromAws(args));
-		
 		/*
 		 * --- Kafka Producer Config
 		 * Retrieve the properties from the local properties files, or from AWS
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
 		 * properties into the Flink app
 		 */
-        DataStream<Properties> dataStreamProducerProperties =  env.addSource(new KafkaClientPropertiesLookup(false, args));
+        DataStream<Properties> dataStreamProducerProperties = 
+			env.fromData(new Properties())
+			   .map(new KafkaClientPropertiesLookup(false, Common.checkForFlagGetFromAws(args)))
+			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
 		dataStreamProducerProperties
 			.executeAndCollect()

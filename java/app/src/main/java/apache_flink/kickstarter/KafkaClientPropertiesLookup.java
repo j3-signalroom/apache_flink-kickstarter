@@ -24,14 +24,19 @@ import apache_flink.kickstarter.enums.*;
 import apache_flink.kickstarter.helper.*;
 
 
-public class KafkaClientPropertiesLookup extends RichMapFunction<Object, Properties>{
+public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Properties>{
     private static final String CONFLUENT_CLOUD_RESOURCE_PATH = "/confluent_cloud_resource/";
     private static final String KAFKA_CLUSTER_SECRETS_PATH = CONFLUENT_CLOUD_RESOURCE_PATH + "kafka_cluster/java_client";
     private static final String KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH = CONFLUENT_CLOUD_RESOURCE_PATH + "consumer_kafka_client";
     private static final String KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH = CONFLUENT_CLOUD_RESOURCE_PATH + "producer_kafka_client";
 
-    private transient AtomicReference<Properties> properties;
+    private transient AtomicReference<Properties> _properties;
+    private volatile boolean _consumerKafkaClient;
+    private volatile boolean _useAws;
 
+
+    public KafkaClientPropertiesLookup(final boolean consumerKafkaClient, final boolean useAws) {
+    }
 
     /**
      * This method is called when the source is opened.  Any setup can be done
@@ -45,23 +50,18 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Object, Propert
      */
     @Override
     public void open(Configuration configuration) throws Exception {
-        // ---
-        boolean consumerKafkaClient = configuration.get(KafkaClientPropertiesLookupConfigOptions.JOB_USE_AWS);
-        boolean useAws = configuration.get(KafkaClientPropertiesLookupConfigOptions.JOB_FOR_CONSUMER_KAFKA_CLIENT);
-
-        // ---
-        ObjectResult<Properties> properties = getKafkaClientProperties(consumerKafkaClient, useAws);
+        ObjectResult<Properties> properties = getKafkaClientProperties(this._consumerKafkaClient, this._useAws);
 		if(!properties.isSuccessful()) { 
 			throw new RuntimeException("Failed to retrieve the Kafka Client properties could not be retrieved because " + properties.getErrorMessageCode() + " " + properties.getErrorMessage());
 		}
 
         // --- 
-        this.properties = new AtomicReference<>(properties.get());
+        this._properties = new AtomicReference<>(properties.get());
     }
 
     @Override
-    public Properties map(Object value) {
-        return(this.properties.get());
+    public Properties map(Properties value) {
+        return(this._properties.get());
     }
     
     @Override

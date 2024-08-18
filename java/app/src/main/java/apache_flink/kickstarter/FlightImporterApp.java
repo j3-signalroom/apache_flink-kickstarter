@@ -26,8 +26,6 @@ import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.formats.json.*;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.*;
@@ -107,7 +105,10 @@ public class FlightImporterApp {
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
 		 * properties into the Flink app
 		 */
-        DataStream<Properties> dataStreamConsumerProperties = env.addSource(new KafkaClientPropertiesSource(true, args));
+        DataStream<Properties> dataStreamConsumerProperties = 
+			env.fromData(new Properties())
+			   .map(new KafkaClientPropertiesLookup(true, Common.checkForFlagGetFromAws(args)))
+			   .name("kafka_consumer_properties");
 		Properties consumerProperties = new Properties();
 		dataStreamConsumerProperties
 			.executeAndCollect()
@@ -121,7 +122,10 @@ public class FlightImporterApp {
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
 		 * properties into the Flink app
 		 */
-        DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
+        DataStream<Properties> dataStreamProducerProperties = 
+			env.fromData(new Properties())
+			   .map(new KafkaClientPropertiesLookup(false, Common.checkForFlagGetFromAws(args)))
+			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
 		dataStreamProducerProperties
 			.executeAndCollect()
