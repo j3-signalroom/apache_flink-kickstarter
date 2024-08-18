@@ -24,6 +24,7 @@ No.|Capability|Description
     - [DevOps in Action with Terraform ran locally](#devops-in-action-with-terraform-ran-locally)
         + [Run Terraform locally](#run-terraform-locally)
     - [DevOps in Action with GitHub, running Terraform in the cloud](#devops-in-action-with-github-running-terraform-in-the-cloud)
+        + [Deploy Terraform from the cloud](#deploy-terraform-from-the-cloud)
     - [Power up the Apache Flink Docker containers](#power-up-the-apache-flink-docker-containers)
 + [Examples to get you kickstarted!](#examples-to-get-you-kickstarted)
     - [Java Examples](#java-examples)
@@ -85,6 +86,15 @@ scripts/run-terraform-locally.sh --environment=<ENVIRONMENT_NAME> --profile=<PRO
 
 ### DevOps in Action with GitHub, running Terraform in the cloud
 In order to run the Terraform configuration from GitHub, the Terraform Cloud API token and Confluent Cloud API Key are required as GitHub Secret variables.  Learn how to do to get the Terraform Cloud API token and Confluent Cloud API key [here](.blog/setup-github.md).
+
+#### Deploy Terraform from the cloud
+From the repo on GitHub, go to [GitHub Actions](https://github.com/j3-signalroom/apache_flink-kickstarter/actions), for instance (as shown in the picture below):
+
+![github-actions-screenshot](.blog/images/github-actions-screenshot.png)
+
+Then click the `Deploy` workflow, and the Deploy page will be displayed (as shown below):
+
+![github-deploy-workflow-screenshot](.blog/images/github-deploy-workflow-screenshot.png)
 
 ### Power up the Apache Flink Docker containers
 
