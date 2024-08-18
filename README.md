@@ -21,13 +21,9 @@ No.|Capability|Description
 <!-- toc -->
 + [What do we call these examples, Flink Jobs or Flink Applications?](#what-do-we-call-these-examples-flink-jobs-or-flink-applications)
 + [Let's get started](#lets-get-started)
-    - [DevOps in Action with Terraform Cloud](#devops-in-action-with-terraform-cloud)
-        + [Get Terraform Cloud API token](#get-terraform-cloud-api-token)
-            - [Set up your Confluent Cloud environment](#set-up-your-confluent-cloud-environment)
-                + [AWS Secrets Manager](#aws-secrets-manager)
-                + [AWS Systems Manager Parameter Store](#aws-systems-manager-parameter-store)
-        + [Run the Terraform configuration](#run-the-terraform-configuration)
-    - [GitHub set up](#github-set-up)
+    - [DevOps in Action with Terraform ran locally](#devops-in-action-with-terraform-ran-locally)
+        + [Run Terraform locally](#run-terraform-locally)
+    - [DevOps in Action with GitHub, running Terraform in the cloud](#devops-in-action-with-github-running-terraform-in-the-cloud)
         + [Terraform Cloud API token for GitHub set up](#terraform-cloud-api-token-for-github-set-up)
         + [Confluent Cloud API for GitHub set up](#confluent-cloud-api-for-github-set-up)
     - [Power up the Apache Flink Docker containers](#power-up-the-apache-flink-docker-containers)
@@ -81,7 +77,7 @@ As of August 2024, Confluent’s Serverless Flink offering does not yet support 
 
 4. Run Apache Flink on your Mac locally, or Power up the Docker containers that run Apache Flink and Apache Iceberg locally on your machine.
 
-### DevOps in Action with Terraform Cloud
+### DevOps in Action with Terraform ran locally
 Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your local machine, and make sure you have an [HCP Terraform account](https://app.terraform.io/session) to run the Terraform configuration.  For information on how to set up Terraform Cloud for local use click [here](.blog/setup-terraform-cloud.md).
 
 #### Run Terraform locally
@@ -89,7 +85,7 @@ Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials
 scripts/run-terraform-locally.sh --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> 
 ```
 
-### GitHub set up
+### DevOps in Action with GitHub, running Terraform in the cloud
 In order to run the Terraform configuration, the Terraform Cloud API token and Confluent Cloud API Key are required as GitHub Secret variables:
 
 #### Terraform Cloud API token for GitHub set up

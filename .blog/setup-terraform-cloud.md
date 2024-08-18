@@ -1,5 +1,14 @@
 # Set up Terraform Cloud for local use
 
+**Table of Contents**
+
+<!-- toc -->
++ [Get Terraform Cloud API token](#get-terraform-cloud-api-token)
+    - [Set up your Confluent Cloud environment](#set-up-your-confluent-cloud-environment)
+        + [AWS Secrets Manager](#aws-secrets-manager)
+        + [AWS Systems Manager Parameter Store](#aws-systems-manager-parameter-store)
+<!-- tocstop -->
+
 ## Get Terraform Cloud API token
 In order to authenticate with HCP Terraform, run the `terraform login` CLI command.  Enter `yes` to the prompt to confirm that you want to authenticate.
 
