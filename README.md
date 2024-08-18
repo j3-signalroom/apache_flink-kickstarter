@@ -19,20 +19,20 @@ No.|Capability|Description
 **Table of Contents**
 
 <!-- toc -->
-+ [What do we call these examples, Flink Jobs or Flink Applications?](#what-do-we-call-these-examples-flink-jobs-or-flink-applications)
-+ [Let's get started](#lets-get-started)
-    - [DevOps in Action with Terraform ran locally](#devops-in-action-with-terraform-ran-locally)
-        + [Run Terraform locally](#run-terraform-locally)
-    - [DevOps in Action with GitHub, running Terraform in the cloud](#devops-in-action-with-github-running-terraform-in-the-cloud)
-        + [Deploy Terraform from the cloud](#deploy-terraform-from-the-cloud)
-    - [Power up the Apache Flink Docker containers](#power-up-the-apache-flink-docker-containers)
-+ [Examples to get you kickstarted!](#examples-to-get-you-kickstarted)
-    - [Java Examples](#java-examples)
-    - [Python Examples](#python-examples)
-+ [Resources](#resources)
++ [1.0 What do we call these examples, Flink Jobs or Flink Applications?](#10-what-do-we-call-these-examples-flink-jobs-or-flink-applications)
++ [2.0 Let's get started](#20-lets-get-started)
+    - [2.1 DevOps in Action with Terraform ran locally](#21-devops-in-action-with-terraform-ran-locally)
+        + [2.1.1 Run Terraform locally](#211-run-terraform-locally)
+    - [2.2 DevOps in Action with GitHub, running Terraform in the cloud](#22-devops-in-action-with-github-running-terraform-in-the-cloud)
+        + [2.2.1 Deploy Terraform from the cloud](#221-deploy-terraform-from-the-cloud)
+    - [2.3 Power up the Apache Flink Docker containers](#23-power-up-the-apache-flink-docker-containers)
++ [3.0 Examples to get you kickstarted!](#30-examples-to-get-you-kickstarted)
+    - [3.1 Java Examples](#31-java-examples)
+    - [3.2 Python Examples](#32-flink-apps-written-in-python)
++ [4.0 Resources](#40-resources)
 <!-- tocstop -->
 
-## What do we call these examples, Flink Jobs or Flink Applications?
+## 1.0 What do we call these examples, Flink Jobs or Flink Applications?
 
 > _"What's in a name? That which we call a rose by any other name would smell just as sweet."_
 >
@@ -40,7 +40,7 @@ No.|Capability|Description
 
 Flink jobs are often called Flink applications because they encompass more than just a single task or computation. The term "application" better reflects the nature and scope of what is being developed and executed in Apache Flink.  (See [here](.blog/rationale-behind-calling-it-flink-app.md) for the rationale behind this reasoning.)  By calling Flink jobs "Flink applications," it emphasizes the comprehensive, complex, and integrated nature of the work, aligning it more closely with how we think about and manage software applications in general.
 
-## Let's get started
+## 2.0 Let's get started
 
 As of August 2024, Confluent’s Serverless Flink offering does not yet support the DataStream API and Table API for writing Flink Apps in Java or Python.  Therefore, this repo restricts the use of cloud resources to the _Confluent Cloud Kafka Cluster and Schema Registry_ only.  It utilizes _AWS Secrets Manager_ to store Kafka Cluster and Schema Registry API Key secrets, _AWS Systems Manager Parameter Store_ to store Consumer and Producer Kafka configuration properties, and _Terraform Cloud for Infrastructure as Code (IaC) DevOps CI/CD_.  Locally, we will utilize Docker containers to run Apache Flink and Apache Iceberg.
 
@@ -76,18 +76,18 @@ As of August 2024, Confluent’s Serverless Flink offering does not yet support 
 
 4. Run Apache Flink on your Mac locally, or Power up the Docker containers that run Apache Flink and Apache Iceberg locally on your machine.
 
-### DevOps in Action with Terraform ran locally
+### 2.1 DevOps in Action with Terraform ran locally
 Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your local machine, and make sure you have an [HCP Terraform account](https://app.terraform.io/session) to run the Terraform configuration.  Learn how to set up Terraform Cloud for local use by clicking [here](.blog/setup-terraform-cloud.md).
 
-#### Run Terraform locally
+#### 2.1.1 Run Terraform locally
 ```shell
 scripts/run-terraform-locally.sh --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> 
 ```
 
-### DevOps in Action with GitHub, running Terraform in the cloud
+### 2.2 DevOps in Action with GitHub, running Terraform in the cloud
 In order to run the Terraform configuration from GitHub, the Terraform Cloud API token and Confluent Cloud API Key are required as GitHub Secret variables.  Learn how to do to get the Terraform Cloud API token and Confluent Cloud API key [here](.blog/setup-github.md).
 
-#### Deploy Terraform from the cloud
+#### 2.2.1 Deploy Terraform from the cloud
 From the repo on GitHub, go to [GitHub Actions](https://github.com/j3-signalroom/apache_flink-kickstarter/actions), for instance (see screenshot below):
 
 ![github-actions-screenshot](.blog/images/github-actions-screenshot.png)
@@ -102,7 +102,7 @@ Click `Run workflow` button, and the Deploy dialog box will be displayed (see sc
 
 Then fill out the Deploy dialog box, and click the `Run workflow` button to deploy the Terraform configuration.
 
-### Power up the Apache Flink Docker containers
+### 2.3 Power up the Apache Flink Docker containers
 
 > **Prerequisite**
 > 
@@ -124,15 +124,15 @@ This section guides you through the local setup (on one machine but in separate 
 scripts/run-flink-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64>
 ```
 
-## Examples to get you kickstarted!
+## 3.0 Examples to get you kickstarted!
 
-### Flink Apps written in Java
+### 3.1 Flink Apps written in Java
 [Let's get started!](java/README.md)
 
-### Flink Apps written in Python
+### 3.2 Flink Apps written in Python
 [Let's get started!](python/README.md)
 
-## Resources
+## 4.0 Resources
 
 [Apache Flink's Core is Dataflow Programming](https://en.wikipedia.org/wiki/Dataflow_programming)
 
