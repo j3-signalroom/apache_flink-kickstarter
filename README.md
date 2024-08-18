@@ -88,13 +88,19 @@ scripts/run-terraform-locally.sh --environment=<ENVIRONMENT_NAME> --profile=<PRO
 In order to run the Terraform configuration from GitHub, the Terraform Cloud API token and Confluent Cloud API Key are required as GitHub Secret variables.  Learn how to do to get the Terraform Cloud API token and Confluent Cloud API key [here](.blog/setup-github.md).
 
 #### Deploy Terraform from the cloud
-From the repo on GitHub, go to [GitHub Actions](https://github.com/j3-signalroom/apache_flink-kickstarter/actions), for instance (as shown in the picture below):
+From the repo on GitHub, go to [GitHub Actions](https://github.com/j3-signalroom/apache_flink-kickstarter/actions), for instance (see screenshot below):
 
 ![github-actions-screenshot](.blog/images/github-actions-screenshot.png)
 
-Then click the `Deploy` workflow, and the Deploy page will be displayed (as shown below):
+Click the `Deploy` workflow, and the Deploy page will be displayed (see screenshot below):
 
 ![github-deploy-workflow-screenshot](.blog/images/github-deploy-workflow-screenshot.png)
+
+Click `Run workflow` button, and the Deploy dialog box will be displayed (see screenshot below):
+
+![github-run-deploy-workflow-screenshot](.blog/images/github-run-deploy-workflow-screenshot.png)
+
+Then fill out the Deploy dialog box, and click the `Run workflow` button to deploy the Terraform configuration.
 
 ### Power up the Apache Flink Docker containers
 
