@@ -13,6 +13,8 @@ package apache_flink.kickstarter;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.connector.kafka.sink.*;
@@ -21,6 +23,8 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMap
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.*;
+import org.apache.iceberg.flink.FlinkConfigOptions;
+
 import java.util.*;
 import org.slf4j.*;
 
@@ -46,13 +50,20 @@ public class DataGeneratorApp {
 		// --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
+		// --- Create a configuration instance
+        Configuration configuration = new Configuration();
+
+        // --- Set some configuration values
+        configuration.set(KafkaClientPropertiesLookupConfigOptions.JOB_FOR_CONSUMER_KAFKA_CLIENT, false);
+        configuration.set(KafkaClientPropertiesLookupConfigOptions.JOB_USE_AWS, Common.checkForFlagGetFromAws(args));
+		
 		/*
 		 * --- Kafka Producer Config
 		 * Retrieve the properties from the local properties files, or from AWS
          * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
 		 * properties into the Flink app
 		 */
-        DataStream<Properties> dataStreamProducerProperties = env.addSource(new KafkaClientPropertiesSource(false, args));
+        DataStream<Properties> dataStreamProducerProperties =  env.addSource(new KafkaClientPropertiesLookup(false, args));
 		Properties producerProperties = new Properties();
 		dataStreamProducerProperties
 			.executeAndCollect()
@@ -84,7 +95,7 @@ public class DataGeneratorApp {
 		KafkaRecordSerializationSchema<SkyOneAirlinesFlightData> skyOneSerializer = 
 			KafkaRecordSerializationSchema.<SkyOneAirlinesFlightData>builder()
 				.setTopic("airline.skyone")
-				.setValueSerializationSchema(new JsonSerializationSchema<>(DataGeneratorApp::getMapper))
+				.setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
 				.build();
 
 		/*
@@ -125,7 +136,7 @@ public class DataGeneratorApp {
 		KafkaRecordSerializationSchema<SunsetAirFlightData> sunsetSerializer = 
 			KafkaRecordSerializationSchema.<SunsetAirFlightData>builder()
 				.setTopic("airline.sunset")
-				.setValueSerializationSchema(new JsonSerializationSchema<>(DataGeneratorApp::getMapper))
+				.setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
 				.build();
 
 		/*
@@ -151,13 +162,5 @@ public class DataGeneratorApp {
 		} catch (Exception e) {
 			logger.error("The App stopped early due to the following: {}", e.getMessage());
 		}
-	}
-
-	/**
-     * @return returns a new instance of the Jackson ObjectMapper with the JavaTimeModule
-     * registered.
-     */
-	private static ObjectMapper getMapper() {
-		return new ObjectMapper().registerModule(new JavaTimeModule());
 	}
 }
