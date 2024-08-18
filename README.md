@@ -8,7 +8,7 @@ App|Description
 `FlightImporterApp`|This app imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and converts it to a unified format for the `airline.all` Kafka topic.
 `UserStatisticsApp`|This app processes data from the `airline.all` Kafka topic to aggregate user statistics in the `airline.user_statistics` Kafka topic.
 
- Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/), and adapted to showcase one best practice and three additional capabilities:
+ Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/), and adapted to showcase one *highly recommended* best practice and three additional capabilities:
 
 No.|Best Practice/Capability|Description
 -|-|-
@@ -55,7 +55,7 @@ As of August 2024, Confluent’s Serverless Flink offering does not yet support 
     > - [GitHub Account](https://github.com) *with OIDC configured for AWS*
     > - [Snowflake Account](https://app.snowflake.com/)
     > - [Terraform Cloud Account](https://app.terraform.io/) *with OIDC configured for GitHub*
-    > 
+    >    
     > You need to have the following installed on your local machine:
     > - [AWS CLI version 2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
     > - [Confluent CLI version 3 or higher](https://docs.confluent.io/confluent-cli/4.0/overview.html)
