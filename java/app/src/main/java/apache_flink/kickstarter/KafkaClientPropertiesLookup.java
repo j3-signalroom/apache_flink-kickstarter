@@ -35,12 +35,19 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
     private volatile boolean _useAws;
 
 
+    /**
+     * Default constructor.
+     * 
+     * @param consumerKafkaClient
+     * @param useAws
+     */
     public KafkaClientPropertiesLookup(final boolean consumerKafkaClient, final boolean useAws) {
+        this._consumerKafkaClient = consumerKafkaClient;
+        this._useAws = useAws;
     }
 
     /**
-     * This method is called when the source is opened.  Any setup can be done
-     * here if needed.
+     * This method is called once per parallel task instance when the job starts. 
      * 
      * @parameters The configuration containing the parameters attached to the
      * contract.
@@ -59,11 +66,23 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
         this._properties = new AtomicReference<>(properties.get());
     }
 
+    /**
+     * This method is called for each element of the input stream.
+     * 
+     * @param value - The input value.
+     * @return The result of the map operation.
+     */
     @Override
     public Properties map(Properties value) {
         return(this._properties.get());
     }
     
+    /**
+     * This method is called when the task is canceled or the job is stopped.
+     * 
+     * @throws Exception - Implementations may forward exceptions, which are
+     * caught.
+     */
     @Override
     public void close() throws Exception {}
 
