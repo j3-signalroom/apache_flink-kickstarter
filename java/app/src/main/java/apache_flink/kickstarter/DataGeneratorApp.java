@@ -56,11 +56,10 @@ public class DataGeneratorApp {
 			   .map(new KafkaClientPropertiesLookup(false, Common.checkForFlagGetFromAws(args)))
 			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
-		dataStreamProducerProperties
-			.executeAndCollect()
-				.forEachRemaining(typeValue -> {
-					producerProperties.putAll(typeValue);
-				});
+		dataStreamProducerProperties.executeAndCollect()
+									.forEachRemaining(typeValue -> {
+										producerProperties.putAll(typeValue);
+									});
 
 		/*
 		 * Create a data generator source
