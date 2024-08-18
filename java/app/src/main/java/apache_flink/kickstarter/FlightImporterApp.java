@@ -171,7 +171,7 @@ public class FlightImporterApp {
          */
 		KafkaRecordSerializationSchema<FlightData> flightSerializer = KafkaRecordSerializationSchema.<FlightData>builder()
             .setTopic("airline.all")
-			.setValueSerializationSchema(new JsonSerializationSchema<FlightData>(FlightImporterApp::getMapper))
+			.setValueSerializationSchema(new JsonSerializationSchema<FlightData>(Common::getMapper))
             .build();
 
         /*
@@ -218,12 +218,4 @@ public class FlightImporterApp {
 
 		return skyOneFlightStream.union(sunsetFlightStream);
     }
-
-    /**
-     * @return returns a new instance of the Jackson ObjectMapper with the JavaTimeModule
-     * registered.
-     */
-	private static ObjectMapper getMapper() {
-		return new ObjectMapper().registerModule(new JavaTimeModule());
-	}
 }
