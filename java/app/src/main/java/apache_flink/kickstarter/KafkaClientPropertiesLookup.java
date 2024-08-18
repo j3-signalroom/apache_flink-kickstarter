@@ -35,7 +35,15 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
     private volatile boolean _useAws;
 
 
+    /**
+     * Default constructor.
+     * 
+     * @param consumerKafkaClient
+     * @param useAws
+     */
     public KafkaClientPropertiesLookup(final boolean consumerKafkaClient, final boolean useAws) {
+        this._consumerKafkaClient = consumerKafkaClient;
+        this._useAws = useAws;
     }
 
     /**
