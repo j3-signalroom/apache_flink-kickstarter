@@ -38,6 +38,8 @@ dependencies {
     implementation("software.amazon.awssdk:ssm:${awssdkVersion}")
     implementation("org.json:json:20240303")
     runtimeOnly("org.apache.iceberg:iceberg-core:${icebergVersion}")
+    implementation("org.apache.iceberg:iceberg-snowflake:${icebergVersion}")
+    implementation("net.snowflake:snowflake-jdbc:3.18.0")
     implementation("org.apache.iceberg:iceberg-flink-runtime-1.19:${icebergVersion}")
     testImplementation("org.apache.flink:flink-test-utils:${flinkVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
