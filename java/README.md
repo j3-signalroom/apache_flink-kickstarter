@@ -6,7 +6,7 @@ Before we start, I wanted to mention that in the project, I used ![gradle](../.b
 
 Okay, let's start by opening the project from the `Java` subfolder. Then run:
 
-```
+```shell
 ./gradlew app:clean
 ```
 
@@ -15,13 +15,13 @@ Okay, let's start by opening the project from the `Java` subfolder. Then run:
 
 Now build JAR file that contains all the Flink Apps on it, by running:
 
-```
+```shell
 ./gradlew app:build
 ```
 
 Logon to the `apache_flink-kickstarter-jobmanager-1` container's Interative Shell:
 
-```
+```shell
 docker exec -it -w /opt/flink/apps apache_flink-kickstarter-jobmanager-1 /bin/bash
 ```
 
