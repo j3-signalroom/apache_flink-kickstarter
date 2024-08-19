@@ -16,6 +16,9 @@ terraform {
             source  = "hashicorp/aws"
             version = "~> 5.60.0"
         }
+        snowflake = {
+            source = "Snowflake-Labs/snowflake"
+        }
     }
 }
 
