@@ -1,56 +1,7 @@
 services:
-  # Nessie Catalog Server Using In-Memory Store
-  catalog:
-    image: projectnessie/nessie
-    container_name: catalog
-    networks:
-      flink-nessie-iceberg-net:
-    ports:
-      - 19120:19120
-  # Minio Storage Server
-  storage:
-    image: minio/minio
-    container_name: storage
-    environment:
-      - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=password
-      - MINIO_DOMAIN=storage
-      - MINIO_REGION_NAME=${AWS_REGION:-us-east-1}
-      - MINIO_REGION=${AWS_REGION:-us-east-1}
-    networks:
-      flink-nessie-iceberg-net:
-    ports:
-      - 9001:9001
-      - 9000:9000
-    command: ["server", "/data", "--console-address", ":9001"]
-  # Minio Client Container
-  mc:
-    depends_on:
-      - storage
-    image: minio/mc
-    container_name: mc
-    networks:
-      flink-nessie-iceberg-net:
-        aliases:
-          - minio.storage
-    environment:
-      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-      - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
-      - AWS_REGION=${AWS_REGION}
-      - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
-    entrypoint: >
-      /bin/sh -c "
-      until (/usr/bin/mc config host add minio http://storage:9000 admin password) do echo '...waiting...' && sleep 1; done;
-      /usr/bin/mc mb minio/iceberg;
-      /usr/bin/mc policy set public minio/iceberg;
-      tail -f /dev/null
-      "
   # Apache Flink Job Manager
   jobmanager:
     image: ${FLINK_DOCKER_IMAGE:-j3signalroom/mac_flink-with_hadoop_iceberg:latest}
-    networks:
-      flink-nessie-iceberg-net:
     ports:
       - 8081:8081
       - 9092:9092
@@ -58,7 +9,6 @@ services:
     command: jobmanager
     volumes:
       - ./java/app/build/libs:/opt/flink/apps
-      - ./java/app/warehouse:/opt/flink/data/warehouse
     environment:
       - |
         FLINK_PROPERTIES=
@@ -68,20 +18,15 @@ services:
       - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
       - AWS_REGION=${AWS_REGION}
       - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
-      - S3_ENDPOINT=http://minio.storage:9000
-      - S3_PATH_STYLE_ACCESS=true        
   # Apache Flink Task Manager
   taskmanager:
     image: ${FLINK_DOCKER_IMAGE:-j3signalroom/mac_flink-with_hadoop_iceberg:latest}
     depends_on:
       - jobmanager
     command: taskmanager
-    networks:
-      flink-nessie-iceberg-net:
     scale: 3
     volumes:
       - ./java/app/build/libs:/opt/flink/apps
-      - ./java/app/warehouse:/opt/flink/data/warehouse
     environment:
       - |
         FLINK_PROPERTIES=
@@ -92,10 +37,3 @@ services:
       - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
       - AWS_REGION=${AWS_REGION}
       - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
-      - S3_ENDPOINT=http://minio.storage:9000
-      - S3_PATH_STYLE_ACCESS=true
-
-# Containers' shared network
-networks:
-  flink-nessie-iceberg-net:
-    driver: bridge        # Use the default bridge network driver
