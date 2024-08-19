@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file.
 
 The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.00.000] - TBD
+## Added
+- Terraform the AWS S3 bucket that is used for Apache Iceberg file storage
+- Updated the `run-terraform-locally.sh` Bash script handles both the plan\apply and destroy actions
+- 
+
+### Changed
+- Split the Terraform configuration into different files based on the jobs of each
+- Updated the `README.md` files
+- Removed Project Nessie and MINIO docker containers from the `docker-compose.yml`
+
 ## [0.22.01.000] - 2024-08-18
 ### Fixed
 - Store and use the arguments pass to the `KafkaClientPropertiesLookup` constructor 

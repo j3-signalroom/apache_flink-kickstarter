@@ -2,24 +2,24 @@
 
 #
 # *** Script Syntax ***
-# scripts/run-terraform-locally.sh --profile=<AWS_SSO_PROFILE_NAME>
+# scripts/run-terraform-locally.sh --environment=<ENVIRONMENT_NAME> --profile=<SSO_PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> --action=<create | destroy>
 #
-# *** Example Call ***
-# scripts/run-terraform-locally.sh --profile=AdministratorAccess-0123456789
 #
+
 # Check if arguments were supplied; otherwise exit script
 if [ ! -n "$1" ]
 then
     echo
     echo "(Error Message 001)  You did not include all four arguments in the call."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS>"
+    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<SSO_PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> --action=<create | destroy>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
 
 # Get the arguments passed
 arg_count=0
+action_argument_supplied=false
 for arg in "$@" # $@ sees arguments as separate words
 do
     case $arg in
@@ -34,6 +34,12 @@ do
         *"--confluent_cloud_api_secret="*)
             arg_length=29
             confluent_cloud_api_secret=${arg:$arg_length:$(expr ${#arg} - $arg_length)};;
+        *"--action=create"*)
+            action_argument_supplied=true
+            create_action=true;;
+        *"--action=destroy"*)
+            action_argument_supplied=true
+            create_action=false;;
     esac
     let "arg_count+=1"
 done
@@ -44,7 +50,7 @@ then
     echo
     echo "(Error Message 002)  You did not include the proper use of the --environment=<ENVIRONMENT_NAME> argument in the call."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS>"
+    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<SSO_PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> --action=<create | destroy>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -53,9 +59,9 @@ fi
 if [ -z $AWS_PROFILE ]
 then
     echo
-    echo "(Error Message 003)  You did not include the proper use of the --profile=<AWS_SSO_PROFILE_NAME> argument in the call."
+    echo "(Error Message 003)  You did not include the proper use of the --profile=<AWS_SSO_SSO_PROFILE_NAME> argument in the call."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS>"
+    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<SSO_PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> --action=<create | destroy>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -66,7 +72,7 @@ then
     echo
     echo "(Error Message 004)  You did not include the proper use of the --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> argument in the call."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS>"
+    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<SSO_PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> --action=<create | destroy>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -77,10 +83,22 @@ then
     echo
     echo "(Error Message 005)  You did not include the proper use of the --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> argument in the call."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS>"
+    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<SSO_PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> --action=<create | destroy>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
+
+# Check required --action argument was supplied
+if [ "$action_argument_supplied" = false ]
+then
+    echo
+    echo "(Error Message 002)  You did not include the proper use of the --action=<create | destroy> argument in the call."
+    echo
+    echo "Usage:  Require all four arguments ---> `basename $0` --environment=<ENVIRONMENT_NAME> --profile=<SSO_PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> --action=<create | destroy>"
+    echo
+    exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
+fi
+
 
 # Get the SSO AWS_ACCESS_KEY_ID, AWS_ACCESS_SECRET_KEY, AWS_SESSION_TOKEN, and AWS_REGION, and
 # set them as an environmental variables
@@ -103,5 +121,11 @@ printf "confluent_cloud_api_key=\"${confluent_cloud_api_key}\"\
 \nauto_offset_reset=\"earliest\"" > terraform.tfvars
 
 terraform init
-terraform plan -var-file=terraform.tfvars
-terraform apply -var-file=terraform.tfvars
+
+if [ "$create_action" = true ]
+then
+    terraform plan -var-file=terraform.tfvars
+    terraform apply -var-file=terraform.tfvars
+else
+    terraform destroy -var-file=terraform.tfvars
+fi
