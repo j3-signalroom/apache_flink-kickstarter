@@ -92,6 +92,9 @@ jobs:
           TF_VAR_aws_account_id: ${{ steps.aws-profile-properties.outputs.aws_account_id }}
           TF_VAR_aws_profile: ${{ github.event.inputs.aws_profile }}
           TF_VAR_aws_region: ${{ github.event.inputs.aws_region }}
+          TF_VAR_snowflake_login_url: ${{ secrets.snowflake_login_url }}
+          TF_VAR_snowflake_username: ${{ secrets.snowflake_username }}
+          TF_VAR_snowflake_password: ${{ secrets.snowflake_password }}
           TF_VAR_auto_offset_reset: ${{ github.event.inputs.auto_offset_reset }}
           TF_VAR_number_of_api_keys_to_retain: ${{ github.event.inputs.number_of_api_keys_to_retain }}
           TF_VAR_day_count: ${{ github.event.inputs.day_count }}
@@ -105,6 +108,9 @@ jobs:
           TF_VAR_aws_account_id: ${{ steps.aws-profile-properties.outputs.aws_account_id }}
           TF_VAR_aws_profile: ${{ github.event.inputs.aws_profile }}
           TF_VAR_aws_region: ${{ github.event.inputs.aws_region }}
+          TF_VAR_snowflake_login_url: ${{ secrets.snowflake_login_url }}
+          TF_VAR_snowflake_username: ${{ secrets.snowflake_username }}
+          TF_VAR_snowflake_password: ${{ secrets.snowflake_password }}
           TF_VAR_auto_offset_reset: ${{ github.event.inputs.auto_offset_reset }}
           TF_VAR_number_of_api_keys_to_retain: ${{ github.event.inputs.number_of_api_keys_to_retain }}
           TF_VAR_day_count: ${{ github.event.inputs.day_count }}
