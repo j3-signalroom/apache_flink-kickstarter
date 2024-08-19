@@ -65,7 +65,7 @@ jobs:
           number_of_api_keys_to_retain: ${{ github.event.inputs.number_of_api_keys_to_retain }}
           day_count: ${{ github.event.inputs.day_count }}
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ steps.aws-profile-properties.outputs.aws_account_id }}:role/GitHubActionsRole

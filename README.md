@@ -54,7 +54,7 @@ As of August 2024, Confluent’s Serverless Flink offering does not yet support 
     > - [Docker Account](https://docker.com)
     > - [GitHub Account](https://github.com) *with OIDC configured for AWS*
     > - [Snowflake Account](https://app.snowflake.com/)
-    > - [Terraform Cloud Account](https://app.terraform.io/) *with OIDC configured for GitHub*
+    > - [Terraform Cloud Account](https://app.terraform.io/)
 
     > You need to have the following installed on your local machine:
     > - [AWS CLI version 2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
