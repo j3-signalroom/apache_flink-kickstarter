@@ -31,8 +31,8 @@ resource "confluent_schema_registry_cluster" "env" {
     # See https://docs.confluent.io/cloud/current/stream-governance/packages.html#stream-governance-regions
     # Schema Registry and Kafka clusters can be in different regions as well as different cloud providers,
     # but you should to place both in the same cloud and region to restrict the fault isolation boundary.
-    # A fault isolation boundary, also known as a swimlane, is a concept that separates services into failure 
-    # domains to limit the impact of a failure to a specific number of components.
+    # A fault isolation boundary, also known as a swimlane, is a concept that separates services into
+    # failure domains to limit the impact of a failure to a specific number of components.
     id = data.confluent_schema_registry_region.env.id
   }
 }
@@ -88,14 +88,17 @@ resource "confluent_service_account" "kafka_cluster_api" {
     description  = "Kafka Cluster API Service Account"
 }
 
+# Since the Kafka Cluster created is a Basic Cluster type, setting more granular 
+# permissions is not allowed. Therefore, the ‘EnvironmentAdmin’ role is assigned
+# to the entire cluster instead of implementing RBAC for specific Kafka topics.
 resource "confluent_role_binding" "kafka_cluster_api_environment_admin" {
   principal   = "User:${confluent_service_account.kafka_cluster_api.id}"
   role_name   = "EnvironmentAdmin"
   crn_pattern = confluent_environment.env.resource_name
 }
 
-# Create the Kafka Cluster API Key Pairs, rotate them in accordance to a time schedule, and provide the current acitve API Key Pair
-# to use
+# Create the Kafka Cluster API Key Pairs, rotate them in accordance to a time schedule,
+# and provide the current acitve API Key Pair to use
 module "kafka_cluster_api_key_rotation" {
     source  = "github.com/j3-signalroom/iac-confluent_cloud_resource_api_key_rotation-tf_module"
 
@@ -125,6 +128,7 @@ module "kafka_cluster_api_key_rotation" {
     day_count = var.day_count
 }
 
+# Create the `airline.skyone` Kafka topic
 resource "confluent_kafka_topic" "airline_skyone" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
@@ -143,6 +147,7 @@ resource "confluent_kafka_topic" "airline_skyone" {
   }
 }
 
+# Create the `airline.sunset` Kafka topic
 resource "confluent_kafka_topic" "airline_sunset" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
@@ -161,6 +166,7 @@ resource "confluent_kafka_topic" "airline_sunset" {
   }
 }
 
+# Create the `airline.all` Kafka topic
 resource "confluent_kafka_topic" "airline_all" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
@@ -179,6 +185,7 @@ resource "confluent_kafka_topic" "airline_all" {
   }
 }
 
+# Create the `airline.user_statistics` Kafka topic
 resource "confluent_kafka_topic" "airline_user_statistics" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
