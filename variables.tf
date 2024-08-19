@@ -73,3 +73,21 @@ variable "auto_offset_reset" {
         error_message = "The auto_offset_reset must be either 'earliest' or 'latest'."
     }
 }
+
+variable "snowflake_login_url" {
+    description = "Specifies the Snowflake login URL."
+    type        = string
+
+}
+
+variable "snowflake_username" {
+    description = "Specifies the Snowflake user name."
+    type        = string
+
+}
+
+variable "snowflake_password" {
+    description = "Specifies the Snowflake password."
+    type        = string
+
+}
