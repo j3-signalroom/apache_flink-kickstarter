@@ -9,6 +9,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 
 ## [0.22.00.000] - 2024-08-17
 ### Added
+- Added GitHub Workflow/Actions to execute the Terraform configuration in the cloud
 - Removed all deprecated calls in the creation of the Apache Flink custom Data Source
 - the `terraform.tfvars` is auto-generated in script
 - new Apache Iceberg dependencies
