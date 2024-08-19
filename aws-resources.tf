@@ -1,6 +1,6 @@
 # Create the Schema Registry Cluster Secrets: API Key Pair and REST endpoint
 resource "aws_secretsmanager_secret" "schema_registry_cluster_api_key" {
-    name = "${local.secrets_prefix}/schema_registry_cluster/java_client"
+    name = "${local.confluent_cloud_secrets_prefix}/schema_registry_cluster/java_client"
     description = "Schema Registry Cluster secrets"
 }
 
@@ -14,7 +14,7 @@ resource "aws_secretsmanager_secret_version" "schema_registry_cluster_api_key" {
 # Create the Kafka Cluster Secrets: API Key Pair, JAAS (Java Authentication and Authorization) representation,
 # bootstrap server URI and REST endpoint
 resource "aws_secretsmanager_secret" "kafka_cluster_api_key" {
-    name = "${local.secrets_prefix}/kafka_cluster/java_client"
+    name = "${local.confluent_cloud_secrets_prefix}/kafka_cluster/java_client"
     description = "Kafka Cluster secrets"
 }
 
@@ -125,4 +125,18 @@ resource "aws_ssm_parameter" "producer_kafka_client_acks" {
 
 resource "aws_s3_bucket" "iceberg_bucket" {
   bucket = "apache-flink-kickstarter-iceberg-bucket"
+}
+
+
+# Snowflake Secrets
+resource "aws_secretsmanager_secret" "snowflake" {
+    name = "${local.snowflake_secrets_prefix}"
+    description = "Snowflake secrets"
+}
+
+resource "aws_secretsmanager_secret_version" "snowflake" {
+    secret_id     = aws_secretsmanager_secret.snowflake.id
+    secret_string = jsonencode({"login_url": "${var.snowflake_login_url}",
+                                "username": "${var.snowflake_username}",
+                                "password": "${var.snowflake_password}"})
 }

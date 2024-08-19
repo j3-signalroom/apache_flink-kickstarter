@@ -20,6 +20,7 @@ terraform {
 }
 
 locals {
-  cloud          = "AWS"
-  secrets_prefix = "/confluent_cloud_resource"
+  cloud                          = "AWS"
+  confluent_cloud_secrets_prefix = "/confluent_cloud_resource"
+  snowflake_secrets_prefix       = "/snowflake_resource"
 }
