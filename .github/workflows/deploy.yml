@@ -92,6 +92,7 @@ jobs:
           TF_VAR_aws_account_id: ${{ steps.aws-profile-properties.outputs.aws_account_id }}
           TF_VAR_aws_profile: ${{ github.event.inputs.aws_profile }}
           TF_VAR_aws_region: ${{ github.event.inputs.aws_region }}
+          TF_VAR_snowflake_account_id: ${{ secrets.SNOWFLAKE_ACCOUNT_ID }}
           TF_VAR_snowflake_login_url: ${{ secrets.SNOWFLAKE_LOGIN_URL }}
           TF_VAR_snowflake_username: ${{ secrets.SNOWFLAKE_USERNAME }}
           TF_VAR_snowflake_password: ${{ secrets.SNOWFLAKE_PASSWORD }}
@@ -108,6 +109,7 @@ jobs:
           TF_VAR_aws_account_id: ${{ steps.aws-profile-properties.outputs.aws_account_id }}
           TF_VAR_aws_profile: ${{ github.event.inputs.aws_profile }}
           TF_VAR_aws_region: ${{ github.event.inputs.aws_region }}
+          TF_VAR_snowflake_account_id: ${{ secrets.SNOWFLAKE_ACCOUNT_ID }}
           TF_VAR_snowflake_login_url: ${{ secrets.SNOWFLAKE_LOGIN_URL }}
           TF_VAR_snowflake_username: ${{ secrets.SNOWFLAKE_USERNAME }}
           TF_VAR_snowflake_password: ${{ secrets.SNOWFLAKE_PASSWORD }}

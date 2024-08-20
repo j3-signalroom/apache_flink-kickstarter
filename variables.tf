@@ -74,6 +74,12 @@ variable "auto_offset_reset" {
     }
 }
 
+variable "snowflake_account_id" {
+    description = "Specifies the Snowflake Account ID."
+    type        = string
+
+}
+
 variable "snowflake_login_url" {
     description = "Specifies the Snowflake login URL."
     type        = string

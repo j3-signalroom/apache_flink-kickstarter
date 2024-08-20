@@ -9,3 +9,9 @@ provider "aws" {
     #secret_key = var.aws_secret_access_key
     #token      = var.aws_session_token
 }
+
+provider "snowflake" {
+  account  = var.snowflake_account_id
+  username = var.snowflake_username
+  password = var.snowflake_password
+}
