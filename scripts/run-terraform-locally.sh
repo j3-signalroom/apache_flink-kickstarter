@@ -183,8 +183,14 @@ terraform init
 
 if [ "$create_action" = true ]
 then
+    # Create/Update/Destroy the Terraform configuration
     terraform plan -var-file=terraform.tfvars
     terraform apply -var-file=terraform.tfvars
 else
+    # Force the destroy of all the AWS Secrets created by the Terraform configuration
+    aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/schema_registry_cluster/java_client --force-delete-without-recovery
+    aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/kafka_cluster/java_client --force-delete-without-recovery
+
+    # Destroy the Terraform configuration
     terraform destroy -var-file=terraform.tfvars
 fi
