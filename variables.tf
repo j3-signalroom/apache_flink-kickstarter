@@ -9,11 +9,6 @@ variable "confluent_api_secret" {
   sensitive   = true
 }
 
-variable "aws_profile" {
-    description = "The AWS Landing Zone Profile."
-    type        = string
-}
-
 variable "aws_region" {
     description = "The AWS Region."
     type        = string

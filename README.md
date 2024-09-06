@@ -82,7 +82,7 @@ Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials
 
 #### 2.1.1 Run Terraform locally
 ```bash
-scripts/run-terraform-locally.sh --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> 
+scripts/run-terraform-locally.sh --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> 
 ```
 
 ### 2.2 DevOps in Action with GitHub, running Terraform in the cloud

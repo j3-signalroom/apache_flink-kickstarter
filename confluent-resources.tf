@@ -4,12 +4,12 @@ data "confluent_organization" "env" {}
 
 # Create the Confluent Cloud Environment
 resource "confluent_environment" "env" {
-    display_name = "${var.aws_profile}"
+    display_name = "${local.secrets_insert}"
 }
 
 # Create the Service Account for the Kafka Cluster API
 resource "confluent_service_account" "schema_registry_cluster_api" {
-    display_name = "${var.aws_profile}-environment-api"
+    display_name = "${local.secrets_insert}-environment-api"
     description  = "Environment API Service Account"
 }
 
@@ -84,7 +84,7 @@ resource "confluent_kafka_cluster" "kafka_cluster" {
 
 # Create the Service Account for the Kafka Cluster API
 resource "confluent_service_account" "kafka_cluster_api" {
-    display_name = "${var.aws_profile}-kafka_cluster-api"
+    display_name = "${local.secrets_insert}-kafka_cluster-api"
     description  = "Kafka Cluster API Service Account"
 }
 

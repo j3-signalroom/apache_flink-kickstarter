@@ -3,7 +3,6 @@
 #
 # *** Script Syntax ***
 # scripts/run-terraform-locally.sh <create | delete> --profile=<SSO_PROFILE_NAME> \
-#                                                    --environment_name=<ENVIRONMENT_NAME> \
 #                                                    --confluent_api_key=<CONFLUENT_API_KEY> \
 #                                                    --confluent_api_secret=<CONFLUENT_API_SECRET> \
 #                                                    --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> \
@@ -24,7 +23,7 @@ case $1 in
     echo
     echo "(Error Message 001)  You did not specify one of the commands: create | delete."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --environment_name=<ENVIRONMENT_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
+    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
     ;;
@@ -45,9 +44,6 @@ do
         *"--confluent_api_secret="*)
             arg_length=23
             confluent_api_secret=${arg:$arg_length:$(expr ${#arg} - $arg_length)};;
-        *"--environment_name="*)
-            arg_length=19
-            environment_name=${arg:$arg_length:$(expr ${#arg} - $arg_length)};;
         *"--snowflake_warehouse="*)
             arg_length=22
             snowflake_warehouse=${arg:$arg_length:$(expr ${#arg} - $arg_length)};;
@@ -75,18 +71,7 @@ then
     echo
     echo "(Error Message 002)  You did not include the proper use of the --profile=<SSO_PROFILE_NAME> argument in the call."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --environment_name=<ENVIRONMENT_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
-    echo
-    exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
-fi
-
-# Check required --environment_name argument was supplied
-if [ -z $environment_name ]
-then
-    echo
-    echo "(Error Message 003)  You did not include the proper use of the --environment_name=<ENVIRONMENT_NAME> argument in the call."
-    echo
-    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --environment_name=<ENVIRONMENT_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
+    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -95,9 +80,9 @@ fi
 if [ -z $confluent_api_key ]
 then
     echo
-    echo "(Error Message 004)  You did not include the proper use of the --confluent_api_key=<CONFLUENT_API_KEY> argument in the call."
+    echo "(Error Message 003)  You did not include the proper use of the --confluent_api_key=<CONFLUENT_API_KEY> argument in the call."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --environment_name=<ENVIRONMENT_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
+    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -106,9 +91,9 @@ fi
 if [ -z $confluent_api_secret ]
 then
     echo
-    echo "(Error Message 005)  You did not include the proper use of the --confluent_api_secret=<CONFLUENT_API_SECRET> argument in the call."
+    echo "(Error Message 004)  You did not include the proper use of the --confluent_api_secret=<CONFLUENT_API_SECRET> argument in the call."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --environment_name=<ENVIRONMENT_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
+    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -117,9 +102,9 @@ fi
 if [ -z $snowflake_warehouse ]
 then
     echo
-    echo "(Error Message 006)  You did not include the proper use of the --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> argument in the call."
+    echo "(Error Message 005)  You did not include the proper use of the --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> argument in the call."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --environment_name=<ENVIRONMENT_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
+    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -128,9 +113,9 @@ fi
 if [ -z $service_account_user ]
 then
     echo
-    echo "(Error Message 007)  You did not include the proper use of the --service_account_user=<SERVICE_ACCOUNT_USER> argument in the call."
+    echo "(Error Message 006)  You did not include the proper use of the --service_account_user=<SERVICE_ACCOUNT_USER> argument in the call."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --environment_name=<ENVIRONMENT_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
+    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -139,9 +124,9 @@ fi
 if [ -z $day_count ] && [ create_action = true ]
 then
     echo
-    echo "(Error Message 008)  You did not include the proper use of the --day_count=<DAY_COUNT> argument in the call."
+    echo "(Error Message 007)  You did not include the proper use of the --day_count=<DAY_COUNT> argument in the call."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --environment_name=<ENVIRONMENT_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
+    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -150,9 +135,9 @@ fi
 if [ $auto_offset_reset_set = false ] && [ create_action = true ]
 then
     echo
-    echo "(Error Message 009)  You did not include the proper use of the --auto_offset_reset=<earliest | latest> argument in the call."
+    echo "(Error Message 008)  You did not include the proper use of the --auto_offset_reset=<earliest | latest> argument in the call."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --environment_name=<ENVIRONMENT_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
+    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -161,9 +146,9 @@ fi
 if [ -z $number_of_api_keys_to_retain ] && [ create_action = true ]
 then
     echo
-    echo "(Error Message 010)  You did not include the proper use of the --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN> argument in the call."
+    echo "(Error Message 009)  You did not include the proper use of the --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN> argument in the call."
     echo
-    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --environment_name=<ENVIRONMENT_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
+    echo "Usage:  Require all four arguments ---> `basename $0` <create | delete> --profile=<SSO_PROFILE_NAME> --confluent_api_key=<CONFLUENT_API_KEY> --confluent_api_secret=<CONFLUENT_API_SECRET> --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> --service_account_user=<SERVICE_ACCOUNT_USER> --day_count=<DAY_COUNT> --auto_offset_reset=<earliest | latest> --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -183,10 +168,9 @@ then
     \naws_access_key_id=\"${AWS_ACCESS_KEY_ID}\"\
     \naws_secret_access_key=\"${AWS_SECRET_ACCESS_KEY}\"\
     \naws_session_token=\"${AWS_SESSION_TOKEN}\"\
-    \nenvironment_name=\"${environment_name}\"\
     \nconfluent_api_key=\"${confluent_api_key}\"\
     \nconfluent_api_secret=\"${confluent_api_secret}\"\
-    \service_account_user=\"${service_account_user}\"\
+    \nservice_account_user=\"${service_account_user}\"\
     \nsnowflake_warehouse=\"${snowflake_warehouse}\"\
     \nauto_offset_reset=\"${auto_offset_reset}\"\
     \nday_count=${day_count}\
@@ -197,11 +181,10 @@ else
     \naws_access_key_id=\"${AWS_ACCESS_KEY_ID}\"\
     \naws_secret_access_key=\"${AWS_SECRET_ACCESS_KEY}\"\
     \naws_session_token=\"${AWS_SESSION_TOKEN}\"\
-    \nenvironment_name=\"${environment_name}\"\
     \nconfluent_api_key=\"${confluent_api_key}\"\
     \nconfluent_api_secret=\"${confluent_api_secret}\"\
     \nsnowflake_warehouse=\"${snowflake_warehouse}\"\
-    \service_account_user=\"${service_account_user}\"" > terraform.tfvars
+    \nservice_account_user=\"${service_account_user}\"" > terraform.tfvars
 fi
 
 # Initialize the Terraform configuration
