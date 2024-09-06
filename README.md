@@ -65,7 +65,7 @@ As of this writing, Confluent’s Serverless Flink offering does not yet support
     > - [Terraform CLI version 1.85 or higher](https://developer.hashicorp.com/terraform/install)
 
 2. Clone the repo:
-    ```shell
+    ```bash
     git clone https://github.com/j3-signalroom/apache_flink-kickstarter.git
     ```
 
@@ -81,7 +81,7 @@ As of this writing, Confluent’s Serverless Flink offering does not yet support
 Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your local machine, and make sure you have an [HCP Terraform account](https://app.terraform.io/session) to run the Terraform configuration.  Learn how to set up Terraform Cloud for local use by clicking [here](.blog/setup-terraform-cloud.md).
 
 #### 2.1.1 Run Terraform locally
-```shell
+```bash
 scripts/run-terraform-locally.sh --environment=<ENVIRONMENT_NAME> --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> 
 ```
 
@@ -108,12 +108,12 @@ Then fill out the Deploy dialog box, and click the `Run workflow` button to depl
 > **Prerequisite**
 > 
 > Before you can run `scripts/run-flink-locally.sh` Bash script, you need to install the [`aws2-wrap`](https://pypi.org/project/aws2-wrap/#description) utility.  If you have a Mac machine, run this command from your Terminal:
-> ````shell
+> ````bash
 > brew install aws2-wrap
 > ````
 >
 > Or, make sure you have Python3.x installed on your machine, and run this command from your Terminal:
-> ```shell
+> ```bash
 > pip install aws2-wrap
 > ```
 
@@ -121,7 +121,7 @@ This section guides you through the local setup (on one machine but in separate 
 
 > *If you are running Docker on a Mac with M1, M2, or M3 chip, set the `--chip` argument to `--chip=arm64`.  Otherwise, set it to `--chip=amd64`.  As for the `--profile` argument, specify your AWS SSO Profile Name (e.g., `--profile=AdministratorAccess-0123456789`.*
 
-```shell
+```bash
 scripts/run-flink-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64>
 ```
 
