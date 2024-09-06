@@ -9,6 +9,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 - Updated the `run-terraform-locally.sh` Bash script handles both the plan\apply and destroy actions.
 - Terraform the AWS Secrets Manager Secrets for the Snowflake credentials.
 - Terraform the Snowflake resources.
+- Terraform Snowflake resources
 
 ### Changed
 - Split the Terraform configuration into different files based on the jobs of each.
