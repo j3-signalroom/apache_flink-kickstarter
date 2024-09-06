@@ -7,6 +7,10 @@ terraform {
         }
   }
 
+  # Using the "pessimistic constraint operators" for all the Providers to ensure
+  # that the provider version is compatible with the configuration.  Meaning
+  # only patch-level updates are allowed but minor-level and major-level 
+  # updates of the Providers are not allowed
   required_providers {
         confluent = {
             source  = "confluentinc/confluent"
