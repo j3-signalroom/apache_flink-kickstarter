@@ -87,6 +87,8 @@ jobs:
             TF_VAR_aws_access_key_id: ${{ steps.aws-credentials.outputs.aws-access-key-id }}
             TF_VAR_aws_secret_access_key: ${{ steps.aws-credentials.outputs.aws-secret-access-key }}
             TF_VAR_aws_session_token: ${{ steps.aws-credentials.outputs.aws-session-token }}
+            TF_VAR_snowflake_warehouse: ${{ github.event.inputs.snowflake_warehouse }}
+            TF_VAR_service_account_user: ${{ github.event.inputs.service_account_user }}
   
         - name: Terraform Destroy Apply
           id: apply_destroy
@@ -99,3 +101,5 @@ jobs:
             TF_VAR_aws_access_key_id: ${{ steps.aws-credentials.outputs.aws-access-key-id }}
             TF_VAR_aws_secret_access_key: ${{ steps.aws-credentials.outputs.aws-secret-access-key }}
             TF_VAR_aws_session_token: ${{ steps.aws-credentials.outputs.aws-session-token }}
+            TF_VAR_snowflake_warehouse: ${{ github.event.inputs.snowflake_warehouse }}
+            TF_VAR_service_account_user: ${{ github.event.inputs.service_account_user }}
