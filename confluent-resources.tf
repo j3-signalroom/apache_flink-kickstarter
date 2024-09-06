@@ -43,9 +43,9 @@ module "schema_registry_cluster_api_key_rotation" {
     }
 
     resource = {
-        id          = confluent_schema_registry_cluster.env.id
-        api_version = confluent_schema_registry_cluster.env.api_version
-        kind        = confluent_schema_registry_cluster.env.kind
+        id          = data.confluent_schema_registry_cluster.env.id
+        api_version = data.confluent_schema_registry_cluster.env.api_version
+        kind        = data.confluent_schema_registry_cluster.env.kind
 
         environment = {
             id = confluent_environment.env.id
