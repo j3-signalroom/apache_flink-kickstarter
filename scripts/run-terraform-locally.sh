@@ -168,7 +168,6 @@ then
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
 
-
 # Get the SSO AWS_ACCESS_KEY_ID, AWS_ACCESS_SECRET_KEY, AWS_SESSION_TOKEN, and AWS_REGION, and
 # set them as an environmental variables
 aws sso login $AWS_PROFILE
@@ -184,9 +183,10 @@ then
     \naws_access_key_id=\"${AWS_ACCESS_KEY_ID}\"\
     \naws_secret_access_key=\"${AWS_SECRET_ACCESS_KEY}\"\
     \naws_session_token=\"${AWS_SESSION_TOKEN}\"\
+    \nenvironment_name=\"${environment_name}\"\
     \nconfluent_api_key=\"${confluent_api_key}\"\
     \nconfluent_api_secret=\"${confluent_api_secret}\"\
-    \nenvironment_name=\"${environment_name}\"\
+    \service_account_user=\"${service_account_user}\"\
     \nsnowflake_warehouse=\"${snowflake_warehouse}\"\
     \nauto_offset_reset=\"${auto_offset_reset}\"\
     \nday_count=${day_count}\
@@ -197,10 +197,11 @@ else
     \naws_access_key_id=\"${AWS_ACCESS_KEY_ID}\"\
     \naws_secret_access_key=\"${AWS_SECRET_ACCESS_KEY}\"\
     \naws_session_token=\"${AWS_SESSION_TOKEN}\"\
+    \nenvironment_name=\"${environment_name}\"\
     \nconfluent_api_key=\"${confluent_api_key}\"\
     \nconfluent_api_secret=\"${confluent_api_secret}\"\
-    \nenvironment_name=\"${environment_name}\"\
-    \nsnowflake_warehouse=\"${snowflake_warehouse}\"" > terraform.tfvars
+    \nsnowflake_warehouse=\"${snowflake_warehouse}\"\
+    \service_account_user=\"${service_account_user}\"" > terraform.tfvars
 fi
 
 # Initialize the Terraform configuration
