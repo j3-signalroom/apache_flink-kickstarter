@@ -8,7 +8,7 @@ resource "aws_secretsmanager_secret_version" "schema_registry_cluster_api_key" {
     secret_id     = aws_secretsmanager_secret.schema_registry_cluster_api_key.id
     secret_string = jsonencode({"basic.auth.credentials.source": "USER_INFO",
                                 "basic.auth.user.info": "${module.schema_registry_cluster_api_key_rotation.active_api_key.id}:${module.schema_registry_cluster_api_key_rotation.active_api_key.secret}",
-                                "schema.registry.url": "${confluent_schema_registry_cluster.env.rest_endpoint}"})
+                                "schema.registry.url": "${data.confluent_schema_registry_cluster.env.rest_endpoint}"})
 }
 
 # Create the Kafka Cluster Secrets: API Key Pair, JAAS (Java Authentication and Authorization) representation,
@@ -124,7 +124,7 @@ resource "aws_ssm_parameter" "producer_kafka_client_acks" {
 }
 
 resource "aws_s3_bucket" "iceberg_bucket" {
-  bucket = "${local.secrets_insert}-bucket"
+  bucket = "${local.secrets_insert}_bucket"
 }
 
 data "aws_secretsmanager_secret" "admin_public_keys" {

@@ -9,7 +9,7 @@ provider "snowflake" {
 
 resource "snowflake_account_role" "role" {
   provider = snowflake.security_admin
-  name     = "example_role"
+  name     = "${local.secrets_insert}_role"
 }
 
 resource "snowflake_grant_privileges_to_account_role" "database_grant" {
@@ -24,7 +24,7 @@ resource "snowflake_grant_privileges_to_account_role" "database_grant" {
 
 resource "snowflake_schema" "schema" {
   database   = snowflake_database.example.name
-  name       = "example_data_lakehouse"
+  name       = local.secrets_insert
 }
 
 resource "snowflake_grant_privileges_to_account_role" "schema_grant" {
