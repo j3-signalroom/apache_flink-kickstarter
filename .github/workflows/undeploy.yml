@@ -6,9 +6,9 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      aws_profile:
+      aws_environment:
         type: choice
-        description: AWS Landing Zone Profile
+        description: AWS Environment
         required: true
         default: dev
         options:
@@ -25,29 +25,44 @@ on:
           - us-east-2
           - us-west-1
           - us-west-2
+      snowflake_warehouse:
+        type: string
+        description: Snowflake Warehouse
+        required: true
+      service_account_user:
+        type: string
+        description: Snowflake Service Account User
+        required: true
 
-run-name: ${{ github.workflow }} ${{ github.ref_name }} branch to the ${{ github.event.inputs.aws_region }} ${{ github.event.inputs.aws_profile }} environment
+run-name: ${{ github.workflow }} ${{ github.ref_name }} branch to the ${{ github.event.inputs.aws_region }} ${{ github.event.inputs.aws_environment }} environment
 
 jobs:
     deploy:
       name: "Undeploy terraform configuration"
-      runs-on: ${{ github.event.inputs.aws_profile }}
+      runs-on: ${{ github.event.inputs.aws_environment }}
       steps:
         - name: Checkout code
           uses: actions/checkout@v4
 
-        - name: Get AWS Profile Properties
-          id: aws-profile-properties
-          uses: ./.github/actions/aws-profile-properties
+        - name: Get AWS Environment Info
+          id: aws-environment-info
+          uses: ./.github/actions/aws-environment-info
           with:
-            aws_profile: ${{ github.event.inputs.aws_profile }}
+            aws_environment: ${{ github.event.inputs.aws_environment }}
+            aws_dev_account_id: ${{ vars.AWS_DEV_ACCOUNT_ID }}
+            aws_test_account_id: ${{ vars.AWS_TEST_ACCOUNT_ID }}
+            aws_prod_account_id: ${{ vars.AWS_PROD_ACCOUNT_ID }}
             aws_region: ${{ github.event.inputs.aws_region }}
-
+            snowflake_warehouse: ${{ github.event.inputs.snowflake_warehouse }}
+            service_account_user: ${{ github.event.inputs.service_account_user }}
+  
         - name: Configure AWS credentials
+          id: aws-credentials
           uses: aws-actions/configure-aws-credentials@v4
           with:
-            role-to-assume: arn:aws:iam::${{ steps.aws-profile-properties.outputs.aws_account_id }}:role/GitHubActionsRole
+            role-to-assume: arn:aws:iam::${{ steps.aws-environment-info.outputs.aws_account_id }}:role/GitHubActionsRole
             aws-region: ${{ github.event.inputs.aws_region }}
+            output-credentials: true
 
         - uses: hashicorp/setup-terraform@v3
           with:
@@ -67,9 +82,11 @@ jobs:
           env:
             TF_VAR_confluent_cloud_api_key: ${{ secrets.CONFLUENT_CLOUD_API_KEY }}
             TF_VAR_confluent_cloud_api_secret: ${{ secrets.CONFLUENT_CLOUD_API_SECRET }}
-            TF_VAR_aws_account_id: ${{ steps.aws-profile-properties.outputs.aws_account_id }}
-            TF_VAR_aws_profile: ${{ github.event.inputs.aws_profile }}
+            TF_VAR_aws_account_id: ${{ steps.aws-environment-info.outputs.aws_account_id }}
             TF_VAR_aws_region: ${{ github.event.inputs.aws_region }}
+            TF_VAR_aws_access_key_id: ${{ steps.aws-credentials.outputs.aws-access-key-id }}
+            TF_VAR_aws_secret_access_key: ${{ steps.aws-credentials.outputs.aws-secret-access-key }}
+            TF_VAR_aws_session_token: ${{ steps.aws-credentials.outputs.aws-session-token }}
   
         - name: Terraform Destroy Apply
           id: apply_destroy
@@ -77,6 +94,8 @@ jobs:
           env:
             TF_VAR_confluent_cloud_api_key: ${{ secrets.CONFLUENT_CLOUD_API_KEY }}
             TF_VAR_confluent_cloud_api_secret: ${{ secrets.CONFLUENT_CLOUD_API_SECRET }}
-            TF_VAR_aws_account_id: ${{ steps.aws-profile-properties.outputs.aws_account_id }}
-            TF_VAR_aws_profile: ${{ github.event.inputs.aws_profile }}
+            TF_VAR_aws_account_id: ${{ steps.aws-environment-info.outputs.aws_account_id }}
             TF_VAR_aws_region: ${{ github.event.inputs.aws_region }}
+            TF_VAR_aws_access_key_id: ${{ steps.aws-credentials.outputs.aws-access-key-id }}
+            TF_VAR_aws_secret_access_key: ${{ steps.aws-credentials.outputs.aws-secret-access-key }}
+            TF_VAR_aws_session_token: ${{ steps.aws-credentials.outputs.aws-session-token }}
