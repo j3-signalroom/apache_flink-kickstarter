@@ -217,9 +217,9 @@ else
     terraform destroy -var-file=terraform.tfvars
 
     # Delete the secrets created by the Terraform configurations
-    aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/schema_registry_cluster/java_client --force-delete-without-recovery || true
-    aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/kafka_cluster/java_client --force-delete-without-recovery || true
-    aws secretsmanager delete-secret --secret-id '/snowflake_resource' --force-delete-without-recovery || true
-    aws secretsmanager delete-secret --secret-id '/snowflake_resource/rsa_private_key_pem_1' --force-delete-without-recovery || true
-    aws secretsmanager delete-secret --secret-id '/snowflake_resource/rsa_private_key_pem_2' --force-delete-without-recovery || true
+    aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/apache_flink_kickstarter/schema_registry_cluster/java_client --force-delete-without-recovery || true
+    aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/apache_flink_kickstarter/kafka_cluster/java_client --force-delete-without-recovery || true
+    aws secretsmanager delete-secret --secret-id '/snowflake_resource/apache_flink_kickstarter' --force-delete-without-recovery || true
+    aws secretsmanager delete-secret --secret-id '/snowflake_resource/apache_flink_kickstarter/rsa_private_key_pem_1' --force-delete-without-recovery || true
+    aws secretsmanager delete-secret --secret-id '/snowflake_resource/apache_flink_kickstarter/rsa_private_key_pem_2' --force-delete-without-recovery || true
 fi
