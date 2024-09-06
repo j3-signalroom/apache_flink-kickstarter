@@ -41,7 +41,7 @@ resource "confluent_schema_registry_cluster" "env" {
 # acitve API Key Pair to use
 module "schema_registry_cluster_api_key_rotation" {
     
-    source  = "github.com/j3-signalroom/iac-confluent_cloud_resource_api_key_rotation-tf_module"
+    source  = "github.com/j3-signalroom/iac-confluent-api_key_rotation-tf_module"
 
     # Required Input(s)
     owner = {
@@ -60,8 +60,8 @@ module "schema_registry_cluster_api_key_rotation" {
         }
     }
 
-    confluent_cloud_api_key    = var.confluent_cloud_api_key
-    confluent_cloud_api_secret = var.confluent_cloud_api_secret
+    confluent_api_key    = var.confluent_api_key
+    confluent_api_secret = var.confluent_api_secret
 
     # Optional Input(s)
     key_display_name = "Confluent Schema Registry Cluster Service Account API Key - {date} - Managed by Terraform Cloud"
@@ -100,7 +100,7 @@ resource "confluent_role_binding" "kafka_cluster_api_environment_admin" {
 # Create the Kafka Cluster API Key Pairs, rotate them in accordance to a time schedule,
 # and provide the current acitve API Key Pair to use
 module "kafka_cluster_api_key_rotation" {
-    source  = "github.com/j3-signalroom/iac-confluent_cloud_resource_api_key_rotation-tf_module"
+    source  = "github.com/j3-signalroom/iac-confluent-api_key_rotation-tf_module"
 
     #Required Input(s)
     owner = {
@@ -119,8 +119,8 @@ module "kafka_cluster_api_key_rotation" {
         }
     }
 
-    confluent_cloud_api_key    = var.confluent_cloud_api_key
-    confluent_cloud_api_secret = var.confluent_cloud_api_secret
+    confluent_api_key    = var.confluent_api_key
+    confluent_api_secret = var.confluent_api_secret
 
     # Optional Input(s)
     key_display_name = "Confluent Kafka Cluster Service Account API Key - {date} - Managed by Terraform Cloud"
