@@ -6,16 +6,17 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 ## [0.30.00.000] - TBD
 ## Added
 - Terraform the AWS S3 bucket that is used for Apache Iceberg file storage.
-- Updated the `run-terraform-locally.sh` Bash script handles both the plan\apply and destroy actions.
+- Updated the `run-terraform-locally.sh` Bash script handles both the plan/apply and destroy actions.
 - Terraform the AWS Secrets Manager Secrets for the Snowflake credentials.
-- Terraform the Snowflake resources.
-- Terraform Snowflake resources
+- Terraform Snowflake resources.
 
 ### Changed
 - Split the Terraform configuration into different files based on the jobs of each.
 - Updated the `README.md` files.
 - Removed Project Nessie and MINIO docker containers from the `docker-compose.yml`
 - Upgrade Terraform AWS Provider to `5.66.0`, Terraform Snowflake Provider to `0.95.0`, and Terraform Confluent Provider to `2.1.0`.
+- Replaced deprecated Confluent and Snowflake resource/data blocks with updated resource/data blocks.
+- Refactor `run-terraform-locally.sh` BASH script to accommodate all the new arguments for Snowflake.
 
 ## [0.22.01.000] - 2024-08-18
 ### Fixed
