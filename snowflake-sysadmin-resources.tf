@@ -7,11 +7,11 @@ provider "snowflake" {
 }
 
 resource "snowflake_database" "example" {
-  name = "example"
+  name = local.secrets_insert
 }
 
 resource "snowflake_warehouse" "example" {
-  name           = "example"
+  name           = local.secrets_insert
   warehouse_size = "xsmall"
   auto_suspend   = 60
 }
