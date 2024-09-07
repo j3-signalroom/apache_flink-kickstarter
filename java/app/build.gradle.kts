@@ -41,6 +41,7 @@ dependencies {
     implementation("org.apache.iceberg:iceberg-snowflake:${icebergVersion}")
     implementation("net.snowflake:snowflake-jdbc:3.19.0")
     implementation("org.apache.iceberg:iceberg-flink-runtime-1.19:${icebergVersion}")
+    implementation("org.apache.iceberg:iceberg-flink:${icebergVersion}")
     testImplementation("org.apache.flink:flink-test-utils:${flinkVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
