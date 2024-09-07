@@ -63,7 +63,7 @@ module "schema_registry_cluster_api_key_rotation" {
 
 # Create the Kafka cluster
 resource "confluent_kafka_cluster" "kafka_cluster" {
-    display_name = "kafka_cluster"
+    display_name = local.secrets_insert
     availability = "SINGLE_ZONE"
     cloud        = local.cloud
     region       = var.aws_region
@@ -137,6 +137,10 @@ resource "confluent_kafka_topic" "airline_skyone" {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
   }
+
+  depends_on = [ 
+    confluent_kafka_cluster.kafka_cluster 
+  ]
 }
 
 # Create the `airline.sunset` Kafka topic
@@ -156,6 +160,10 @@ resource "confluent_kafka_topic" "airline_sunset" {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
   }
+
+  depends_on = [ 
+    confluent_kafka_cluster.kafka_cluster 
+  ]
 }
 
 # Create the `airline.all` Kafka topic
@@ -175,6 +183,10 @@ resource "confluent_kafka_topic" "airline_all" {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
   }
+
+  depends_on = [ 
+    confluent_kafka_cluster.kafka_cluster 
+  ]
 }
 
 # Create the `airline.user_statistics` Kafka topic
@@ -194,4 +206,8 @@ resource "confluent_kafka_topic" "airline_user_statistics" {
     key    = module.kafka_cluster_api_key_rotation.active_api_key.id
     secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
   }
+
+  depends_on = [ 
+    confluent_kafka_cluster.kafka_cluster 
+  ]
 }
