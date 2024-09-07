@@ -124,7 +124,7 @@ resource "aws_ssm_parameter" "producer_kafka_client_acks" {
 }
 
 resource "aws_s3_bucket" "iceberg_bucket" {
-  bucket = local.secrets_insert
+  bucket = replace(local.secrets_insert, "_", "-")
 }
 
 data "aws_secretsmanager_secret" "admin_public_keys" {
