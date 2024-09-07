@@ -3,7 +3,7 @@ terraform {
       organization = "signalroom"
 
         workspaces {
-            name = "apache-flink-kickstarter"
+            name = "apache-flink-kickstarter-001"
         }
   }
 
@@ -29,7 +29,7 @@ terraform {
 
 locals {
   cloud                         = "AWS"
-  secrets_insert                = "apache_flink_kickstarter"
+  secrets_insert                = "j3_apache_flink_kickstarter"
   confluent_secrets_path_prefix = "/confluent_cloud_resource/${local.secrets_insert}"
   snowflake_secrets_path_prefix = "/snowflake_resource/${local.secrets_insert}"
 }
