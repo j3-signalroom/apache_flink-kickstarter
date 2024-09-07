@@ -46,7 +46,7 @@ module "snowflake_user_rsa_key_pairs_rotation" {
     service_account_user = var.service_account_user
 
     # Optional Input(s)
-    secret_insert             = "/${local.secrets_insert}"
+    secret_insert             = local.secrets_insert
     day_count                 = var.day_count
     aws_lambda_memory_size    = var.aws_lambda_memory_size
     aws_lambda_timeout        = var.aws_lambda_timeout
