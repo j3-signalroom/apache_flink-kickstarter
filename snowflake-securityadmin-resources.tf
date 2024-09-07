@@ -18,12 +18,12 @@ resource "snowflake_grant_privileges_to_account_role" "database_grant" {
   account_role_name = snowflake_account_role.role.name
   on_account_object {
     object_type = "DATABASE"
-    object_name = snowflake_database.example.name
+    object_name = snowflake_database.apache_flink.name
   }
 }
 
 resource "snowflake_schema" "schema" {
-  database   = snowflake_database.example.name
+  database   = snowflake_database.apache_flink.name
   name       = local.secrets_insert
 }
 
@@ -32,7 +32,7 @@ resource "snowflake_grant_privileges_to_account_role" "schema_grant" {
   privileges        = ["USAGE"]
   account_role_name = snowflake_account_role.role.name
   on_schema {
-    schema_name = "\"${snowflake_database.example.name}\".\"${snowflake_schema.schema.name}\""
+    schema_name = "\"${snowflake_database.apache_flink.name}\".\"${snowflake_schema.schema.name}\""
   }
 }
 
@@ -42,16 +42,16 @@ resource "snowflake_grant_privileges_to_account_role" "warehouse_grant" {
   account_role_name = snowflake_account_role.role.name
   on_account_object {
     object_type = "WAREHOUSE"
-    object_name = snowflake_warehouse.example.name
+    object_name = snowflake_warehouse.apache_flink.name
   }
 }
 
 resource "snowflake_user" "user" {
   provider          = snowflake.security_admin
   name              = upper(var.service_account_user)
-  default_warehouse = snowflake_warehouse.example.name
+  default_warehouse = snowflake_warehouse.apache_flink.name
   default_role      = snowflake_account_role.role.name
-  default_namespace = "${snowflake_database.example.name}.${snowflake_schema.schema.name}"
+  default_namespace = "${snowflake_database.apache_flink.name}.${snowflake_schema.schema.name}"
 
   # Setting the attributes to `null`, effectively unsets the attribute
   # Refer to this link `https://docs.snowflake.com/en/user-guide/key-pair-auth#configuring-key-pair-rotation`

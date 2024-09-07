@@ -200,9 +200,10 @@ else
     terraform destroy -var-file=terraform.tfvars
 
     # Delete the secrets created by the Terraform configurations
-    aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/apache_flink_kickstarter/schema_registry_cluster/java_client --force-delete-without-recovery || true
-    aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/apache_flink_kickstarter/kafka_cluster/java_client --force-delete-without-recovery || true
-    aws secretsmanager delete-secret --secret-id '/snowflake_resource/apache_flink_kickstarter' --force-delete-without-recovery || true
-    aws secretsmanager delete-secret --secret-id '/snowflake_resource/apache_flink_kickstarter/rsa_private_key_pem_1' --force-delete-without-recovery || true
-    aws secretsmanager delete-secret --secret-id '/snowflake_resource/apache_flink_kickstarter/rsa_private_key_pem_2' --force-delete-without-recovery || true
+    service_account_user=$(echo $service_account_user | tr '[:upper:]' '[:lower:]')
+    aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/${service_account_user}/schema_registry_cluster/java_client --force-delete-without-recovery || true
+    aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/${service_account_user}/kafka_cluster/java_client --force-delete-without-recovery || true
+    aws secretsmanager delete-secret --secret-id /snowflake_resource/${service_account_user} --force-delete-without-recovery || true
+    aws secretsmanager delete-secret --secret-id /snowflake_resource/${service_account_user}/rsa_private_key_pem_1 --force-delete-without-recovery || true
+    aws secretsmanager delete-secret --secret-id /snowflake_resource/${service_account_user}/rsa_private_key_pem_2 --force-delete-without-recovery || true
 fi
