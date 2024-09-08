@@ -9,8 +9,9 @@
  * or custom sources. This custom source can be anything that isn't supported by Flink
  * out of the box, such as proprietary REST APIs, specialized databases, custom hardware 
  * interfaces, etc. J3 utilizes a Custom Source Data Stream to read the AWS Secrets Manager 
- * secrets and AWS Systems Manager Parameter Store properties during the initial start of a 
- * App, then caches the properties for use by any subsequent events that need these properties.
+ * secrets and AWS Systems Manager Parameter Store properties during the initial start of
+ * the Flink App, then caches the properties for use by any subsequent events that need 
+ * these properties.
  */
 package apache_flink.kickstarter;
 
@@ -53,7 +54,9 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
     }
 
     /**
-     * This method is called once per parallel task instance when the job starts. 
+     * This method is called once per parallel task instance when the job starts.
+     * Which its main purpose is to set up the task, and get the Kafka Client 
+     * properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
      * 
      * @parameters The configuration containing the parameters attached to the
      * contract.
@@ -95,6 +98,7 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
     
     /**
      * This method is called when the task is canceled or the job is stopped.
+     * For this particular class, it is not used.
      * 
      * @throws Exception - Implementations may forward exceptions, which are
      * caught.
