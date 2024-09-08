@@ -26,24 +26,32 @@ import apache_flink.kickstarter.helper.*;
 
 public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Properties>{
     private static final String CONFLUENT_CLOUD_RESOURCE_PATH = "/confluent_cloud_resource/";
-    private static final String KAFKA_CLUSTER_SECRETS_PATH = CONFLUENT_CLOUD_RESOURCE_PATH + "kafka_cluster/java_client";
-    private static final String KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH = CONFLUENT_CLOUD_RESOURCE_PATH + "consumer_kafka_client";
-    private static final String KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH = CONFLUENT_CLOUD_RESOURCE_PATH + "producer_kafka_client";
+    private static final String KAFKA_CLUSTER_SECRETS_PATH = "kafka_cluster/java_client";
+    private static final String KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH = "consumer_kafka_client";
+    private static final String KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH = "producer_kafka_client";
 
     private transient AtomicReference<Properties> _properties;
     private volatile boolean _consumerKafkaClient;
     private volatile boolean _useAws;
+    private volatile String _serviceAccountUser;
 
 
     /**
      * Default constructor.
      * 
      * @param consumerKafkaClient
-     * @param useAws
+     * @param appOptions
+     * @throws Exception - Exception occurs when the service account user is empty.
      */
-    public KafkaClientPropertiesLookup(final boolean consumerKafkaClient, final boolean useAws) {
+    public KafkaClientPropertiesLookup(final boolean consumerKafkaClient, final AppOptions appOptions) throws Exception {
         this._consumerKafkaClient = consumerKafkaClient;
-        this._useAws = useAws;
+        this._useAws = appOptions.isGetFromAws();
+
+        if(this._serviceAccountUser.isEmpty()) {
+            throw new Exception("The service account user must be provided when the --get-from-aws flag is passed.");
+        }
+
+        this._serviceAccountUser = appOptions.getServiceAccountUser();
     }
 
     /**
@@ -102,10 +110,11 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
 			/*
 			 * The flag was passed to the App, and therefore the properties will be fetched
 			 * from AWS Systems Manager Parameter Store and Secrets Manager, respectively.
-			 */
-            final String kakfaClientParametersPath = consumerKafkaClient ? KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH : KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH;
-            
-            final KafkaClient kafkaClient = new KafkaClient(KAFKA_CLUSTER_SECRETS_PATH, kakfaClientParametersPath);
+			 */            
+            final KafkaClient kafkaClient = 
+                new KafkaClient(
+                    CONFLUENT_CLOUD_RESOURCE_PATH + this._serviceAccountUser + "/" + KAFKA_CLUSTER_SECRETS_PATH, 
+                    CONFLUENT_CLOUD_RESOURCE_PATH + this._serviceAccountUser + "/" + (consumerKafkaClient ? KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH : KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH));
             return kafkaClient.getKafkaClusterPropertiesFromAws();
 		} else {
 			/*
