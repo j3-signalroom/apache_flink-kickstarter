@@ -26,9 +26,9 @@ import apache_flink.kickstarter.helper.*;
 
 public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Properties>{
     private static final String CONFLUENT_CLOUD_RESOURCE_PATH = "/confluent_cloud_resource/";
-    private static final String KAFKA_CLUSTER_SECRETS_PATH = "kafka_cluster/java_client";
-    private static final String KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH = "consumer_kafka_client";
-    private static final String KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH = "producer_kafka_client";
+    private static final String KAFKA_CLUSTER_SECRETS_PATH = "/kafka_cluster/java_client";
+    private static final String KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH = "/consumer_kafka_client";
+    private static final String KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH = "/producer_kafka_client";
 
     private transient AtomicReference<Properties> _properties;
     private volatile boolean _consumerKafkaClient;
@@ -67,7 +67,7 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
      */
     @Override
     public void open(Configuration configuration) throws Exception {
-        ObjectResult<Properties> properties = getKafkaClientProperties(this._consumerKafkaClient, this._useAws);
+        ObjectResult<Properties> properties = getKafkaClientProperties();
 		if(!properties.isSuccessful()) { 
 			throw new RuntimeException("Failed to retrieve the Kafka Client properties could not be retrieved because " + properties.getErrorMessageCode() + " " + properties.getErrorMessage());
 		}
@@ -97,18 +97,12 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
     public void close() throws Exception {}
 
     /**
-     * This method retrieves the Kafka Client properties from either the local properties files
-     * or AWS Secrets Manager and AWS Systems Manager Parameter Store.
-     * 
-     * @param consumerKafkaClient true if the Kafka Client is a consumer, false if the Kafka Client
-     * is a producer.
-     * @param useAws true if the properties should be retrieved from AWS, false if the properties.
      * @return the Kafka Client properties from the local properties file if no arugments are passed,
      * or from AWS Secrets Manager and AWS Systems Manager Parameter Store if --get-from-aws is passed
      * as an argument.  Otherwise, an error message occurs, an error code and message is returned.
      */
-    private ObjectResult<Properties> getKafkaClientProperties(final boolean consumerKafkaClient, final boolean useAws) {
-		if(useAws) {
+    private ObjectResult<Properties> getKafkaClientProperties() {
+		if(this._useAws) {
 			/*
 			 * The flag was passed to the App, and therefore the properties will be fetched
 			 * from AWS Systems Manager Parameter Store and Secrets Manager, respectively.
@@ -116,7 +110,7 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
             final KafkaClient kafkaClient = 
                 new KafkaClient(
                     CONFLUENT_CLOUD_RESOURCE_PATH + this._serviceAccountUser + "/" + KAFKA_CLUSTER_SECRETS_PATH, 
-                    CONFLUENT_CLOUD_RESOURCE_PATH + this._serviceAccountUser + "/" + (consumerKafkaClient ? KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH : KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH));
+                    CONFLUENT_CLOUD_RESOURCE_PATH + this._serviceAccountUser + "/" + (this._consumerKafkaClient ? KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH : KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH));
             return kafkaClient.getKafkaClusterPropertiesFromAws();
 		} else {
 			/*
@@ -125,7 +119,7 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
 			 */
             try {
                 Properties properties = new Properties();
-                final String resourceFilename = consumerKafkaClient ? "consumer.properties" : "producer.properties";
+                final String resourceFilename = this._consumerKafkaClient ? "consumer.properties" : "producer.properties";
                 try (InputStream stream = KafkaClientPropertiesLookup.class.getClassLoader().getResourceAsStream(resourceFilename)) {
                     properties.load(stream);
                 }
