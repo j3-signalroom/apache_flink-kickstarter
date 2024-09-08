@@ -42,7 +42,7 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
 
         // --- Check if the service account user is empty
         if(this._serviceAccountUser.isEmpty()) {
-            throw new Exception("The service account user must be provided when the --get-from-aws option is passed.");
+            throw new Exception("The service account user must be provided.");
         }
     }
 
