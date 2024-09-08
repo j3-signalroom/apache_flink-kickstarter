@@ -23,9 +23,8 @@ public class Common {
      * @param args list of strings passed to the main method.
      * @return true if the flag is found, false otherwise.
      */
-    public static AppOptions getAppOptions(final String[] args) {
-        // --- Create a new instance of the AppOptions class with the default values
-        AppOptions appOptions = new AppOptions(false, "");
+    public static String getAppOptions(final String[] args) {
+        String serviceAccountUser = "";
         
         // --- Loop through the args parameter and check for the `OPT_GET_FROM_AWS` and `OPT_SERVICE_ACCOUNT_USER` options
         Iterator <String> iterator = List.of(args).iterator();
@@ -33,13 +32,11 @@ public class Common {
             String arg = iterator.next();
 			if(arg.equalsIgnoreCase(OPT_SERVICE_ACCOUNT_USER)) {
                 if(iterator.hasNext()) {
-                    appOptions.setServiceAccountUser(iterator.next());
+                    serviceAccountUser = iterator.next();
                 }
             }
 		}
-
-        // --- Return the instantiated AppOptions object
-        return appOptions;
+        return serviceAccountUser;
     }
 
     /**
