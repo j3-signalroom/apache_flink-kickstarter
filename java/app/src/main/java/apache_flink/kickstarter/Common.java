@@ -25,9 +25,11 @@ public class Common {
      * @return true if the flag is found, false otherwise.
      */
     public static AppOptions getAppOptions(final String[] args) {
+        // --- Create a new instance of the AppOptions class with the default values
         AppOptions appOptions = new AppOptions(false, "");
-        Iterator <String> iterator = List.of(args).iterator();
         
+        // --- Loop through the args parameter and check for the `OPT_GET_FROM_AWS` and `OPT_SERVICE_ACCOUNT_USER` options
+        Iterator <String> iterator = List.of(args).iterator();
         while (iterator.hasNext()) {
             String arg = iterator.next();
 			if(arg.equalsIgnoreCase(OPT_GET_FROM_AWS))
@@ -39,6 +41,7 @@ public class Common {
             }
 		}
 
+        // --- Return the instantiated AppOptions object
         return appOptions;
     }
 
