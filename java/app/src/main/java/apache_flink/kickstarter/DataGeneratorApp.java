@@ -16,7 +16,6 @@ import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.formats.json.JsonSerializationSchema;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.*;
-
 import java.util.*;
 import org.slf4j.*;
 
@@ -57,101 +56,103 @@ public class DataGeneratorApp {
 			   .map(new KafkaClientPropertiesLookup(false, Common.getAppOptions(args)))
 			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
+
 		dataStreamProducerProperties.executeAndCollect()
-									.forEachRemaining(typeValue -> {
-										producerProperties.putAll(typeValue);
-									});
+                                    .forEachRemaining(typeValue -> {
+                                        logger.info("Producer Properties: {}", typeValue);
+                                        producerProperties.putAll(typeValue);
+                                    });
 
-		/*
-		 * Create a data generator source
-		 */
-		DataGeneratorSource<SkyOneAirlinesFlightData> skyOneSource =
-			new DataGeneratorSource<>(
-				index -> DataGenerator.generateSkyOneAirlinesFlightData(),
-				Long.MAX_VALUE,
-				RateLimiterStrategy.perSecond(1),
-				Types.POJO(SkyOneAirlinesFlightData.class)
-			);
+        /*
+         * Create a data generator source
+         */
+        DataGeneratorSource<SkyOneAirlinesFlightData> skyOneSource =
+            new DataGeneratorSource<>(
+                index -> DataGenerator.generateSkyOneAirlinesFlightData(),
+                Long.MAX_VALUE,
+                RateLimiterStrategy.perSecond(1),
+                Types.POJO(SkyOneAirlinesFlightData.class)
+            );
 
-		/*
+        /*
          * Sets up a Flink POJO source to consume data
          */
-		DataStream<SkyOneAirlinesFlightData> skyOneStream = 
-			env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
+        DataStream<SkyOneAirlinesFlightData> skyOneStream = 
+            env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
-		/*
+        /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone` with the
          * specified serializer
          */
-		KafkaRecordSerializationSchema<SkyOneAirlinesFlightData> skyOneSerializer = 
-			KafkaRecordSerializationSchema.<SkyOneAirlinesFlightData>builder()
-				.setTopic("airline.skyone")
-				.setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
-				.build();
+        KafkaRecordSerializationSchema<SkyOneAirlinesFlightData> skyOneSerializer = 
+            KafkaRecordSerializationSchema.<SkyOneAirlinesFlightData>builder()
+                .setTopic("airline.skyone")
+                .setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
+                .build();
 
-		/*
-		 * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
-		 * environment (a.k.a. the Flink job graph -- the DAG)
-		 */
-		KafkaSink<SkyOneAirlinesFlightData> skyOneSink = 
-			KafkaSink.<SkyOneAirlinesFlightData>builder()
-				.setKafkaProducerConfig(producerProperties)
-				.setRecordSerializer(skyOneSerializer)
-				.setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
-				.build();
-
-		/*
-		 * Adds the given Sink to the DAG. Note only streams with sinks added will be executed
-		 * once the StreamExecutionEnvironment.execute() method is called
-		 */
-		skyOneStream.sinkTo(skyOneSink).name("skyone_sink");
-
-		/*
-         * Sets up a Flink POJO source to consume data
-         */
-		DataGeneratorSource<SunsetAirFlightData> sunsetSource =
-			new DataGeneratorSource<>(
-				index -> DataGenerator.generateSunsetAirFlightData(),
-				Long.MAX_VALUE,
-				RateLimiterStrategy.perSecond(1),
-				Types.POJO(SunsetAirFlightData.class)
-			);
-
-		DataStream<SunsetAirFlightData> sunsetStream = 
-			env.fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
-
-		/*
-         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset` with the
-         * specified serializer
-         */
-		KafkaRecordSerializationSchema<SunsetAirFlightData> sunsetSerializer = 
-			KafkaRecordSerializationSchema.<SunsetAirFlightData>builder()
-				.setTopic("airline.sunset")
-				.setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
-				.build();
-
-		/*
+        /*
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
-		KafkaSink<SunsetAirFlightData> sunsetSink = 
-			KafkaSink.<SunsetAirFlightData>builder()
-				.setKafkaProducerConfig(producerProperties)
-				.setRecordSerializer(sunsetSerializer)
-				.setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
-				.build();
+        KafkaSink<SkyOneAirlinesFlightData> skyOneSink = 
+            KafkaSink.<SkyOneAirlinesFlightData>builder()
+                .setKafkaProducerConfig(producerProperties)
+                .setRecordSerializer(skyOneSerializer)
+                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                .build();
 
-		/*
-		 * Adds the given Sink to the DAG. Note only streams with sinks added will be executed
-		 * once the StreamExecutionEnvironment.execute() method is called
-		 */
-		sunsetStream.sinkTo(sunsetSink).name("sunset_sink");
+        /*
+         * Adds the given Sink to the DAG. Note only streams with sinks added will be executed
+         * once the StreamExecutionEnvironment.execute() method is called
+         */
+        skyOneStream.sinkTo(skyOneSink).name("skyone_sink");
 
-		try {
-			// --- Execute the Flink job graph (DAG)
-			env.execute("DataGeneratorApp");
-		} catch (Exception e) {
-			logger.error("The App stopped early due to the following: {}", e.getMessage());
-		}
+        /*
+         * Sets up a Flink POJO source to consume data
+         */
+        DataGeneratorSource<SunsetAirFlightData> sunsetSource =
+            new DataGeneratorSource<>(
+                index -> DataGenerator.generateSunsetAirFlightData(),
+                Long.MAX_VALUE,
+                RateLimiterStrategy.perSecond(1),
+                Types.POJO(SunsetAirFlightData.class)
+            );
+
+        DataStream<SunsetAirFlightData> sunsetStream = 
+            env.fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
+
+        /*
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset` with the
+         * specified serializer
+         */
+        KafkaRecordSerializationSchema<SunsetAirFlightData> sunsetSerializer = 
+            KafkaRecordSerializationSchema.<SunsetAirFlightData>builder()
+                .setTopic("airline.sunset")
+                .setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
+                .build();
+
+        /*
+         * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
+         * environment (a.k.a. the Flink job graph -- the DAG)
+         */
+        KafkaSink<SunsetAirFlightData> sunsetSink = 
+            KafkaSink.<SunsetAirFlightData>builder()
+                .setKafkaProducerConfig(producerProperties)
+                .setRecordSerializer(sunsetSerializer)
+                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                .build();
+
+        /*
+         * Adds the given Sink to the DAG. Note only streams with sinks added will be executed
+         * once the StreamExecutionEnvironment.execute() method is called
+         */
+        sunsetStream.sinkTo(sunsetSink).name("sunset_sink");
+
+        try {
+            // --- Execute the Flink job graph (DAG)
+            env.execute("DataGeneratorApp");
+        } catch (Exception e) {
+            logger.error("The App stopped early due to the following: {}", e.getMessage());
+        }
 	}
 }

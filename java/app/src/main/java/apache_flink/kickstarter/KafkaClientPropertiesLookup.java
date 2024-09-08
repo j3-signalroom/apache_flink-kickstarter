@@ -22,6 +22,12 @@ import java.util.*;
 import apache_flink.kickstarter.helper.*;
 
 
+/**
+ * This class creates a Custom Source Data Stream to read the AWS Secrets Manager secrets 
+ * and AWS Systems Manager Parameter Store properties during the initial set up of the 
+ * Flink App, then caches the properties for use by any subsequent events that need these
+ * properties.
+ */
 public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Properties>{
     private transient AtomicReference<Properties> _properties;
     private volatile boolean _consumerKafkaClient;
@@ -36,14 +42,14 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
      * @throws Exception - Exception occurs when the service account user is empty.
      */
     public KafkaClientPropertiesLookup(final boolean consumerKafkaClient, final String serviceAccountUser) throws Exception {
-        // ---  Set the fields
-        this._consumerKafkaClient = consumerKafkaClient;
-        this._serviceAccountUser = serviceAccountUser;
-
         // --- Check if the service account user is empty
-        if(this._serviceAccountUser.isEmpty()) {
+        if(serviceAccountUser.isEmpty()) {
             throw new Exception("The service account user must be provided.");
         }
+
+        // ---  Set the class properties
+        this._consumerKafkaClient = consumerKafkaClient;
+        this._serviceAccountUser = serviceAccountUser;
     }
 
     /**
@@ -57,13 +63,23 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
      */
     @Override
     public void open(Configuration configuration) throws Exception {
-        ObjectResult<Properties> properties = getKafkaClientProperties();
+        /* 
+         * Get the Kafka Client properties from AWS Secrets Manager and AWS Systems
+         * Manager Parameter Store.
+         */
+        final String secretPathPrefix = "/confluent_cloud_resource/" + this._serviceAccountUser;
+        final KafkaClient kafkaClient = 
+            new KafkaClient(
+                secretPathPrefix + "/kafka_cluster/java_client", 
+                secretPathPrefix + (this._consumerKafkaClient ? "/consumer_kafka_client" : "/producer_kafka_client"));
+        ObjectResult<Properties> properties = kafkaClient.getKafkaClusterPropertiesFromAws();
+
 		if(!properties.isSuccessful()) { 
 			throw new RuntimeException("Failed to retrieve the Kafka Client properties could not be retrieved because " + properties.getErrorMessageCode() + " " + properties.getErrorMessage());
-		}
-
-        // --- 
-        this._properties = new AtomicReference<>(properties.get());
+		} else {
+            // ---  Set the class properties
+            this._properties = new AtomicReference<>(properties.get());
+        }
     }
 
     /**
@@ -85,17 +101,4 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
      */
     @Override
     public void close() throws Exception {}
-
-    /**
-     * @return the Kafka Client properties from the AWS Secrets Manager and AWS Systems Manager 
-     * Parameter Store.  Otherwise, an error message occurs, an error code and message is returned.
-     */
-    private ObjectResult<Properties> getKafkaClientProperties() {
-        final String secretPathPrefix = "/confluent_cloud_resource/" + this._serviceAccountUser;
-        final KafkaClient kafkaClient = 
-            new KafkaClient(
-                secretPathPrefix + "/kafka_cluster/java_client", 
-                secretPathPrefix + (this._consumerKafkaClient ? "/consumer_kafka_client" : "/producer_kafka_client"));
-        return kafkaClient.getKafkaClusterPropertiesFromAws();
-    }
 }
