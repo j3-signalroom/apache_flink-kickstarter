@@ -19,7 +19,7 @@ val flinkVersion: String = "1.19.1"
 val kafkaVersion: String = "3.7.0"
 val junitVersion: String = "5.10.0"
 val awssdkVersion: String = "2.26.29"
-var icebergVersion: String = "1.6.1"
+var icebergVersion: String = "1.6.0"
 
 dependencies {
     implementation("org.apache.kafka:kafka-clients:${kafkaVersion}")
@@ -41,7 +41,6 @@ dependencies {
     implementation("org.apache.iceberg:iceberg-snowflake:${icebergVersion}")
     implementation("net.snowflake:snowflake-jdbc:3.19.0")
     implementation("org.apache.iceberg:iceberg-flink-runtime-1.19:${icebergVersion}")
-    implementation("org.apache.iceberg:iceberg-flink:${icebergVersion}")
     testImplementation("org.apache.flink:flink-test-utils:${flinkVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
@@ -65,6 +64,10 @@ application {
     } else {
         mainClass.set("apache_flink.kickstarter." + appMainClass)
     }    
+}
+
+tasks.withType<Zip> {
+    isZip64 = true
 }
 
 tasks {
