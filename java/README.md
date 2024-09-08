@@ -31,6 +31,6 @@ Finally, to run any of the Flink Apps, choose the app and then enter the corresp
 
 App|Commands for CLI
 -|-
-**`DataGeneratorApp`**|`flink run --class apache_flink.kickstarter.DataGeneratorApp apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
-**`FlightImporterApp`**|`flink run --class apache_flink.kickstarter.FlightImporterApp apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
-**`UserStatisticsApp`**|`flink run --class apache_flink.kickstarter.UserStatisticsApp apache_flink-kickstarter-x.xx.xx.xxx.jar --get-from-aws`
+**`DataGeneratorApp`**|`flink run --class apache_flink.kickstarter.DataGeneratorApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
+**`FlightImporterApp`**|`flink run --class apache_flink.kickstarter.FlightImporterApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
+**`UserStatisticsApp`**|`flink run --class apache_flink.kickstarter.UserStatisticsApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`

@@ -9,30 +9,29 @@
  * or custom sources. This custom source can be anything that isn't supported by Flink
  * out of the box, such as proprietary REST APIs, specialized databases, custom hardware 
  * interfaces, etc. J3 utilizes a Custom Source Data Stream to read the AWS Secrets Manager 
- * secrets and AWS Systems Manager Parameter Store properties during the initial start of a 
- * App, then caches the properties for use by any subsequent events that need these properties.
+ * secrets and AWS Systems Manager Parameter Store properties during the initial start of
+ * the Flink App, then caches the properties for use by any subsequent events that need 
+ * these properties.
  */
 package apache_flink.kickstarter;
 
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
 import java.util.concurrent.atomic.AtomicReference;
-import java.io.*;
 import java.util.*;
 
-import apache_flink.kickstarter.enums.*;
 import apache_flink.kickstarter.helper.*;
 
 
+/**
+ * This class creates a Custom Source Data Stream to read the AWS Secrets Manager secrets 
+ * and AWS Systems Manager Parameter Store properties during the initial set up of the 
+ * Flink App, then caches the properties for use by any subsequent events that need these
+ * properties.
+ */
 public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Properties>{
-    private static final String CONFLUENT_CLOUD_RESOURCE_PATH = "/confluent_cloud_resource/";
-    private static final String KAFKA_CLUSTER_SECRETS_PATH = "kafka_cluster/java_client";
-    private static final String KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH = "consumer_kafka_client";
-    private static final String KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH = "producer_kafka_client";
-
     private transient AtomicReference<Properties> _properties;
     private volatile boolean _consumerKafkaClient;
-    private volatile boolean _useAws;
     private volatile String _serviceAccountUser;
 
 
@@ -40,24 +39,24 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
      * Default constructor.
      * 
      * @param consumerKafkaClient
-     * @param appOptions
+     * @param serviceAccountUser
      * @throws Exception - Exception occurs when the service account user is empty.
      */
-    public KafkaClientPropertiesLookup(final boolean consumerKafkaClient, final AppOptions appOptions) throws Exception {
-        // ---  Set the fields
-        this._consumerKafkaClient = consumerKafkaClient;
-        this._useAws = appOptions.isGetFromAws();
-        this._serviceAccountUser = appOptions.getServiceAccountUser();
+    public KafkaClientPropertiesLookup(final boolean consumerKafkaClient, final String serviceAccountUser) throws Exception {
+        // --- Check if the service account user is empty
+        if(serviceAccountUser.isEmpty()) {
+            throw new Exception("The service account user must be provided.");
+        }
 
-        // --- Check if the service account user is empty, only if the --get-from-aws option is passed
-        if(this._useAws)
-            if(this._serviceAccountUser.isEmpty()) {
-                throw new Exception("The service account user must be provided when the --get-from-aws option is passed.");
-            }
+        // ---  Set the class properties
+        this._consumerKafkaClient = consumerKafkaClient;
+        this._serviceAccountUser = serviceAccountUser;
     }
 
     /**
-     * This method is called once per parallel task instance when the job starts. 
+     * This method is called once per parallel task instance when the job starts.
+     * Which its main purpose is to set up the task, and get the Kafka Client 
+     * properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
      * 
      * @parameters The configuration containing the parameters attached to the
      * contract.
@@ -67,13 +66,23 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
      */
     @Override
     public void open(Configuration configuration) throws Exception {
-        ObjectResult<Properties> properties = getKafkaClientProperties(this._consumerKafkaClient, this._useAws);
+        /* 
+         * Get the Kafka Client properties from AWS Secrets Manager and AWS Systems
+         * Manager Parameter Store.
+         */
+        final String secretPathPrefix = "/confluent_cloud_resource/" + this._serviceAccountUser;
+        final KafkaClient kafkaClient = 
+            new KafkaClient(
+                secretPathPrefix + "/kafka_cluster/java_client", 
+                secretPathPrefix + (this._consumerKafkaClient ? "/consumer_kafka_client" : "/producer_kafka_client"));
+        ObjectResult<Properties> properties = kafkaClient.getKafkaClusterPropertiesFromAws();
+
 		if(!properties.isSuccessful()) { 
 			throw new RuntimeException("Failed to retrieve the Kafka Client properties could not be retrieved because " + properties.getErrorMessageCode() + " " + properties.getErrorMessage());
-		}
-
-        // --- 
-        this._properties = new AtomicReference<>(properties.get());
+		} else {
+            // ---  Set the class properties
+            this._properties = new AtomicReference<>(properties.get());
+        }
     }
 
     /**
@@ -89,50 +98,11 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
     
     /**
      * This method is called when the task is canceled or the job is stopped.
+     * For this particular class, it is not used.
      * 
      * @throws Exception - Implementations may forward exceptions, which are
      * caught.
      */
     @Override
     public void close() throws Exception {}
-
-    /**
-     * This method retrieves the Kafka Client properties from either the local properties files
-     * or AWS Secrets Manager and AWS Systems Manager Parameter Store.
-     * 
-     * @param consumerKafkaClient true if the Kafka Client is a consumer, false if the Kafka Client
-     * is a producer.
-     * @param useAws true if the properties should be retrieved from AWS, false if the properties.
-     * @return the Kafka Client properties from the local properties file if no arugments are passed,
-     * or from AWS Secrets Manager and AWS Systems Manager Parameter Store if --get-from-aws is passed
-     * as an argument.  Otherwise, an error message occurs, an error code and message is returned.
-     */
-    private ObjectResult<Properties> getKafkaClientProperties(final boolean consumerKafkaClient, final boolean useAws) {
-		if(useAws) {
-			/*
-			 * The flag was passed to the App, and therefore the properties will be fetched
-			 * from AWS Systems Manager Parameter Store and Secrets Manager, respectively.
-			 */            
-            final KafkaClient kafkaClient = 
-                new KafkaClient(
-                    CONFLUENT_CLOUD_RESOURCE_PATH + this._serviceAccountUser + "/" + KAFKA_CLUSTER_SECRETS_PATH, 
-                    CONFLUENT_CLOUD_RESOURCE_PATH + this._serviceAccountUser + "/" + (consumerKafkaClient ? KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH : KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH));
-            return kafkaClient.getKafkaClusterPropertiesFromAws();
-		} else {
-			/*
-			 * The flag was NOT passed to the App, therefore the properties will be fetched
-			 * from a local properties file.
-			 */
-            try {
-                Properties properties = new Properties();
-                final String resourceFilename = consumerKafkaClient ? "consumer.properties" : "producer.properties";
-                try (InputStream stream = KafkaClientPropertiesLookup.class.getClassLoader().getResourceAsStream(resourceFilename)) {
-                    properties.load(stream);
-                }
-                return new ObjectResult<>(properties);
-            } catch (final IOException e) {
-                return new ObjectResult<>(ErrorEnum.ERR_CODE_IO_EXCEPTION.getCode(), e.getMessage());
-            }
-		}        
-    }
 }

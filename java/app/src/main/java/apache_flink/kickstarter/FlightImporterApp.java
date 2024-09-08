@@ -101,9 +101,8 @@ public class FlightImporterApp {
 */
         /*
 		 * --- Kafka Consumer Config
-		 * Retrieve the properties from the local properties files, or from AWS
-         * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
-		 * properties into the Flink app
+		 * Retrieve the properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
+		 * Then ingest properties into the Flink app
 		 */
         DataStream<Properties> dataStreamConsumerProperties = 
 			env.fromData(new Properties())
@@ -117,9 +116,8 @@ public class FlightImporterApp {
 
         /*
 		 * --- Kafka Producer Config
-		 * Retrieve the properties from the local properties files, or from AWS
-         * Secrets Manager and AWS Systems Manager Parameter Store.  Then ingest
-		 * properties into the Flink app
+		 * Retrieve the properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
+		 * Then ingest properties into the Flink app
 		 */
         DataStream<Properties> dataStreamProducerProperties = 
 			env.fromData(new Properties())

@@ -14,35 +14,30 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.Ja
 
 
 public class Common {
-    private static final String OPT_GET_FROM_AWS = "--get-from-aws";
     private static final String OPT_SERVICE_ACCOUNT_USER = "--service-account-user";
 
 
     /**
-     * This method Loops through the `args` parameter and checks for the`OPT_GET_FROM_AWS` and `OPT_SERVICE_ACCOUNT_USER` options.
+     * This method Loops through the `args` parameter and checks for the `OPT_SERVICE_ACCOUNT_USER`
+     * option.
      * 
      * @param args list of strings passed to the main method.
      * @return true if the flag is found, false otherwise.
      */
-    public static AppOptions getAppOptions(final String[] args) {
-        // --- Create a new instance of the AppOptions class with the default values
-        AppOptions appOptions = new AppOptions(false, "");
+    public static String getAppOptions(final String[] args) {
+        String serviceAccountUser = "";
         
-        // --- Loop through the args parameter and check for the `OPT_GET_FROM_AWS` and `OPT_SERVICE_ACCOUNT_USER` options
+        // --- Loop through the args parameter and check for the `OPT_SERVICE_ACCOUNT_USER` option
         Iterator <String> iterator = List.of(args).iterator();
         while (iterator.hasNext()) {
             String arg = iterator.next();
-			if(arg.equalsIgnoreCase(OPT_GET_FROM_AWS))
-                appOptions.setGetFromAws(true);
-            else if(arg.equalsIgnoreCase(OPT_SERVICE_ACCOUNT_USER)) {
+			if(arg.equalsIgnoreCase(OPT_SERVICE_ACCOUNT_USER)) {
                 if(iterator.hasNext()) {
-                    appOptions.setServiceAccountUser(iterator.next());
+                    serviceAccountUser = iterator.next();
                 }
             }
 		}
-
-        // --- Return the instantiated AppOptions object
-        return appOptions;
+        return serviceAccountUser;
     }
 
     /**
