@@ -54,7 +54,7 @@ public class UserStatisticsApp {
 		 */
         DataStream<Properties> dataStreamConsumerProperties = 
 			env.fromData(new Properties())
-			   .map(new KafkaClientPropertiesLookup(true, Common.checkForFlagGetFromAws(args)))
+			   .map(new KafkaClientPropertiesLookup(true, Common.getAppOptions(args)))
 			   .name("kafka_consumer_properties");
 		Properties consumerProperties = new Properties();
 		dataStreamConsumerProperties.executeAndCollect()
@@ -70,7 +70,7 @@ public class UserStatisticsApp {
 		 */
         DataStream<Properties> dataStreamProducerProperties = 
 			env.fromData(new Properties())
-			   .map(new KafkaClientPropertiesLookup(false, Common.checkForFlagGetFromAws(args)))
+			   .map(new KafkaClientPropertiesLookup(false, Common.getAppOptions(args)))
 			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
 		dataStreamProducerProperties.executeAndCollect()

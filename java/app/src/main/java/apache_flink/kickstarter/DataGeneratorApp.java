@@ -53,7 +53,7 @@ public class DataGeneratorApp {
 		 */
         DataStream<Properties> dataStreamProducerProperties = 
 			env.fromData(new Properties())
-			   .map(new KafkaClientPropertiesLookup(false, Common.checkForFlagGetFromAws(args)))
+			   .map(new KafkaClientPropertiesLookup(false, Common.getAppOptions(args)))
 			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
 		dataStreamProducerProperties.executeAndCollect()
