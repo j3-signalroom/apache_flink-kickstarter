@@ -44,14 +44,16 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
      * @throws Exception - Exception occurs when the service account user is empty.
      */
     public KafkaClientPropertiesLookup(final boolean consumerKafkaClient, final AppOptions appOptions) throws Exception {
+        // ---  Set the fields
         this._consumerKafkaClient = consumerKafkaClient;
         this._useAws = appOptions.isGetFromAws();
-
-        if(this._serviceAccountUser.isEmpty()) {
-            throw new Exception("The service account user must be provided when the --get-from-aws flag is passed.");
-        }
-
         this._serviceAccountUser = appOptions.getServiceAccountUser();
+
+        // --- Check if the service account user is empty, only if the --get-from-aws option is passed
+        if(this._useAws)
+            if(this._serviceAccountUser.isEmpty()) {
+                throw new Exception("The service account user must be provided when the --get-from-aws option is passed.");
+            }
     }
 
     /**

@@ -19,26 +19,29 @@ public class Common {
 
 
     /**
-     * This method Loops through the `args` parameter and checks for the`FLAG_GET_FROM_AWS` flag.
+     * This method Loops through the `args` parameter and checks for the`OPT_GET_FROM_AWS` and `OPT_SERVICE_ACCOUNT_USER` options.
      * 
      * @param args list of strings passed to the main method.
      * @return true if the flag is found, false otherwise.
      */
     public static AppOptions getAppOptions(final String[] args) {
+        // --- Create a new instance of the AppOptions class with the default values
         AppOptions appOptions = new AppOptions(false, "");
-        Iterator <String> iterator = List.of(args).iterator();
         
+        // --- Loop through the args parameter and check for the `OPT_GET_FROM_AWS` and `OPT_SERVICE_ACCOUNT_USER` options
+        Iterator <String> iterator = List.of(args).iterator();
         while (iterator.hasNext()) {
             String arg = iterator.next();
 			if(arg.equalsIgnoreCase(OPT_GET_FROM_AWS))
-                appOptions.getFromAws = true;
+                appOptions.setGetFromAws(true);
             else if(arg.equalsIgnoreCase(OPT_SERVICE_ACCOUNT_USER)) {
                 if(iterator.hasNext()) {
-                    appOptions.serviceAccountUser = iterator.next();
+                    appOptions.setServiceAccountUser(iterator.next());
                 }
             }
 		}
 
+        // --- Return the instantiated AppOptions object
         return appOptions;
     }
 
