@@ -31,10 +31,10 @@ public class Common {
         while (iterator.hasNext()) {
             String arg = iterator.next();
 			if(arg.equalsIgnoreCase(OPT_GET_FROM_AWS))
-                appOptions.getFromAws = true;
+                appOptions.setGetFromAws(true);
             else if(arg.equalsIgnoreCase(OPT_SERVICE_ACCOUNT_USER)) {
                 if(iterator.hasNext()) {
-                    appOptions.serviceAccountUser = iterator.next();
+                    appOptions.setServiceAccountUser(iterator.next());
                 }
             }
 		}
