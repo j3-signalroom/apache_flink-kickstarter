@@ -57,6 +57,12 @@ public class DataGeneratorApp {
 			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
 
+		/*
+		 * Execute the data stream and collect the properties.
+		 * 
+		 * Note, the try-with-resources block ensures that the close() method of the CloseableIterator is
+		 * called automatically at the end, even if an exception occurs during iteration.
+		 */
 		try {
 			dataStreamProducerProperties.executeAndCollect()
                                     .forEachRemaining(typeValue -> {
