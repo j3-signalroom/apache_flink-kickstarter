@@ -4,9 +4,6 @@
  * @author Jeffrey Jonathan Jennings (J3)
  * 
  * 
- * This class creates fake flight data for fictional airlines <b>Sunset Air</b> and 
- * <b>Sky One</b> Airlines," and sends it to the Kafka topics `airline.sunset` and `airline.skyone`,
- * respectively.
  */
 package apache_flink.kickstarter;
 
@@ -26,6 +23,11 @@ import org.slf4j.*;
 import apache_flink.kickstarter.model.*;
 
 
+/**
+ * This class creates fake flight data for fictional airlines <b>Sunset Air</b> and 
+ * <b>Sky One</b> Airlines," and sends it to the Kafka topics `airline.sunset` and `airline.skyone`,
+ * respectively.
+ */
 public class DataGeneratorApp {
 	private static final Logger logger = LoggerFactory.getLogger(DataGeneratorApp.class);
 
