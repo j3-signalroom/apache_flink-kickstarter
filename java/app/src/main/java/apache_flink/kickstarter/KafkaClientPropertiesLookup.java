@@ -17,22 +17,14 @@ package apache_flink.kickstarter;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
 import java.util.concurrent.atomic.AtomicReference;
-import java.io.*;
 import java.util.*;
 
-import apache_flink.kickstarter.enums.*;
 import apache_flink.kickstarter.helper.*;
 
 
 public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Properties>{
-    private static final String CONFLUENT_CLOUD_RESOURCE_PATH = "/confluent_cloud_resource/";
-    private static final String KAFKA_CLUSTER_SECRETS_PATH = "/kafka_cluster/java_client";
-    private static final String KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH = "/consumer_kafka_client";
-    private static final String KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH = "/producer_kafka_client";
-
     private transient AtomicReference<Properties> _properties;
     private volatile boolean _consumerKafkaClient;
-    private volatile boolean _useAws;
     private volatile String _serviceAccountUser;
 
 
@@ -46,14 +38,12 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
     public KafkaClientPropertiesLookup(final boolean consumerKafkaClient, final AppOptions appOptions) throws Exception {
         // ---  Set the fields
         this._consumerKafkaClient = consumerKafkaClient;
-        this._useAws = appOptions.isGetFromAws();
         this._serviceAccountUser = appOptions.getServiceAccountUser();
 
-        // --- Check if the service account user is empty, only if the --get-from-aws option is passed
-        if(this._useAws)
-            if(this._serviceAccountUser.isEmpty()) {
-                throw new Exception("The service account user must be provided when the --get-from-aws option is passed.");
-            }
+        // --- Check if the service account user is empty
+        if(this._serviceAccountUser.isEmpty()) {
+            throw new Exception("The service account user must be provided when the --get-from-aws option is passed.");
+        }
     }
 
     /**
@@ -97,36 +87,16 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
     public void close() throws Exception {}
 
     /**
-     * @return the Kafka Client properties from the local properties file if no arugments are passed,
-     * or from AWS Secrets Manager and AWS Systems Manager Parameter Store if --get-from-aws is passed
-     * as an argument.  Otherwise, an error message occurs, an error code and message is returned.
+     * @return the Kafka Client properties from the AWS Secrets Manager and AWS Systems Manager 
+     * Parameter Store if --get-from-aws is passed as an argument.  Otherwise, an error message
+     * occurs, an error code and message is returned.
      */
     private ObjectResult<Properties> getKafkaClientProperties() {
-		if(this._useAws) {
-			/*
-			 * The flag was passed to the App, and therefore the properties will be fetched
-			 * from AWS Systems Manager Parameter Store and Secrets Manager, respectively.
-			 */            
-            final KafkaClient kafkaClient = 
-                new KafkaClient(
-                    CONFLUENT_CLOUD_RESOURCE_PATH + this._serviceAccountUser + "/" + KAFKA_CLUSTER_SECRETS_PATH, 
-                    CONFLUENT_CLOUD_RESOURCE_PATH + this._serviceAccountUser + "/" + (this._consumerKafkaClient ? KAFKA_CLIENT_CONSUMER_PARAMETERS_PATH : KAFKA_CLIENT_PRODUCER_PARAMETERS_PATH));
-            return kafkaClient.getKafkaClusterPropertiesFromAws();
-		} else {
-			/*
-			 * The flag was NOT passed to the App, therefore the properties will be fetched
-			 * from a local properties file.
-			 */
-            try {
-                Properties properties = new Properties();
-                final String resourceFilename = this._consumerKafkaClient ? "consumer.properties" : "producer.properties";
-                try (InputStream stream = KafkaClientPropertiesLookup.class.getClassLoader().getResourceAsStream(resourceFilename)) {
-                    properties.load(stream);
-                }
-                return new ObjectResult<>(properties);
-            } catch (final IOException e) {
-                return new ObjectResult<>(ErrorEnum.ERR_CODE_IO_EXCEPTION.getCode(), e.getMessage());
-            }
-		}        
+        final String secretPathPrefix = "/confluent_cloud_resource/" + this._serviceAccountUser;
+        final KafkaClient kafkaClient = 
+            new KafkaClient(
+                secretPathPrefix + "/kafka_cluster/java_client", 
+                secretPathPrefix + (this._consumerKafkaClient ? "/consumer_kafka_client" : "/producer_kafka_client"));
+        return kafkaClient.getKafkaClusterPropertiesFromAws();
     }
 }
