@@ -57,11 +57,15 @@ public class DataGeneratorApp {
 			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
 
-		dataStreamProducerProperties.executeAndCollect()
+		try {
+			dataStreamProducerProperties.executeAndCollect()
                                     .forEachRemaining(typeValue -> {
                                         logger.info("Producer Properties: {}", typeValue);
                                         producerProperties.putAll(typeValue);
                                     });
+		} catch (final Exception e) {
+			logger.error("The Flink App stopped early due to the following: {}", e.getMessage());
+		}
 
         /*
          * Create a data generator source
@@ -152,7 +156,7 @@ public class DataGeneratorApp {
             // --- Execute the Flink job graph (DAG)
             env.execute("DataGeneratorApp");
         } catch (Exception e) {
-            logger.error("The App stopped early due to the following: {}", e.getMessage());
+            logger.error("The Flink App stopped early due to the following: {}", e.getMessage());
         }
 	}
 }
