@@ -108,7 +108,7 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
      * as an argument.  Otherwise, an error message occurs, an error code and message is returned.
      */
     private ObjectResult<Properties> getKafkaClientProperties(final boolean consumerKafkaClient, final boolean useAws) {
-		if(!useAws) {
+		if(useAws) {
 			/*
 			 * The flag was passed to the App, and therefore the properties will be fetched
 			 * from AWS Systems Manager Parameter Store and Secrets Manager, respectively.
