@@ -48,7 +48,7 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
         this._useAws = appOptions.isGetFromAws();
 
         if(this._serviceAccountUser.isEmpty()) {
-            throw new Exception("The service account user must be provided when the --get-from-aws flag is passed.");
+            throw new Exception("The service account user must be provided when the --get-from-aws option is passed.");
         }
 
         this._serviceAccountUser = appOptions.getServiceAccountUser();

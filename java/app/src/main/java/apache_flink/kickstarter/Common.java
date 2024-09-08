@@ -19,7 +19,7 @@ public class Common {
 
 
     /**
-     * This method Loops through the `args` parameter and checks for the`FLAG_GET_FROM_AWS` flag.
+     * This method Loops through the `args` parameter and checks for the`OPT_GET_FROM_AWS` and `OPT_SERVICE_ACCOUNT_USER` options.
      * 
      * @param args list of strings passed to the main method.
      * @return true if the flag is found, false otherwise.
