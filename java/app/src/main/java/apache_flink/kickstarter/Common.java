@@ -8,12 +8,14 @@
  */
 package apache_flink.kickstarter;
 
+import java.util.*;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 
 public class Common {
     private static final String FLAG_GET_FROM_AWS = "--get-from-aws";
+    private static final String FLAG_SERVICE_ACCOUNT_USER = "--service-account-user";
 
 
     /**
@@ -23,9 +25,15 @@ public class Common {
      * @return true if the flag is found, false otherwise.
      */
     public static boolean checkForFlagGetFromAws(final String[] args) {
-        for (String arg:args) {
+        Iterator <String> iterator = List.of(args).iterator();
+        
+        while (iterator.hasNext()) {
+            String arg = iterator.next();
 			if(arg.equalsIgnoreCase(FLAG_GET_FROM_AWS))
                 return true;
+            if(arg.equalsIgnoreCase(FLAG_SERVICE_ACCOUNT_USER)) {
+
+            }
 		}
         return false;
     }

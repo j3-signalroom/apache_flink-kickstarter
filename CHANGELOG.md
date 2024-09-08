@@ -17,6 +17,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 - Upgrade Terraform AWS Provider to `5.66.0`, Terraform Snowflake Provider to `0.95.0`, and Terraform Confluent Provider to `2.1.0`.
 - Replaced deprecated Confluent and Snowflake resource/data blocks with updated resource/data blocks.
 - Refactor `run-terraform-locally.sh` BASH script to accommodate all the new arguments for Snowflake.
+- Use the `service_account_user`variable as the secrets insert value, and to customize the naming of all the resources.
 
 ## [0.22.01.000] - 2024-08-18
 ### Fixed
