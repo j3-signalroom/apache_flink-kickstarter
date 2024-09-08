@@ -16,7 +16,12 @@ public class AppOptions {
 
 
     /**
-     * Constructor for the AppOptions class.
+     * Default constructor.
+     */
+    public AppOptions() {}
+
+    /**
+     * Constructor when the the fields are set on instantiation.
      * 
      * @param getFromAws
      * @param serviceAccountUser
@@ -38,5 +43,23 @@ public class AppOptions {
      */
     public String getServiceAccountUser() {
         return serviceAccountUser;
+    }
+
+    /**
+     * Sets the value of the getFromAws field.
+     * 
+     * @param getFromAws the value to set the getFromAws field to.
+     */
+    public void setGetFromAws(boolean getFromAws) {
+        this.getFromAws = getFromAws;
+    }
+
+    /**
+     * Sets the value of the serviceAccountUser field.
+     * 
+     * @param serviceAccountUser the value to set the serviceAccountUser field to.
+     */
+    public void setServiceAccountUser(String serviceAccountUser) {
+        this.serviceAccountUser = serviceAccountUser;
     }
 }

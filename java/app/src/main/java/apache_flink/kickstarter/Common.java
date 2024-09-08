@@ -14,8 +14,8 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.Ja
 
 
 public class Common {
-    private static final String FLAG_GET_FROM_AWS = "--get-from-aws";
-    private static final String FLAG_SERVICE_ACCOUNT_USER = "--service-account-user";
+    private static final String OPT_GET_FROM_AWS = "--get-from-aws";
+    private static final String OPT_SERVICE_ACCOUNT_USER = "--service-account-user";
 
 
     /**
@@ -24,18 +24,22 @@ public class Common {
      * @param args list of strings passed to the main method.
      * @return true if the flag is found, false otherwise.
      */
-    public static boolean checkForFlagGetFromAws(final String[] args) {
+    public static AppOptions getAppOptions(final String[] args) {
+        AppOptions appOptions = new AppOptions(false, "");
         Iterator <String> iterator = List.of(args).iterator();
         
         while (iterator.hasNext()) {
             String arg = iterator.next();
-			if(arg.equalsIgnoreCase(FLAG_GET_FROM_AWS))
-                return true;
-            if(arg.equalsIgnoreCase(FLAG_SERVICE_ACCOUNT_USER)) {
-
+			if(arg.equalsIgnoreCase(OPT_GET_FROM_AWS))
+                appOptions.getFromAws = true;
+            else if(arg.equalsIgnoreCase(OPT_SERVICE_ACCOUNT_USER)) {
+                if(iterator.hasNext()) {
+                    appOptions.serviceAccountUser = iterator.next();
+                }
             }
 		}
-        return false;
+
+        return appOptions;
     }
 
     /**
