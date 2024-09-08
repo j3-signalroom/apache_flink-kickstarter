@@ -18,7 +18,8 @@ public class Common {
 
 
     /**
-     * This method Loops through the `args` parameter and checks for the `OPT_SERVICE_ACCOUNT_USER` options.
+     * This method Loops through the `args` parameter and checks for the `OPT_SERVICE_ACCOUNT_USER`
+     * option.
      * 
      * @param args list of strings passed to the main method.
      * @return true if the flag is found, false otherwise.
@@ -26,7 +27,7 @@ public class Common {
     public static String getAppOptions(final String[] args) {
         String serviceAccountUser = "";
         
-        // --- Loop through the args parameter and check for the `OPT_GET_FROM_AWS` and `OPT_SERVICE_ACCOUNT_USER` options
+        // --- Loop through the args parameter and check for the `OPT_SERVICE_ACCOUNT_USER` option
         Iterator <String> iterator = List.of(args).iterator();
         while (iterator.hasNext()) {
             String arg = iterator.next();

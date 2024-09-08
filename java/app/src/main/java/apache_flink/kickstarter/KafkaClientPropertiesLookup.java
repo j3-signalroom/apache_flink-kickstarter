@@ -88,8 +88,7 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
 
     /**
      * @return the Kafka Client properties from the AWS Secrets Manager and AWS Systems Manager 
-     * Parameter Store if --get-from-aws is passed as an argument.  Otherwise, an error message
-     * occurs, an error code and message is returned.
+     * Parameter Store.  Otherwise, an error message occurs, an error code and message is returned.
      */
     private ObjectResult<Properties> getKafkaClientProperties() {
         final String secretPathPrefix = "/confluent_cloud_resource/" + this._serviceAccountUser;
