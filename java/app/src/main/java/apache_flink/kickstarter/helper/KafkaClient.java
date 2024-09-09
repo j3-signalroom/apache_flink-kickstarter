@@ -39,7 +39,7 @@ public class KafkaClient {
 	public ObjectResult<Properties> getKafkaClusterPropertiesFromAws() {
 		Properties properties = new Properties();
 		
-		// --- Retrieve the SECRET properties from the AWS Secrets Manager		
+		// --- Retrieve the SECRET properties from the AWS Secrets Manager
 		ObjectResult<JSONObject> secret = AwsHelper.getSecrets(this.kafkaClusterSecretsPath, "AWSCURRENT");
 		if(secret.isSuccessful()) {
 			try {

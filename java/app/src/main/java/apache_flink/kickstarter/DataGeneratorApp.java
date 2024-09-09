@@ -17,7 +17,6 @@ import org.apache.flink.formats.json.JsonSerializationSchema;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.*;
 import java.util.*;
-import org.slf4j.*;
 
 import apache_flink.kickstarter.model.*;
 
@@ -28,9 +27,6 @@ import apache_flink.kickstarter.model.*;
  * respectively.
  */
 public class DataGeneratorApp {
-	private static final Logger logger = LoggerFactory.getLogger(DataGeneratorApp.class);
-
-
 	/**
 	 * The main method in a Flink application serves as the entry point of the program, where
 	 * the Flink DAG is defined.  That is, the execution environment, the creation of the data
@@ -64,13 +60,14 @@ public class DataGeneratorApp {
 		 * called automatically at the end, even if an exception occurs during iteration.
 		 */
 		try {
-			dataStreamProducerProperties.executeAndCollect()
-                                    .forEachRemaining(typeValue -> {
-                                        logger.info("Producer Properties: {}", typeValue);
-                                        producerProperties.putAll(typeValue);
-                                    });
+			dataStreamProducerProperties
+				.executeAndCollect()
+                .forEachRemaining(typeValue -> {
+                    producerProperties.putAll(typeValue);
+                });
 		} catch (final Exception e) {
-			logger.error("The Flink App stopped early due to the following: {}", e.getMessage());
+            System.out.println("The Flink App stopped early due to the following: " + e.getMessage());
+            System.exit(1);
 		}
 
         /*
@@ -162,7 +159,7 @@ public class DataGeneratorApp {
             // --- Execute the Flink job graph (DAG)
             env.execute("DataGeneratorApp");
         } catch (Exception e) {
-            logger.error("The Flink App stopped early due to the following: {}", e.getMessage());
+            System.out.println("The Flink App stopped early due to the following: " + e.getMessage());
         }
 	}
 }
