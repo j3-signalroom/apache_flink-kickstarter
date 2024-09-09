@@ -55,8 +55,9 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
 
     /**
      * This method is called once per parallel task instance when the job starts.
-     * Which its main purpose is to set up the task, and get the Kafka Client 
-     * properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
+     * In which, it gets the Kafka Client properties from AWS Secrets Manager and
+     * AWS Systems Manager Parameter Store.  Then the properties are stored in the
+     * class properties.
      * 
      * @parameters The configuration containing the parameters attached to the
      * contract.

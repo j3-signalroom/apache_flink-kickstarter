@@ -15,7 +15,7 @@ repositories {
 }
 
 // --- Dependency version numbers
-val flinkVersion: String = "1.19.1"
+val flinkVersion: String = "1.20.0"
 val kafkaVersion: String = "3.7.0"
 val junitVersion: String = "5.10.0"
 val awssdkVersion: String = "2.26.29"
