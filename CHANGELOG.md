@@ -3,8 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.00.000] - TBD
+### Added
+- AWS, Kafka, and Schema Registry Python helper classes.
+
+### Changed
+- try-wtih-resources
+
 ## [0.25.00.000] - 2024-09-08
-## Added
+### Added
 - Terraform the AWS S3 bucket that is used for Apache Iceberg file storage.
 - Updated the `run-terraform-locally.sh` Bash script handles both the plan/apply and destroy actions.
 - Terraform the AWS Secrets Manager Secrets for the Snowflake credentials.
