@@ -15,7 +15,6 @@ logger = logging.getLogger('Common')
 
 OPT_SERVICE_ACCOUNT_USER = "--service-account-user"
 
-
 def get_app_options(args: List[str]) -> str:
     """
     This method loops through the `args` parameter and checks for the `OPT_SERVICE_ACCOUNT_USER` option.
