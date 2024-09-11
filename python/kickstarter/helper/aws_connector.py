@@ -1,7 +1,6 @@
-import boto3
+import boto3  # Import the boto3 library
 from botocore.exceptions import ClientError
 import json
-import yaml
 import logging
 from re import sub
 from decimal import Decimal
@@ -61,25 +60,6 @@ class AwsService:
                    raise ValueError(e.response['Error']['Code'])
             return None
 
-    def get_yaml_file_from_s3(self, s3_bucket: str, s3_key: str) -> (any):
-        """
-        This methods retrieves a YAML file from an AWS S3 bucket.
-        
-        Args:
-            `s3_bucket` (string): Pass the bucket name.
-            `s3_key` (string): Pass the Object's key identifier.
-            
-        Returns:
-            `data_json` (object): Returns a Python object constructed from the YAML file in the S3
-            bucket.  If there is no YAML file in the bucket, `None` is returned.
-        """
-        
-        s3_yaml = boto3.client('s3')
-        response = s3_yaml.get_object(Bucket=s3_bucket, Key=s3_key)
-        data = response['Body'].read() # this returns binary data
-        data_json = yaml.safe_load(data)
-        return data_json
-        
     def get_parameter_values(self, parameter_path: str) -> (dict):
         """
         This method retrieves the parameteres from the System Manager Parameter Store.

@@ -1,7 +1,7 @@
 import logging
 from confluent_kafka.schema_registry import SchemaRegistryClient, Schema
 from confluent_kafka.schema_registry.error import SchemaRegistryError
-from dpg_coresaasservices.aws_connector import AwsService
+from aws_connector import aws_service as AwsService
 from contextlib import suppress
 
 
