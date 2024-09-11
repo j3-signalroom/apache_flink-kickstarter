@@ -8,8 +8,8 @@ from decimal import Decimal
 from typing import List
 
 # Assuming the equivalent Python model classes are defined in apache_flink.kickstarter.model
-from model.SkyOneAirlinesFlightData import SkyOneAirlinesFlightData
-from model.SunsetAirFlightData import SunsetAirFlightData
+from kickstarter.model.skyone_airlines_flight_data import SkyOneAirlinesFlightData
+from kickstarter.model.sunset_air_flight_data import SunsetAirFlightData
 
 
 class DataGenerator:

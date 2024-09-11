@@ -4,7 +4,7 @@
 from pyflink.common.state import ValueStateDescriptor
 from pyflink.datastream.functions import ProcessWindowFunction
 from pyflink.datastream.window import TimeWindow
-from model.UserStatisticsData import UserStatisticsData
+from kickstarter.model.user_statistics_data import UserStatisticsData
 
 
 class ProcessUserStatisticsDataFunction(ProcessWindowFunction):
