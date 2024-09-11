@@ -8,7 +8,7 @@ from confluent_kafka import KafkaException
 import json
 import sys
 from datetime import datetime
-from dpg_coresaasservices.aws_connector import AwsService
+from aws_connector import aws_service as AwsService
 
 
 class KafkaProducer:

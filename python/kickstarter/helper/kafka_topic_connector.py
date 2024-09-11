@@ -1,7 +1,7 @@
 import logging
 from confluent_kafka import KafkaError
 from confluent_kafka.admin import AdminClient, NewTopic
-from dpg_coresaasservices.aws_connector import AwsService
+from aws_connector import aws_service as AwsService
 
         
 class KafkaTopic:
