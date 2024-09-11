@@ -3,23 +3,22 @@
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
 import json
 from decimal import Decimal
 
 
 @dataclass
 class SkyOneAirlinesFlightData:
-    email_address: Optional[str] = None
-    flight_departure_time: Optional[datetime] = None
-    iata_departure_code: Optional[str] = None
-    flight_arrival_time: Optional[datetime] = None
-    iata_arrival_code: Optional[str] = None
-    flight_number: Optional[str] = None
-    confirmation: Optional[str] = None
-    ticket_price: Optional[float] = None
-    aircraft: Optional[str] = None
-    booking_agency_email: Optional[str] = None
+    email_address: str | None
+    flight_departure_time: datetime | None
+    iata_departure_code: str | None
+    flight_arrival_time: datetime | None
+    iata_arrival_code: str | None
+    flight_number: str | None
+    confirmation: str | None
+    ticket_price: float | None
+    aircraft: str | None
+    booking_agency_email: str | None
 
     def __post_init__(self):
         pass
@@ -72,10 +71,10 @@ class SkyOneAirlinesFlightData:
 
 @dataclass
 class FlightData:
-    email_address: Optional[str] = None
-    departure_time: Optional[datetime] = None
-    departure_airport_code: Optional[str] = None
-    arrival_time: Optional[datetime] = None
-    arrival_airport_code: Optional[str] = None
-    flight_number: Optional[str] = None
-    confirmation_code: Optional[str] = None
+    email_address: str | None
+    departure_time: datetime | None
+    departure_airport_code: str | None
+    arrival_time: datetime | None
+    arrival_airport_code: str | None
+    flight_number: str | None
+    confirmation_code: str | None

@@ -10,16 +10,16 @@ import json
 
 @dataclass
 class SunsetAirFlightData:
-    customer_email_address: Optional[str] = None
-    departure_time: Optional[datetime] = None
-    departure_airport: Optional[str] = None
-    arrival_time: Optional[datetime] = None
-    arrival_airport: Optional[str] = None
-    flight_duration: Optional[timedelta] = None
-    flight_id: Optional[str] = None
-    reference_number: Optional[str] = None
-    total_price: Optional[Decimal] = None
-    aircraft_details: Optional[str] = None
+    customer_email_address: str | None
+    departure_time: datetime | None
+    departure_airport: str | None
+    arrival_time: datetime | None
+    arrival_airport: str | None
+    flight_duration: timedelta | None
+    flight_id: str | None
+    reference_number: str | None
+    total_price: Decimal | None
+    aircraft_details: str | None
 
     def to_flight_data(self):
         flight_data = FlightData(
@@ -69,10 +69,10 @@ class SunsetAirFlightData:
 
 @dataclass
 class FlightData:
-    email_address: Optional[str] = None
-    departure_time: Optional[datetime] = None
-    departure_airport_code: Optional[str] = None
-    arrival_time: Optional[datetime] = None
-    arrival_airport_code: Optional[str] = None
-    flight_number: Optional[str] = None
-    confirmation_code: Optional[str] = None
+    email_address: str | None
+    departure_time: datetime | None
+    departure_airport_code: str | None
+    arrival_time: datetime | None
+    arrival_airport_code: str | None
+    flight_number: str | None
+    confirmation_code: str | None

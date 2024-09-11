@@ -7,9 +7,8 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import List
 
-# Assuming the equivalent Python model classes are defined in apache_flink.kickstarter.model
-from kickstarter.model.skyone_airlines_flight_data import SkyOneAirlinesFlightData
-from kickstarter.model.sunset_air_flight_data import SunsetAirFlightData
+# Assuming the equivalent Python model classes are defined in kickstarter.model
+from model import SkyOneAirlinesFlightData, SunsetAirFlightData
 
 
 class DataGenerator:

@@ -13,7 +13,7 @@
 from pyflink.common import Configuration
 from pyflink.datastream.functions import RichMapFunction
 from threading import Lock
-from apache_flink.kickstarter.helper import KafkaClient, ObjectResult
+from helper import KafkaClient
 import threading
 
 

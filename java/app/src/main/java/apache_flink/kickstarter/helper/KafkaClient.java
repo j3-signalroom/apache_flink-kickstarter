@@ -50,7 +50,7 @@ public class KafkaClient {
 					properties.put(key, value);
 				}
 			} catch (final JSONException e) {
-				return new ObjectResult<>(error_enum.ERR_CODE_MISSING_OR_INVALID_FIELD.getCode(), e.getMessage());
+				return new ObjectResult<>(ErrorEnum.ERR_CODE_MISSING_OR_INVALID_FIELD.getCode(), e.getMessage());
 			}
 
 			ObjectResult<Properties> parameters = AwsHelper.getParameters(this.kafkaClientParametersPath);

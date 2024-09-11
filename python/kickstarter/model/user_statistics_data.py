@@ -8,7 +8,7 @@ from typing import Optional
 
 @dataclass
 class UserStatisticsData:
-    email_address: Optional[str] = None
+    email_address: str | None
     total_flight_duration: Optional[timedelta] = timedelta(0)
     number_of_flights: int = 0
 

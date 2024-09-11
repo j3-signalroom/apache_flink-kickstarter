@@ -3,19 +3,18 @@
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
 import json
 
 
 @dataclass
 class FlightData:
-    email_address: Optional[str] = None
-    departure_time: Optional[datetime] = None
-    departure_airport_code: Optional[str] = None
-    arrival_time: Optional[datetime] = None
-    arrival_airport_code: Optional[str] = None
-    flight_number: Optional[str] = None
-    confirmation_code: Optional[str] = None
+    email_address: str | None
+    departure_time: datetime | None
+    departure_airport_code: str | None
+    arrival_time: datetime | None
+    arrival_airport_code: str | None
+    flight_number: str | None
+    confirmation_code: str | None
 
     def __eq__(self, other):
         if not isinstance(other, FlightData):
