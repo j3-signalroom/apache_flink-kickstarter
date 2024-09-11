@@ -79,7 +79,7 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
         ObjectResult<Properties> properties = kafkaClient.getKafkaClusterPropertiesFromAws();
 
 		if(!properties.isSuccessful()) { 
-			throw new RuntimeException("Failed to retrieve the Kafka Client properties could not be retrieved because " + properties.getErrorMessageCode() + " " + properties.getErrorMessage());
+			throw new RuntimeException(String.format("Failed to retrieve the Kafka Client properties from '%s' secrets because %s:%s", secretPathPrefix, properties.getErrorMessageCode(), properties.getErrorMessage()));
 		} else {
             // ---  Set the class properties
             this._properties = new AtomicReference<>(properties.get());

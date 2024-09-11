@@ -66,7 +66,8 @@ public class DataGeneratorApp {
                     producerProperties.putAll(typeValue);
                 });
 		} catch (final Exception e) {
-            System.out.println("The Flink App stopped early due to the following: " + e.getMessage());
+            System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
+            e.printStackTrace();
             System.exit(1);
 		}
 

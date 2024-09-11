@@ -123,7 +123,8 @@ public class FlightImporterApp {
                     consumerProperties.putAll(typeValue);
                 });
         } catch (final Exception e) {
-            System.out.println("The Flink App stopped early due to the following: " + e.getMessage());
+            System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
+            e.printStackTrace();
             System.exit(1);
 		}
 
@@ -137,11 +138,24 @@ public class FlightImporterApp {
 			   .map(new KafkaClientPropertiesLookup(false, Common.getAppOptions(args)))
 			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
-		dataStreamProducerProperties.executeAndCollect()
-                                    .forEachRemaining(typeValue -> {
-                                        producerProperties.putAll(typeValue);
-                                    });
 
+        /*
+         * Execute the data stream and collect the properties.
+         * 
+         * Note, the try-with-resources block ensures that the close() method of the CloseableIterator is
+         * called automatically at the end, even if an exception occurs during iteration.
+         */
+        try{
+            dataStreamProducerProperties.executeAndCollect()
+                                        .forEachRemaining(typeValue -> {
+                                            producerProperties.putAll(typeValue);
+                                        });
+        } catch (final Exception e) {
+            System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+        
         /*
          * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
          */

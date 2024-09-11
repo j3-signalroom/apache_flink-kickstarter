@@ -56,6 +56,24 @@ public class UserStatisticsApp {
 			   .map(new KafkaClientPropertiesLookup(true, Common.getAppOptions(args)))
 			   .name("kafka_consumer_properties");
 		Properties consumerProperties = new Properties();
+
+        /*
+         * Execute the data stream and collect the properties.
+         * 
+         * Note, the try-with-resources block ensures that the close() method of the CloseableIterator is
+         * called automatically at the end, even if an exception occurs during iteration.
+         */
+        try {
+            dataStreamConsumerProperties
+                .executeAndCollect()
+                .forEachRemaining(typeValue -> {
+                    consumerProperties.putAll(typeValue);
+                });
+        } catch (final Exception e) {
+            System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
 		dataStreamConsumerProperties.executeAndCollect()
                                     .forEachRemaining(typeValue -> {
                                         consumerProperties.putAll(typeValue);
@@ -85,7 +103,8 @@ public class UserStatisticsApp {
                     producerProperties.putAll(typeValue);
                 });
         } catch (final Exception e) {
-            System.out.println("The Flink App stopped early due to the following: " + e.getMessage());
+            System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
+            e.printStackTrace();
             System.exit(1);
 		}
 

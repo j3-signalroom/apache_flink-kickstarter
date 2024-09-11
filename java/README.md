@@ -22,7 +22,7 @@ Now build JAR file that contains all the Flink Apps on it, by running:
 Logon to the `apache_flink-kickstarter-jobmanager-1` container's Interative Shell:
 
 ```bash
-docker exec -it -w /opt/flink/apps apache_flink-kickstarter-jobmanager-1 /bin/bash
+docker exec -it -w /opt/flink mac_flink_with_iceberg-jobmanager-1 /bin/bash
 ```
 
 > *This allows you to interact with the container as if you were inside its terminal, enabling you to run commands, inspect the file system, or perform other tasks interactively within the container.*
