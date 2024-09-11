@@ -30,9 +30,9 @@ public enum ErrorEnum {
     private String errorMessage;
 
     static {
-        for (ErrorEnum errorEnum : values()) {
-            _BY_ERROR_CODE.put(errorEnum.errorMessageCode, errorEnum);
-            _BY_ERROR_MESSAGE.put(errorEnum.errorMessage, errorEnum);
+        for (ErrorEnum ErrorEnum : values()) {
+            _BY_ERROR_CODE.put(ErrorEnum.errorMessageCode, ErrorEnum);
+            _BY_ERROR_MESSAGE.put(ErrorEnum.errorMessage, ErrorEnum);
         }
     }
 
