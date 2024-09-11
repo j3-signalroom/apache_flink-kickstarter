@@ -76,17 +76,17 @@ public class AwsHelper {
 				if(getSecretValueResponse.secretString() != null) {
 					return new ObjectResult<>(new JSONObject(getSecretValueResponse.secretString()));
 				} else {
-					return new ObjectResult<>(ErrorEnum.ERR_CODE_AWS_REQUESTED_SECRET_DOES_HAVE_NOT_STRING.getCode(), String.format("%s does not contain a string value.", secretName));
+					return new ObjectResult<>(error_enum.ERR_CODE_AWS_REQUESTED_SECRET_DOES_HAVE_NOT_STRING.getCode(), String.format("%s does not contain a string value.", secretName));
 				}
 			} else {
-				return new ObjectResult<>(ErrorEnum.ERR_CODE_AWS_REQUESTED_SECRET_HAS_NO_VALUE.getCode(), String.format("%s has no value.", secretName));
+				return new ObjectResult<>(error_enum.ERR_CODE_AWS_REQUESTED_SECRET_HAS_NO_VALUE.getCode(), String.format("%s has no value.", secretName));
 			}
       	} catch(software.amazon.awssdk.services.secretsmanager.model.ResourceNotFoundException e) {
-			return new ObjectResult<>(ErrorEnum.ERR_CODE_AWS_REQUESTED_SECRET_NOT_FOUND.getCode(), e.getMessage());
+			return new ObjectResult<>(error_enum.ERR_CODE_AWS_REQUESTED_SECRET_NOT_FOUND.getCode(), e.getMessage());
       	} catch (InvalidRequestException e) {
-			return new ObjectResult<>(ErrorEnum.ERR_CODE_AWS_INVALID_REQUEST.getCode(), e.getMessage());
+			return new ObjectResult<>(error_enum.ERR_CODE_AWS_INVALID_REQUEST.getCode(), e.getMessage());
       	} catch (InvalidParameterException e) {
-			return new ObjectResult<>(ErrorEnum.ERR_CODE_AWS_INVALID_PARAMETERS.getCode(), e.getMessage());
+			return new ObjectResult<>(error_enum.ERR_CODE_AWS_INVALID_PARAMETERS.getCode(), e.getMessage());
       	}
 	}
 
