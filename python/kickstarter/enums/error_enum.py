@@ -65,9 +65,9 @@ class error_enum(Enum):
 
 
 # Initialize mappings
-error_enum.initialize_mappings()
+ErrorEnum.initialize_mappings()
 
 # Example usage for testing purposes
 if __name__ == "__main__":
-    error = error_enum.value_of_error_message_code("ERR_CODE_IO_EXCEPTION")
+    error = ErrorEnum.value_of_error_message_code("ERR_CODE_IO_EXCEPTION")
     print(f"Error Code: {error.get_code() if error else 'Not Found'}, Message: {error.get_message() if error else 'Not Found'}")

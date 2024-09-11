@@ -3,7 +3,7 @@
 
 import json
 from typing import Dict, Any
-from apache_flink.kickstarter.enums import error_enum
+from apache_flink.kickstarter.enums import ErrorEnum
 from apache_flink.kickstarter.helper import AwsHelper, ObjectResult
 
 
@@ -36,7 +36,7 @@ class kafka_client:
                     properties[key] = secret_data[key]
 
             except json.JSONDecodeError as e:
-                return ObjectResult(error_enum.ERR_CODE_MISSING_OR_INVALID_FIELD.get_code(), str(e))
+                return ObjectResult(ErrorEnum.ERR_CODE_MISSING_OR_INVALID_FIELD.get_code(), str(e))
 
             # Retrieve the parameters from the AWS Systems Manager Parameter Store
             parameters = AwsHelper.get_parameters(self.kafka_client_parameters_path)
