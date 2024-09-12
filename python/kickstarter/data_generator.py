@@ -1,11 +1,15 @@
-# Copyright (c) 2024 Jeffrey Jonathan Jennings
-# Author: Jeffrey Jonathan Jennings (J3)
-
 import random
 import string
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import List
+
+__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+__credits__    = ["Jeffrey Jonathan Jennings"]
+__license__    = "MIT"
+__maintainer__ = "Jeffrey Jonathan Jennings"
+__email__      = "j3@signalroom.ai"
+__status__     = "dev"
 
 # Assuming the equivalent Python model classes are defined in kickstarter.model
 from model import SkyOneAirlinesFlightData, SunsetAirFlightData

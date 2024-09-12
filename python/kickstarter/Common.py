@@ -1,5 +1,9 @@
-# Copyright (c) 2024 Jeffrey Jonathan Jennings
-# Author: Jeffrey Jonathan Jennings (J3)
+__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+__credits__    = ["Jeffrey Jonathan Jennings"]
+__license__    = "MIT"
+__maintainer__ = "Jeffrey Jonathan Jennings"
+__email__      = "j3@signalroom.ai"
+__status__     = "dev"
 #
 # This class contains common methods that are used throughout the application.
 

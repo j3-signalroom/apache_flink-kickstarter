@@ -1,24 +1,30 @@
-# Copyright (c) 2024 Jeffrey Jonathan Jennings
-# Author: Jeffrey Jonathan Jennings (J3)
-#
-# This class imports flight data from `airline.sunset` and `airline.skyone` Kafka topics
-# and converts it to a unified format for the `airline.all` Kafka topic.
-
 from pyflink.common import WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.table import EnvironmentSettings, StreamTableEnvironment
 from pyflink.datastream.connectors import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, JsonDeserializationSchema, JsonSerializationSchema
 from pyflink.datastream.functions import RuntimeContext
-import KafkaClientPropertiesLookup
+from kafka_client_properties_lookup import KafkaClientPropertiesLookup
 import Common
 from model import FlightData, SkyOneAirlinesFlightData, SunsetAirFlightData
 import logging
 import os
 
+__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+__credits__    = ["Jeffrey Jonathan Jennings"]
+__license__    = "MIT"
+__maintainer__ = "Jeffrey Jonathan Jennings"
+__email__      = "j3@signalroom.ai"
+__status__     = "dev"
+
+
 # Setup the logger
 logger = logging.getLogger('FlightImporterApp')
 
 class FlightImporterApp:
+    """
+    This class imports flight data from `airline.sunset` and `airline.skyone` Kafka topics
+    and converts it to a unified format for the `airline.all` Kafka topic.
+    """
 
     @staticmethod
     def main(args):

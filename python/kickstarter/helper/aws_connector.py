@@ -6,6 +6,12 @@ from re import sub
 from decimal import Decimal
 import os
 
+__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+__credits__    = ["Jeffrey Jonathan Jennings"]
+__license__    = "MIT"
+__maintainer__ = "Jeffrey Jonathan Jennings"
+__email__      = "j3@signalroom.ai"
+__status__     = "dev"
 
 class AwsService:
     """AWS Services class, focused on the Secrets Manager, S3 and System Manager Parameter Store."""

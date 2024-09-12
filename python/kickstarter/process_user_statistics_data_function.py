@@ -1,10 +1,14 @@
-# Copyright (c) 2024 Jeffrey Jonathan Jennings
-# Author: Jeffrey Jonathan Jennings (J3)
-
 from pyflink.common.state import ValueStateDescriptor
 from pyflink.datastream.functions import ProcessWindowFunction
 from pyflink.datastream.window import TimeWindow
 from kickstarter.model.user_statistics_data import UserStatisticsData
+
+__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+__credits__    = ["Jeffrey Jonathan Jennings"]
+__license__    = "MIT"
+__maintainer__ = "Jeffrey Jonathan Jennings"
+__email__      = "j3@signalroom.ai"
+__status__     = "dev"
 
 
 class ProcessUserStatisticsDataFunction(ProcessWindowFunction):
