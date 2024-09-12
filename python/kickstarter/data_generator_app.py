@@ -3,7 +3,7 @@ from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRec
 from pyflink.common import Types
 from pyflink.common.serialization import JsonRowSerializationSchema
 from pyflink.datastream.connectors.datagen import DataGeneratorSource
-import Common
+import python.kickstarter.common_functions as common_functions
 from kafka_client_properties_lookup import KafkaClientPropertiesLookup
 from data_generator import DataGenerator
 from model import SkyOneAirlinesFlightData, SunsetAirFlightData
@@ -37,7 +37,7 @@ class DataGeneratorApp:
         # Kafka Producer Config
         data_stream_producer_properties = (
             env.from_collection([{}])
-            .map(KafkaClientPropertiesLookup(False, Common.get_app_options(args)))
+            .map(KafkaClientPropertiesLookup(False, common_functions.get_app_options(args)))
             .name("kafka_producer_properties")
         )
 
@@ -63,7 +63,7 @@ class DataGeneratorApp:
         # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone`
         skyone_serializer = KafkaRecordSerializationSchema.builder() \
             .set_topic("airline.skyone") \
-            .set_value_serialization_schema(JsonRowSerializationSchema(Common.get_mapper)) \
+            .set_value_serialization_schema(JsonRowSerializationSchema(common_functions.get_mapper)) \
             .build()
 
         skyone_sink = KafkaSink.builder() \
@@ -87,7 +87,7 @@ class DataGeneratorApp:
         # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset`
         sunset_serializer = KafkaRecordSerializationSchema.builder() \
             .set_topic("airline.sunset") \
-            .set_value_serialization_schema(JsonRowSerializationSchema(Common.get_mapper)) \
+            .set_value_serialization_schema(JsonRowSerializationSchema(common_functions.get_mapper)) \
             .build()
 
         sunset_sink = KafkaSink.builder() \
