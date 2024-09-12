@@ -7,3 +7,7 @@ Examples of Apache Flink® applications showcasing the [DataStream API](https://
 ## Resources
 
 [Flink Python Docs](https://nightlies.apache.org/flink/flink-docs-master/api/python/)
+
+[Building Apache Flink Applications in Python](https://jaehyeon.me/blog/2023-10-19-build-pyflink-apps/)
+
+[Building Apache Flink Applications in Python GitHub](https://github.com/jaehyeon-kim/flink-demos/tree/master/building-pyflink-apps)
