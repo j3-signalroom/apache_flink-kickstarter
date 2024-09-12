@@ -4,7 +4,7 @@ from pyflink.datastream import StreamExecutionEnvironment, TimeCharacteristic
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema
 from pyflink.datastream.window import TumblingEventTimeWindows
 from pyflink.datastream.functions import RuntimeContext, ProcessWindowFunction
-from . import KafkaClientPropertiesLookup, Common
+from . import KafkaClientPropertiesLookup, common_functions
 from model import FlightData, UserStatisticsData
 from . import ProcessUserStatisticsDataFunction
 import json
@@ -37,7 +37,7 @@ class UserStatisticsApp:
         # Kafka Consumer Config
         data_stream_consumer_properties = (
             env.from_collection([{}])
-            .map(KafkaClientPropertiesLookup(True, Common.get_app_options(args)))
+            .map(KafkaClientPropertiesLookup(True, common_functions.get_app_options(args)))
             .name("kafka_consumer_properties")
         )
 
@@ -52,7 +52,7 @@ class UserStatisticsApp:
         # Kafka Producer Config
         data_stream_producer_properties = (
             env.from_collection([{}])
-            .map(KafkaClientPropertiesLookup(False, Common.get_app_options(args)))
+            .map(KafkaClientPropertiesLookup(False, common_functions.get_app_options(args)))
             .name("kafka_producer_properties")
         )
 

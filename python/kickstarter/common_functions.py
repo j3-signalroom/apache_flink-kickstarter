@@ -1,18 +1,17 @@
-__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
-__credits__    = ["Jeffrey Jonathan Jennings"]
-__license__    = "MIT"
-__maintainer__ = "Jeffrey Jonathan Jennings"
-__email__      = "j3@signalroom.ai"
-__status__     = "dev"
-#
-# This class contains common methods that are used throughout the application.
-
 import json
 from typing import List
 from datetime import datetime
 from json import JSONDecoder, JSONEncoder
 from functools import singledispatch
 import logging
+
+__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+__credits__    = ["Jeffrey Jonathan Jennings"]
+__license__    = "MIT"
+__maintainer__ = "Jeffrey Jonathan Jennings"
+__email__      = "j3@signalroom.ai"
+__status__     = "dev"
+
 
 # Set up the logger
 logger = logging.getLogger('Common')
@@ -53,10 +52,3 @@ def get_mapper():
     :return: CustomJSONEncoder instance.
     """
     return CustomJSONEncoder()
-
-
-if __name__ == "__main__":
-    # Example usage for testing purposes
-    example_args = ["--service-account-user", "example_user"]
-    user = get_app_options(example_args)
-    print(f"Service account user: {user}")

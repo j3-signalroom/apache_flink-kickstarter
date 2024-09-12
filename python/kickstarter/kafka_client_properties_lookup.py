@@ -24,7 +24,7 @@ class KafkaClientPropertiesLookup(RichMapFunction):
     these properties.
 
     Args:
-        RichMapFunction (object): In Apache Flink, the RichMapFunction class is a rich variant
+        RichMapFunction (obj): In Apache Flink, the RichMapFunction class is a rich variant
         of the MapFunction class. It provides access to the RuntimeContext and includes setup
         and teardown methods. 
     """

@@ -4,7 +4,7 @@ from pyflink.table import EnvironmentSettings, StreamTableEnvironment
 from pyflink.datastream.connectors import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, JsonDeserializationSchema, JsonSerializationSchema
 from pyflink.datastream.functions import RuntimeContext
 from kafka_client_properties_lookup import KafkaClientPropertiesLookup
-import Common
+import python.kickstarter.common_functions as common_functions
 from model import FlightData, SkyOneAirlinesFlightData, SunsetAirFlightData
 import logging
 import os
@@ -54,7 +54,7 @@ class FlightImporterApp:
         # Kafka Consumer Config
         data_stream_consumer_properties = (
             env.from_collection([{}])
-            .map(KafkaClientPropertiesLookup(True, Common.get_app_options(args)))
+            .map(KafkaClientPropertiesLookup(True, common_functions.get_app_options(args)))
             .name("kafka_consumer_properties")
         )
 
@@ -69,7 +69,7 @@ class FlightImporterApp:
         # Kafka Producer Config
         data_stream_producer_properties = (
             env.from_collection([{}])
-            .map(KafkaClientPropertiesLookup(False, Common.get_app_options(args)))
+            .map(KafkaClientPropertiesLookup(False, common_functions.get_app_options(args)))
             .name("kafka_producer_properties")
         )
 
