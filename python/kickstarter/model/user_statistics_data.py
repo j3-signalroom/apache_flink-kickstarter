@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Optional
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
@@ -8,6 +8,7 @@ __license__    = "MIT"
 __maintainer__ = "Jeffrey Jonathan Jennings"
 __email__      = "j3@signalroom.ai"
 __status__     = "dev"
+
 
 @dataclass
 class UserStatisticsData:
@@ -29,7 +30,6 @@ class UserStatisticsData:
         merged.email_address = self.email_address
         merged.total_flight_duration = self.total_flight_duration + that.total_flight_duration
         merged.number_of_flights = self.number_of_flights + that.number_of_flights
-
         return merged
 
     def __eq__(self, other):

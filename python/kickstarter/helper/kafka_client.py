@@ -1,5 +1,4 @@
 import json
-from typing import Dict, Any
 from enums import ErrorEnum
 from helper import AwsHelper
 
@@ -10,7 +9,8 @@ __maintainer__ = "Jeffrey Jonathan Jennings"
 __email__      = "j3@signalroom.ai"
 __status__     = "dev"
 
-class kafka_client:
+
+class KafkaClient:
     def __init__(self, kafka_cluster_secrets_path: str, kafka_client_parameters_path: str):
         """
         The default constructor stores the parameter values that are passed to it.
@@ -21,7 +21,7 @@ class kafka_client:
         self.kafka_cluster_secrets_path = kafka_cluster_secrets_path
         self.kafka_client_parameters_path = kafka_client_parameters_path
 
-    def get_kafka_cluster_properties_from_aws(self) -> 'ObjectResult':
+    def get_kafka_cluster_properties_from_aws(self) -> tuple[str, str | None]:
         """
         This method returns the Kafka Cluster properties from the AWS Secrets Manager and Parameter Store.
 
@@ -39,16 +39,15 @@ class kafka_client:
                     properties[key] = secret_data[key]
 
             except json.JSONDecodeError as e:
-                return ObjectResult(ErrorEnum.ERR_CODE_MISSING_OR_INVALID_FIELD.get_code(), str(e))
+                return ErrorEnum.ERR_CODE_MISSING_OR_INVALID_FIELD.get_code(), str(e)
 
             # Retrieve the parameters from the AWS Systems Manager Parameter Store
             parameters = AwsHelper.get_parameters(self.kafka_client_parameters_path)
             if parameters.is_successful():
-                merged = {**properties, **parameters.get()}
-                return ObjectResult(merged)
+                return {**properties, **parameters.get()}
             else:
-                return ObjectResult(parameters.get_error_message_code(), parameters.get_error_message())
+                return parameters.get_error_message_code(), parameters.get_error_message()
 
         else:
-            return ObjectResult(secret.get_error_message_code(), secret.get_error_message())
+            return secret.get_error_message_code(), secret.get_error_message()
 

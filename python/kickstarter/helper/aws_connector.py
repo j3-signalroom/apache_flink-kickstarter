@@ -1,4 +1,4 @@
-import boto3  # Import the boto3 library
+import boto3
 from botocore.exceptions import ClientError
 import json
 import logging
@@ -13,8 +13,11 @@ __maintainer__ = "Jeffrey Jonathan Jennings"
 __email__      = "j3@signalroom.ai"
 __status__     = "dev"
 
+
 class AwsService:
-    """AWS Services class, focused on the Secrets Manager, S3 and System Manager Parameter Store."""
+    """
+    AWS Services class, focused on the Secrets Manager, S3 and System Manager Parameter Store.
+    """
     
     def __init__(self):
         """
@@ -72,15 +75,14 @@ class AwsService:
         Moreover, it converts the values to the appropriate data type.
         
         Arg(s):
-            parameter_path (string): The hierarchy for the parameter.  Hierarchies start
+            parameter_path (str): The hierarchy for the parameter.  Hierarchies start
             with a forward slash (/). The hierarchy is the parameter name except the last
             part of the parameter.  For the API call to succeed, the last part of the
             parameter name can't be in the path. A parameter name hierarchy can have a
-            maximum of 15 levels.  Here is an example of a hierarchy: 
-            /shared/snowflake/database/vdp_acertus_dw_dev/ch
+            maximum of 15 levels.
             
         Return(s):
-            parameters (dictionary): Goes throught recursively and returns all the parameters
+            parameters (dict): Goes throught recursively and returns all the parameters
             within a hierarchy.
         """
         

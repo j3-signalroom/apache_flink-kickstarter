@@ -1,13 +1,13 @@
-from pyflink.common.serialization import JsonRowDeserializationSchema, JsonRowSerializationSchema
+from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.common.watermark_strategy import WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, TimeCharacteristic
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer
 from pyflink.datastream.window import TumblingEventTimeWindows
-from pyflink.datastream.functions import RuntimeContext, ProcessWindowFunction
-from . import KafkaClientPropertiesLookup, common_functions
-from model import FlightData, UserStatisticsData
-from . import ProcessUserStatisticsDataFunction
-import json
+from kafka_client_properties_lookup import KafkaClientPropertiesLookup
+import common_functions
+from model.flight_data import FlightData
+from model.user_statistics_data import UserStatisticsData
+from process_user_statistics_data_function import ProcessUserStatisticsDataFunction
 import logging
 from datetime import timedelta
 

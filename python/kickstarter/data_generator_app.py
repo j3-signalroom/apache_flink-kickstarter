@@ -1,14 +1,12 @@
-from pyflink.datastream import StreamExecutionEnvironment, RateLimiterStrategy
+from pyflink.datastream import StreamExecutionEnvironment
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema
-from pyflink.common import Types, Long
-from pyflink.common.serialization import JsonRowSerializationSchema
-from pyflink.datastream.connectors.datagen import DataGeneratorSource
+from pyflink.common import Types
+from pyflink.datastream.formats.json import JsonRowSerializationSchema
 from pyflink.common.watermark_strategy import WatermarkStrategy
-import python.kickstarter.common_functions as common_functions
+from pyflink.table import (DataTypes, TableEnvironment, EnvironmentSettings, ExplainDetail)
+import common_functions as common_functions
 from kafka_client_properties_lookup import KafkaClientPropertiesLookup
 from data_generator import DataGenerator
-from model import SkyOneAirlinesFlightData, SunsetAirFlightData
-from enums import DeliveryGuarantee
 import logging
 
 
@@ -26,8 +24,9 @@ logger = logging.getLogger('DataGeneratorApp')
 
 class DataGeneratorApp:
     """
-    This class creates fake flight data for fictional airlines Sunset Air and Sky One Airlines
-    and sends it to the Kafka topics `airline.sunset` and `airline.skyone`, respectively.
+    This class generates synthetic flight data for two fictional airlines, Sunset Air
+    and SkyOne Airlines. The synthetic flight data is stored in separate Apache Iceberg
+    tables for Sunset Air and SkyOne Airlines.
     """
     
     @staticmethod
@@ -50,60 +49,15 @@ class DataGeneratorApp:
             print(f"The Flink App stopped during the reading of the custom data source stream because of the following: {e}")
             exit(1)
 
+        t_env = TableEnvironment.create(EnvironmentSettings.in_streaming_mode())
+
+        data_gen = DataGenerator()
+
         # Create a data generator source for SkyOne Airlines
-        skyone_source = DataGeneratorSource(
-            lambda index: DataGenerator.generate_skyone_airlines_flight_data(),
-            Long.MAX_VALUE,
-            RateLimiterStrategy.per_second(1),
-            Types.PICKLE(SkyOneAirlinesFlightData)
-        )
-
-        # Sets up a Flink POJO source to consume data
-        skyone_stream = env.from_source(skyone_source, WatermarkStrategy.no_watermarks(), "skyone_source")
-
-        # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone`
-        skyone_serializer = KafkaRecordSerializationSchema.builder() \
-            .set_topic("airline.skyone") \
-            .set_value_serialization_schema(JsonRowSerializationSchema(common_functions.get_mapper)) \
-            .build()
-
-        skyone_sink = KafkaSink.builder() \
-            .set_kafka_producer_config(producer_properties) \
-            .set_record_serializer(skyone_serializer) \
-            .set_delivery_guarantee(DeliveryGuarantee.AT_LEAST_ONCE) \
-            .build()
-
-        skyone_stream.sink_to(skyone_sink).name("skyone_sink")
-
-        # Create a data generator source for Sunset Air
-        sunset_source = DataGeneratorSource(
-            lambda index: DataGenerator.generate_sunset_air_flight_data(),
-            Long.MAX_VALUE,
-            RateLimiterStrategy.per_second(1),
-            Types.PICKLE(SunsetAirFlightData)
-        )
-
-        sunset_stream = env.from_source(sunset_source, WatermarkStrategy.no_watermarks(), "sunset_source")
-
-        # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset`
-        sunset_serializer = KafkaRecordSerializationSchema.builder() \
-            .set_topic("airline.sunset") \
-            .set_value_serialization_schema(JsonRowSerializationSchema(common_functions.get_mapper)) \
-            .build()
-
-        sunset_sink = KafkaSink.builder() \
-            .set_kafka_producer_config(producer_properties) \
-            .set_record_serializer(sunset_serializer) \
-            .set_delivery_guarantee(DeliveryGuarantee.AT_LEAST_ONCE) \
-            .build()
-
-        sunset_stream.sink_to(sunset_sink).name("sunset_sink")
-
-        try:
-            # Execute the Flink job graph (DAG)
-            env.execute("DataGeneratorApp")
-        except Exception as e:
-            print(f"The Flink App stopped early due to the following: {e}")
+        items = data_gen.generate_skyone_airlines_flight_data()
+        len_sky = len([item for item in items if item.__class__.__name__ == "SkyOneAirlinesFlightData"])
+        logging.info(f"{len_sky} items from SkyOne and {len(items) - len_sky} from Sunset")
+        print(f"{len_sky} items from SkyOne and {len(items) - len_sky} from Sunset")
 
 if __name__ == "__main__":
     import sys

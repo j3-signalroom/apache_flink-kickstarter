@@ -4,7 +4,7 @@ from pyflink.table import EnvironmentSettings, StreamTableEnvironment
 from pyflink.datastream.connectors import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, JsonDeserializationSchema, JsonSerializationSchema
 from pyflink.datastream.functions import RuntimeContext
 from kafka_client_properties_lookup import KafkaClientPropertiesLookup
-import python.kickstarter.common_functions as common_functions
+import common_functions as common_functions
 from model import FlightData, SkyOneAirlinesFlightData, SunsetAirFlightData
 import logging
 import os
