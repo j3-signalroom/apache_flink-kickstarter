@@ -1,14 +1,12 @@
-from pyflink.datastream import StreamExecutionEnvironment, RateLimiterStrategy
+from pyflink.datastream import StreamExecutionEnvironment
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema
-from pyflink.common import Types, Long
-from pyflink.common.serialization import JsonRowSerializationSchema
-from pyflink.datastream.connectors.datagen import DataGeneratorSource
+from pyflink.common import Types
+from pyflink.datastream.formats.json import JsonRowSerializationSchema
 from pyflink.common.watermark_strategy import WatermarkStrategy
+from pyflink.table import (DataTypes, TableEnvironment, EnvironmentSettings, ExplainDetail)
 import common_functions as common_functions
 from kafka_client_properties_lookup import KafkaClientPropertiesLookup
 from data_generator import DataGenerator
-from model import SkyOneAirlinesFlightData, SunsetAirFlightData
-from enums import DeliveryGuarantee
 import logging
 
 
@@ -26,8 +24,9 @@ logger = logging.getLogger('DataGeneratorApp')
 
 class DataGeneratorApp:
     """
-    This class creates fake flight data for fictional airlines Sunset Air and Sky One Airlines
-    and sends it to the Kafka topics `airline.sunset` and `airline.skyone`, respectively.
+    This class generates synthetic flight data for two fictional airlines, Sunset Air
+    and SkyOne Airlines. The synthetic flight data is stored in separate Apache Iceberg
+    tables for Sunset Air and SkyOne Airlines.
     """
     
     @staticmethod
@@ -50,6 +49,39 @@ class DataGeneratorApp:
             print(f"The Flink App stopped during the reading of the custom data source stream because of the following: {e}")
             exit(1)
 
+        t_env = TableEnvironment.create(EnvironmentSettings.in_streaming_mode())
+
+        while True:
+            data_gen = DataGenerator()
+            items = data_gen.generate_items()
+            len_sky = len([item for item in items if item.__class__.__name__ == "SkyOneAirlinesFlightData"])
+            logging.info(f"{len_sky} items from SkyOne and {len(items) - len_sky} from Sunset")
+            print(f"{len_sky} items from SkyOne and {len(items) - len_sky} from Sunset")
+            """
+            for item in items:
+                try:
+                    if item.__class__.__name__ == "SkyOneAirlinesFlightData":
+                        topic_name = "skyone"
+                        key = {"ref": item.confirmation}
+                        arrival_time = item.flight_arrival_time
+                    else:
+                        topic_name = "sunset"
+                        key = {"ref": item.reference_number}
+                        arrival_time = item.arrival_time
+                    self.producer_client.send(
+                        topic=topic_name,
+                        key=key,
+                        value=item.asdict(),
+                    )
+                    logging.info(
+                        f"record sent, topic - {topic_name}, ref - {key['ref']}, arrival time - {arrival_time} "
+                    )
+                except Exception as err:
+                    raise RuntimeError("fails to send a message") from err
+            logging.info(f"wait for {wait_for} seconds...")
+            time.sleep(wait_for)
+            """
+
         # Create a data generator source for SkyOne Airlines
         skyone_source = DataGeneratorSource(
             lambda index: DataGenerator.generate_skyone_airlines_flight_data(),
@@ -64,13 +96,13 @@ class DataGeneratorApp:
         # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone`
         skyone_serializer = KafkaRecordSerializationSchema.builder() \
             .set_topic("airline.skyone") \
-            .set_value_serialization_schema(JsonRowSerializationSchema(common_functions.get_mapper)) \
+            .set_value_serialization_schema(JsonRowSerializationSchema(common_functions.get_mapper())) \
             .build()
 
         skyone_sink = KafkaSink.builder() \
             .set_kafka_producer_config(producer_properties) \
             .set_record_serializer(skyone_serializer) \
-            .set_delivery_guarantee(DeliveryGuarantee.AT_LEAST_ONCE) \
+            .set_delivery_guarantee(KafkaSink.DeliveryGuarantee.AT_LEAST_ONCE) \
             .build()
 
         skyone_stream.sink_to(skyone_sink).name("skyone_sink")
@@ -88,13 +120,13 @@ class DataGeneratorApp:
         # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset`
         sunset_serializer = KafkaRecordSerializationSchema.builder() \
             .set_topic("airline.sunset") \
-            .set_value_serialization_schema(JsonRowSerializationSchema(common_functions.get_mapper)) \
+            .set_value_serialization_schema(JsonRowSerializationSchema(common_functions.get_mapper())) \
             .build()
 
         sunset_sink = KafkaSink.builder() \
             .set_kafka_producer_config(producer_properties) \
             .set_record_serializer(sunset_serializer) \
-            .set_delivery_guarantee(DeliveryGuarantee.AT_LEAST_ONCE) \
+            .set_delivery_guarantee(KafkaSink.DeliveryGuarantee.AT_LEAST_ONCE) \
             .build()
 
         sunset_stream.sink_to(sunset_sink).name("sunset_sink")
