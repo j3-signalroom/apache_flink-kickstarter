@@ -1,8 +1,9 @@
-from pyflink.datastream import StreamExecutionEnvironment
+from pyflink.datastream import StreamExecutionEnvironment, RateLimiterStrategy
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema
-from pyflink.common import Types
+from pyflink.common import Types, Long
 from pyflink.common.serialization import JsonRowSerializationSchema
 from pyflink.datastream.connectors.datagen import DataGeneratorSource
+from pyflink.common.watermark_strategy import WatermarkStrategy
 import python.kickstarter.common_functions as common_functions
 from kafka_client_properties_lookup import KafkaClientPropertiesLookup
 from data_generator import DataGenerator

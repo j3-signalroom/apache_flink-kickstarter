@@ -1,7 +1,7 @@
 from pyflink.common.serialization import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.common.watermark_strategy import WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, TimeCharacteristic
-from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema
+from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer
 from pyflink.datastream.window import TumblingEventTimeWindows
 from pyflink.datastream.functions import RuntimeContext, ProcessWindowFunction
 from . import KafkaClientPropertiesLookup, common_functions
@@ -68,7 +68,7 @@ class UserStatisticsApp:
         flight_data_source = KafkaSource.builder() \
             .set_properties(consumer_properties) \
             .set_topics("airline.all") \
-            .set_starting_offsets(OffsetsInitializer.earliest()) \
+            .set_starting_offsets(KafkaOffsetsInitializer.earliest()) \
             .set_value_only_deserializer(JsonRowDeserializationSchema(FlightData)) \
             .build()
 
@@ -84,7 +84,7 @@ class UserStatisticsApp:
         stats_sink = KafkaSink.builder() \
             .set_kafka_producer_config(producer_properties) \
             .set_record_serializer(statistics_serializer) \
-            .set_delivery_guarantee(DeliveryGuarantee.AT_LEAST_ONCE) \
+            .set_delivery_guarantee(KafkaSink.DeliveryGuarantee.AT_LEAST_ONCE) \
             .build()
 
         # Defines the workflow for the Flink job graph (DAG) by connecting the data streams
