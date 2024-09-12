@@ -4,7 +4,7 @@ from pyflink.common import Types, Long
 from pyflink.common.serialization import JsonRowSerializationSchema
 from pyflink.datastream.connectors.datagen import DataGeneratorSource
 from pyflink.common.watermark_strategy import WatermarkStrategy
-import python.kickstarter.common_functions as common_functions
+import common_functions as common_functions
 from kafka_client_properties_lookup import KafkaClientPropertiesLookup
 from data_generator import DataGenerator
 from model import SkyOneAirlinesFlightData, SunsetAirFlightData
