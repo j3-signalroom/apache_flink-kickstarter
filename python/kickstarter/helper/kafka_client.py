@@ -1,11 +1,14 @@
-# Copyright (c) 2024 Jeffrey Jonathan Jennings
-# Author: Jeffrey Jonathan Jennings (J3)
-
 import json
 from typing import Dict, Any
-from apache_flink.kickstarter.enums import ErrorEnum
-from apache_flink.kickstarter.helper import AwsHelper, ObjectResult
+from enums import ErrorEnum
+from helper import AwsHelper
 
+__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+__credits__    = ["Jeffrey Jonathan Jennings"]
+__license__    = "MIT"
+__maintainer__ = "Jeffrey Jonathan Jennings"
+__email__      = "j3@signalroom.ai"
+__status__     = "dev"
 
 class kafka_client:
     def __init__(self, kafka_cluster_secrets_path: str, kafka_client_parameters_path: str):

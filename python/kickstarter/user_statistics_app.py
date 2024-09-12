@@ -1,26 +1,32 @@
-# Copyright (c) 2024 Jeffrey Jonathan Jennings
-# Author: Jeffrey Jonathan Jennings (J3)
-#
-# This class processes data from the `airline.all` Kafka topic to aggregate user
-# statistics in the `airline.user_statistics` Kafka topic.
-
 from pyflink.common.serialization import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.common.watermark_strategy import WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, TimeCharacteristic
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema
 from pyflink.datastream.window import TumblingEventTimeWindows
 from pyflink.datastream.functions import RuntimeContext, ProcessWindowFunction
-from apache_flink.kickstarter import KafkaClientPropertiesLookup, Common
-from apache_flink.kickstarter.model import FlightData, UserStatisticsData
-from apache_flink.kickstarter.functions import ProcessUserStatisticsDataFunction
+from . import KafkaClientPropertiesLookup, Common
+from model import FlightData, UserStatisticsData
+from . import ProcessUserStatisticsDataFunction
 import json
 import logging
 from datetime import timedelta
+
+__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+__credits__    = ["Jeffrey Jonathan Jennings"]
+__license__    = "MIT"
+__maintainer__ = "Jeffrey Jonathan Jennings"
+__email__      = "j3@signalroom.ai"
+__status__     = "dev"
+
 
 # Setup the logger
 logger = logging.getLogger('UserStatisticsApp')
 
 class UserStatisticsApp:
+    """
+    This class processes data from the `airline.all` Kafka topic to aggregate user
+    statistics in the `airline.user_statistics` Kafka topic.
+    """
 
     @staticmethod
     def main(args):

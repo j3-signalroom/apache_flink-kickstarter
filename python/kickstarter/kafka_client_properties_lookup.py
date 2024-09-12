@@ -1,23 +1,34 @@
-# Copyright (c) 2024 Jeffrey Jonathan Jennings
-# Author: Jeffrey Jonathan Jennings (J3)
-#
-# An Apache Flink custom source data stream is a user-defined source of data that
-# is integrated into a Flink application to read and process data from non-standard
-# or custom sources. This custom source can be anything that isn't supported by Flink
-# out of the box, such as proprietary REST APIs, specialized databases, custom hardware
-# interfaces, etc. J3 utilizes a Custom Source Data Stream to read the AWS Secrets Manager
-# secrets and AWS Systems Manager Parameter Store properties during the initial start of
-# the Flink App, then caches the properties for use by any subsequent events that need
-# these properties.
-
 from pyflink.common import Configuration
 from pyflink.datastream.functions import RichMapFunction
 from threading import Lock
 from helper import KafkaClient
 import threading
 
+__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+__credits__    = ["Jeffrey Jonathan Jennings"]
+__license__    = "MIT"
+__maintainer__ = "Jeffrey Jonathan Jennings"
+__email__      = "j3@signalroom.ai"
+__status__     = "dev"
+
 
 class KafkaClientPropertiesLookup(RichMapFunction):
+    """
+    An Apache Flink custom source data stream is a user-defined source of data that
+    is integrated into a Flink application to read and process data from non-standard
+    or custom sources. This custom source can be anything that isn't supported by Flink
+    out of the box, such as proprietary REST APIs, specialized databases, custom hardware
+    interfaces, etc. J3 utilizes a Custom Source Data Stream to read the AWS Secrets Manager
+    secrets and AWS Systems Manager Parameter Store properties during the initial start of
+    the Flink App, then caches the properties for use by any subsequent events that need
+    these properties.
+
+    Args:
+        RichMapFunction (object): In Apache Flink, the RichMapFunction class is a rich variant
+        of the MapFunction class. It provides access to the RuntimeContext and includes setup
+        and teardown methods. 
+    """
+
     def __init__(self, consumer_kafka_client: bool, service_account_user: str):
         """
         Default constructor.
