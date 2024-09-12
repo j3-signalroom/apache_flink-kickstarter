@@ -1,9 +1,5 @@
-import json
 from typing import List
-from datetime import datetime
-from json import JSONDecoder, JSONEncoder
 from functools import singledispatch
-import logging
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -12,9 +8,6 @@ __maintainer__ = "Jeffrey Jonathan Jennings"
 __email__      = "j3@signalroom.ai"
 __status__     = "dev"
 
-
-# Set up the logger
-logger = logging.getLogger('Common')
 
 OPT_SERVICE_ACCOUNT_USER = "--service-account-user"
 
@@ -34,21 +27,3 @@ def get_app_options(args: List[str]) -> str:
             service_account_user = next(iterator, "")
 
     return service_account_user
-
-
-class CustomJSONEncoder(JSONEncoder):
-    def default(self, obj):
-        # Handling serialization of datetime objects
-        if isinstance(obj, datetime):
-            return obj.isoformat()
-        # Let the base class default method raise the TypeError
-        return super().default(obj)
-
-
-def get_mapper():
-    """
-    Returns a new instance of the JSON encoder with custom handling for datetime serialization.
-
-    :return: CustomJSONEncoder instance.
-    """
-    return CustomJSONEncoder()

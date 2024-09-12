@@ -1,6 +1,5 @@
-from pyflink.common.state import ValueStateDescriptor
+from pyflink.datastream.state import ValueStateDescriptor
 from pyflink.datastream.functions import ProcessWindowFunction
-from pyflink.datastream.window import TimeWindow
 from kickstarter.model.user_statistics_data import UserStatisticsData
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"

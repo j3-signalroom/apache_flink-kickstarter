@@ -1,7 +1,7 @@
 from pyflink.common import Configuration
 from pyflink.datastream.functions import RichMapFunction
 from threading import Lock
-from helper import KafkaClient
+from helper.kafka_client import KafkaClient
 import threading
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"

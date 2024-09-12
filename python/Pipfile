@@ -8,7 +8,7 @@ grpcio-tools = ">=1.29.0,<=1.50.0"
 setuptools = ">=37.0.0"
 apache-flink = "1.20.0"
 boto3 = "1.35.16"
-botocore = "1.35.16"
+botocore = "*"
 confluent-kafka = "2.5.3"
 pyiceberg = {extras = ["s3fs", "snappy", "pandas", "hive"], version = "0.7.1" }
 
