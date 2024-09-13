@@ -1,5 +1,5 @@
 from pyflink.common import Configuration
-from pyflink.datastream.functions import RichMapFunction
+from pyflink.datastream.functions import MapFunction
 from threading import Lock
 from helper.kafka_client import KafkaClient
 import threading
@@ -12,7 +12,7 @@ __email__      = "j3@thej3.com"
 __status__     = "dev"
 
 
-class KafkaClientPropertiesLookup(RichMapFunction):
+class KafkaClientPropertiesLookup(MapFunction):
     """
     An Apache Flink custom source data stream is a user-defined source of data that
     is integrated into a Flink application to read and process data from non-standard
@@ -24,9 +24,9 @@ class KafkaClientPropertiesLookup(RichMapFunction):
     these properties.
 
     Args:
-        RichMapFunction (obj): In Apache Flink, the RichMapFunction class is a rich variant
-        of the MapFunction class. It provides access to the RuntimeContext and includes setup
-        and teardown methods. 
+        MapFunction (obj): In Apache Flink, the MapFunction class is a rich variant of the
+        MapFunction class. It provides access to the RuntimeContext and includes setup and
+        teardown methods. 
     """
 
     def __init__(self, consumer_kafka_client: bool, service_account_user: str):
