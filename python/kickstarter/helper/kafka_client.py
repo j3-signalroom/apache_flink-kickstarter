@@ -1,6 +1,6 @@
 import json
-from enums import ErrorEnum
-from helper import AwsHelper
+from enums.error_enum import ErrorEnum
+from helper.aws_connector import AwsService
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -30,7 +30,7 @@ class KafkaClient:
         properties = {}
 
         # Retrieve the SECRET properties from the AWS Secrets Manager
-        secret = AwsHelper.get_secrets(self.kafka_cluster_secrets_path, "AWSCURRENT")
+        secret = AwsService.get_secrets(self.kafka_cluster_secrets_path, "AWSCURRENT")
         if secret.is_successful():
             try:
                 # Convert the JSON object to a dictionary
@@ -39,10 +39,10 @@ class KafkaClient:
                     properties[key] = secret_data[key]
 
             except json.JSONDecodeError as e:
-                return ErrorEnum.ERR_CODE_MISSING_OR_INVALID_FIELD.get_code(), str(e)
+                return ErrorEnum.ERR_CODE_MISSING_OR_INVALID_FIELD.name, str(e)
 
             # Retrieve the parameters from the AWS Systems Manager Parameter Store
-            parameters = AwsHelper.get_parameters(self.kafka_client_parameters_path)
+            parameters = AwsService.get_parameters(self.kafka_client_parameters_path)
             if parameters.is_successful():
                 return {**properties, **parameters.get()}
             else:
