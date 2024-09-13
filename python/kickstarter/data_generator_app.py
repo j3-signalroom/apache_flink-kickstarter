@@ -51,7 +51,7 @@ class DataGeneratorApp:
             exit(1)
         
         # Set up the table environment to work with the Table and SQL API in Flink
-        table_env = StreamTableEnvironment.create(env, EnvironmentSettings.in_streaming_mode())
+        table_env = StreamExecutionEnvironment.create(env, EnvironmentSettings.in_streaming_mode())
 
         # Define the placheolder values for the preceeding Flink SQL statements
         catalog_name = "apache_kickstarter"
@@ -94,7 +94,7 @@ class DataGeneratorApp:
         # within a catalog by encapsulating both the database name and the object name.  For 
         # instance, this case we using it to get the fully qualified path of the `skyone_airlines`
         # table
-        skyone_airlines_table_path = catalog.ObjectPath(database_name, skyone_airlines_table)
+        skyone_airlines_table_path = ObjectPath(database_name, skyone_airlines_table)
 
         # Check if the table exists.  If it does not exist, create the table
         try:
@@ -135,7 +135,7 @@ class DataGeneratorApp:
         # within a catalog by encapsulating both the database name and the object name.  For 
         # instance, this case we using it to get the fully qualified path of the `sunset_air`
         # table
-        sunset_air_table_path = catalog.ObjectPath(database_name, sunset_air_table)
+        sunset_air_table_path = ObjectPath(database_name, sunset_air_table)
 
         # Check if the table exists.  If it does not exist, create the table
         try:
