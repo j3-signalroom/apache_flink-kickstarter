@@ -113,9 +113,14 @@ class DataGeneratorApp:
                     .field("booking_agency_email", DataTypes.STRING()) \
                     .build()
                 
-                # Define the table properties
+                # Define Apache Iceberg-specific table properties
                 properties = {
-                    'connector': 'iceberg'
+                    'connector': 'iceberg',
+                    'catalog-type': 'hadoop',  # Type of Iceberg catalog (used for working with AWS S3)
+                    'warehouse': f"'{s3_bucket}'",  # Warehouse directory where Iceberg stores data and metadata
+                    'write.format.default': 'parquet',  # File format for Iceberg writes
+                    'write.target-file-size-bytes': '134217728',  # Target size for files written by Iceberg (128 MB by default)
+                    'partitioning': 'iata_arrival_code'  # Optional: Partitioning columns for Iceberg table
                 }
 
                 # Create a CatalogTable instance, which is an instantiated object that represents the
