@@ -3,19 +3,19 @@ from pyflink.common.watermark_strategy import WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, TimeCharacteristic
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer
 from pyflink.datastream.window import TumblingEventTimeWindows
+import logging
+from datetime import timedelta
 from kafka_client_properties_lookup import KafkaClientPropertiesLookup
 import common_functions
 from model.flight_data import FlightData
 from model.user_statistics_data import UserStatisticsData
 from process_user_statistics_data_function import ProcessUserStatisticsDataFunction
-import logging
-from datetime import timedelta
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
 __license__    = "MIT"
 __maintainer__ = "Jeffrey Jonathan Jennings"
-__email__      = "j3@signalroom.ai"
+__email__      = "j3@thej3.com"
 __status__     = "dev"
 
 
@@ -47,7 +47,7 @@ class UserStatisticsApp:
                 consumer_properties.update(type_value)
         except Exception as e:
             print(f"The Flink App stopped during the reading of the custom data source stream because of the following: {e}")
-            exit(1)
+            sys.exit(1)
 
         # Kafka Producer Config
         data_stream_producer_properties = (
@@ -62,7 +62,7 @@ class UserStatisticsApp:
                 producer_properties.update(type_value)
         except Exception as e:
             print(f"The Flink App stopped during the reading of the custom data source stream because of the following: {e}")
-            exit(1)
+            sys.exit(1)
 
         # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.all`
         flight_data_source = KafkaSource.builder() \
