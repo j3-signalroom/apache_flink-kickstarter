@@ -5,7 +5,7 @@
  * 
  * 
  */
-package apache_flink.kickstarter;
+package kickstarter;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
@@ -18,7 +18,7 @@ import java.time.Duration;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import apache_flink.kickstarter.model.*;
+import kickstarter.model.*;
 
 
 class UserStatisticsAppTest {

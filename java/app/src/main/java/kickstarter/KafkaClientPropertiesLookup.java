@@ -13,14 +13,15 @@
  * the Flink App, then caches the properties for use by any subsequent events that need 
  * these properties.
  */
-package apache_flink.kickstarter;
+package kickstarter;
 
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
+
+import kickstarter.helper.*;
+
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.*;
-
-import apache_flink.kickstarter.helper.*;
 
 
 /**

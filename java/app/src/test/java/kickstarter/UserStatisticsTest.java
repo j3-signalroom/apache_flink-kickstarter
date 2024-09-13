@@ -5,16 +5,15 @@
  * 
  * 
  */
-package apache_flink.kickstarter;
+package kickstarter;
 
 import org.junit.jupiter.api.Test;
 
+import kickstarter.model.*;
 
 import java.time.Duration;
 import static org.apache.flink.types.PojoTestUtils.assertSerializedAsPojo;
 import static org.junit.jupiter.api.Assertions.*;
-
-import apache_flink.kickstarter.model.*;
 
 class UserStatisticsTest {
 

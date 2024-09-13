@@ -5,13 +5,13 @@
  * 
  * 
  */
-package apache_flink.kickstarter.helper;
+package kickstarter.helper;
 
 
 import java.util.*;
 import org.json.*;
 
-import apache_flink.kickstarter.enums.*;
+import kickstarter.enums.*;
 
 
 public class KafkaClient {

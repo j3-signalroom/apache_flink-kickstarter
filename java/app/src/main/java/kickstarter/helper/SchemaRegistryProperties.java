@@ -5,7 +5,7 @@
  * 
  * 
  */
-package apache_flink.kickstarter.helper;
+package kickstarter.helper;
 
 import java.util.*;
 

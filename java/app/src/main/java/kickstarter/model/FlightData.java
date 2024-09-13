@@ -5,7 +5,7 @@
  * 
  * 
  */
-package apache_flink.kickstarter.model;
+package kickstarter.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.*;
 import java.time.*;

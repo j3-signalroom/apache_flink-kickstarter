@@ -5,13 +5,13 @@
  * 
  * 
  */
-package apache_flink.kickstarter.model;
+package kickstarter.model;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.apache.flink.types.PojoTestUtils.*;
 
-import apache_flink.kickstarter.*;
+import kickstarter.*;
 
 
 class FlightDataTest {

@@ -5,7 +5,7 @@
  * 
  * 
  */
-package apache_flink.kickstarter;
+package kickstarter;
 
 import org.apache.flink.api.common.state.*;
 import org.apache.flink.configuration.Configuration;
@@ -13,7 +13,7 @@ import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.*;
 
-import apache_flink.kickstarter.model.*;
+import kickstarter.model.*;
 
 
 class ProcessUserStatisticsDataFunction extends ProcessWindowFunction<UserStatisticsData, UserStatisticsData, String, TimeWindow> {

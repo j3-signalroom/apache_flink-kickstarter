@@ -5,7 +5,7 @@
  * 
  * 
  */
-package apache_flink.kickstarter;
+package kickstarter;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -16,9 +16,10 @@ import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.formats.json.JsonSerializationSchema;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.*;
-import java.util.*;
 
-import apache_flink.kickstarter.model.*;
+import kickstarter.model.*;
+
+import java.util.*;
 
 
 /**
