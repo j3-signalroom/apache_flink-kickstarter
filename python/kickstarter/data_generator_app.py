@@ -1,7 +1,8 @@
 from pyflink.common import Types, Row
 from pyflink.datastream import StreamExecutionEnvironment
+from pyflink.table.table_environment import StreamTableEnvironment
 from pyflink.table import TableSchema, DataTypes, TableEnvironment, EnvironmentSettings, ExplainDetail
-from pyflink.table.catalog import ObjectPath, CatalogTable
+from pyflink.table.catalog import ObjectPath, CatalogBaseTable
 import logging
 import os
 import sys
@@ -51,7 +52,7 @@ class DataGeneratorApp:
             exit(1)
         
         # Set up the table environment to work with the Table and SQL API in Flink
-        table_env = StreamExecutionEnvironment.create(env, EnvironmentSettings.in_streaming_mode())
+        table_env = StreamTableEnvironment.create(env, EnvironmentSettings.in_streaming_mode())
 
         # Define the placheolder values for the preceeding Flink SQL statements
         catalog_name = "apache_kickstarter"
@@ -123,11 +124,11 @@ class DataGeneratorApp:
                     'partitioning': 'iata_arrival_code'  # Optional: Partitioning columns for Iceberg table
                 }
 
-                # Create a CatalogTable instance, which is an instantiated object that represents the
+                # Create a CatalogBaseTable instance, which is an instantiated object that represents the
                 # metadata of a table within a catalog.  It encapsulates all the necessary information
                 # about a table's schema, properties, and characteristics, allowing Flink to interact
                 # with various data sources and sinks in a unified and consistent manner
-                catalog_table = CatalogTable.create_table(schema, properties, comment="The SkyOne Airlines table")
+                catalog_table = CatalogBaseTable.create_table(schema=schema, properties=properties, comment="The SkyOne Airlines table")
 
                 # Create the table in the catalog
                 catalog.create_table(skyone_airlines_table_path, catalog_table, ignore_if_exists=True)
@@ -145,11 +146,11 @@ class DataGeneratorApp:
         # Check if the table exists.  If it does not exist, create the table
         try:
             if not catalog.table_exists(sunset_air_table_path):
-                # Create a CatalogTable instance, which is an instantiated object that represents the
+                # Create a CatalogBaseTable instance, which is an instantiated object that represents the
                 # metadata of a table within a catalog.  It encapsulates all the necessary information
                 # about a table's schema, properties, and characteristics, allowing Flink to interact
                 # with various data sources and sinks in a unified and consistent manner
-                catalog_table = CatalogTable.create_table(schema, properties, comment="The Sunset Air table")
+                catalog_table = CatalogBaseTable.create_table(schema=schema, properties=properties, comment="The Sunset Air table")
 
                 # Create the table in the catalog
                 catalog.create_table(sunset_air_table_path, catalog_table, ignore_if_exists=True)
