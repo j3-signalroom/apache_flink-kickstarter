@@ -1,5 +1,9 @@
 from typing import List
 from functools import singledispatch
+from typing import List
+from datetime import datetime
+from json import JSONEncoder
+from functools import singledispatch
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -27,3 +31,20 @@ def get_app_options(args: List[str]) -> str:
             service_account_user = next(iterator, "")
 
     return service_account_user
+
+class CustomJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        # Handling serialization of datetime objects
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        # Let the base class default method raise the TypeError
+        return super().default(obj)
+
+
+def get_mapper():
+    """
+    Returns a new instance of the JSON encoder with custom handling for datetime serialization.
+
+    :return: CustomJSONEncoder instance.
+    """
+    return CustomJSONEncoder()

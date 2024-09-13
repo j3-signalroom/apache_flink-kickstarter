@@ -1,8 +1,10 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Optional
 from decimal import Decimal
 import json
+from utils import serialize
+from pyflink.common import Row
+
 from model.flight_data import FlightData
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
@@ -34,6 +36,20 @@ class SunsetAirFlightData:
                           arrival_airport_code=self.arrival_airport,
                           flight_number=self.flight_id,
                           confirmation_code=self.reference_number)
+    
+    def to_row(self):
+        return Row(
+            email_address=self.email_address,
+            departure_time=serialize(self.flight_departure_time),
+            iata_departure_code=self.iata_departure_code,
+            arrival_time=serialize(self.flight_arrival_time),
+            iata_arrival_code=self.iata_arrival_code,
+            flight_number=self.flight_number,
+            confirmation=self.confirmation,
+            ticket_price=self.ticket_price,
+            aircraft=self.aircraft,
+            booking_agency_email=self.booking_agency_email
+        )
 
     def __eq__(self, other):
         if not isinstance(other, SunsetAirFlightData):
