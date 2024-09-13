@@ -1,20 +1,19 @@
-from pyflink.datastream import StreamExecutionEnvironment
-from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema
 from pyflink.common import Types
-from pyflink.datastream.formats.json import JsonRowSerializationSchema
-from pyflink.common.watermark_strategy import WatermarkStrategy
-from pyflink.table import (DataTypes, TableEnvironment, EnvironmentSettings, ExplainDetail)
+from pyflink.datastream import StreamExecutionEnvironment
+from pyflink.table import DataTypes, TableEnvironment, EnvironmentSettings, ExplainDetail
+from pyflink.table.catalog import ObjectPath
+import logging
+import os
 import common_functions as common_functions
 from kafka_client_properties_lookup import KafkaClientPropertiesLookup
 from data_generator import DataGenerator
-import logging
 
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
 __license__    = "MIT"
 __maintainer__ = "Jeffrey Jonathan Jennings"
-__email__      = "j3@signalroom.ai"
+__email__      = "j3@thej3.com"
 __status__     = "dev"
 
 
@@ -49,15 +48,30 @@ class DataGeneratorApp:
             print(f"The Flink App stopped during the reading of the custom data source stream because of the following: {e}")
             exit(1)
 
-        t_env = TableEnvironment.create(EnvironmentSettings.in_streaming_mode())
-
+        # Get a row of SkyOne Airlines synthetic flight data
         data_gen = DataGenerator()
+        row = data_gen.generate_skyone_airlines_flight_data()
+        
+        # Set up the table environment to work with the Table and SQL API in Flink
+        table_env = StreamTableEnvironment.create(env, EnvironmentSettings.in_streaming_mode())
 
-        # Create a data generator source for SkyOne Airlines
-        items = data_gen.generate_skyone_airlines_flight_data()
-        len_sky = len([item for item in items if item.__class__.__name__ == "SkyOneAirlinesFlightData"])
-        logging.info(f"{len_sky} items from SkyOne and {len(items) - len_sky} from Sunset")
-        print(f"{len_sky} items from SkyOne and {len(items) - len_sky} from Sunset")
+        # Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
+        # using the HadoopCatalog to store metadata in AWS S3, a Hadoop-compatible 
+        # filesystem
+        flink_sql = "CREATE CATALOG apache_kickstarter WITH (\n" + \
+                    "  'type'='iceberg',\n" + \
+                    "  'catalog-type'='hadoop',\n" + \
+                    "  'catalog-impl'='org.apache.iceberg.flink.FlinkCatalog',\n" + \
+                    "  'warehouse'='{s3_bucket}',\n" + \
+                    "  'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',\n" + \
+                    "  'aws.region' = '{aws_region}',\n" + \
+                    "  's3.endpoint' = 's3.{aws_region}.amazonaws.com');".format(s3_bucket=os.environ['AWS_S3_BUCKET'],
+                                                                                 aws_region=os.environ['AWS_REGION'])
+        
+        # Execution the registration of the Iceberg catalog with Flink SQL in the DAG
+        table_env.execute_sql(flink_sql)
+
+
 
 if __name__ == "__main__":
     import sys
