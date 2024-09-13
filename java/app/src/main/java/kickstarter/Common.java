@@ -6,7 +6,7 @@
  * 
  * This class contains common methods that are used throughout the application.
  */
-package apache_flink.kickstarter;
+package kickstarter;
 
 import java.util.*;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;

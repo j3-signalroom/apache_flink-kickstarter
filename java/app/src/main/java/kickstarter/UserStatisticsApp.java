@@ -7,7 +7,7 @@
  * This class processes data from the `airline.all` Kafka topic to aggregate user
  * statistics in the `airline.user_statistics` Kafka topic.
  */
-package apache_flink.kickstarter;
+package kickstarter;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.base.DeliveryGuarantee;
@@ -24,7 +24,7 @@ import java.time.*;
 import java.util.*;
 import org.slf4j.*;
 
-import apache_flink.kickstarter.model.*;
+import kickstarter.model.*;
 
 
 public class UserStatisticsApp {

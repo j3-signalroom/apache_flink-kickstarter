@@ -19,7 +19,7 @@
  * with the Flink Table API.  In this DAG, I use Apache Iceberg to store the unified flight
  * data in the `db_example.airline_flight_data` table.
  */
-package apache_flink.kickstarter;
+package kickstarter;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.sink.*;
@@ -34,7 +34,7 @@ import java.util.*;
 import java.time.*;
 import org.slf4j.*;
 
-import apache_flink.kickstarter.model.*;
+import kickstarter.model.*;
 
 
 public class FlightImporterApp {

@@ -60,9 +60,9 @@ java {
 application {
     // --- If the main class is not provided, use the default
     if (appMainClass.isNullOrEmpty()) {
-        mainClass.set("apache_flink.kickstarter.DataGeneratorApp")
+        mainClass.set("kickstarter.DataGeneratorApp")
     } else {
-        mainClass.set("apache_flink.kickstarter." + appMainClass)
+        mainClass.set("kickstarter." + appMainClass)
     }    
 }
 

@@ -5,14 +5,14 @@
  * 
  * 
  */
-package apache_flink.kickstarter;
+package kickstarter;
 
 import java.math.*;
 import java.time.*;
 import java.util.*;
 import java.util.stream.*;
 
-import apache_flink.kickstarter.model.*;
+import kickstarter.model.*;
 
 
 public class DataGenerator {

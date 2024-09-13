@@ -5,12 +5,13 @@
  * 
  * 
  */
-package apache_flink.kickstarter;
+package kickstarter;
 
 import java.time.*;
 import java.util.Random;
 
-import apache_flink.kickstarter.model.*;
+import kickstarter.model.*;
+
 
 public class TestHelpers {
     private static Random random = new Random(System.currentTimeMillis());

@@ -5,7 +5,7 @@
  * 
  * 
  */
-package apache_flink.kickstarter.model;
+package kickstarter.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import static org.apache.flink.types.PojoTestUtils.assertSerializedAsPojo;
 import static org.junit.jupiter.api.Assertions.*;
 
-import apache_flink.kickstarter.*;
+import kickstarter.*;
 
 
 class SunsetAirFlightDataTest {
