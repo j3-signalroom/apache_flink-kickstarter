@@ -3,7 +3,6 @@ from botocore.exceptions import ClientError
 import json
 import logging
 from re import sub
-from decimal import Decimal
 import os
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"

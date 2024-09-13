@@ -6,6 +6,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 ## [0.30.00.000] - TBD
 ### Added
 - AWS, Kafka, and Schema Registry Python helper classes.
+- DataGeneratorApp sinks synthetic flight data to Apache Iceberg tables.
 
 ### Changed
 - try-wtih-resources
