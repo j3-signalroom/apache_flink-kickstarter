@@ -11,7 +11,7 @@ services:
     command: jobmanager
     volumes:
       - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/libs:/opt/flink/java_apps
-      - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/python/kickstarter:/opt/flink/python_apps
+      - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/python:/opt/flink/python_apps
     environment:
       - |
         FLINK_PROPERTIES=
@@ -33,7 +33,7 @@ services:
     scale: 3
     volumes:
       - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/libs:/opt/flink/java_apps
-      - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/python/kickstarter:/opt/flink/python_apps
+      - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/python:/opt/flink/python_apps
     environment:
       - |
         FLINK_PROPERTIES=
