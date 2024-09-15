@@ -10,6 +10,7 @@ apache-flink = "*"
 boto3 = "*"
 botocore = "*"
 confluent-kafka = "2.5.3"
+google-api-python-client = "*"
 pyiceberg = "*"
 s3fs = "*"
 
