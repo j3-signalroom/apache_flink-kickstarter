@@ -4,7 +4,7 @@ import json
 from pyflink.common import Row
 
 from model.flight_data import FlightData
-from kickstarter.common_functions import serialize
+from common_functions import serialize
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]

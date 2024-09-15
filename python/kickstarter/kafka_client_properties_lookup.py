@@ -18,10 +18,10 @@ class KafkaClientPropertiesLookup(MapFunction):
     is integrated into a Flink application to read and process data from non-standard
     or custom sources. This custom source can be anything that isn't supported by Flink
     out of the box, such as proprietary REST APIs, specialized databases, custom hardware
-    interfaces, etc. J3 utilizes a Custom Source Data Stream to read the AWS Secrets Manager
-    secrets and AWS Systems Manager Parameter Store properties during the initial start of
-    the Flink App, then caches the properties for use by any subsequent events that need
-    these properties.
+    interfaces, etc. This code uses a Custom Source Data Stream to read the AWS Secrets 
+    Manager secrets and AWS Systems Manager Parameter Store properties during the initial
+    start of the Flink App, then caches the properties for use by any subsequent events
+    that need these properties.
 
     Args:
         MapFunction (obj): In Apache Flink, the MapFunction class is a rich variant of the
@@ -43,8 +43,41 @@ class KafkaClientPropertiesLookup(MapFunction):
         # Set the class properties
         self._consumer_kafka_client = consumer_kafka_client
         self._service_account_user = service_account_user
-        self._properties = None
-        self._lock = threading.Lock()
+
+        # Private attribute with a threading.Lock for atomic operations
+        self._properties_lock = threading.Lock()
+        self._properties = {}  # This acts like Java's Properties class
+
+    def __getstate__(self):
+        """
+        This method is called when an object is pickled (a.k.a., serialized).
+
+        Returns:
+            dict:  It returns the object's state.
+        """
+
+        state = self.__dict__.copy()
+
+        # Remove transient attributes from the state to be pickled
+        del state['_properties']
+        del state['_properties_lock']
+        return state
+
+    def __setstate__(self, state):
+        """
+        This method is called when an object is unpickled (a.k.a., deserialized). 
+        It receives the state (the dictionary returned by __getstate__) and
+        updates the object's __dict__.
+
+        Args:
+            state (dict):  The state of the object.
+        """
+
+        self.__dict__.update(state)
+
+        # Restore transient attributes
+        self._properties_lock = threading.Lock()
+        self._properties = {}
 
     def open(self, configuration: Configuration):
         """
@@ -69,7 +102,7 @@ class KafkaClientPropertiesLookup(MapFunction):
             raise RuntimeError(f"Failed to retrieve the Kafka Client properties from '{secret_path_prefix}' secrets because {properties.get_error_message_code()}:{properties.get_error_message()}")
         else:
             # Set the class properties using thread-safe atomic operation
-            with self._lock:
+            with self._properties_lock:
                 self._properties = properties.get()
 
     def map(self, value):
@@ -79,7 +112,7 @@ class KafkaClientPropertiesLookup(MapFunction):
         :param value: The input value.
         :return: The result of the map operation.
         """
-        with self._lock:
+        with self._properties_lock:
             return self._properties
 
     def close(self):
