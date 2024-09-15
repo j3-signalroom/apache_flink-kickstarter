@@ -12,7 +12,6 @@ botocore = "*"
 confluent-kafka = "2.5.3"
 pyiceberg = "*"
 s3fs = "*"
-utils = "*"
 
 [dev-packages]
 
