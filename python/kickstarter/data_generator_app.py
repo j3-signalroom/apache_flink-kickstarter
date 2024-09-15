@@ -7,8 +7,8 @@ import logging
 import os
 import sys
 import time
-import common_functions as common_functions
-from kafka_client_properties_lookup import KafkaClientPropertiesLookup
+
+from common_functions import get_app_options
 from data_generator import DataGenerator
 
 
@@ -36,12 +36,10 @@ class DataGeneratorApp:
         # Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         env = StreamExecutionEnvironment.get_execution_environment()
 
-        # Kafka Producer Config
-        data_stream_producer_properties = (
-            env.from_collection([{}])
-            .map(KafkaClientPropertiesLookup(False, common_functions.get_app_options(args)))
-            .name("kafka_producer_properties")
-        )
+        env.set_parallelism(1)
+
+        # Add the custom source
+        data_stream_producer_properties = env.add_source(KafkaClientPropertiesLookup(flag=None, options=get_app_options(False, args)))
 
         producer_properties = {}
         try:

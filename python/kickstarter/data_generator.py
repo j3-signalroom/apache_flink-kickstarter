@@ -2,6 +2,7 @@ import random
 import string
 from datetime import datetime, timedelta
 from decimal import Decimal
+
 from model.skyone_airlines_flight_data import SkyOneAirlinesFlightData
 from model.sunset_air_flight_data import SunsetAirFlightData
 
