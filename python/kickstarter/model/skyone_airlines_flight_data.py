@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
 import json
-from utils import serialize
 from pyflink.common import Row
 
 from model.flight_data import FlightData
