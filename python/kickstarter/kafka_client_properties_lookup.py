@@ -2,7 +2,6 @@ from pyflink.common import Configuration
 from pyflink.datastream.functions import MapFunction
 from threading import Lock
 from helper.kafka_client import KafkaClient
-import threading
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -45,7 +44,7 @@ class KafkaClientPropertiesLookup(MapFunction):
         self._service_account_user = service_account_user
 
         # Private attribute with a threading.Lock for atomic operations
-        self._properties_lock = threading.Lock()
+        self._properties_lock = Lock()
         self._properties = {}  # This acts like Java's Properties class
 
     def __getstate__(self):
@@ -76,7 +75,7 @@ class KafkaClientPropertiesLookup(MapFunction):
         self.__dict__.update(state)
 
         # Restore transient attributes
-        self._properties_lock = threading.Lock()
+        self._properties_lock = Lock()
         self._properties = {}
 
     def open(self, configuration: Configuration):
