@@ -1,6 +1,7 @@
 from pyflink.common import Configuration
 from pyflink.datastream.functions import MapFunction
 from threading import Lock
+
 from helper.kafka_client import KafkaClient
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"

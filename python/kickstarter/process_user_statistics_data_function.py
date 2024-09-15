@@ -1,6 +1,7 @@
 from pyflink.datastream.state import ValueStateDescriptor
 from pyflink.datastream.functions import ProcessWindowFunction
-from kickstarter.model.user_statistics_data import UserStatisticsData
+
+from model.user_statistics_data import UserStatisticsData
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]

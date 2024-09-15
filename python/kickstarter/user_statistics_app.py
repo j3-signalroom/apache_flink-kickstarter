@@ -5,8 +5,9 @@ from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRec
 from pyflink.datastream.window import TumblingEventTimeWindows
 import logging
 from datetime import timedelta
+
 from kafka_client_properties_lookup import KafkaClientPropertiesLookup
-import common_functions
+from common_functions import get_app_options
 from model.flight_data import FlightData
 from model.user_statistics_data import UserStatisticsData
 from process_user_statistics_data_function import ProcessUserStatisticsDataFunction
@@ -37,7 +38,7 @@ class UserStatisticsApp:
         # Kafka Consumer Config
         data_stream_consumer_properties = (
             env.from_collection([{}])
-            .map(KafkaClientPropertiesLookup(True, common_functions.get_app_options(args)))
+            .map(KafkaClientPropertiesLookup(True, get_app_options(args)))
             .name("kafka_consumer_properties")
         )
 

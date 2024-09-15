@@ -7,7 +7,8 @@ import logging
 import os
 import sys
 import time
-import common_functions as common_functions
+
+from common_functions import get_app_options
 from kafka_client_properties_lookup import KafkaClientPropertiesLookup
 from data_generator import DataGenerator
 
@@ -39,7 +40,7 @@ class DataGeneratorApp:
         # Kafka Producer Config
         data_stream_producer_properties = (
             env.from_collection([{}])
-            .map(KafkaClientPropertiesLookup(False, common_functions.get_app_options(args)))
+            .map(KafkaClientPropertiesLookup(False, get_app_options(args)))
             .name("kafka_producer_properties")
         )
 
