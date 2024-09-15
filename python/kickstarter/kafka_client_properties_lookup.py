@@ -18,10 +18,10 @@ class KafkaClientPropertiesLookup(MapFunction):
     is integrated into a Flink application to read and process data from non-standard
     or custom sources. This custom source can be anything that isn't supported by Flink
     out of the box, such as proprietary REST APIs, specialized databases, custom hardware
-    interfaces, etc. J3 utilizes a Custom Source Data Stream to read the AWS Secrets Manager
-    secrets and AWS Systems Manager Parameter Store properties during the initial start of
-    the Flink App, then caches the properties for use by any subsequent events that need
-    these properties.
+    interfaces, etc. This code uses a Custom Source Data Stream to read the AWS Secrets 
+    Manager secrets and AWS Systems Manager Parameter Store properties during the initial
+    start of the Flink App, then caches the properties for use by any subsequent events
+    that need these properties.
 
     Args:
         MapFunction (obj): In Apache Flink, the MapFunction class is a rich variant of the
