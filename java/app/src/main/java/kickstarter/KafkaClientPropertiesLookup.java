@@ -4,14 +4,14 @@
  * @author Jeffrey Jonathan Jennings (J3)
  * 
  * 
- * An Apache Flink custom source data stream is a user-defined source of data that
+ * An Apache Flink custom data source stream is a user-defined source of data that
  * is integrated into a Flink application to read and process data from non-standard
  * or custom sources. This custom source can be anything that isn't supported by Flink
  * out of the box, such as proprietary REST APIs, specialized databases, custom hardware 
- * interfaces, etc. J3 utilizes a Custom Source Data Stream to read the AWS Secrets Manager 
- * secrets and AWS Systems Manager Parameter Store properties during the initial start of
- * the Flink App, then caches the properties for use by any subsequent events that need 
- * these properties.
+ * interfaces, etc.  This code uses a Custom Data Source Stream to read the AWS Secrets 
+ * Manager secrets and AWS Systems Manager Parameter Store properties during the initial
+ * start of the Flink App, then caches the properties for use by any subsequent events
+ * that need these properties.
  */
 package kickstarter;
 

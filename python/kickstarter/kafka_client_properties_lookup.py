@@ -1,5 +1,5 @@
 from pyflink.common import Configuration
-from pyflink.datastream.functions import MapFunction
+from pyflink.datastream import SourceFunction
 from threading import Lock
 
 from helper.kafka_client import KafkaClient
@@ -12,20 +12,20 @@ __email__      = "j3@thej3.com"
 __status__     = "dev"
 
 
-class KafkaClientPropertiesLookup(MapFunction):
+class KafkaClientPropertiesLookup(SourceFunction):
     """
-    An Apache Flink custom source data stream is a user-defined source of data that
+    An Apache Flink custom data source stream is a user-defined source of data that
     is integrated into a Flink application to read and process data from non-standard
     or custom sources. This custom source can be anything that isn't supported by Flink
     out of the box, such as proprietary REST APIs, specialized databases, custom hardware
-    interfaces, etc. This code uses a Custom Source Data Stream to read the AWS Secrets 
+    interfaces, etc. This code uses a Custom Data Source Stream to read the AWS Secrets 
     Manager secrets and AWS Systems Manager Parameter Store properties during the initial
     start of the Flink App, then caches the properties for use by any subsequent events
     that need these properties.
 
     Args:
-        MapFunction (obj): In Apache Flink, the MapFunction class is a rich variant of the
-        MapFunction class. It provides access to the RuntimeContext and includes setup and
+        SourceFunction (obj): In Apache Flink, the SourceFunction class is a rich variant of the
+        SourceFunction class. It provides access to the RuntimeContext and includes setup and
         teardown methods. 
     """
 
@@ -44,52 +44,17 @@ class KafkaClientPropertiesLookup(MapFunction):
         self._consumer_kafka_client = consumer_kafka_client
         self._service_account_user = service_account_user
 
-        # Private attribute with a threading.Lock for atomic operations
-        self._properties_lock = Lock()
         self._properties = {}  # This acts like Java's Properties class
 
-    def __getstate__(self):
-        """
-        This method is called when an object is pickled (a.k.a., serialized).
+        self.is_running = True
 
-        Returns:
-            dict:  It returns the object's state.
-        """
-
-        state = self.__dict__.copy()
-
-        # Remove transient attributes from the state to be pickled
-        del state['_properties']
-        del state['_properties_lock']
-        return state
-
-    def __setstate__(self, state):
-        """
-        This method is called when an object is unpickled (a.k.a., deserialized). 
-        It receives the state (the dictionary returned by __getstate__) and
-        updates the object's __dict__.
-
-        Args:
-            state (dict):  The state of the object.
-        """
-
-        self.__dict__.update(state)
-
-        # Restore transient attributes
-        self._properties_lock = Lock()
-        self._properties = {}
-
-    def open(self, configuration: Configuration):
+    def run(self, ctx):
         """
         This method is called once per parallel task instance when the job starts.
         It gets the Kafka Client properties from AWS Secrets Manager and
-        AWS Systems Manager Parameter Store, then stores the properties in class attributes.
-        
-        :param configuration: The configuration containing the parameters attached to the contract.
-        :raises Exception: Implementations may forward exceptions, which are caught by the runtime.
-                           When the runtime catches an exception, it aborts the task and lets the
-                           fail-over logic decide whether to retry the task execution.
+        AWS Systems Manager Parameter Store, then stores the properties in class attributes.        
         """
+
         # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
         secret_path_prefix = f"/confluent_cloud_resource/{self._service_account_user}"
         kafka_client = KafkaClient(
@@ -101,25 +66,8 @@ class KafkaClientPropertiesLookup(MapFunction):
         if not properties.is_successful():
             raise RuntimeError(f"Failed to retrieve the Kafka Client properties from '{secret_path_prefix}' secrets because {properties.get_error_message_code()}:{properties.get_error_message()}")
         else:
-            # Set the class properties using thread-safe atomic operation
-            with self._properties_lock:
-                self._properties = properties.get()
-
-    def map(self, value):
-        """
-        This method is called for each element of the input stream.
-        
-        :param value: The input value.
-        :return: The result of the map operation.
-        """
-        with self._properties_lock:
-            return self._properties
-
-    def close(self):
-        """
-        This method is called when the task is canceled or the job is stopped.
-        For this particular class, it is not used.
-        
-        :raises Exception: Implementations may forward exceptions, which are caught.
-        """
-        pass
+            ctx.collect(properties.get())
+            self.is_running = False
+    
+    def cancel(self):
+        self.is_running = False
