@@ -85,10 +85,14 @@ RUN pipenv --python 3.11 install apache-flink==1.20.0
 RUN pipenv --python 3.11 install pyiceberg
 RUN pipenv --python 3.11 install boto3
 RUN pipenv --python 3.11 install s3fs
+RUN pipenv --python 3.11 install google-api-python-client
+RUN pipenv --python 3.11 install pyflink
 
-# This action forces the installation of the latest version of the AWS SDK
+# This action forces the installation of the latest version of the AWS SDK and PyFlink
 RUN pip install boto3
-
+RUN pip install apache-flink==1.20.0
+RUN pip install pyflink
+RUN pip install google-api-python-client
 #
 RUN pip install google-api-python-client
 
