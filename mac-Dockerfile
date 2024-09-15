@@ -38,10 +38,16 @@ RUN apt update && apt install -y nano
 
 # Install PyFlink
 RUN pip3 install --upgrade pip
+RUN pip3 install pipenv
 RUN pip3 install "grpcio-tools>=1.29.0,<=1.50.0"
 RUN pip3 install setuptools>=37.0.0
 RUN pip3 install apache-flink==1.20.0
 RUN pip3 install "pyiceberg[s3fs,hive,pandas]"
+RUN pip3 install boto3
+RUN pip3 install botocore
+RUN pip3 install confluent-kafka==2.5.3
+RUN pip3 install s3fs
+RUN pip3 install utils
 
 # Set the entrypoint to Flink's entrypoint script
 ENTRYPOINT ["/docker-entrypoint.sh"]

@@ -1,9 +1,6 @@
 from typing import List
-from functools import singledispatch
-from typing import List
-from datetime import datetime
+import datetime
 from json import JSONEncoder
-from functools import singledispatch
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -31,6 +28,24 @@ def get_app_options(args: List[str]) -> str:
             service_account_user = next(iterator, "")
 
     return service_account_user
+
+def serialize(obj):
+    """
+    This method serializes the `obj` parameter to a string.
+
+    Args:
+        obj (obj):  The object to serialize.
+
+    Returns:
+        str:  If the obj is a datetime object, the time formatted according to 
+        ISO is returned (i.e., 'YYYY-MM-DD HH:MM:SS.mmmmmm').  If the obj is a 
+        date object, the date is returned. Otherwise, the obj is returned as is.
+    """
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat(timespec="milliseconds")
+    if isinstance(obj, datetime.date):
+        return str(obj)
+    return obj
 
 class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):

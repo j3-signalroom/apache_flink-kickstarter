@@ -2,10 +2,10 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from decimal import Decimal
 import json
-from utils import serialize
 from pyflink.common import Row
 
 from model.flight_data import FlightData
+from kickstarter.common_functions import serialize
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
