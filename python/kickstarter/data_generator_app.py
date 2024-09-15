@@ -9,7 +9,6 @@ import sys
 import time
 
 from common_functions import get_app_options
-from kafka_client_properties_lookup import KafkaClientPropertiesLookup
 from data_generator import DataGenerator
 
 
@@ -40,7 +39,7 @@ class DataGeneratorApp:
         env.set_parallelism(1)
 
         # Add the custom source
-        data_stream_producer_properties = env.add_source(KafkaClientPropertiesLookup(False, get_app_options(args)))
+        data_stream_producer_properties = env.add_source(KafkaClientPropertiesLookup(flag=None, options=get_app_options(False, args)))
 
         producer_properties = {}
         try:

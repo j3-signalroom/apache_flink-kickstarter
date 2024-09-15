@@ -12,7 +12,7 @@ __status__     = "dev"
 
 OPT_SERVICE_ACCOUNT_USER = "--service-account-user"
 
-def get_app_options(args: List[str]) -> str:
+def get_app_options(consumer_kafka_client: bool, args: List[str]) -> str:
     """
     This method loops through the `args` parameter and checks for the `OPT_SERVICE_ACCOUNT_USER` option.
 
@@ -27,7 +27,12 @@ def get_app_options(args: List[str]) -> str:
         if arg.lower() == OPT_SERVICE_ACCOUNT_USER.lower():
             service_account_user = next(iterator, "")
 
-    return service_account_user
+    # Parse and return application options from args
+    options = {
+        "consumer_kafka_client": consumer_kafka_client,
+        "service_account_user": service_account_user,
+    }
+    return options
 
 def serialize(obj):
     """
