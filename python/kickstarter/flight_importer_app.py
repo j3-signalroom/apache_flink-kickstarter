@@ -50,7 +50,7 @@ def main(args):
 
     # Kafka Producer Config
     options = {
-        "is_consumer": False,
+        "consumer_kafka_client": False,
         "s3_bucket_name": args.s3_bucket_name
     }
     data_stream_producer_properties = (

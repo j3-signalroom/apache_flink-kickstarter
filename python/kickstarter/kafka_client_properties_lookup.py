@@ -38,7 +38,7 @@ class KafkaClientPropertiesLookup(SourceFunction):
 
         # Set the class properties
         self._is_consumer = options.get('is_consumer')
-        self._s3_bucket_name = options.get('s3_bucket_name')
+        self._service_account_user = options.get('s3_bucket_name')
 
         self._properties = {}  # This acts like Java's Properties class
 
@@ -52,7 +52,7 @@ class KafkaClientPropertiesLookup(SourceFunction):
         """
 
         # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
-        secret_path_prefix = f"/confluent_cloud_resource/{self._s3_bucket_name}"
+        secret_path_prefix = f"/confluent_cloud_resource/{self._service_account_user}"
         kafka_client = KafkaClient(
             f"{secret_path_prefix}/kafka_cluster/java_client",
             f"{secret_path_prefix}/consumer_kafka_client" if self._is_consumer else f"{secret_path_prefix}/producer_kafka_client"
