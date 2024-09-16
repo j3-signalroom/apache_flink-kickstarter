@@ -87,6 +87,7 @@ RUN pipenv --python 3.11 install boto3
 RUN pipenv --python 3.11 install s3fs
 RUN pipenv --python 3.11 install google-api-python-client
 RUN pipenv --python 3.11 install pyflink
+RUN pipenv --python 3.11 install py4j==0.10.9.7
 
 # This action forces the installation of the latest version of the AWS SDK and PyFlink
 RUN pip install boto3

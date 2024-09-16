@@ -10,30 +10,6 @@ __email__      = "j3@thej3.com"
 __status__     = "dev"
 
 
-OPT_SERVICE_ACCOUNT_USER = "--service-account-user"
-
-def get_app_options(consumer_kafka_client: bool, args: List[str]) -> str:
-    """
-    This method loops through the `args` parameter and checks for the `OPT_SERVICE_ACCOUNT_USER` option.
-
-    :param args: List of strings passed to the main method.
-    :return: Returns the service account user if the flag is found, an empty string otherwise.
-    """
-    service_account_user = ""
-
-    # Loop through the args parameter and check for the `OPT_SERVICE_ACCOUNT_USER` option
-    iterator = iter(args)
-    for arg in iterator:
-        if arg.lower() == OPT_SERVICE_ACCOUNT_USER.lower():
-            service_account_user = next(iterator, "")
-
-    # Parse and return application options from args
-    options = {
-        "consumer_kafka_client": consumer_kafka_client,
-        "service_account_user": service_account_user,
-    }
-    return options
-
 def serialize(obj):
     """
     This method serializes the `obj` parameter to a string.
