@@ -2,23 +2,23 @@
 
 #
 # *** Script Syntax ***
-# scripts/run-flink-locally.sh <up | down> --profile=<AWS_SSO_PROFILE_NAME>
+# scripts/run-flink-locally.sh <on | down> --profile=<AWS_SSO_PROFILE_NAME>
 #                                          --chip=<amd64 | armd64>
 #                                          [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
 #
 #
 
-# Check required command (up or down) was supplied
+# Check required command (on or off) was supplied
 case $1 in
-  up)
-    up_action=true;;
-  down)
-    up_action=false;;
+  on)
+    is_on=true;;
+  off)
+    is_on=false;;
   *)
     echo
-    echo "(Error Message 001)  You did not specify one of the commands: <up | down>."
+    echo "(Error Message 001)  You did not specify one of the commands: <on | down>."
     echo
-    echo "Usage:  Require ---> `basename $0` <up | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | armd64> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
+    echo "Usage:  Require ---> `basename $0` <on | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | armd64> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
     ;;
@@ -54,7 +54,7 @@ then
     echo
     echo "(Error Message 002)  You did not include the proper use of the --profile=<AWS_SSO_PROFILE_NAME> argument in the call."
     echo
-    echo "Usage:  Require ---> `basename $0` <up | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | armd64> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
+    echo "Usage:  Require ---> `basename $0` <on | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | armd64> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -65,7 +65,7 @@ then
     echo
     echo "(Error Message 003)  You did not include the proper use of the --chip=<amd64 | armd64> argument in the call."
     echo
-    echo "Usage:  Require ---> `basename $0` <up | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | armd64> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
+    echo "Usage:  Require ---> `basename $0` <on | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | armd64> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
@@ -94,16 +94,18 @@ else
     \nAWS_S3_BUCKET=${AWS_S3_BUCKET}" > .env
 fi
 
-# Run the Apache Flink cluster containers in the background (i.e., detach execution from the Termial window)
+# Turn on or off Apache Flink
 if [ $use_non_mac = false ]
 then
-    if [ $up_action = true ]
+    if [ $is_on = true ]
+    then
         docker-compose -f linux-docker-compose.yml up -d
     else
         docker-compose -f linux-docker-compose.yml down
     fi
 else
-    if [ $up_action = true ]
+    if [ $is_on = true ]
+    then
         docker-compose -f mac-docker-compose.yml up -d
     else
         docker-compose -f mac-docker-compose.yml down

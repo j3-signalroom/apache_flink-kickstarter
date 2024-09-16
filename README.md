@@ -1,6 +1,6 @@
 # Apache Flink Kickstarter
 ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png)
-To kickstart your journey in the wonderful world that the creators of Apache Flink have created for us all.  J3 started with the three primary DataStream apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
+To kickstart your journey in the wonderful world that the creators of Apache Flink have created for us all.  J3 started with the three primary Flink Apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
 
 App|Description
 -|-
@@ -8,28 +8,30 @@ App|Description
 `FlightImporterApp`|This app imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and converts it to a unified format for the `airline.all` Kafka topic.
 `UserStatisticsApp`|This app processes data from the `airline.all` Kafka topic to aggregate user statistics in the `airline.user_statistics` Kafka topic.
 
- Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/), and adapted to showcase one *highly recommended* best practice and three additional capabilities:
+ Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/).  To that which would be familiar to most who attempted to learn 101 Java Flink implementation.  This repo is the extension of that work to showcase how Flink will practically work in the enterprise by showcasing best practices and how it works with other enterprise capabilities (e.g., AWS, Apache Iceberg):
 
 No.|Best Practice/Capability|Description
 -|-|-
 1.|DevOps Infrastructure as Code (IaC)|As a best practice, we utilize GitHub Workflow/Actions and Terraform Cloud to automate the creation and teardown of the Confluent Cloud and AWS resources for you.
 2.|Read AWS Secrets Manager and AWS Systems Manager Parameter Store|Instead of relying on the local consumer and producer properties file, the Kafka Cluster API Key, and Kafka Consumer and Kafka Producer client configuration properties are read from the AWS Secrets Manager and AWS Systems Manager Parameter Store.
 3.|Custom Source Data Stream|An Apache Flink custom source data stream is a user-defined source of data that is integrated into a Flink application to read and process data from non-standard or custom sources. This custom source can be anything that isn't supported by Flink out of the box, such as proprietary REST APIs, specialized databases, custom hardware interfaces, etc. J3 utilizes a Custom Source Data Stream to read the AWS Secrets Manager secrets and AWS Systems Manager Parameter Store properties during the initial start of a App, then caches the properties for use by any subsequent events that need these properties.
-4.|Sink synthetic flight data to Apache Iceberg|The combination of Apache Flink and Apache Iceberg provides several advantages. Iceberg’s capabilities, including snapshot isolation for reads and writes, the ability to handle multiple concurrent operations, ACID-compliant queries, and incremental reads, enable Flink to perform operations that were traditionally challenging with older table formats. Together, they offer an efficient and scalable platform for processing large-scale data, especially for streaming use cases.
+4.|Consume & Sink synthetic flight data to/from Apache Iceberg|The combination of Apache Flink and Apache Iceberg provides several advantages. Iceberg’s capabilities, including snapshot isolation for reads and writes, the ability to handle multiple concurrent operations, ACID-compliant queries, and incremental reads, enable Flink to perform operations that were traditionally challenging with older table formats. Together, they offer an efficient and scalable platform for processing large-scale data, especially for streaming use cases.
+
+One other thing, the examples are not only written in Java (duh!), but the Java examples have been translated to Python as well, were possible.  To showcase you how you can use this cool framework (Apache Flink) with another powerful language, Python.
 
 **Table of Contents**
 
 <!-- toc -->
 + [1.0 What do we call these examples, Flink Jobs or Flink Applications?](#10-what-do-we-call-these-examples-flink-jobs-or-flink-applications)
-+ [2.0 Let's get started](#20-lets-get-started)
++ [2.0 Let's get started!](#20-lets-get-started)
     - [2.1 DevOps in Action with Terraform ran locally](#21-devops-in-action-with-terraform-ran-locally)
         + [2.1.1 Run Terraform locally](#211-run-terraform-locally)
     - [2.2 DevOps in Action with GitHub, running Terraform in the cloud](#22-devops-in-action-with-github-running-terraform-in-the-cloud)
         + [2.2.1 Deploy Terraform from the cloud](#221-deploy-terraform-from-the-cloud)
     - [2.3 Power up the Apache Flink Docker containers](#23-power-up-the-apache-flink-docker-containers)
 + [3.0 Examples to get you kickstarted!](#30-examples-to-get-you-kickstarted)
-    - [3.1 Java Examples](#31-java-examples)
-    - [3.2 Python Examples](#32-flink-apps-written-in-python)
+    - [3.1 Flink Apps in Action written in Java](#31-flink-apps-in-action-written-in-java)
+    - [3.2 Flink Apps in Action written in Python](#32-flink-apps-in-action-written-in-python)
 + [4.0 Resources](#40-resources)
 <!-- tocstop -->
 
@@ -41,7 +43,7 @@ No.|Best Practice/Capability|Description
 
 Flink jobs are often called Flink applications because they encompass more than just a single task or computation. The term "application" better reflects the nature and scope of what is being developed and executed in Apache Flink.  (See [here](.blog/rationale-behind-calling-it-flink-app.md) for the rationale behind this reasoning.)  By calling Flink jobs "Flink applications," it emphasizes the comprehensive, complex, and integrated nature of the work, aligning it more closely with how we think about and manage software applications in general.
 
-## 2.0 Let's get started
+## 2.0 Let's get started!
 
 As of this writing, Confluent’s Serverless Flink offering does not yet support the DataStream API and Table API for creating Flink Apps in Java or Python.  Therefore, this repo restricts the use of cloud resources to the _Confluent Cloud Kafka Cluster and Schema Registry_ only.  It utilizes _AWS Secrets Manager_ to store Kafka Cluster and Schema Registry API Key secrets, _AWS Systems Manager Parameter Store_ to store Consumer and Producer Kafka configuration properties, _AWS S3 Bucket to store Apache Iceberg files in it_, and _Terraform Cloud and GitHub Workflow/Actions for DevOps Infrastructure as Code (IaC)_.  Locally, we will utilize Docker containers to run Apache Flink with support for Apache Iceberg.
 
@@ -119,18 +121,22 @@ Then fill out the Deploy dialog box, and click the `Run workflow` button to depl
 
 This section guides you through the local setup (on one machine but in separate containers) of the Apache Flink cluster in Session mode using Docker containers with support for Apache Iceberg.  Run the `bash` script below to start the Apache Flink cluster in Session Mode on your machine:
 
-> *If you are running Docker on a Mac with M1, M2, or M3 chip, set the `--chip` argument to `--chip=arm64`.  Otherwise, set it to `--chip=amd64`.  As for the `--profile` argument, specify your AWS SSO Profile Name (e.g., `--profile=AdministratorAccess-0123456789`.*
-
 ```bash
-scripts/run-flink-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64>
+scripts/run-flink-locally.sh <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | armd64> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
 ```
+Argument placeholder|Replace with
+    -|-
+    `<on | off>`|use `on` to turn on Flink locally, otherwise `off` to turn Flink off.
+    `<AWS_SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
+    `<amd64 | armd64>`|if you are running on a Mac with M1, M2, or M3 chip, use `arm64`.  Otherwise, use `amd64`.
+    `<AWS_S3_BUCKET_NAME>`|**[Optional]** can specify the name of the AWS S3 bucket used to store Apache Iceberg files.
 
 ## 3.0 Examples to get you kickstarted!
 
-### 3.1 Flink Apps written in Java
+### 3.1 Flink Apps in Action written in Java
 [Let's get started!](java/README.md)
 
-### 3.2 Flink Apps written in Python
+### 3.2 Flink Apps in Action written in Python
 [Let's get started!](python/README.md)
 
 ## 4.0 Resources
