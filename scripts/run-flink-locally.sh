@@ -48,65 +48,64 @@ do
     esac
 done
 
-# Check required --profile argument was supplied
-if [ -z $AWS_PROFILE ]
+if [ $is_on = true ]
 then
-    echo
-    echo "(Error Message 002)  You did not include the proper use of the --profile=<AWS_SSO_PROFILE_NAME> argument in the call."
-    echo
-    echo "Usage:  Require ---> `basename $0` <on | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | armd64> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
-    echo
-    exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
-fi
+    # Check required --profile argument was supplied
+    if [ -z $AWS_PROFILE ]
+    then
+        echo
+        echo "(Error Message 002)  You did not include the proper use of the --profile=<AWS_SSO_PROFILE_NAME> argument in the call."
+        echo
+        echo "Usage:  Require ---> `basename $0` <on | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | armd64> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
+        echo
+        exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
+    fi
 
-# Check required --profile argument was supplied
-if [ $chip_arg_provider = false ]
-then
-    echo
-    echo "(Error Message 003)  You did not include the proper use of the --chip=<amd64 | armd64> argument in the call."
-    echo
-    echo "Usage:  Require ---> `basename $0` <on | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | armd64> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
-    echo
-    exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
-fi
+    # Check required --profile argument was supplied
+    if [ $chip_arg_provider = false ]
+    then
+        echo
+        echo "(Error Message 003)  You did not include the proper use of the --chip=<amd64 | armd64> argument in the call."
+        echo
+        echo "Usage:  Require ---> `basename $0` <on | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | armd64> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
+        echo
+        exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
+    fi
 
-# Get the SSO AWS_ACCESS_KEY_ID, AWS_ACCESS_SECRET_KEY, AWS_SESSION_TOKEN, and AWS_REGION, and
-# set them as an environmental variables
-aws sso login $AWS_PROFILE
-eval $(aws2-wrap $AWS_PROFILE --export)
-export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
+    # Get the SSO AWS_ACCESS_KEY_ID, AWS_ACCESS_SECRET_KEY, AWS_SESSION_TOKEN, and AWS_REGION, and
+    # set them as an environmental variables
+    aws sso login $AWS_PROFILE
+    eval $(aws2-wrap $AWS_PROFILE --export)
+    export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
 
-# Create and then pass the AWS environment variables to docker-compose
-if [ -z $AWS_S3_BUCKET ]
-then
-    printf "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}\
-    \nAWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}\
-    \nAWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
-    \nAWS_REGION=${AWS_REGION}\
-    \nAWS_DEFAULT_REGION=${AWS_REGION}" > .env
-else
-    printf "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}\
-    \nAWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}\
-    \nAWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
-    \nAWS_REGION=${AWS_REGION}\
-    \nAWS_DEFAULT_REGION=${AWS_REGION}\
-    \nAWS_PROFILE=${AWS_PROFILE}\
-    \nAWS_S3_BUCKET=${AWS_S3_BUCKET}" > .env
-fi
+    # Create and then pass the AWS environment variables to docker-compose
+    if [ -z $AWS_S3_BUCKET ]
+    then
+        printf "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}\
+        \nAWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}\
+        \nAWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
+        \nAWS_REGION=${AWS_REGION}\
+        \nAWS_DEFAULT_REGION=${AWS_REGION}" > .env
+    else
+        printf "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}\
+        \nAWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}\
+        \nAWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
+        \nAWS_REGION=${AWS_REGION}\
+        \nAWS_DEFAULT_REGION=${AWS_REGION}\
+        \nAWS_PROFILE=${AWS_PROFILE}\
+        \nAWS_S3_BUCKET=${AWS_S3_BUCKET}" > .env
+    fi
 
-# Turn on or off Apache Flink
-if [ $use_non_mac = false ]
-then
-    if [ $is_on = true ]
+    if [ $use_non_mac = false ]
     then
         docker-compose -f linux-docker-compose.yml up -d
     else
-        docker-compose -f linux-docker-compose.yml down
+        docker-compose -f mac-docker-compose.yml up -d
     fi
 else
-    if [ $is_on = true ]
+    if [ $use_non_mac = false ]
     then
-        docker-compose -f mac-docker-compose.yml up -d
+        docker-compose -f linux-docker-compose.yml down
     else
         docker-compose -f mac-docker-compose.yml down
     fi
