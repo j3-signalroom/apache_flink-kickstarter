@@ -1,5 +1,4 @@
-from pyflink.common import Configuration
-from pyflink.datastream import SourceFunction
+from pyflink.datastream.functions import SourceFunction
 from threading import Lock
 
 from helper.kafka_client import KafkaClient
@@ -29,8 +28,8 @@ class KafkaClientPropertiesLookup(SourceFunction):
         teardown methods. 
     """
 
-    def __init__(self, flag, options):
-        self.flag = flag
+    def __init__(self, s3_bucket_name, options):
+        self._s3_bucket_name = s3_bucket_name
         self.options = options
         
         if not options.get('s3_bucket_name'):
@@ -38,8 +37,7 @@ class KafkaClientPropertiesLookup(SourceFunction):
 
         # Set the class properties
         self._is_consumer = options.get('is_consumer')
-        self._service_account_user = options.get('s3_bucket_name')
-
+    
         self._properties = {}  # This acts like Java's Properties class
 
         self.is_running = True
@@ -52,7 +50,7 @@ class KafkaClientPropertiesLookup(SourceFunction):
         """
 
         # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
-        secret_path_prefix = f"/confluent_cloud_resource/{self._service_account_user}"
+        secret_path_prefix = f"/confluent_cloud_resource/{self._s3_bucket_name}"
         kafka_client = KafkaClient(
             f"{secret_path_prefix}/kafka_cluster/java_client",
             f"{secret_path_prefix}/consumer_kafka_client" if self._is_consumer else f"{secret_path_prefix}/producer_kafka_client"
