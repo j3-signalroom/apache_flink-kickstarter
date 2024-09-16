@@ -28,8 +28,6 @@ import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsIni
 import org.apache.flink.formats.json.*;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.*;
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import java.util.*;
 import java.time.*;
 import org.slf4j.*;
@@ -57,48 +55,6 @@ public class FlightImporterApp {
         // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         
-        // --- Set up the table environment to work with the Table and SQL API in Flink using Java
-        final StreamTableEnvironment tableEnv = 
-            StreamTableEnvironment.create(env, EnvironmentSettings.newInstance().inStreamingMode().build());
-
-        /*
-         * --- Create an Apache Iceberg Catalog using Project Nessie
-         * 
-         * Project Nessie brings this Git-like workflow and benefits to your data stack.  Nessie is a 
-         * transactional metastore that tracks the state and changes of all tables in the catalog 
-         * through metadata via commits and alternate isolated branches like Git.
-         */
-        tableEnv.executeSql(
-                "CREATE CATALOG iceberg WITH ("
-                        + "'type'='iceberg',"
-                        + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
-                        + "'uri'='http://localhost:19120/api/v1',"
-                        + "'ref'='main',"
-                        + "'warehouse' = '/opt/flink/data/warehouse'"
-                        + ")");
-
-        // --- List all avialable Apache Iceberg Catalogs
-        TableResult result = tableEnv.executeSql("SHOW CATALOGS");
-        result.print();
-/*
-        // --- Set the current Apache Iceberg Catalog to the new Catalog
-        tableEnv.useCatalog("iceberg");
-
-        // --- Create a database in the current Catalog
-        tableEnv.executeSql("CREATE DATABASE IF NOT EXISTS db_example");
-
-        // --- Create the Apache Iceberg Table
-        tableEnv.executeSql(
-                "CREATE TABLE IF NOT EXISTS db_example.airline_flight_data ("
-                        + "email_address STRING,"
-                        + "departure_time STRING,"
-                        + "departure_airport_code STRING,"
-                        + "arrival_time STRING,"
-                        + "arrival_airport_code STRING,"
-                        + "flight_number STRING,"
-                        + "confirmation_code STRING"
-                        + ")");
-*/
         /*
 		 * --- Kafka Consumer Config
 		 * Retrieve the properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
