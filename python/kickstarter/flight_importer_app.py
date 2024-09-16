@@ -34,11 +34,7 @@ def main(args):
         "is_consumer": True,
         "s3_bucket_name": args.s3_bucket_name
     }
-    data_stream_consumer_properties = (
-        env.from_collection([{}])
-        .map(KafkaClientPropertiesLookup(flag=None, options=options))
-        .name("kafka_consumer_properties")
-    )
+    data_stream_consumer_properties = env.from_source(KafkaClientPropertiesLookup(flag=None, options=options)).name("kafka_consumer_properties")
 
     consumer_properties = {}
     try:
@@ -53,11 +49,7 @@ def main(args):
         "consumer_kafka_client": False,
         "s3_bucket_name": args.s3_bucket_name
     }
-    data_stream_producer_properties = (
-        env.from_collection([{}])
-        .map(KafkaClientPropertiesLookup(flag=None, options=options))
-        .name("kafka_producer_properties")
-    )
+    data_stream_producer_properties = env.from_source(KafkaClientPropertiesLookup(flag=None, options=options)).name("kafka_producer_properties")
 
     producer_properties = {}
     try:
