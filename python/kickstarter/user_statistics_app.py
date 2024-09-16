@@ -32,12 +32,12 @@ def main(args):
 
     # Kafka Consumer Config
     options = {
-        "consumer_kafka_client": True,
-        "s3_bucket_name": args.s3_bucket
+        "is_consumer": True,
+        "s3_bucket_name": args.s3_bucket_name
     }
     data_stream_consumer_properties = (
         env.from_collection([{}])
-        .map(KafkaClientPropertiesLookup(flags=None, options=options))
+        .map(KafkaClientPropertiesLookup(flag=None, options=options))
         .name("kafka_consumer_properties")
     )
 
@@ -51,12 +51,12 @@ def main(args):
 
     # Kafka Producer Config
     options = {
-        "consumer_kafka_client": False,
-        "s3_bucket_name": args.s3_bucket
+        "is_consumer": False,
+        "s3_bucket_name": args.s3_bucket_name
     }
     data_stream_producer_properties = (
         env.from_collection([{}])
-        .map(KafkaClientPropertiesLookup(flags=None, options=options))
+        .map(KafkaClientPropertiesLookup(flag=None, options=options))
         .name("kafka_producer_properties")
     )
 
