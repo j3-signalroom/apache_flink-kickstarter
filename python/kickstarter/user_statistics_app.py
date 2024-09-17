@@ -110,7 +110,7 @@ def define_workflow(flight_data_source):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--s3_bucket_name',
+        '--aws_s3_bucket',
         dest='s3_bucket_name',
         required=True,
         help='The AWS S3 bucket name.')

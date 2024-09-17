@@ -12,6 +12,7 @@ services:
     volumes:
       - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/libs:/opt/flink/java_apps
       - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/python:/opt/flink/python_apps
+      - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/classes/java/main:/opt/flink/python_apps/java_classes
     environment:
       - |
         FLINK_PROPERTIES=
@@ -34,6 +35,7 @@ services:
     volumes:
       - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/libs:/opt/flink/java_apps
       - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/python:/opt/flink/python_apps
+      - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/classes/java/main:/opt/flink/python_apps/java_classes
     environment:
       - |
         FLINK_PROPERTIES=
