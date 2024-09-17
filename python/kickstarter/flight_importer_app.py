@@ -1,10 +1,11 @@
 from pyflink.common import WatermarkStrategy
-from pyflink.datastream import StreamExecutionEnvironment, MapFunction
+from pyflink.datastream import StreamExecutionEnvironment, DataStream
+from pyflink.java_gateway import get_gateway
 from pyflink.table import EnvironmentSettings, StreamTableEnvironment
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.datastream.functions import RuntimeContext
-from pyflink.java_gateway import get_gateway
+from pyflink.common.typeinfo import Types
 from datetime import datetime
 import logging
 import argparse
@@ -29,15 +30,40 @@ def main(args):
     # Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
 
-    # Get the Java Gateway
-    gateway = get_gateway()
+    # Path to your custom JAR file
+    custom_jar_path = "/opt/flink/python_apps/java_classes/kickstarter.jar"
 
-    # Kafka Consumer Config
-    options = {
-        "is_consumer": True,
-        "s3_bucket_name": args.s3_bucket_name
-    }
-    data_stream_consumer_properties = env.add_source(KafkaClientPropertiesLookup(s3_bucket_name=args.s3_bucket_name, options=options))
+    # Add the JAR to the classpath
+    env.add_jars(f"file://{custom_jar_path}")
+
+    # Get the Java Gateway and JVM
+    gateway = get_gateway()
+    jvm = gateway.jvm
+
+    # Create a DataStream from a collection
+    data_stream = env.from_collection(["Hello", "World", "Apache", "Flink"])
+
+    # Access the underlying Java DataStream
+    java_data_stream = data_stream._j_data_stream
+
+    # Fully qualified class name of your Java RichMapFunction
+    class_name = 'kickstarter.KafkaClientPropertiesLookup'
+
+    # Load and instantiate the Java RichMapFunction for Kafka Consumer Config
+    KafkaClientPropertiesLookupClass = jvm.Thread.currentThread().getContextClassLoader().loadClass(class_name)
+    kafka_client_properties_lookup_class_instance = KafkaClientPropertiesLookupClass(True, args.s3_bucket_name)
+
+    # Apply the Java RichMapFunction to the Java DataStream
+    mapped_java_data_stream = java_data_stream.map(kafka_client_properties_lookup_class_instance)
+
+    # Wrap the Java DataStream back into a PyFlink DataStream
+    data_stream_consumer_properties = DataStream(mapped_java_data_stream)
+
+    # Provide type information
+    data_stream_consumer_properties = data_stream_consumer_properties.map(
+        lambda x: x,  # Identity function
+        output_type= Types.TUPLE()
+    )
 
     consumer_properties = {}
     try:
@@ -47,12 +73,21 @@ def main(args):
         print(f"The Flink App stopped during the reading of the custom data source stream because of the following: {e}")
         exit(1)
 
-    # Kafka Producer Config
-    options = {
-        "consumer_kafka_client": False,
-        "s3_bucket_name": args.s3_bucket_name
-    }
-    data_stream_producer_properties = env.add_source(KafkaClientPropertiesLookup(s3_bucket_name=args.s3_bucket_name, options=options))
+    # Load and instantiate the Java RichMapFunction for Kafka Producer Config
+    KafkaClientPropertiesLookupClass = jvm.Thread.currentThread().getContextClassLoader().loadClass(class_name)
+    kafka_client_properties_lookup_class_instance = KafkaClientPropertiesLookupClass(False, args.s3_bucket_name)
+
+    # Apply the Java RichMapFunction to the Java DataStream
+    mapped_java_data_stream = java_data_stream.map(kafka_client_properties_lookup_class_instance)
+
+    # Wrap the Java DataStream back into a PyFlink DataStream
+    data_stream_producer_properties = DataStream(mapped_java_data_stream)
+
+    # Provide type information
+    data_stream_producer_properties = data_stream_producer_properties.map(
+        lambda x: x,  # Identity function
+        output_type= Types.TUPLE()
+    )
 
     producer_properties = {}
     try:
