@@ -29,6 +29,9 @@ def main(args):
     # Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
 
+    # Get the Java Gateway
+    gateway = get_gateway()
+
     # Kafka Consumer Config
     options = {
         "is_consumer": True,
@@ -114,9 +117,9 @@ def define_workflow(skyone_source, sunset_source):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--service-account-user',
+        '--s3_bucket_name',
         dest='s3_bucket_name',
         required=True,
-        help='The service account user name is used as the name for the AWS S3 bucket.')
+        help='The AWS S3 bucket name.')
     known_args, _ = parser.parse_known_args()
     main(known_args)
