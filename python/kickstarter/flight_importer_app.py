@@ -39,8 +39,8 @@ def main(args):
     gateway = get_gateway()
     jvm = gateway.jvm
 
-    # Create a DataStream from a collection
-    data_stream = env.from_collection(["Hello", "World", "Apache", "Flink"])
+    # Create an empty DataStream
+    data_stream = env.from_collection([])
 
     # Access the underlying Java DataStream
     java_data_stream = data_stream._j_data_stream
