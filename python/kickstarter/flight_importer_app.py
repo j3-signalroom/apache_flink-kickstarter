@@ -13,7 +13,6 @@ import argparse
 from common_functions import get_mapper
 from model.skyone_airlines_flight_data import SkyOneAirlinesFlightData
 from model.sunset_air_flight_data import SunsetAirFlightData
-from kafka_client_properties_lookup import KafkaClientPropertiesLookup
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
