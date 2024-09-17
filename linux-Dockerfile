@@ -95,4 +95,10 @@ RUN pip install apache-flink==1.20.0
 RUN pip install pyflink
 RUN pip install google-api-python-client
 
+# Create a JAR file from the Java Classes in the Python Apps directory
+# This JAR file will be used to run in PyFlink jobs via the 
+# pyflink.java_gateway.get_gateway().jvm.<package>.<class>.<method>() method
+WORKDIR /opt/flink/python_apps/java_classes
+RUN find . -name "*.class" | xargs jar cvf kickstarter.jar
+
 CMD ["./bin/start-cluster.sh"]

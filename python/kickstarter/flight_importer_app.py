@@ -117,7 +117,7 @@ def define_workflow(skyone_source, sunset_source):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--s3_bucket_name',
+        '--aws_s3_bucket',
         dest='s3_bucket_name',
         required=True,
         help='The AWS S3 bucket name.')
