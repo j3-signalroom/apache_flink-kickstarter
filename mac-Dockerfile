@@ -99,7 +99,7 @@ RUN pip install google-api-python-client
 # This JAR file will be used to run in PyFlink jobs via the 
 # pyflink.java_gateway.get_gateway().jvm.<package>.<class>.<method>() method
 WORKDIR /opt/flink/python_apps/java_classes
-RUN find . -name "*.class" | xargs jar cvf kickstarter.jar
+RUN find . -name '*.class' | xargs jar -c -v -f kickstarter.jar
 
 # Set the entrypoint to Flink's entrypoint script
 ENTRYPOINT ["/docker-entrypoint.sh"]
