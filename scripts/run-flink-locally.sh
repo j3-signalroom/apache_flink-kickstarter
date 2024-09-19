@@ -96,14 +96,14 @@ then
         \nAWS_S3_BUCKET=${AWS_S3_BUCKET}" > .env
     fi
 
-    if [ $use_non_mac = false ]
+    if [ $use_non_mac = true ]
     then
-        docker-compose -f linux-docker-compose.yml up -d
+        docker-compose -f linux-docker-compose.yml up --build --force-recreate -d 
     else
-        docker-compose -f mac-docker-compose.yml up -d
+        docker-compose -f mac-docker-compose.yml up --build --force-recreate -d
     fi
 else
-    if [ $use_non_mac = false ]
+    if [ $use_non_mac = true ]
     then
         docker-compose -f linux-docker-compose.yml down
     else

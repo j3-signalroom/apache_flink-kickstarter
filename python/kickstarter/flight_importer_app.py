@@ -46,14 +46,17 @@ def main(args):
     java_data_stream = data_stream._j_data_stream
 
     # Fully qualified class name of your Java RichMapFunction
-    class_name = 'kickstarter/KafkaClientPropertiesLookup'
+    class_name = "kickstarter.TestApp"
 
     # Load and instantiate the Java RichMapFunction for Kafka Consumer Config
     KafkaClientPropertiesLookupClass = jvm.Thread.currentThread().getContextClassLoader().loadClass(class_name)
-    constructor = KafkaClientPropertiesLookupClass.getConstructor(jvm.Boolean, jvm.String)
-    kafka_client_properties_lookup_class_instance = constructor.newInstance(True, args.s3_bucket)
+    # constructor = KafkaClientPropertiesLookupClass.getConstructor(jvm.java.lang.Boolean.TYPE, jvm.java.lang.String)
+    constructors = KafkaClientPropertiesLookupClass.getConstructors()
+    print(constructors[0])
+    # kafka_client_properties_lookup_class_instance = constructors[0].newInstance(True, args.s3_bucket_name)
+    kafka_client_properties_lookup_class_instance = constructors[0].newInstance()
 
-    # Apply the Java RichMapFunction to the Java DataStream
+    # Apply the Java RichMapFunction  to the Java DataStream
     mapped_java_data_stream = java_data_stream.map(kafka_client_properties_lookup_class_instance)
 
     # Wrap the Java DataStream back into a PyFlink DataStream
@@ -75,7 +78,7 @@ def main(args):
 
     # Load and instantiate the Java RichMapFunction for Kafka Producer Config
     KafkaClientPropertiesLookupClass = jvm.Thread.currentThread().getContextClassLoader().loadClass(class_name)
-    kafka_client_properties_lookup_class_instance = constructor.newInstance(False, args.s3_bucket)
+    kafka_client_properties_lookup_class_instance = constructors[0].newInstance(False, args.s3_bucket_name)
 
     # Apply the Java RichMapFunction to the Java DataStream
     mapped_java_data_stream = java_data_stream.map(kafka_client_properties_lookup_class_instance)
