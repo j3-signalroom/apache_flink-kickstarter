@@ -46,12 +46,12 @@ def main(args):
     java_data_stream = data_stream._j_data_stream
 
     # Fully qualified class name of your Java RichMapFunction
-    class_name = 'kickstarter/KafkaClientPropertiesLookup'
+    class_name = "kickstarter.KafkaClientPropertiesLookup"
 
     # Load and instantiate the Java RichMapFunction for Kafka Consumer Config
     KafkaClientPropertiesLookupClass = jvm.Thread.currentThread().getContextClassLoader().loadClass(class_name)
-    constructor = KafkaClientPropertiesLookupClass.getConstructor(jvm.Boolean, jvm.String)
-    kafka_client_properties_lookup_class_instance = constructor.newInstance(True, args.s3_bucket)
+    constructor = KafkaClientPropertiesLookupClass.getConstructor(jvm.java.lang.Boolean.TYPE, jvm.java.lang.String)
+    kafka_client_properties_lookup_class_instance = constructor.newInstance(True, args.aws_s3_bucket)
 
     # Apply the Java RichMapFunction to the Java DataStream
     mapped_java_data_stream = java_data_stream.map(kafka_client_properties_lookup_class_instance)

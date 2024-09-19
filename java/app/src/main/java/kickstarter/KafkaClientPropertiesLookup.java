@@ -43,7 +43,7 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
      * @param serviceAccountUser
      * @throws Exception - Exception occurs when the service account user is empty.
      */
-    public KafkaClientPropertiesLookup(final boolean consumerKafkaClient, final String serviceAccountUser) throws Exception {
+    public KafkaClientPropertiesLookup(boolean consumerKafkaClient, String serviceAccountUser) throws Exception {
         // --- Check if the service account user is empty
         if(serviceAccountUser.isEmpty()) {
             throw new Exception("The service account user must be provided.");
