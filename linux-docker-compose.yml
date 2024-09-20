@@ -12,7 +12,6 @@ services:
     volumes:
       - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/libs:/opt/flink/java_apps
       - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/python:/opt/flink/python_apps
-      - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/classes/java/main:/opt/flink/python_apps/java_classes
     environment:
       - |
         FLINK_PROPERTIES=
@@ -35,12 +34,6 @@ services:
     volumes:
       - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/libs:/opt/flink/java_apps
       - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/python:/opt/flink/python_apps
-      - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/classes/java/main:/opt/flink/python_apps/java_classes
-    # Create a JAR file from the Java Classes in the Python Apps directory
-    # This JAR file will be used to run in PyFlink jobs via the 
-    # pyflink.java_gateway.get_gateway().jvm.<package>.<class>.<method>() method
-    working_dir: /opt/flink/python_apps/java_classes
-    entrypoint: [ "bash", "-c", "find . -name '*.class' | xargs jar cvf kickstarter.jar"]
     environment:
       - |
         FLINK_PROPERTIES=
