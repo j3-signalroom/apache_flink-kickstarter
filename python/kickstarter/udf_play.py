@@ -1,9 +1,10 @@
+from typing import Iterator
 from pyflink.datastream import StreamExecutionEnvironment
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.expressions import call, col
-from pyflink.common import Types
-from pyflink.table import DataTypes, TableEnvironment, EnvironmentSettings, TableSchema
-from pyflink.table.udf import ScalarFunction, udf
+from pyflink.common import Types, Row
+from pyflink.table import DataTypes, TableEnvironment, EnvironmentSettings, Schema, TableDescriptor
+from pyflink.table.udf import udtf, udf
 import boto3
 from botocore.exceptions import ClientError
 import json
@@ -12,16 +13,21 @@ from re import sub
 import os
 
 
-def get_kafka_properties(kafka_cluster_secrets_path: str, kafka_client_parameters_path: str) -> tuple[str, str | None]:
-    """
-    This method returns the Kafka Cluster properties from the AWS Secrets Manager and Parameter Store.
+def get_kafka_properties(cluster_secrets_path: str, client_parameters_path: str) -> tuple[str, str | None]:
+    """This method returns the Kafka Cluster properties from the AWS Secrets Manager and Parameter Store.
 
-    :return: An ObjectResult containing the Kafka Cluster properties collection.
+    Args:
+        cluster_secrets_path (str): _description_
+        client_parameters_path (str): _description_
+
+    Returns:
+        properties (tuple[str, str | None]): the Kafka Cluster properties collection if successful, otherwise None.
     """
+    
     properties = {}
 
     # Retrieve the SECRET properties from the AWS Secrets Manager
-    secret = get_secrets(kafka_cluster_secrets_path)
+    secret = get_secrets(cluster_secrets_path)
     if secret is not None:
         try:
             # Convert the JSON object to a dictionary
@@ -33,7 +39,7 @@ def get_kafka_properties(kafka_cluster_secrets_path: str, kafka_client_parameter
             return None
 
         # Retrieve the parameters from the AWS Systems Manager Parameter Store
-        parameters = get_parameters(kafka_client_parameters_path)
+        parameters = get_parameters(client_parameters_path)
         if parameters is not None:
             return parameters
         else:
@@ -42,8 +48,7 @@ def get_kafka_properties(kafka_cluster_secrets_path: str, kafka_client_parameter
         return None
     
 def get_secrets(secrets_name: str) -> (any):
-    """
-    This method retrieve secrets from the AWS Secrets Manager.
+    """This method retrieve secrets from the AWS Secrets Manager.
     
     Arg(s):
         `secrets_name` (string): Pass the name of the secrets you want the secrets for.
@@ -85,8 +90,7 @@ def get_secrets(secrets_name: str) -> (any):
         return None
 
 def get_parameters(parameter_path: str) -> (dict):
-    """
-    This method retrieves the parameteres from the System Manager Parameter Store.
+    """This method retrieves the parameteres from the System Manager Parameter Store.
     Moreover, it converts the values to the appropriate data type.
     
     Arg(s):
@@ -144,8 +148,9 @@ tbl_env = StreamTableEnvironment.create(env)
 # Adjust resource configuration
 env.set_parallelism(1)  # Set parallelism to 1 for simplicity
 
-@udf(input_types=[DataTypes.BOOLEAN(), DataTypes.STRING()], result_type=DataTypes.STRING())
-def udf_function(for_consumer: bool, service_account_user: str):
+@udtf(result_types=DataTypes.ROW([DataTypes.FIELD('property_key',DataTypes.STRING()),
+                                 DataTypes.FIELD('property_value', DataTypes.STRING())]))
+def kafka_properties_udtf(kakfa_properties: Row) -> Row:
     # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
     for_consumer = True
     service_account_user = "tf_snowflake_user"
@@ -154,40 +159,57 @@ def udf_function(for_consumer: bool, service_account_user: str):
         f"{secret_path_prefix}/kafka_cluster/java_client",
         f"{secret_path_prefix}/consumer_kafka_client" if for_consumer else f"{secret_path_prefix}/producer_kafka_client"
     )
-
     if properties is None:
         raise RuntimeError(f"Failed to retrieve the Kafka Client properties from '{secret_path_prefix}' secrets because {properties.get_error_message_code()}:{properties.get_error_message()}")
     else:
-        # Set the class properties using thread-safe atomic operation
-        return properties
+        for property_key, property_value in properties.items():
+            yield Row(property_key, property_value)
 
-# Register the UDF
-tbl_env.create_temporary_function("udf_function", udf_function)
+# Create a sample table
+example_data = [
+    ('key1', 'value1'),
+    ('key2', 'value2'),
+    ('key3', 'value3')
+]
 
-# Define the data stream
-data_stream = env.from_collection(
-    collection=[
-        (True, 'user1'),
-        (False, 'user2')
-    ],
-    type_info=Types.ROW([Types.BOOLEAN(), Types.STRING()])
+# Define the schema for the table
+schema = DataTypes.ROW([
+    DataTypes.FIELD('property_key', DataTypes.STRING()),
+    DataTypes.FIELD('property_value', DataTypes.STRING())
+])
+
+# Create a table from the data
+kafka_property_table = tbl_env.from_elements(example_data, schema)
+
+# Register the table as a temporary view
+tbl_env.create_temporary_view('kafka_property_table', kafka_property_table)
+
+kafka_property_table = tbl_env.from_path('kafka_property_table')
+print('\n Kafka Property Table Schema:--->')
+kafka_property_table.print_schema()
+
+print('\n Kafka Property Table Example Data:--->')
+kafka_property_table.execute().print()
+
+#device_stats = kafka_property_table.flat_map(kafka_properties_udtf).alias('property_key', 'property_value')
+
+device_stats = kafka_property_table.join_lateral(kafka_properties_udtf.alias("a", "b"))
+
+print('\n Device Stats Table Schema ::>')
+device_stats.print_schema()
+
+sink_field_names = ['property_key', 'property_value','a', 'b']
+sink_field_types = [DataTypes.STRING(), DataTypes.STRING(),DataTypes.STRING(), DataTypes.STRING()]
+sink_schema = Schema.new_builder().from_fields(sink_field_names, sink_field_types).build()
+
+source_path_tableapi = 'device_stats'
+tbl_env.create_table(
+    'udf_sink',
+    TableDescriptor.for_connector('filesystem')
+    .schema(sink_schema)
+    .option('path', f'{source_path_tableapi}')
+    .format('csv')
+    .build()
 )
 
-# Create and register the input table
-input_table = tbl_env.from_data_stream(data_stream, col("f0").alias("for_consumer"), col("f1").alias("service_account_user"))
-tbl_env.create_temporary_view("input_table", input_table)
-
-# Use the UDF to fetch secrets from AWS Secrets Manager in a query
-result_table = tbl_env.sql_query("""
-    SELECT service_account_user, udf_function(for_consumer, service_account_user) AS property_values FROM input_table
-""")
-
-# Print the result table schema for debugging purposes
-result_table.print_schema()
-
-# Convert the result table back to a data stream and print it
-result_data_stream = tbl_env.to_append_stream(result_table, Types.ROW([Types.STRING(), Types.STRING()]))
-result_data_stream.print()
-
-# Execute the Flink job
-env.execute("UDF Play")
+device_stats.execute_insert('udf_sink').print()
