@@ -198,9 +198,11 @@ result = device_stats.execute().collect()
 # Process the results into a Python dictionary
 result_dict = {}
 for row in result:
-    # Assuming 'id' is unique and the key
-    result_dict[row[0]] = row[1]
-
+    if ".ms" in row[0]:
+        """Convert the string representation of milliseconds into its float-point value"""
+        result_dict[row[0]] = int(row[1])
+    else:
+        result_dict[row[0]] = row[1]
 
 result.close()
 
