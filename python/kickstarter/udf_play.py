@@ -150,7 +150,7 @@ env.set_parallelism(1)  # Set parallelism to 1 for simplicity
 
 @udtf(result_types=DataTypes.ROW([DataTypes.FIELD('property_key',DataTypes.STRING()),
                                  DataTypes.FIELD('property_value', DataTypes.STRING())]))
-def kafka_properties_udtf(kakfa_properties: Row) -> Row:
+def kafka_properties_udtf(kakfa_properties: Row) -> Iterator[Row]:
     # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
     for_consumer = True
     service_account_user = "tf_snowflake_user"
@@ -163,7 +163,7 @@ def kafka_properties_udtf(kakfa_properties: Row) -> Row:
         raise RuntimeError(f"Failed to retrieve the Kafka Client properties from '{secret_path_prefix}' secrets because {properties.get_error_message_code()}:{properties.get_error_message()}")
     else:
         for property_key, property_value in properties.items():
-            yield Row(property_key, property_value)
+            yield Row(str(property_key), str(property_value))
 
 # Create a sample table
 example_data = [
@@ -191,25 +191,6 @@ kafka_property_table.print_schema()
 print('\n Kafka Property Table Example Data:--->')
 kafka_property_table.execute().print()
 
-#device_stats = kafka_property_table.flat_map(kafka_properties_udtf).alias('property_key', 'property_value')
+device_stats = kafka_property_table.join_lateral(kafka_properties_udtf.alias("a", "b")).select(col("property_key"), col("property_value"), col("a"), col("b"))
 
-device_stats = kafka_property_table.join_lateral(kafka_properties_udtf.alias("a", "b"))
-
-print('\n Device Stats Table Schema ::>')
-device_stats.print_schema()
-
-sink_field_names = ['property_key', 'property_value','a', 'b']
-sink_field_types = [DataTypes.STRING(), DataTypes.STRING(),DataTypes.STRING(), DataTypes.STRING()]
-sink_schema = Schema.new_builder().from_fields(sink_field_names, sink_field_types).build()
-
-source_path_tableapi = 'device_stats'
-tbl_env.create_table(
-    'udf_sink',
-    TableDescriptor.for_connector('filesystem')
-    .schema(sink_schema)
-    .option('path', f'{source_path_tableapi}')
-    .format('csv')
-    .build()
-)
-
-device_stats.execute_insert('udf_sink').print()
+device_stats.execute().print()
