@@ -11,6 +11,7 @@ import json
 import logging
 from re import sub
 import os
+import sys
 
 
 def get_kafka_properties(cluster_secrets_path: str, client_parameters_path: str) -> tuple[str, str | None]:
@@ -41,13 +42,15 @@ def get_kafka_properties(cluster_secrets_path: str, client_parameters_path: str)
         # Retrieve the parameters from the AWS Systems Manager Parameter Store
         parameters = get_parameters(client_parameters_path)
         if parameters is not None:
-            return parameters
+            for key in parameters:
+                properties[key] = parameters[key]
+            return properties
         else:
             return None
     else:
         return None
     
-def get_secrets(secrets_name: str) -> (any):
+def get_secrets(secrets_name: str) -> (dict):
     """This method retrieve secrets from the AWS Secrets Manager.
     
     Arg(s):
@@ -165,12 +168,8 @@ def kafka_properties_udtf(kakfa_properties: Row) -> Iterator[Row]:
         for property_key, property_value in properties.items():
             yield Row(str(property_key), str(property_value))
 
-# Create a sample table
-example_data = [
-    ('key1', 'value1'),
-    ('key2', 'value2'),
-    ('key3', 'value3')
-]
+# Seed table with empty data
+example_data = [('','')]
 
 # Define the schema for the table
 schema = DataTypes.ROW([
@@ -178,7 +177,7 @@ schema = DataTypes.ROW([
     DataTypes.FIELD('property_value', DataTypes.STRING())
 ])
 
-# Create a table from the data
+# Create a table from the empty and the provide schema
 kafka_property_table = tbl_env.from_elements(example_data, schema)
 
 # Register the table as a temporary view
@@ -188,9 +187,22 @@ kafka_property_table = tbl_env.from_path('kafka_property_table')
 print('\n Kafka Property Table Schema:--->')
 kafka_property_table.print_schema()
 
-print('\n Kafka Property Table Example Data:--->')
-kafka_property_table.execute().print()
-
-device_stats = kafka_property_table.join_lateral(kafka_properties_udtf.alias("a", "b")).select(col("property_key"), col("property_value"), col("a"), col("b"))
-
+print('\n Kafka Property Table Data:--->')
+device_stats = kafka_property_table.join_lateral(kafka_properties_udtf.alias("key", "value")).select(col("key"), col("value"))
 device_stats.execute().print()
+
+# Convert the result into a Python dictionary
+# First, collect the results using to_data_stream or execute.collect()
+result = device_stats.execute().collect()
+
+# Process the results into a Python dictionary
+result_dict = {}
+for row in result:
+    # Assuming 'id' is unique and the key
+    result_dict[row[0]] = row[1]
+
+
+result.close()
+
+# Now you have the table result in a dictionary
+print(result_dict)
