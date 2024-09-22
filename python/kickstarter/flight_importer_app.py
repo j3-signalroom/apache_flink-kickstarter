@@ -224,18 +224,19 @@ def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str)
     # Create an empty table
     kafka_property_table = tbl_env.from_elements([('','')], schema)
 
-    # Register the table as a temporary view
-    tbl_env.create_temporary_view('kafka_property_table', kafka_property_table)
+    table_name = "kafka_property_table_" + ("consumer" if for_consumer else "producer")
 
-    kafka_property_table = tbl_env.from_path('kafka_property_table')
+    # Register the table as a temporary view
+    tbl_env.create_temporary_view(table_name, kafka_property_table)
+
+    kafka_property_table = tbl_env.from_path(table_name)
 
     print('\n Kafka Property Table Schema:--->')
     kafka_property_table.print_schema()
 
     # Register the function as a PyFlink UDTF
-    kafka_properties_udtf = udtf(KafkaProperties(for_consumer, service_account_user), 
-                                 result_types=DataTypes.ROW([DataTypes.FIELD('property_key',DataTypes.STRING()),
-                                                             DataTypes.FIELD('property_value', DataTypes.STRING())]))
+    kafka_properties_udtf = udtf(f=KafkaProperties(for_consumer, service_account_user), 
+                                 result_types=schema)
 
     func_results = kafka_property_table.join_lateral(kafka_properties_udtf.alias("key", "value")).select(col("key"), col("value"))
     print('\n Kafka Property Table Data:--->')
