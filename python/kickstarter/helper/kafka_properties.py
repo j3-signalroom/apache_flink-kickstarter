@@ -77,6 +77,10 @@ def kafka_properties_udtf(kakfa_properties: Row) -> Iterator[Row]:
     for_consumer = _gbl_for_consumer
     service_account_user = _gbl_service_account_user
     secret_path_prefix = f"/confluent_cloud_resource/{service_account_user}"
+
+    print(f"\n{secret_path_prefix}/kafka_cluster/java_client")
+    print(f"\n{secret_path_prefix}/consumer_kafka_client" if for_consumer else f"\n{secret_path_prefix}/producer_kafka_client")
+    
     properties = get_kafka_properties_from_aws(
         f"{secret_path_prefix}/kafka_cluster/java_client",
         f"{secret_path_prefix}/consumer_kafka_client" if for_consumer else f"{secret_path_prefix}/producer_kafka_client"
