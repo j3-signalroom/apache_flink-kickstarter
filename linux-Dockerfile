@@ -54,7 +54,8 @@ RUN apt-get update && apt-get install -y \
     wget \
     git \
     python3-pip \
-    python3-venv
+    python3-venv \
+    zip
 
 # Install Python from source
 RUN cd /usr/local && \
