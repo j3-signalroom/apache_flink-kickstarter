@@ -70,7 +70,7 @@ def kafka_properties_udtf(kakfa_properties: Row) -> Iterator[Row]:
         RuntimeError: _description_
 
     Yields:
-        Iterator[Row]: _description_
+        Iterator[Row]: combination of Kafka Cluster properties and Kafka Client parameters.
     """
 
     # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
@@ -97,9 +97,10 @@ def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str)
         service_account_user (str): _description_
 
     Returns:
-        dict: _description_
+        dict: combination of Kafka Cluster properties and Kafka Client parameters.
     """
 
+    # Set the global variables
     global _gbl_for_consumer, _gbl_service_account_user
     _gbl_for_consumer = for_consumer
     _gbl_service_account_user = service_account_user
