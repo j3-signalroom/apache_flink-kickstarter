@@ -93,12 +93,12 @@ def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str)
 
     kafka_property_table = tbl_env.from_path('kafka_property_table')
 
-    # print('\n Kafka Property Table Schema:--->')
-    # kafka_property_table.print_schema()
+    print('\n Kafka Property Table Schema:--->')
+    kafka_property_table.print_schema()
 
     func_results = kafka_property_table.join_lateral(kafka_properties_udtf.alias("key", "value")).select(col("key"), col("value"))
-    # print('\n Kafka Property Table Data:--->')
-    # func_results.execute().print()
+    print('\n Kafka Property Table Data:--->')
+    func_results.execute().print()
 
     # Convert the result into a Python dictionary
     result = func_results.execute().collect()
@@ -113,5 +113,5 @@ def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str)
     result.close()
 
     # Return the table results into a dictionary
-    # print(result_dict)
+    print(result_dict)
     return result_dict
