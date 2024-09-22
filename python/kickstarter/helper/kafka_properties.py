@@ -60,6 +60,19 @@ def get_kafka_properties_from_aws(cluster_secrets_path: str, client_parameters_p
 @udtf(result_types=DataTypes.ROW([DataTypes.FIELD('property_key',DataTypes.STRING()),
                                     DataTypes.FIELD('property_value', DataTypes.STRING())]))
 def kafka_properties_udtf(kakfa_properties: Row) -> Iterator[Row]:
+    """This User-Defined Table Function (UDTF) is used to retrieve the Kafka Cluster properties
+    from the AWS Secrets Manager and Parameter Store.
+
+    Args:
+        kakfa_properties (Row): _description_
+
+    Raises:
+        RuntimeError: _description_
+
+    Yields:
+        Iterator[Row]: _description_
+    """
+
     # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
     for_consumer = _gbl_for_consumer
     service_account_user = _gbl_service_account_user
@@ -75,6 +88,18 @@ def kafka_properties_udtf(kakfa_properties: Row) -> Iterator[Row]:
             yield Row(str(property_key), str(property_value))
 
 def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str) -> dict:
+    """This method retrieves the Kafka Cluster properties from the AWS Secrets Manager 
+    and AWS Systems Manager.
+
+    Args:
+        tbl_env (_type_): _description_
+        for_consumer (bool): _description_
+        service_account_user (str): _description_
+
+    Returns:
+        dict: _description_
+    """
+
     global _gbl_for_consumer, _gbl_service_account_user
     _gbl_for_consumer = for_consumer
     _gbl_service_account_user = service_account_user
