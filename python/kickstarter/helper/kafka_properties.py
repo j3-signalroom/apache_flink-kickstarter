@@ -5,7 +5,7 @@ from pyflink.common import Row
 from pyflink.table import DataTypes
 from pyflink.table.udf import udtf
 
-from aws_services import AwsServices
+from helper.aws_services import AwsServices
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
