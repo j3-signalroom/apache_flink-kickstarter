@@ -1,16 +1,15 @@
+from typing import Iterator
+from pyflink.datastream import StreamExecutionEnvironment
+from pyflink.table import StreamTableEnvironment
 from pyflink.common import WatermarkStrategy
-from pyflink.datastream import StreamExecutionEnvironment, DataStream
-from pyflink.java_gateway import get_gateway
-from pyflink.table import EnvironmentSettings, StreamTableEnvironment
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
-from pyflink.datastream.functions import RuntimeContext
-from pyflink.common.typeinfo import Types
 from datetime import datetime
 import logging
 import argparse
 
 from common_functions import get_mapper
+from helper.kafka_properties import get_kafka_properties
 from model.skyone_airlines_flight_data import SkyOneAirlinesFlightData
 from model.sunset_air_flight_data import SunsetAirFlightData
 
@@ -28,77 +27,14 @@ logger = logging.getLogger('FlightImporterApp')
 def main(args):
     # Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
+    tbl_env = StreamTableEnvironment.create(env)
 
-    # Path to your custom JAR file
-    custom_jar_path = "/opt/flink/python_apps/java_classes/kickstarter.jar"
+    # Adjust resource configuration
+    env.set_parallelism(1)  # Set parallelism to 1 for simplicity
 
-    # Add the JAR to the classpath
-    env.add_jars(f"file://{custom_jar_path}")
+    consumer_properties = get_kafka_properties(tbl_env, True, args.s3_bucket_name)
 
-    # Get the Java Gateway and JVM
-    gateway = get_gateway()
-    jvm = gateway.jvm
-
-    # Create an empty DataStream
-    data_stream = env.from_collection([])
-
-    # Access the underlying Java DataStream
-    java_data_stream = data_stream._j_data_stream
-
-    # Fully qualified class name of your Java RichMapFunction
-    class_name = "kickstarter.TestApp"
-
-    # Load and instantiate the Java RichMapFunction for Kafka Consumer Config
-    KafkaClientPropertiesLookupClass = jvm.Thread.currentThread().getContextClassLoader().loadClass(class_name)
-    # constructor = KafkaClientPropertiesLookupClass.getConstructor(jvm.java.lang.Boolean.TYPE, jvm.java.lang.String)
-    constructors = KafkaClientPropertiesLookupClass.getConstructors()
-    print(constructors[0])
-    # kafka_client_properties_lookup_class_instance = constructors[0].newInstance(True, args.s3_bucket_name)
-    kafka_client_properties_lookup_class_instance = constructors[0].newInstance()
-
-    # Apply the Java RichMapFunction  to the Java DataStream
-    mapped_java_data_stream = java_data_stream.map(kafka_client_properties_lookup_class_instance)
-
-    # Wrap the Java DataStream back into a PyFlink DataStream
-    data_stream_consumer_properties = DataStream(mapped_java_data_stream, env)
-
-    # Provide type information
-    data_stream_consumer_properties = data_stream_consumer_properties.map(
-        lambda x: x,  # Identity function
-        output_type= Types.TUPLE()
-    )
-
-    consumer_properties = {}
-    try:
-        for type_value in data_stream_consumer_properties.execute_and_collect():
-            consumer_properties.update(type_value)
-    except Exception as e:
-        print(f"The Flink App stopped during the reading of the custom data source stream because of the following: {e}")
-        exit(1)
-
-    # Load and instantiate the Java RichMapFunction for Kafka Producer Config
-    KafkaClientPropertiesLookupClass = jvm.Thread.currentThread().getContextClassLoader().loadClass(class_name)
-    kafka_client_properties_lookup_class_instance = constructors[0].newInstance(False, args.s3_bucket_name)
-
-    # Apply the Java RichMapFunction to the Java DataStream
-    mapped_java_data_stream = java_data_stream.map(kafka_client_properties_lookup_class_instance)
-
-    # Wrap the Java DataStream back into a PyFlink DataStream
-    data_stream_producer_properties = DataStream(mapped_java_data_stream, env)
-
-    # Provide type information
-    data_stream_producer_properties = data_stream_producer_properties.map(
-        lambda x: x,  # Identity function
-        output_type= Types.TUPLE()
-    )
-
-    producer_properties = {}
-    try:
-        for type_value in data_stream_producer_properties.execute_and_collect():
-            producer_properties.update(type_value)
-    except Exception as e:
-        print(f"The Flink App stopped during the reading of the custom data source stream because of the following: {e}")
-        exit(1)
+    producer_properties = get_kafka_properties(tbl_env, False, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
     skyone_source = KafkaSource.builder() \
