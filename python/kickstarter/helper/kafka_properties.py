@@ -74,7 +74,7 @@ def kafka_properties_udtf(kakfa_properties: Row) -> Iterator[Row]:
         for property_key, property_value in properties.items():
             yield Row(str(property_key), str(property_value))
 
-def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str) -> dict[str, str]:
+def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str) -> dict:
     global _gbl_for_consumer, _gbl_service_account_user
     _gbl_for_consumer = for_consumer
     _gbl_service_account_user = service_account_user
