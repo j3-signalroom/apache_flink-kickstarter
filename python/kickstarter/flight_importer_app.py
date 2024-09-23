@@ -272,23 +272,23 @@ def main(args):
     producer_properties = get_kafka_properties(tbl_env, False, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
-    skyone_source = KafkaSource.builder() \
-        .set_properties(consumer_properties) \
-        .set_topics("airline.skyone") \
-        .set_starting_offsets(KafkaOffsetsInitializer.earliest()) \
-        .set_value_only_deserializer(JsonRowDeserializationSchema(SkyOneAirlinesFlightData)) \
-        .build()
+    skyone_source = (KafkaSource.builder()
+                                .set_properties(consumer_properties)
+                                .set_topics("airline.skyone")
+                                .set_starting_offsets(KafkaOffsetsInitializer.earliest())
+                                .set_value_only_deserializer(JsonRowDeserializationSchema(SkyOneAirlinesFlightData))
+                                .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
     skyone_stream = env.from_source(skyone_source, WatermarkStrategy.for_monotonous_timestamps(), "skyone_source")
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset`
-    sunset_source = KafkaSource.builder() \
-        .set_properties(consumer_properties) \
-        .set_topics("airline.sunset") \
-        .set_starting_offsets(KafkaOffsetsInitializer.earliest()) \
-        .set_value_only_deserializer(JsonRowDeserializationSchema(SunsetAirFlightData)) \
-        .build()
+    sunset_source = (KafkaSource.builder()
+                                .set_properties(consumer_properties)
+                                .set_topics("airline.sunset")
+                                .set_starting_offsets(KafkaOffsetsInitializer.earliest())
+                                .set_value_only_deserializer(JsonRowDeserializationSchema(SunsetAirFlightData))
+                                .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
     sunset_stream = env.from_source(sunset_source, WatermarkStrategy.for_monotonous_timestamps(), "sunset_source")
