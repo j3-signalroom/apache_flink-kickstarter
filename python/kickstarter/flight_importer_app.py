@@ -265,7 +265,7 @@ def execute_kafka_properties_udtf(tbl_env, for_consumer: bool, service_account_u
     result.close()
 
     # Convert the table back to a DataStream
-    result_stream = tbl_env.to_data_stream(kafka_property_table)
+    #result_stream = tbl_env.to_data_stream(kafka_property_table)
     
     # print('\n Kafka Client Properties Python dictionary:--->')
     # print(result_dict)
@@ -305,17 +305,18 @@ def main(args):
     env = StreamExecutionEnvironment.get_execution_environment()
 
     # Create a Table Environment for batch mode
-    env_settings = EnvironmentSettings.new_instance().in_batch_mode().build()
-    tbl_env = StreamTableEnvironment.create(stream_execution_environment=env, environment_settings=env_settings)
+    #env_settings = EnvironmentSettings.new_instance().in_batch_mode().build()
+    #tbl_env = StreamTableEnvironment.create(stream_execution_environment=env, environment_settings=env_settings)
+    tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Adjust resource configuration
     env.set_parallelism(1)  # Set parallelism to 1 for simplicity
 
-    # Get the Kafka Cluster properties for the consumer and producer
-    consumer_properties = execute_kafka_properties_udtf(env, tbl_env, True, args.s3_bucket_name)
-    producer_properties = execute_kafka_properties_udtf(env, tbl_env, False, args.s3_bucket_name)
+    # Get the Kafka Cluster properties for the consumer
+    consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
+    print("\nSet the KafkaSources:--->")
     skyone_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
                                 .set_topics("airline.skyone")
@@ -332,7 +333,14 @@ def main(args):
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset`
     sunset_source = (KafkaSource.builder()
-                                .set_properties(consumer_properties)
+                                .set_bootstrap_servers(consumer_properties['bootstrap.servers'])
+                                .set_property("security.protocol", consumer_properties['security.protocol'])
+                                .set_property("sasl.mechanism", consumer_properties['sasl.mechanism'])
+                                .set_property("sasl.jaas.config", consumer_properties['sasl.jaas.config'])
+                                .set_property("basic.auth.credentials.source", consumer_properties['basic.auth.credentials.source'])
+                                .set_property("auto.offset.reset", consumer_properties['auto.offset.reset'])
+                                .set_property("client.dns.lookup", consumer_properties['client.dns.lookup'])
+                                .set_property("enable.auto.commit", consumer_properties['enable.auto.commit'])
                                 .set_topics("airline.sunset")
                                 .set_group_id("sunset_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
@@ -346,6 +354,10 @@ def main(args):
     sunset_stream = env.from_source(sunset_source, WatermarkStrategy.for_monotonous_timestamps(), "sunset_source")
 
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.all`
+    print("\nSet the KafkaSink:--->")
+
+    # Get the Kafka Cluster properties for the producer
+    producer_properties = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
     flight_sink = (KafkaSink.builder()
                             .set_bootstrap_servers(producer_properties['bootstrap.servers'])
                             .set_property("security.protocol", producer_properties['security.protocol'])
@@ -356,10 +368,6 @@ def main(args):
                             .set_record_serializer(KafkaRecordSerializationSchema
                                                    .builder()
                                                    .set_topic("airline.all")
-                                                   .set_key_serialization_schema(JsonRowSerializationSchema
-                                                                                 .builder()
-                                                                                 .with_type_info(FlightData.get_key_type_info())
-                                                                                 .build())
                                                    .set_value_serialization_schema(JsonRowSerializationSchema
                                                                                    .builder()
                                                                                    .with_type_info(FlightData.get_value_type_info())
@@ -369,6 +377,7 @@ def main(args):
                             .build())
 
     # Defines the workflow for the Flink job graph (DAG) by connecting the data streams
+    print("\nDefine the Workflow:--->")
     (define_workflow(skyone_stream, sunset_stream)
         .map(lambda flight: flight.to_row(), output_type=FlightData.get_value_type_info())
         .sink_to(flight_sink).name("flightdata_sink"))

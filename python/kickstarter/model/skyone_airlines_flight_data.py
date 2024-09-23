@@ -17,38 +17,36 @@ __status__     = "dev"
 @dataclass
 class SkyOneAirlinesFlightData:
     email_address: str | None
-    flight_departure_time: datetime | None
+    flight_departure_time: str | None
     iata_departure_code: str | None
-    flight_arrival_time: datetime | None
+    flight_arrival_time: str | None
     iata_arrival_code: str | None
     flight_number: str | None
     confirmation: str | None
-    ticket_price: float | None
+    ticket_price: int | None
     aircraft: str | None
     booking_agency_email: str | None
 
     def to_flight_data(self):
-        return FlightData(email_address=self.email_address,
-                          departure_time=self.flight_departure_time,
-                          departure_airport_code=self.iata_departure_code,
-                          arrival_time=self.flight_arrival_time,
-                          arrival_airport_code=self.iata_arrival_code,
-                          flight_number=self.flight_number,
-                          confirmation_code=self.confirmation)
+        return FlightData(email_address=self.email_address or "",
+                          departure_time=self.flight_departure_time or "",
+                          departure_airport_code=self.iata_departure_code or "",
+                          arrival_time=self.flight_arrival_time or "",
+                          arrival_airport_code=self.iata_arrival_code or "",
+                          flight_number=self.flight_number or "",
+                          confirmation_code=self.confirmation or "")
     
     def to_row(self):
-        return Row(
-            email_address=self.email_address,
-            departure_time=serialize(self.flight_departure_time),
-            iata_departure_code=self.iata_departure_code,
-            arrival_time=serialize(self.flight_arrival_time),
-            iata_arrival_code=self.iata_arrival_code,
-            flight_number=self.flight_number,
-            confirmation=self.confirmation,
-            ticket_price=self.ticket_price,
-            aircraft=self.aircraft,
-            booking_agency_email=self.booking_agency_email
-        )
+        return Row(email_address=self.email_address or "",
+                   flight_departure_time=self.flight_departure_time or "",
+                   iata_departure_code=self.iata_departure_code or "",
+                   flight_arrival_time=self.flight_arrival_time or "",
+                   iata_arrival_code=self.iata_arrival_code or "",
+                   flight_number=self.flight_number or "",
+                   confirmation=self.confirmation or "",
+                   ticket_price=self.ticket_price or 0,
+                   aircraft=self.aircraft or "",
+                   booking_agency_email=self.booking_agency_email or "")
     
     @staticmethod
     def get_value_type_info():
@@ -67,13 +65,13 @@ class SkyOneAirlinesFlightData:
             ],
             field_types=[
                 Types.STRING(),
-                Types.SQL_TIMESTAMP(),
-                Types.STRING(),
-                Types.SQL_TIMESTAMP(),
                 Types.STRING(),
                 Types.STRING(),
                 Types.STRING(),
-                Types.FLOAT(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
                 Types.STRING(),
                 Types.STRING(),
             ],

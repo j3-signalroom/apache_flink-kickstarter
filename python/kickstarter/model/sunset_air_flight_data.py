@@ -18,67 +18,16 @@ __status__     = "dev"
 @dataclass
 class SunsetAirFlightData:
     customer_email_address: str | None
-    departure_time: datetime | None
+    departure_time: str | None
     departure_airport: str | None
-    arrival_time: datetime | None
+    arrival_time: str | None
     arrival_airport: str | None
-    flight_duration: timedelta | None
+    flight_duration: int | None
     flight_id: str | None
     reference_number: str | None
-    total_price: Decimal | None
+    total_price: int | None
     aircraft_details: str | None
 
-    def to_flight_data(self):
-        return FlightData(email_address=self.customer_email_address,
-                          departure_time=self.departure_time,
-                          departure_airport_code=self.departure_airport,
-                          arrival_time=self.arrival_time,
-                          arrival_airport_code=self.arrival_airport,
-                          flight_number=self.flight_id,
-                          confirmation_code=self.reference_number)
-    
-    def to_row(self):
-        return Row(
-            email_address=self.email_address,
-            departure_time=serialize(self.flight_departure_time),
-            iata_departure_code=self.iata_departure_code,
-            arrival_time=serialize(self.flight_arrival_time),
-            iata_arrival_code=self.iata_arrival_code,
-            flight_number=self.flight_number,
-            confirmation=self.confirmation,
-            ticket_price=self.ticket_price,
-            aircraft=self.aircraft,
-            booking_agency_email=self.booking_agency_email
-        )
-
-    @staticmethod
-    def get_value_type_info():
-        return Types.ROW_NAMED(
-            field_names=[
-                "email_address",
-                "flight_departure_time",
-                "iata_departure_code",
-                "flight_arrival_time",
-                "iata_arrival_code",
-                "flight_number",
-                "confirmation",
-                "ticket_price",
-                "aircraft",
-                "booking_agency_email",
-            ],
-            field_types=[
-                Types.STRING(),
-                Types.SQL_TIMESTAMP(),
-                Types.STRING(),
-                Types.SQL_TIMESTAMP(),
-                Types.STRING(),
-                Types.STRING(),
-                Types.STRING(),
-                Types.FLOAT(),
-                Types.STRING(),
-                Types.STRING(),
-            ],
-        )
     
     def __eq__(self, other):
         if not isinstance(other, SunsetAirFlightData):
@@ -108,3 +57,68 @@ class SunsetAirFlightData:
 
     def __str__(self):
         return json.dumps(self.__dict__, default=str)
+    
+    def to_flight_data(self):
+        return FlightData(email_address=self.email_address or "",
+                          departure_time=self.flight_departure_time or "",
+                          departure_airport_code=self.iata_departure_code or "",
+                          arrival_time=self.flight_arrival_time or "",
+                          arrival_airport_code=self.iata_arrival_code or "",
+                          flight_number=self.flight_number or "",
+                          confirmation_code=self.confirmation or "")
+    
+    @classmethod
+    def from_row(cls, row: Row):
+        return cls(
+            customer_email_address=row.customer_email_address,
+            departure_time=row.departure_time,
+            departure_airport=row.departure_airport,
+            arrival_time=row.arrival_time,
+            arrival_airport=row.arrival_airport,
+            flight_duration=row.flight_duration,
+            flight_id=row.flight_id,
+            reference_number=row.reference_number,
+            total_price=row.total_price,
+            aircraft_details=row.aircraft_details,
+        )
+    
+    def to_row(self):
+        return Row(email_address=self.email_address or "",
+                   flight_departure_time=self.flight_departure_time or "",
+                   iata_departure_code=self.iata_departure_code or "",
+                   flight_arrival_time=self.flight_arrival_time or "",
+                   iata_arrival_code=self.iata_arrival_code or "",
+                   flight_number=self.flight_number or "",
+                   confirmation=self.confirmation or "",
+                   ticket_price=self.ticket_price or 0,
+                   aircraft=self.aircraft or "",
+                   booking_agency_email=self.booking_agency_email or "")
+
+    @staticmethod
+    def get_value_type_info():
+        return Types.ROW_NAMED(
+            field_names=[
+                "email_address",
+                "flight_departure_time",
+                "iata_departure_code",
+                "flight_arrival_time",
+                "iata_arrival_code",
+                "flight_number",
+                "confirmation",
+                "ticket_price",
+                "aircraft",
+                "booking_agency_email",
+            ],
+            field_types=[
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+            ],
+        )
