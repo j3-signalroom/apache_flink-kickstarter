@@ -1,21 +1,21 @@
-from typing import Iterator
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.table import EnvironmentSettings, StreamTableEnvironment
 from pyflink.common import WatermarkStrategy
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
-from datetime import datetime
-import logging
-import argparse
-import json
-import boto3
-from botocore.exceptions import ClientError
-from re import sub
-import os
 from pyflink.table.expressions import col
 from pyflink.common import Row
 from pyflink.table import DataTypes
 from pyflink.table.udf import udtf, TableFunction
+from typing import Iterator
+from datetime import datetime
+import boto3
+from botocore.exceptions import ClientError
+import logging
+import argparse
+import json
+from re import sub
+import os
 
 from model.skyone_airlines_flight_data import SkyOneAirlinesFlightData
 from model.sunset_air_flight_data import SunsetAirFlightData
