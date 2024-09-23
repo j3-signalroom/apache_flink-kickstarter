@@ -208,7 +208,7 @@ class KafkaProperties(TableFunction):
             return parameters
 
 
-def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str) -> dict:
+def execute_kafka_properties_udtf(tbl_env, for_consumer: bool, service_account_user: str) -> dict:
     """This method retrieves the Kafka Cluster properties from the AWS Secrets Manager 
     and AWS Systems Manager.
 
@@ -263,6 +263,9 @@ def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str)
     for row in result:
         result_dict[row[0]] = row[1]
     result.close()
+
+    # Convert the table back to a DataStream
+    result_stream = tbl_env.to_data_stream(kafka_property_table)
     
     # print('\n Kafka Client Properties Python dictionary:--->')
     # print(result_dict)
@@ -309,8 +312,8 @@ def main(args):
     env.set_parallelism(1)  # Set parallelism to 1 for simplicity
 
     # Get the Kafka Cluster properties for the consumer and producer
-    consumer_properties = get_kafka_properties(tbl_env, True, args.s3_bucket_name)
-    producer_properties = get_kafka_properties(tbl_env, False, args.s3_bucket_name)
+    consumer_properties = execute_kafka_properties_udtf(env, tbl_env, True, args.s3_bucket_name)
+    producer_properties = execute_kafka_properties_udtf(env, tbl_env, False, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
     skyone_source = (KafkaSource.builder()
