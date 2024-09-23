@@ -1,11 +1,9 @@
+from pyflink.common import Row, WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
-from pyflink.table import EnvironmentSettings, StreamTableEnvironment
-from pyflink.common import WatermarkStrategy
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
+from pyflink.table import DataTypes, EnvironmentSettings, StreamTableEnvironment
 from pyflink.table.expressions import col
-from pyflink.common import Row
-from pyflink.table import DataTypes
 from pyflink.table.udf import udtf, TableFunction
 from typing import Iterator
 from datetime import datetime
