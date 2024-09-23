@@ -279,14 +279,15 @@ def define_workflow(skyone_source: DataStream, sunset_source: DataStream):
 def main(args):
     # Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
+
+    # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(env)
 
     # Adjust resource configuration
     env.set_parallelism(1)  # Set parallelism to 1 for simplicity
 
-
+    # Get the Kafka Cluster properties for the consumer and producer
     consumer_properties = get_kafka_properties(tbl_env, True, args.s3_bucket_name)
-
     producer_properties = get_kafka_properties(tbl_env, False, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
