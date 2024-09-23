@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
 import json
+from common_functions import serialize
+from pyflink.common import Types, Row
+
+from model.user_statistics_data import UserStatisticsData
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -42,3 +46,72 @@ class FlightData:
 
     def __str__(self):
         return json.dumps(self.__dict__, default=str)
+    
+    def get_duration(self):
+        return int(( datetime.fromisoformat(self.arrival_time) - datetime.fromisoformat(self.departure_time)).seconds / 60)
+    
+    def to_row(self):
+        return Row(
+            email_address=self.email_address,
+            departure_time=serialize(self.departure_time),
+            departure_airport_code=self.departure_airport_code,
+            arrival_time=serialize(self.arrival_time),
+            arrival_airport_code=self.arrival_airport_code,
+            flight_number=self.flight_number,
+            confirmation=self.confirmation,
+            source=self.source,
+        )
+
+    @classmethod
+    def from_row(cls, row: Row):
+        return cls(
+            email_address=row.email_address,
+            departure_time=row.departure_time,
+            departure_airport_code=row.departure_airport_code,
+            arrival_time=row.arrival_time,
+            arrival_airport_code=row.arrival_airport_code,
+            flight_number=row.flight_number,
+            confirmation=row.confirmation,
+            source=row.source,
+        )
+
+    @staticmethod
+    def get_key_type_info():
+        return Types.ROW_NAMED(
+            field_names=[
+                "confirmation",
+            ],
+            field_types=[
+                Types.STRING(),
+            ],
+        )
+
+    @staticmethod
+    def get_value_type_info():
+        return Types.ROW_NAMED(
+            field_names=[
+                "email_address",
+                "departure_time",
+                "departure_airport_code",
+                "arrival_time",
+                "arrival_airport_code",
+                "flight_number",
+                "confirmation",
+                "source",
+            ],
+            field_types=[
+                Types.STRING(),
+                Types.SQL_TIMESTAMP(),
+                Types.STRING(),
+                Types.SQL_TIMESTAMP(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+            ],
+        )
+
+    @staticmethod
+    def to_user_statistics_data(row: Row):
+        data = FlightData.from_row(row)
+        return UserStatisticsData(data.email_address, data.get_duration(), 1)

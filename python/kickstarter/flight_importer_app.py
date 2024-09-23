@@ -1,8 +1,8 @@
 from typing import Iterator
-from pyflink.datastream import StreamExecutionEnvironment
+from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.table import StreamTableEnvironment
 from pyflink.common import WatermarkStrategy
-from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer
+from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from datetime import datetime
 import logging
@@ -20,6 +20,7 @@ from pyflink.table.udf import udtf, TableFunction
 from common_functions import get_mapper
 from model.skyone_airlines_flight_data import SkyOneAirlinesFlightData
 from model.sunset_air_flight_data import SunsetAirFlightData
+from model.flight_data import FlightData
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -246,11 +247,7 @@ def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str)
     result = func_results.execute().collect()
     result_dict = {}
     for row in result:
-        if ".ms" in row[0]:
-            # Convert the string representation of milliseconds into its float-point value
-            result_dict[row[0]] = int(row[1])
-        else:
-            result_dict[row[0]] = row[1]
+        result_dict[row[0]] = row[1]
 
     result.close()
 
@@ -275,8 +272,11 @@ def main(args):
     skyone_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
                                 .set_topics("airline.skyone")
+                                .set_group_id("skyone_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(JsonRowDeserializationSchema(SkyOneAirlinesFlightData))
+                                .set_value_only_deserializer(JsonRowDeserializationSchema.builder()
+                                                                                         .type_info(SkyOneAirlinesFlightData.get_value_type_info())
+                                                                                         .build())
                                 .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
@@ -286,23 +286,29 @@ def main(args):
     sunset_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
                                 .set_topics("airline.sunset")
+                                .set_group_id("sunset_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(JsonRowDeserializationSchema(SunsetAirFlightData))
+                                .set_value_only_deserializer(JsonRowDeserializationSchema.builder()
+                                                                                         .type_info(SunsetAirFlightData.get_value_type_info())
+                                                                                         .build())
                                 .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
     sunset_stream = env.from_source(sunset_source, WatermarkStrategy.for_monotonous_timestamps(), "sunset_source")
 
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.all`
-    flight_serializer = KafkaRecordSerializationSchema.builder() \
-        .set_topic("airline.all") \
-        .set_value_serialization_schema(JsonRowSerializationSchema( get_mapper())) \
-        .build()
-
-    flight_sink = KafkaSink.builder() \
-        .set_kafka_producer_config(producer_properties) \
-        .set_record_serializer(flight_serializer) \
-        .build()
+    flight_sink = (KafkaSink.builder()                            
+                            .set_record_serializer(KafkaRecordSerializationSchema.builder()
+                                                                                 .set_topic("airline.all")
+                                                                                 .set_key_serialization_schema(JsonRowSerializationSchema.builder()
+                                                                                                                                         .with_type_info(FlightData.get_key_type_info())
+                                                                                                                                         .build())
+                                                                                 .set_value_serialization_schema(JsonRowSerializationSchema.builder()
+                                                                                                                                           .with_type_info(FlightData.get_value_type_info())
+                                                                                                                                           .build())
+                                                                                 .build())
+                            .set_delivery_guarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                            .build())
 
     # Defines the workflow for the Flink job graph (DAG) by connecting the data streams
     define_workflow(skyone_stream, sunset_stream).sink_to(flight_sink).name("flightdata_sink")
@@ -312,14 +318,12 @@ def main(args):
     except Exception as e:
         logger.error("The App stopped early due to the following: %s", e)
 
-def define_workflow(skyone_source, sunset_source):
-    skyone_flight_stream = skyone_source \
-        .filter(lambda flight: flight.get_flight_arrival_time() > datetime.now()) \
-        .map(SkyOneAirlinesFlightData.to_flight_data)
+def define_workflow(skyone_source: DataStream, sunset_source: DataStream):
+    skyone_flight_stream = (skyone_source.filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now())
+                                         .map(SkyOneAirlinesFlightData.to_flight_data))
 
-    sunset_flight_stream = sunset_source \
-        .filter(lambda flight: flight.get_arrival_time() > datetime.now()) \
-        .map(SunsetAirFlightData.to_flight_data)
+    sunset_flight_stream = (sunset_source.filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now())
+                                         .map(SunsetAirFlightData.to_flight_data))
 
     return skyone_flight_stream.union(sunset_flight_stream)
 
