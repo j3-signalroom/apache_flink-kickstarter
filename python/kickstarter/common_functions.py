@@ -27,20 +27,3 @@ def serialize(obj):
     if isinstance(obj, datetime.date):
         return str(obj)
     return obj
-
-class CustomJSONEncoder(JSONEncoder):
-    def default(self, obj):
-        # Handling serialization of datetime objects
-        if isinstance(obj, datetime):
-            return obj.isoformat()
-        # Let the base class default method raise the TypeError
-        return super().default(obj)
-
-
-def get_mapper():
-    """
-    Returns a new instance of the JSON encoder with custom handling for datetime serialization.
-
-    :return: CustomJSONEncoder instance.
-    """
-    return CustomJSONEncoder()

@@ -1,6 +1,6 @@
 from typing import Iterator
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
-from pyflink.table import StreamTableEnvironment
+from pyflink.table import EnvironmentSettings, StreamTableEnvironment
 from pyflink.common import WatermarkStrategy
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
@@ -17,7 +17,6 @@ from pyflink.common import Row
 from pyflink.table import DataTypes
 from pyflink.table.udf import udtf, TableFunction
 
-from common_functions import get_mapper
 from model.skyone_airlines_flight_data import SkyOneAirlinesFlightData
 from model.sunset_air_flight_data import SunsetAirFlightData
 from model.flight_data import FlightData
@@ -304,8 +303,9 @@ def main(args):
     # Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
 
-    # Create a Table Environment
-    tbl_env = StreamTableEnvironment.create(env)
+    # Create a Table Environment for batch mode
+    env_settings = EnvironmentSettings.new_instance().in_batch_mode().build()
+    tbl_env = StreamTableEnvironment.create(stream_execution_environment=env, environment_settings=env_settings)
 
     # Adjust resource configuration
     env.set_parallelism(1)  # Set parallelism to 1 for simplicity
