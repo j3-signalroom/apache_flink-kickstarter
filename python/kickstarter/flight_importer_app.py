@@ -366,26 +366,26 @@ def main(args):
     except Exception as e:
         logger.error("The App stopped early due to the following: %s", e)
 
-def define_workflow(skyone_source: DataStream, sunset_source: DataStream) -> DataStream:
+def define_workflow(skyone_original: DataStream, sunset_original: DataStream) -> DataStream:
     """This method defines the workflow for the Flink job graph (DAG) by connecting the data streams.
 
     Args:
-        skyone_source (DataStream): is the source of the SkyOne Airlines flight data.
-        sunset_source (DataStream): is the source of the Sunset Air flight data.
+        skyone_original (DataStream): is the source of the SkyOne Airlines flight data.
+        sunset_original (DataStream): is the source of the Sunset Air flight data.
 
     Returns:
         DataStream: the union of the SkyOne Airlines and Sunset Air flight data streams.
     """
 
-    skyone = (skyone_source
-              .filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now())
-              .map(SkyOneAirlinesFlightData.to_flight_data))
+    skyone_modifed = (skyone_original
+                      .filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now())
+                      .map(SkyOneAirlinesFlightData.to_flight_data))
 
-    sunset = (sunset_source
-              .filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now())
-              .map(SunsetAirFlightData.to_flight_data))
+    # sunset_modified  = (sunset_original
+    #                     .filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now())
+    #                     .map(SunsetAirFlightData.to_flight_data))
 
-    return skyone.union(sunset)
+    return skyone_modifed #.union(sunset_modified)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
