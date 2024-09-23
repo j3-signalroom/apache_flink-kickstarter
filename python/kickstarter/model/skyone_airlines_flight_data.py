@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from decimal import Decimal
 import json
 from pyflink.common import Types, Row
 
@@ -17,30 +18,30 @@ __status__     = "dev"
 @dataclass
 class SkyOneAirlinesFlightData:
     email_address: str | None
-    flight_departure_time: str | None
+    flight_departure_time: datetime | None
     iata_departure_code: str | None
-    flight_arrival_time: str | None
+    flight_arrival_time: datetime | None
     iata_arrival_code: str | None
     flight_number: str | None
     confirmation: str | None
-    ticket_price: int | None
+    ticket_price: Decimal | None
     aircraft: str | None
     booking_agency_email: str | None
 
     def to_flight_data(self):
         return FlightData(email_address=self.email_address or "",
-                          departure_time=self.flight_departure_time or "",
+                          departure_time=self.flight_departure_time or datetime.now(),
                           departure_airport_code=self.iata_departure_code or "",
-                          arrival_time=self.flight_arrival_time or "",
+                          arrival_time=self.flight_arrival_time or datetime.now(),
                           arrival_airport_code=self.iata_arrival_code or "",
                           flight_number=self.flight_number or "",
                           confirmation_code=self.confirmation or "")
     
     def to_row(self):
         return Row(email_address=self.email_address or "",
-                   flight_departure_time=self.flight_departure_time or "",
+                   flight_departure_time=self.flight_departure_time or datetime.now(),
                    iata_departure_code=self.iata_departure_code or "",
-                   flight_arrival_time=self.flight_arrival_time or "",
+                   flight_arrival_time=self.flight_arrival_time or datetime.now(),
                    iata_arrival_code=self.iata_arrival_code or "",
                    flight_number=self.flight_number or "",
                    confirmation=self.confirmation or "",
@@ -65,13 +66,13 @@ class SkyOneAirlinesFlightData:
             ],
             field_types=[
                 Types.STRING(),
+                Types.SQL_TIMESTAMP(),
+                Types.STRING(),
+                Types.SQL_TIMESTAMP(),
                 Types.STRING(),
                 Types.STRING(),
                 Types.STRING(),
-                Types.STRING(),
-                Types.STRING(),
-                Types.STRING(),
-                Types.STRING(),
+                Types.BIG_DEC(),
                 Types.STRING(),
                 Types.STRING(),
             ],

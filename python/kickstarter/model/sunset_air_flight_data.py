@@ -60,9 +60,9 @@ class SunsetAirFlightData:
     
     def to_flight_data(self):
         return FlightData(email_address=self.email_address or "",
-                          departure_time=self.flight_departure_time or "",
+                          departure_time=self.flight_departure_time or datetime.now(),
                           departure_airport_code=self.iata_departure_code or "",
-                          arrival_time=self.flight_arrival_time or "",
+                          arrival_time=self.flight_arrival_time or datetime.now(),
                           arrival_airport_code=self.iata_arrival_code or "",
                           flight_number=self.flight_number or "",
                           confirmation_code=self.confirmation or "")
@@ -84,9 +84,9 @@ class SunsetAirFlightData:
     
     def to_row(self):
         return Row(email_address=self.email_address or "",
-                   flight_departure_time=self.flight_departure_time or "",
+                   flight_departure_time=self.flight_departure_time or datetime.now(),
                    iata_departure_code=self.iata_departure_code or "",
-                   flight_arrival_time=self.flight_arrival_time or "",
+                   flight_arrival_time=self.flight_arrival_time or datetime.now(),
                    iata_arrival_code=self.iata_arrival_code or "",
                    flight_number=self.flight_number or "",
                    confirmation=self.confirmation or "",
@@ -111,13 +111,13 @@ class SunsetAirFlightData:
             ],
             field_types=[
                 Types.STRING(),
+                Types.SQL_TIMESTAMP(),
+                Types.STRING(),
+                Types.SQL_TIMESTAMP(),
                 Types.STRING(),
                 Types.STRING(),
                 Types.STRING(),
-                Types.STRING(),
-                Types.STRING(),
-                Types.STRING(),
-                Types.STRING(),
+                Types.BIG_DEC(),
                 Types.STRING(),
                 Types.STRING(),
             ],

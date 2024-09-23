@@ -17,9 +17,9 @@ __status__     = "dev"
 @dataclass
 class FlightData:
     email_address: str | None
-    departure_time: str | None
+    departure_time: datetime | None
     departure_airport_code: str | None
-    arrival_time: str | None
+    arrival_time: datetime | None
     arrival_airport_code: str | None
     flight_number: str | None
     confirmation_code: str | None
@@ -48,7 +48,7 @@ class FlightData:
         return json.dumps(self.__dict__, default=str)
     
     def get_duration(self):
-        return int(( datetime.fromisoformat(self.arrival_time) - datetime.fromisoformat(self.departure_time)).seconds / 60)
+        return int((self.arrival_time - self.departure_time).seconds / 60)
     
     def to_row(self):
         return Row(
@@ -101,9 +101,9 @@ class FlightData:
             ],
             field_types=[
                 Types.STRING(),
+                Types.SQL_TIMESTAMP(),
                 Types.STRING(),
-                Types.STRING(),
-                Types.STRING(),
+                Types.SQL_TIMESTAMP(),
                 Types.STRING(),
                 Types.STRING(),
                 Types.STRING(),
