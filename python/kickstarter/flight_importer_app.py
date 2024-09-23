@@ -273,27 +273,6 @@ def execute_kafka_properties_udtf(tbl_env, for_consumer: bool, service_account_u
     # Return the table results into a dictionary
     return result_dict
 
-def define_workflow(skyone_source: DataStream, sunset_source: DataStream) -> DataStream:
-    """This method defines the workflow for the Flink job graph (DAG) by connecting the data streams.
-
-    Args:
-        skyone_source (DataStream): is the source of the SkyOne Airlines flight data.
-        sunset_source (DataStream): is the source of the Sunset Air flight data.
-
-    Returns:
-        DataStream: the union of the SkyOne Airlines and Sunset Air flight data streams.
-    """
-
-    skyone_flight_stream = (skyone_source
-                            .map(SkyOneAirlinesFlightData.to_flight_data)
-                            .filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now()))
-
-    sunset_flight_stream = (sunset_source
-                            .map(SunsetAirFlightData.to_flight_data)
-                            .filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now()))
-
-    return skyone_flight_stream.union(sunset_flight_stream)
-
 def main(args):
     """This is the main function that sets up the Flink job graph (DAG) for the Flight Importer App.
         
@@ -386,6 +365,27 @@ def main(args):
         env.execute("FlightImporterApp")
     except Exception as e:
         logger.error("The App stopped early due to the following: %s", e)
+
+def define_workflow(skyone_source: DataStream, sunset_source: DataStream) -> DataStream:
+    """This method defines the workflow for the Flink job graph (DAG) by connecting the data streams.
+
+    Args:
+        skyone_source (DataStream): is the source of the SkyOne Airlines flight data.
+        sunset_source (DataStream): is the source of the Sunset Air flight data.
+
+    Returns:
+        DataStream: the union of the SkyOne Airlines and Sunset Air flight data streams.
+    """
+
+    skyone = (skyone_source
+              .filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now())
+              .map(SkyOneAirlinesFlightData.to_flight_data))
+
+    sunset = (sunset_source
+              .filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now())
+              .map(SunsetAirFlightData.to_flight_data))
+
+    return skyone.union(sunset)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
