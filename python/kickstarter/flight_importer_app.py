@@ -38,8 +38,16 @@ class KafkaProperties(TableFunction):
     from the AWS Secrets Manager and Parameter Store.
     """
 
-
     def __init__(self, for_consumer: bool, service_account_user: str):
+        """Initializes the UDTF with the necessary parameters.
+
+        Args:
+            for_consumer (bool): determines if the Kafka Client is a consumer or producer.
+            service_account_user (str): is the name of the service account user.  It is used in
+            the prefix to the path of the Kafka Cluster secrets in the AWS Secrets Manager and
+            the Kafka Client parameters in the AWS Systems Manager Parameter Store.
+        """
+
         self._for_consumer = for_consumer
         self._service_account_user = service_account_user
         self._aws_region_name = os.environ['AWS_REGION']
@@ -49,10 +57,10 @@ class KafkaProperties(TableFunction):
         and AWS Systems Manager.
 
         Args:
-            kakfa_properties (Row): _description_
+            kakfa_properties (Row): is a Row object that contains the Kafka Cluster properties.
 
         Raises:
-            RuntimeError: _description_
+            RuntimeError: is a generic error that is raised when an error occurs.
 
         Yields:
             Iterator[Row]: combination of Kafka Cluster properties and Kafka Client parameters.
@@ -265,7 +273,17 @@ def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str)
     # Return the table results into a dictionary
     return result_dict
 
-def define_workflow(skyone_source: DataStream, sunset_source: DataStream):
+def define_workflow(skyone_source: DataStream, sunset_source: DataStream) -> DataStream:
+    """This method defines the workflow for the Flink job graph (DAG) by connecting the data streams.
+
+    Args:
+        skyone_source (DataStream): is the source of the SkyOne Airlines flight data.
+        sunset_source (DataStream): is the source of the Sunset Air flight data.
+
+    Returns:
+        DataStream: the union of the SkyOne Airlines and Sunset Air flight data streams.
+    """
+
     skyone_flight_stream = (skyone_source
                             .map(SkyOneAirlinesFlightData.to_flight_data)
                             .filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now()))
@@ -277,6 +295,12 @@ def define_workflow(skyone_source: DataStream, sunset_source: DataStream):
     return skyone_flight_stream.union(sunset_flight_stream)
 
 def main(args):
+    """This is the main function that sets up the Flink job graph (DAG) for the Flight Importer App.
+        
+    Args:
+        args (argparse.Namespace): is the arguments passed to the script.
+    """
+
     # Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
 
