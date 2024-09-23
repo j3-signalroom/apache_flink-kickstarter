@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 import json
-from pyflink.common import Row
+from pyflink.common import Types, Row
 
 from model.flight_data import FlightData
 from common_functions import serialize
@@ -49,7 +49,36 @@ class SkyOneAirlinesFlightData:
             aircraft=self.aircraft,
             booking_agency_email=self.booking_agency_email
         )
-
+    
+    @staticmethod
+    def get_value_type_info():
+        return Types.ROW_NAMED(
+            field_names=[
+                "email_address",
+                "flight_departure_time",
+                "iata_departure_code",
+                "flight_arrival_time",
+                "iata_arrival_code",
+                "flight_number",
+                "confirmation",
+                "ticket_price",
+                "aircraft",
+                "booking_agency_email",
+            ],
+            field_types=[
+                Types.STRING(),
+                Types.SQL_TIMESTAMP(),
+                Types.STRING(),
+                Types.SQL_TIMESTAMP(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.FLOAT(),
+                Types.STRING(),
+                Types.STRING(),
+            ],
+        )
+    
     def __eq__(self, other):
         if not isinstance(other, SkyOneAirlinesFlightData):
             return False
