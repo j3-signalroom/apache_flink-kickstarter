@@ -31,6 +31,12 @@ RUN curl -L https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.26.9/
 # --- Kafka Flink Library
 RUN curl -L https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.2.0-1.19/flink-sql-connector-kafka-3.2.0-1.19.jar -o /opt/flink/lib/flink-sql-connector-kafka-3.2.0-1.19.jar
 
+# --- Flink JSON Library
+RUN curl -L https://repo1.maven.org/maven2/org/apache/flink/flink-json/1.19.1/flink-json-1.19.1.jar -o /opt/flink/lib/flink-json-1.19.1.jar
+
+# --- Kafka Client
+RUN curl -L https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.7.0/kafka-clients-3.7.0.jar -o /opt/flink/lib/kafka-clients-3.7.0.jar
+
 # Install Nano to edit files
 RUN apt update && apt install -y nano
 

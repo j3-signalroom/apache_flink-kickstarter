@@ -1,26 +1,22 @@
-from typing import Iterator
+from pyflink.common import Row, WatermarkStrategy, Types
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
-from pyflink.table import StreamTableEnvironment
-from pyflink.common import WatermarkStrategy
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
-from datetime import datetime
+from pyflink.table import DataTypes, StreamTableEnvironment
+from pyflink.table.expressions import col
+from pyflink.table.udf import udtf, TableFunction
+from typing import Iterator
+from datetime import datetime, timedelta
+import boto3
+from botocore.exceptions import ClientError
 import logging
 import argparse
 import json
-import boto3
-from botocore.exceptions import ClientError
 from re import sub
 import os
-from pyflink.table.expressions import col
-from pyflink.common import Row
-from pyflink.table import DataTypes
-from pyflink.table.udf import udtf, TableFunction
-
-from common_functions import get_mapper
-from model.skyone_airlines_flight_data import SkyOneAirlinesFlightData
-from model.sunset_air_flight_data import SunsetAirFlightData
-from model.flight_data import FlightData
+from dataclasses import dataclass
+from decimal import Decimal
+from typing import Optional
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -33,13 +29,306 @@ __status__     = "dev"
 # Setup the logger
 logger = logging.getLogger('FlightImporterApp')
 
+def serialize(obj):
+    """
+    This method serializes the `obj` parameter to a string.
+
+    Args:
+        obj (obj):  The object to serialize.
+
+    Returns:
+        str:  If the obj is a datetime object, the time formatted according to 
+        ISO is returned (i.e., 'YYYY-MM-DD HH:MM:SS.mmmmmm').  If the obj is a 
+        date object, the date is returned. Otherwise, the obj is returned as is.
+    """
+    if isinstance(obj, datetime):
+        return obj.isoformat(timespec="milliseconds")
+    if isinstance(obj, datetime.date):
+        return str(obj)
+    return obj
+
+@dataclass
+class FlightData():
+    email_address: str | None
+    departure_time: str | None
+    departure_airport_code: str | None
+    arrival_time: str | None
+    arrival_airport_code: str | None
+    flight_number: str | None
+    confirmation_code: str | None
+    source: str | None
+
+
+    def get_duration(self):
+        return int((datetime.fromisoformat(self.arrival_time) - datetime.fromisoformat(self.departure_time)).seconds / 60)
+    
+    def to_row(self):
+        return Row(
+            email_address=self.email_address,
+            departure_time=serialize(self.departure_time),
+            departure_airport_code=self.departure_airport_code,
+            arrival_time=serialize(self.arrival_time),
+            arrival_airport_code=self.arrival_airport_code,
+            flight_number=self.flight_number,
+            confirmation_code=self.confirmation_code,
+            source=self.source,
+        )
+    
+    @classmethod
+    def from_row(cls, row: Row):
+        return cls(
+            email_address=row.email_address,
+            departure_time=row.departure_time,
+            departure_airport_code=row.departure_airport_code,
+            arrival_time=row.arrival_time,
+            arrival_airport_code=row.arrival_airport_code,
+            flight_number=row.flight_number,
+            confirmation_code=row.confirmation_code,
+            source=row.source,
+        )
+
+    @staticmethod
+    def get_value_type_info():
+        return Types.ROW_NAMED(
+            field_names=[
+                "email_address",
+                "departure_time",
+                "departure_airport_code",
+                "arrival_time",
+                "arrival_airport_code",
+                "flight_number",
+                "confirmation_code",
+                "source",
+            ],
+            field_types=[
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+            ],
+        )
+
+@dataclass
+class SkyOneAirlinesFlightData():
+    email_address: str | None
+    departure_time: str | None
+    departure_airport_code: str | None
+    arrival_time: str | None
+    arrival_airport_code: str | None
+    flight_number: str | None
+    confirmation_code: str | None
+    ticket_price: Decimal | None
+    aircraft: str | None
+    booking_agency_email: str | None
+
+    
+    @staticmethod
+    def to_flight_data(row: Row):
+        data = SkyOneAirlinesFlightData.from_row(row)
+        return FlightData(
+            data.email_address,
+            data.departure_time,
+            data.departure_airport_code,
+            data.arrival_time,
+            data.arrival_airport_code,
+            data.flight_number,
+            data.confirmation_code,
+            "skyone",
+        )
+    
+    @classmethod
+    def from_row(cls, row: Row):
+        return cls(email_address=row.email_address or "",
+                   departure_time=row.departure_time or datetime.now(),
+                   departure_airport_code=row.departure_airport_code or "",
+                   arrival_time=row.arrival_time or datetime.now(),
+                   arrival_airport_code=row.arrival_airport_code or "",
+                   flight_number=row.flight_number or "",
+                   confirmation_code=row.confirmation_code or "",
+                   ticket_price=row.ticket_price or 0,
+                   aircraft=row.aircraft or "",
+                   booking_agency_email=row.booking_agency_email or "")
+    
+    def to_row(self):
+        return Row(email_address=self.email_address or "",
+                   departure_time=serialize(self.departure_time or datetime.now()),
+                   departure_airport_code=self.departure_airport_code or "",
+                   arrival_time=serialize(self.arrival_time or datetime.now()),
+                   arrival_airport_code=self.arrival_airport_code or "",
+                   flight_number=self.flight_number or "",
+                   confirmation_code=self.confirmation_code or "",
+                   ticket_price=self.ticket_price or 0,
+                   aircraft=self.aircraft or "",
+                   booking_agency_email=self.booking_agency_email or "")
+    
+    @staticmethod
+    def get_value_type_info():
+        return Types.ROW_NAMED(
+            field_names=[
+                "email_address",
+                "departure_time",
+                "departure_airport_code",
+                "arrival_time",
+                "arrival_airport_code",
+                "flight_number",
+                "confirmation_code",
+                "ticket_price",
+                "aircraft",
+                "booking_agency_email",
+            ],
+            field_types=[
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+            ],
+        )
+
+@dataclass
+class SunsetAirFlightData:
+    email_address: str | None
+    departure_time: str | None
+    departure_airport_code: str | None
+    arrival_time: str | None
+    arrival_airport_code: str | None
+    flight_number: str | None
+    confirmation_code: str | None
+    ticket_price: Decimal | None
+    aircraft: str | None
+    booking_agency_email: str | None
+
+        
+    @staticmethod
+    def to_flight_data(row: Row):
+        data = SunsetAirFlightData.from_row(row)
+        return FlightData(
+            data.email_address,
+            data.departure_time,
+            data.departure_airport_code,
+            data.arrival_time,
+            data.arrival_airport_code,
+            data.flight_number,
+            data.confirmation_code,
+            "sunset",
+        )
+    
+    @classmethod
+    def from_row(cls, row: Row):
+        return cls(email_address=row.email_address or "",
+                   departure_time=row.departure_time or datetime.now(),
+                   departure_airport_code=row.departure_airport_code or "",
+                   arrival_time=row.arrival_time or datetime.now(),
+                   arrival_airport_code=row.arrival_airport_code or "",
+                   flight_number=row.flight_number or "",
+                   confirmation_code=row.confirmation_code or "",
+                   ticket_price=row.ticket_price or 0,
+                   aircraft=row.aircraft or "",
+                   booking_agency_email=row.booking_agency_email or "")
+
+    def to_row(self):
+        return Row(email_address=self.email_address or "",
+                   departure_time=serialize(self.departure_time or datetime.now()),
+                   departure_airport_code=self.departure_airport_code or "",
+                   arrival_time=serialize(self.arrival_time or datetime.now()),
+                   arrival_airport_code=self.arrival_airport_code or "",
+                   flight_number=self.flight_number or "",
+                   confirmation_code=self.confirmation_code or "",
+                   ticket_price=self.ticket_price or 0,
+                   aircraft=self.aircraft or "",
+                   booking_agency_email=self.booking_agency_email or "")
+    
+    @staticmethod
+    def get_value_type_info():
+        return Types.ROW_NAMED(
+            field_names=[
+                "email_address",
+                "departure_time",
+                "departure_airport_code",
+                "arrival_time",
+                "arrival_airport_code",
+                "flight_number",
+                "confirmation_code",
+                "ticket_price",
+                "aircraft",
+                "booking_agency_email",
+            ],
+            field_types=[
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+                Types.STRING(),
+            ],
+        )
+
+@dataclass
+class UserStatisticsData:
+    email_address: str | None
+    total_flight_duration: Optional[timedelta] = timedelta(0)
+    number_of_flights: int = 0
+
+    def __init__(self, flight_data=None):
+        if flight_data:
+            self.email_address = flight_data.email_address
+            self.total_flight_duration = flight_data.arrival_time - flight_data.departure_time
+            self.number_of_flights = 1
+
+    def merge(self, that):
+        if self.email_address != that.email_address:
+            raise ValueError("Cannot merge UserStatisticsData for different email addresses")
+
+        merged = UserStatisticsData()
+        merged.email_address = self.email_address
+        merged.total_flight_duration = self.total_flight_duration + that.total_flight_duration
+        merged.number_of_flights = self.number_of_flights + that.number_of_flights
+        return merged
+
+    def __eq__(self, other):
+        if not isinstance(other, UserStatisticsData):
+            return False
+        return (self.email_address == other.email_address and
+                self.total_flight_duration == other.total_flight_duration and
+                self.number_of_flights == other.number_of_flights)
+
+    def __hash__(self):
+        return hash((self.email_address, self.total_flight_duration, self.number_of_flights))
+
+    def __str__(self):
+        return (f"UserStatisticsData{{"
+                f"emailAddress='{self.email_address}', "
+                f"totalFlightDuration={self.total_flight_duration}, "
+                f"numberOfFlights={self.number_of_flights}}}")
+
 class KafkaProperties(TableFunction):
     """This User-Defined Table Function (UDTF) is used to retrieve the Kafka Cluster properties
     from the AWS Secrets Manager and Parameter Store.
     """
 
-
     def __init__(self, for_consumer: bool, service_account_user: str):
+        """Initializes the UDTF with the necessary parameters.
+
+        Args:
+            for_consumer (bool): determines if the Kafka Client is a consumer or producer.
+            service_account_user (str): is the name of the service account user.  It is used in
+            the prefix to the path of the Kafka Cluster secrets in the AWS Secrets Manager and
+            the Kafka Client parameters in the AWS Systems Manager Parameter Store.
+        """
+
         self._for_consumer = for_consumer
         self._service_account_user = service_account_user
         self._aws_region_name = os.environ['AWS_REGION']
@@ -49,10 +338,10 @@ class KafkaProperties(TableFunction):
         and AWS Systems Manager.
 
         Args:
-            kakfa_properties (Row): _description_
+            kakfa_properties (Row): is a Row object that contains the Kafka Cluster properties.
 
         Raises:
-            RuntimeError: _description_
+            RuntimeError: is a generic error that is raised when an error occurs.
 
         Yields:
             Iterator[Row]: combination of Kafka Cluster properties and Kafka Client parameters.
@@ -203,20 +492,25 @@ class KafkaProperties(TableFunction):
             return parameters
 
 
-def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str) -> dict:
+def execute_kafka_properties_udtf(tbl_env, for_consumer: bool, service_account_user: str) -> dict:
     """This method retrieves the Kafka Cluster properties from the AWS Secrets Manager 
     and AWS Systems Manager.
 
     Args:
-        tbl_env (_type_): _description_
-        for_consumer (bool): _description_
-        service_account_user (str): _description_
+        tbl_env (TableEnvironment): is the instantiated Flink Table Environment.  A Table
+        Environment is a unified entry point for creating Table and SQL API programs.  It
+        is used to convert a DataStream into a Table or vice versa.  It is also used to
+        register a Table in a catalog.
+        for_consumer (bool): determines if the Kafka Client is a consumer or producer.
+        service_account_user (str): is the name of the service account user.  It is used in
+        the prefix to the path of the Kafka Cluster secrets in the AWS Secrets Manager and
+        the Kafka Client parameters in the AWS Systems Manager Parameter Store.
 
     Returns:
         dict: combination of Kafka Cluster properties and Kafka Client parameters.
     """
 
-    # Define the schema for the table
+    # Define the schema for the table and the return result of the UDTF
     schema = DataTypes.ROW([
         DataTypes.FIELD('property_key', DataTypes.STRING()),
         DataTypes.FIELD('property_value', DataTypes.STRING())
@@ -225,21 +519,25 @@ def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str)
     # Create an empty table
     kafka_property_table = tbl_env.from_elements([('','')], schema)
 
+    # Define the table name based on the type of Kafka client
     table_name = "kafka_property_table_" + ("consumer" if for_consumer else "producer")
 
     # Register the table as a temporary view
     tbl_env.create_temporary_view(table_name, kafka_property_table)
 
+    # Get the table from the temporary view
     kafka_property_table = tbl_env.from_path(table_name)
 
-    print('\n Kafka Property Table Schema:--->')
-    kafka_property_table.print_schema()
+    # print('\n Kafka Property Table Schema:--->')
+    # kafka_property_table.print_schema()
 
-    # Register the function as a PyFlink UDTF
+    # Register the Python function as a PyFlink UDTF (User-Defined Table Function)
     kafka_properties_udtf = udtf(f=KafkaProperties(for_consumer, service_account_user), 
                                  result_types=schema)
 
+    # Join the Kafka Property Table with the UDTF
     func_results = kafka_property_table.join_lateral(kafka_properties_udtf.alias("key", "value")).select(col("key"), col("value"))
+
     print('\n Kafka Property Table Data:--->')
     func_results.execute().print()
 
@@ -248,39 +546,51 @@ def get_kafka_properties(tbl_env, for_consumer: bool, service_account_user: str)
     result_dict = {}
     for row in result:
         result_dict[row[0]] = row[1]
-
     result.close()
 
+    # Convert the table back to a DataStream
+    #result_stream = tbl_env.to_data_stream(kafka_property_table)
+    
+    # print('\n Kafka Client Properties Python dictionary:--->')
+    # print(result_dict)
+
     # Return the table results into a dictionary
-    print(result_dict)
     return result_dict
 
 def main(args):
+    """This is the main function that sets up the Flink job graph (DAG) for the Flight Importer App.
+        
+    Args:
+        args (argparse.Namespace): is the arguments passed to the script.
+    """
+
     # Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
-    tbl_env = StreamTableEnvironment.create(env)
+
+    # Create a Table Environment for batch mode
+    tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Adjust resource configuration
     env.set_parallelism(1)  # Set parallelism to 1 for simplicity
 
-
-    consumer_properties = get_kafka_properties(tbl_env, True, args.s3_bucket_name)
-
-    producer_properties = get_kafka_properties(tbl_env, False, args.s3_bucket_name)
+    # Get the Kafka Cluster properties for the consumer
+    consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
+    print("\nSet the KafkaSources:--->")
     skyone_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
                                 .set_topics("airline.skyone")
                                 .set_group_id("skyone_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(JsonRowDeserializationSchema.builder()
-                                                                                         .type_info(SkyOneAirlinesFlightData.get_value_type_info())
-                                                                                         .build())
+                                .set_value_only_deserializer(JsonRowDeserializationSchema
+                                                             .builder()
+                                                             .type_info(SkyOneAirlinesFlightData.get_value_type_info())
+                                                             .build())
                                 .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
-    skyone_stream = env.from_source(skyone_source, WatermarkStrategy.for_monotonous_timestamps(), "skyone_source")
+    skyone_stream = env.from_source(skyone_source, WatermarkStrategy.no_watermarks(), "skyone_source")
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset`
     sunset_source = (KafkaSource.builder()
@@ -288,44 +598,74 @@ def main(args):
                                 .set_topics("airline.sunset")
                                 .set_group_id("sunset_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(JsonRowDeserializationSchema.builder()
-                                                                                         .type_info(SunsetAirFlightData.get_value_type_info())
-                                                                                         .build())
+                                .set_value_only_deserializer(JsonRowDeserializationSchema
+                                                             .builder()
+                                                             .type_info(SunsetAirFlightData.get_value_type_info())
+                                                             .build())
                                 .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
-    sunset_stream = env.from_source(sunset_source, WatermarkStrategy.for_monotonous_timestamps(), "sunset_source")
+    sunset_stream = env.from_source(sunset_source, WatermarkStrategy.no_watermarks(), "sunset_source")
 
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.all`
-    flight_sink = (KafkaSink.builder()                            
-                            .set_record_serializer(KafkaRecordSerializationSchema.builder()
-                                                                                 .set_topic("airline.all")
-                                                                                 .set_key_serialization_schema(JsonRowSerializationSchema.builder()
-                                                                                                                                         .with_type_info(FlightData.get_key_type_info())
-                                                                                                                                         .build())
-                                                                                 .set_value_serialization_schema(JsonRowSerializationSchema.builder()
-                                                                                                                                           .with_type_info(FlightData.get_value_type_info())
-                                                                                                                                           .build())
-                                                                                 .build())
-                            .set_delivery_guarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+    print("\nSet the KafkaSink:--->")
+
+    # Get the Kafka Cluster properties for the producer
+    producer_properties = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
+    producer_properties.update({
+        'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
+    })
+    flight_sink = (KafkaSink.builder()
+                            .set_bootstrap_servers(producer_properties['bootstrap.servers'])
+                            .set_property("security.protocol", producer_properties['security.protocol'])
+                            .set_property("sasl.mechanism", producer_properties['sasl.mechanism'])
+                            .set_property("sasl.jaas.config", producer_properties['sasl.jaas.config'])
+                            .set_property("acks", producer_properties['acks'])
+                            .set_property("client.dns.lookup", producer_properties['client.dns.lookup'])
+                            .set_property("transaction.timeout.ms", producer_properties['transaction.timeout.ms'])
+                            .set_record_serializer(KafkaRecordSerializationSchema
+                                                   .builder()
+                                                   .set_topic("airline.all")
+                                                   .set_value_serialization_schema(JsonRowSerializationSchema
+                                                                                   .builder()
+                                                                                   .with_type_info(FlightData.get_value_type_info())
+                                                                                   .build())
+                                                   .build())
+                            .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
                             .build())
 
     # Defines the workflow for the Flink job graph (DAG) by connecting the data streams
-    define_workflow(skyone_stream, sunset_stream).sink_to(flight_sink).name("flightdata_sink")
+    print("\nDefine the Workflow:--->")
+    (define_workflow(skyone_stream, sunset_stream)
+     .map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
+     .sink_to(flight_sink)
+     .name("flightdata_sink"))
 
     try:
         env.execute("FlightImporterApp")
     except Exception as e:
         logger.error("The App stopped early due to the following: %s", e)
 
-def define_workflow(skyone_source: DataStream, sunset_source: DataStream):
-    skyone_flight_stream = (skyone_source.filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now())
-                                         .map(SkyOneAirlinesFlightData.to_flight_data))
+def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> DataStream:
+    """This method defines the workflow for the Flink job graph (DAG) by connecting the data streams.
 
-    sunset_flight_stream = (sunset_source.filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now())
-                                         .map(SunsetAirFlightData.to_flight_data))
+    Args:
+        skyone_stream (DataStream): is the source of the SkyOne Airlines flight data.
+        sunset_stream (DataStream): is the source of the Sunset Air flight data.
 
-    return skyone_flight_stream.union(sunset_flight_stream)
+    Returns:
+        DataStream: the union of the SkyOne Airlines and Sunset Air flight data streams.
+    """
+
+    all_airlines_stream = (skyone_stream
+                           .map(SkyOneAirlinesFlightData.to_flight_data)
+                           .filter(lambda flight: datetime.fromisoformat(str(flight.arrival_time)) > datetime.now()))
+                      
+    all_airlines_stream = all_airlines_stream.union(sunset_stream
+                                                    .map(SunsetAirFlightData.to_flight_data)
+                                                    .filter(lambda flight: datetime.fromisoformat(str(flight.arrival_time)) > datetime.now()))
+    
+    return all_airlines_stream
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

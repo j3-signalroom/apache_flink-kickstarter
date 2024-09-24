@@ -1,5 +1,5 @@
 # Base image from https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/deployment/resource-providers/standalone/docker/
-FROM arm64v8/flink:1.20.0-scala_2.12-java17
+FROM arm64v8/flink:1.19.1-scala_2.12-java17
 
 # Container environment variable(s)
 ENV PYTHON_VERSION=3.11
@@ -61,7 +61,7 @@ ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
 RUN curl -L https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.19/1.6.1/iceberg-flink-runtime-1.19-1.6.1.jar -o /opt/flink/lib/iceberg-flink-runtime-1.19-1.6.1.jar
 
 # --- Hive Flink Library
-RUN curl -L https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/1.20.0/flink-sql-connector-hive-3.1.3_2.12-1.20.0.jar -o /opt/flink/lib/flink-sql-connector-hive-3.1.3_2.12-1.20.0.jar
+RUN curl -L https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/1.19.1/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar -o /opt/flink/lib/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar
 
 # --- Hadoop Common Classes
 RUN curl -L https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.4.0/hadoop-common-3.4.0.jar -o /opt/flink/lib/hadoop-common-3.4.0.jar
@@ -72,8 +72,17 @@ RUN curl -L https://repo.maven.apache.org/maven2/org/apache/flink/flink-shaded-h
 # --- AWS Bundled Classes
 RUN curl -L https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.27.9/bundle-2.27.9.jar -o /opt/flink/lib/bundle-2.27.9.jar
 
-# --- Kafka Flink Library
+# --- Kafka Flink SQL Library
 RUN curl -L https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.2.0-1.19/flink-sql-connector-kafka-3.2.0-1.19.jar -o /opt/flink/lib/flink-sql-connector-kafka-3.2.0-1.19.jar
+
+# --- Kafka Flink Library
+RUN curl -L https://repo1.maven.org/maven2/org/apache/flink/flink-connector-kafka/3.2.0-1.19/flink-connector-kafka-3.2.0-1.19.jar -o /opt/flink/lib/flink-connector-kafka-3.2.0-1.19.jar
+
+# --- Flink JSON Library
+RUN curl -L https://repo1.maven.org/maven2/org/apache/flink/flink-json/1.19.1/flink-json-1.19.1.jar -o /opt/flink/lib/flink-json-1.19.1.jar
+
+# --- Kafka Client
+RUN curl -L https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.7.0/kafka-clients-3.7.0.jar -o /opt/flink/lib/kafka-clients-3.7.0.jar
 
 # Install Nano to edit files
 RUN apt update && apt install -y nano
@@ -85,7 +94,7 @@ RUN python3.11 -m venv .venv
 RUN . .venv/bin/activate
 RUN pipenv --python 3.11 install "grpcio-tools>=1.29.0,<=1.50.0"
 RUN pipenv --python 3.11 install setuptools>=37.0.0
-RUN pipenv --python 3.11 install apache-flink==1.20.0
+RUN pipenv --python 3.11 install apache-flink==1.19.1
 RUN pipenv --python 3.11 install pyiceberg
 RUN pipenv --python 3.11 install boto3
 RUN pipenv --python 3.11 install s3fs
@@ -95,7 +104,7 @@ RUN pipenv --python 3.11 install py4j==0.10.9.7
 
 # This action forces the installation of the latest version of the AWS SDK and PyFlink
 RUN pip install boto3
-RUN pip install apache-flink==1.20.0
+RUN pip install apache-flink==1.19.1
 RUN pip install pyflink
 RUN pip install google-api-python-client
 

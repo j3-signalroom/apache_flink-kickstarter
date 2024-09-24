@@ -1,6 +1,4 @@
-from typing import List
-import datetime
-from json import JSONEncoder
+from datetime import datetime
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -22,25 +20,8 @@ def serialize(obj):
         ISO is returned (i.e., 'YYYY-MM-DD HH:MM:SS.mmmmmm').  If the obj is a 
         date object, the date is returned. Otherwise, the obj is returned as is.
     """
-    if isinstance(obj, datetime.datetime):
+    if isinstance(obj, datetime):
         return obj.isoformat(timespec="milliseconds")
     if isinstance(obj, datetime.date):
         return str(obj)
     return obj
-
-class CustomJSONEncoder(JSONEncoder):
-    def default(self, obj):
-        # Handling serialization of datetime objects
-        if isinstance(obj, datetime):
-            return obj.isoformat()
-        # Let the base class default method raise the TypeError
-        return super().default(obj)
-
-
-def get_mapper():
-    """
-    Returns a new instance of the JSON encoder with custom handling for datetime serialization.
-
-    :return: CustomJSONEncoder instance.
-    """
-    return CustomJSONEncoder()
