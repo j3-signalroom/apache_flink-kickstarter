@@ -143,9 +143,9 @@ class SkyOneAirlinesFlightData():
     @classmethod
     def from_row(cls, row: Row):
         return cls(email_address=row.email_address or "",
-                   departure_time=row.departure_time or datetime.now(),
+                   departure_time=row.departure_time or None,
                    departure_airport_code=row.departure_airport_code or "",
-                   arrival_time=row.arrival_time or datetime.now(),
+                   arrival_time=row.arrival_time or None,
                    arrival_airport_code=row.arrival_airport_code or "",
                    flight_number=row.flight_number or "",
                    confirmation_code=row.confirmation_code or "",
@@ -155,9 +155,9 @@ class SkyOneAirlinesFlightData():
     
     def to_row(self):
         return Row(email_address=self.email_address or "",
-                   departure_time=serialize(self.departure_time or datetime.now()),
+                   departure_time=serialize(self.departure_time or None),
                    departure_airport_code=self.departure_airport_code or "",
-                   arrival_time=serialize(self.arrival_time or datetime.now()),
+                   arrival_time=serialize(self.arrival_time or None),
                    arrival_airport_code=self.arrival_airport_code or "",
                    flight_number=self.flight_number or "",
                    confirmation_code=self.confirmation_code or "",
@@ -225,9 +225,9 @@ class SunsetAirFlightData:
     @classmethod
     def from_row(cls, row: Row):
         return cls(email_address=row.email_address or "",
-                   departure_time=row.departure_time or datetime.now(),
+                   departure_time=row.departure_time or None,
                    departure_airport_code=row.departure_airport_code or "",
-                   arrival_time=row.arrival_time or datetime.now(),
+                   arrival_time=row.arrival_time or None,
                    arrival_airport_code=row.arrival_airport_code or "",
                    flight_number=row.flight_number or "",
                    confirmation_code=row.confirmation_code or "",
@@ -237,9 +237,9 @@ class SunsetAirFlightData:
 
     def to_row(self):
         return Row(email_address=self.email_address or "",
-                   departure_time=serialize(self.departure_time or datetime.now()),
+                   departure_time=serialize(self.departure_time or None),
                    departure_airport_code=self.departure_airport_code or "",
-                   arrival_time=serialize(self.arrival_time or datetime.now()),
+                   arrival_time=serialize(self.arrival_time or None),
                    arrival_airport_code=self.arrival_airport_code or "",
                    flight_number=self.flight_number or "",
                    confirmation_code=self.confirmation_code or "",
@@ -538,7 +538,7 @@ def execute_kafka_properties_udtf(tbl_env, for_consumer: bool, service_account_u
     # Join the Kafka Property Table with the UDTF
     func_results = kafka_property_table.join_lateral(kafka_properties_udtf.alias("key", "value")).select(col("key"), col("value"))
 
-    print('\n Kafka Property Table Data:--->')
+    print("\n Kafka " + ("Consumer" if for_consumer else "Producer") + " Client Property Table Data:--->")
     func_results.execute().print()
 
     # Convert the result into a Python dictionary
@@ -577,7 +577,6 @@ def main(args):
     consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
-    print("\nSet the KafkaSources:--->")
     skyone_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
                                 .set_topics("airline.skyone")
@@ -608,8 +607,6 @@ def main(args):
     sunset_stream = env.from_source(sunset_source, WatermarkStrategy.no_watermarks(), "sunset_source")
 
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.all`
-    print("\nSet the KafkaSink:--->")
-
     # Get the Kafka Cluster properties for the producer
     producer_properties = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
     producer_properties.update({
@@ -635,7 +632,6 @@ def main(args):
                             .build())
 
     # Defines the workflow for the Flink job graph (DAG) by connecting the data streams
-    print("\nDefine the Workflow:--->")
     (define_workflow(skyone_stream, sunset_stream)
      .map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
      .sink_to(flight_sink)
