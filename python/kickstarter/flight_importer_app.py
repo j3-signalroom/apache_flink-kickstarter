@@ -653,21 +653,13 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
         DataStream: the union of the SkyOne Airlines and Sunset Air flight data streams.
     """
 
-    try:
-        skyone_flight_stream = (skyone_stream
-                                .map(SkyOneAirlinesFlightData.to_flight_data)
-                                .filter(lambda flight: datetime.fromisoformat(str(flight.arrival_time)) > datetime.now()))
-    except Exception as e:
-        logging.warning(f"Warning got an error because {e}.")
-        pass
+    skyone_flight_stream = (skyone_stream
+                            .map(SkyOneAirlinesFlightData.to_flight_data)
+                            .filter(lambda flight: flight.arrival_time is not None and datetime.fromisoformat(str(flight.arrival_time)) > datetime.now()))
 
-    try:                      
-        sunset_flight_stream = (sunset_stream
-                                .map(SunsetAirFlightData.to_flight_data)
-                                .filter(lambda flight: datetime.fromisoformat(str(flight.arrival_time)) > datetime.now()))
-    except Exception as e:
-        logging.warning(f"Warning got an error because {e}.")
-        pass
+    sunset_flight_stream = (sunset_stream
+                            .map(SunsetAirFlightData.to_flight_data)
+                            .filter(lambda flight: flight.arrival_time is not None and datetime.fromisoformat(str(flight.arrival_time)) > datetime.now()))
     
     # Return the union of the SkyOne Airlines and Sunset Air flight data streams
     # or the SkyOne Airlines flight data stream if the Sunset Air flight data stream is empty

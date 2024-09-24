@@ -68,10 +68,10 @@ class FlightImporterAppTest {
     @Test
     void defineWorkflow_shouldFilterOutFlightsInThePast() throws Exception {
         SkyOneAirlinesFlightData newSkyOneFlight = new TestHelpers.SkyOneBuilder()
-                .setFlightArrivalTime(ZonedDateTime.now().plusMinutes(1))
+                .setArrivalTime(ZonedDateTime.now().plusMinutes(1))
                 .build();
         SkyOneAirlinesFlightData oldSkyOneFlight = new TestHelpers.SkyOneBuilder()
-                .setFlightArrivalTime(ZonedDateTime.now().minusSeconds(1))
+                .setArrivalTime(ZonedDateTime.now().minusSeconds(1))
                 .build();
 
         SunsetAirFlightData newSunsetFlight = new TestHelpers.SunsetBuilder()

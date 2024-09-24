@@ -45,11 +45,11 @@ public class FlightData {
         this.departureTime = departureTime;
     }
 
-    public String getDepartureAirportCode() {
+    public String getDepartureAirportCodeCode() {
         return departureAirportCode;
     }
 
-    public void setDepartureAirportCode(String departureAirportCode) {
+    public void setDepartureAirportCodeCode(String departureAirportCode) {
         this.departureAirportCode = departureAirportCode;
     }
 
@@ -61,11 +61,11 @@ public class FlightData {
         this.arrivalTime = arrivalTime;
     }
 
-    public String getArrivalAirportCode() {
+    public String getArrivalAirportCodeCode() {
         return arrivalAirportCode;
     }
 
-    public void setArrivalAirportCode(String arrivalAirportCode) {
+    public void setArrivalAirportCodeCode(String arrivalAirportCode) {
         this.arrivalAirportCode = arrivalAirportCode;
     }
 

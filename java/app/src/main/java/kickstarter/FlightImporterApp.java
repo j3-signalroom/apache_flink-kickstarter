@@ -192,7 +192,7 @@ public class FlightImporterApp {
      */
 	public static DataStream<FlightData> defineWorkflow(DataStream<SkyOneAirlinesFlightData> skyOneSource, DataStream<SunsetAirFlightData> sunsetSource) {
         DataStream<FlightData> skyOneFlightStream =  skyOneSource
-			.filter(flight -> flight.getFlightArrivalTime().isAfter(ZonedDateTime.now()))
+			.filter(flight -> flight.getArrivalTime().isAfter(ZonedDateTime.now()))
 			.map(SkyOneAirlinesFlightData::toFlightData);
 
 		DataStream<FlightData> sunsetFlightStream = sunsetSource

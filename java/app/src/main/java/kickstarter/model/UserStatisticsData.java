@@ -12,44 +12,44 @@ import java.util.*;
 
 
 public class UserStatisticsData {
-    private String emailAddress;
-    private Duration totalFlightDuration;
-    private long numberOfFlights;
+    private String email_address;
+    private Duration total_flight_duration;
+    private long number_of_flights;
 
     public UserStatisticsData() {
     }
 
     public UserStatisticsData(FlightData flightData) {
-        this.emailAddress = flightData.getEmailAddress();
-        this.totalFlightDuration = Duration.between(
+        this.email_address = flightData.getEmailAddress();
+        this.total_flight_duration = Duration.between(
                 flightData.getDepartureTime(),
                 flightData.getArrivalTime()
         );
-        this.numberOfFlights = 1;
+        this.number_of_flights = 1;
     }
 
     public String getEmailAddress() {
-        return emailAddress;
+        return this.email_address;
     }
 
     public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress;
+        this.email_address = emailAddress;
     }
 
     public Duration getTotalFlightDuration() {
-        return totalFlightDuration;
+        return this.total_flight_duration;
     }
 
     public void setTotalFlightDuration(Duration totalFlightDuration) {
-        this.totalFlightDuration = totalFlightDuration;
+        this.total_flight_duration = totalFlightDuration;
     }
 
     public long getNumberOfFlights() {
-        return numberOfFlights;
+        return this.number_of_flights;
     }
 
     public void setNumberOfFlights(long numberOfFlights) {
-        this.numberOfFlights = numberOfFlights;
+        this.number_of_flights = numberOfFlights;
     }
 
     @Override
@@ -57,30 +57,32 @@ public class UserStatisticsData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserStatisticsData that = (UserStatisticsData) o;
-        return numberOfFlights == that.numberOfFlights && Objects.equals(emailAddress, that.emailAddress) && Objects.equals(totalFlightDuration, that.totalFlightDuration);
+        return this.number_of_flights == that.number_of_flights && 
+                Objects.equals(this.email_address, that.email_address) &&
+                Objects.equals(this.total_flight_duration, that.total_flight_duration);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(emailAddress, totalFlightDuration, numberOfFlights);
+        return Objects.hash(this.email_address, this.total_flight_duration, this.number_of_flights);
     }
 
     @Override
     public String toString() {
         return "UserStatistics{" +
-                "emailAddress='" + emailAddress + '\'' +
-                ", totalFlightDuration=" + totalFlightDuration +
-                ", numberOfFlights=" + numberOfFlights +
+                "email_address='" + this.email_address + '\'' +
+                ", totalFlightDuration=" + this.total_flight_duration +
+                ", number_of_flights=" + this.number_of_flights +
                 '}';
     }
 
     public UserStatisticsData merge(UserStatisticsData that) {
-        if(this.emailAddress.equals(that.emailAddress)) {
+        if(this.email_address.equals(that.email_address)) {
             UserStatisticsData merged = new UserStatisticsData();
 
-            merged.setEmailAddress(this.emailAddress);
-            merged.setTotalFlightDuration(this.totalFlightDuration.plus(that.getTotalFlightDuration()));
-            merged.setNumberOfFlights(this.numberOfFlights + that.getNumberOfFlights());
+            merged.setEmailAddress(this.email_address);
+            merged.setTotalFlightDuration(this.total_flight_duration.plus(that.getTotalFlightDuration()));
+            merged.setNumberOfFlights(this.number_of_flights + that.getNumberOfFlights());
 
             return merged;
         } else {
