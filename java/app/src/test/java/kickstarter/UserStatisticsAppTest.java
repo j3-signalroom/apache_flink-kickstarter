@@ -104,13 +104,13 @@ class UserStatisticsAppTest {
         String email = TestHelpers.generateEmail();
         FlightData flight1 = new TestHelpers.FlightDataBuilder().setEmailAddress(email).build();
         FlightData flight2 = new TestHelpers.FlightDataBuilder().setEmailAddress(email).build();
-        FlightData flight3 = new TestHelpers.FlightDataBuilder().setEmailAddress(email).setDepartureAirportCodeCode("LATE")
+        FlightData flight3 = new TestHelpers.FlightDataBuilder().setEmailAddress(email).setDepartureAirportCode("LATE")
                 .build();
 
         WatermarkStrategy<FlightData> watermarkStrategy = WatermarkStrategy
                 .<FlightData>forMonotonousTimestamps()
                 .withTimestampAssigner((event, timestamp) -> {
-                    if (event.getDepartureAirportCodeCode().equals("LATE")) {
+                    if (event.getDepartureAirportCode().equals("LATE")) {
                         return System.currentTimeMillis() + Duration.ofMinutes(1).toMillis();
                     } else {
                         return System.currentTimeMillis();

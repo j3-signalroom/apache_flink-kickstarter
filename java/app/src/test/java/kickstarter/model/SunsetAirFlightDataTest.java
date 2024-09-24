@@ -78,9 +78,9 @@ class SunsetAirFlightDataTest {
         FlightData expected = new FlightData();
         expected.setEmailAddress(sunset.getEmailAddress());
         expected.setDepartureTime(sunset.getDepartureTime());
-        expected.setDepartureAirportCodeCode(sunset.getDepartureAirportCode());
+        expected.setDepartureAirportCode(sunset.getDepartureAirportCode());
         expected.setArrivalTime(sunset.getArrivalTime());
-        expected.setArrivalAirportCodeCode(sunset.getArrivalAirportCode());
+        expected.setArrivalAirportCode(sunset.getArrivalAirportCode());
         expected.setFlightNumber(sunset.getFlightNumber());
         expected.setConfirmationCode(sunset.getConfirmationCode());
 
@@ -102,7 +102,7 @@ class SunsetAirFlightDataTest {
 
     @Test
     void serializer_shouldHandleUnknownFields() throws Exception {
-        String json = "{\"EmailAddress\":\"LJNZGYPIER@email.com\",\"departureTime\":\"2023-10-16T22:25:00.000Z\",\"departureAirport\":\"LAS\",\"arrivalTime\":\"2023-10-17T09:38:00.000Z\",\"arrivalAirport\":\"BOS\",\"flightId\":\"SKY1522\",\"referenceNumber\":\"SKY1OUJUUK\"}";
+        String json = "{\"email_address\":\"LJNZGYPIER@email.com\",\"departure_time\":\"2023-10-16T22:25:00.000Z\",\"departure_airport_code\":\"LAS\",\"arrival_time\":\"2023-10-17T09:38:00.000Z\",\"arrival_airport_code\":\"BOS\",\"flight_number\":\"SKY1522\",\"confirmation_code\":\"SKY1OUJUUK\"}";
 
         SunsetAirFlightData object = mapper.readValue(json, SunsetAirFlightData.class);
 

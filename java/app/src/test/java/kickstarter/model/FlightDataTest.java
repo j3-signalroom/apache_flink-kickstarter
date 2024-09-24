@@ -27,17 +27,17 @@ class FlightDataTest {
         FlightData actual = new FlightData();
         actual.setEmailAddress(expected.getEmailAddress());
         actual.setDepartureTime(expected.getDepartureTime());
-        actual.setDepartureAirportCodeCode(expected.getDepartureAirportCodeCode());
+        actual.setDepartureAirportCode(expected.getDepartureAirportCode());
         actual.setArrivalTime(expected.getArrivalTime());
-        actual.setArrivalAirportCodeCode(expected.getArrivalAirportCodeCode());
+        actual.setArrivalAirportCode(expected.getArrivalAirportCode());
         actual.setFlightNumber(expected.getFlightNumber());
         actual.setConfirmationCode(expected.getConfirmationCode());
 
         assertEquals(expected.getEmailAddress(), actual.getEmailAddress());
         assertEquals(expected.getDepartureTime(), actual.getDepartureTime());
-        assertEquals(expected.getDepartureAirportCodeCode(), actual.getDepartureAirportCodeCode());
+        assertEquals(expected.getDepartureAirportCode(), actual.getDepartureAirportCode());
         assertEquals(expected.getArrivalTime(), actual.getArrivalTime());
-        assertEquals(expected.getArrivalAirportCodeCode(), actual.getArrivalAirportCodeCode());
+        assertEquals(expected.getArrivalAirportCode(), actual.getArrivalAirportCode());
         assertEquals(expected.getFlightNumber(), actual.getFlightNumber());
         assertEquals(expected.getConfirmationCode(), actual.getConfirmationCode());
     }
@@ -48,9 +48,9 @@ class FlightDataTest {
         FlightData flight2 = new FlightData();
         flight2.setEmailAddress(flight1.getEmailAddress());
         flight2.setDepartureTime(flight1.getDepartureTime());
-        flight2.setDepartureAirportCodeCode(flight1.getDepartureAirportCodeCode());
+        flight2.setDepartureAirportCode(flight1.getDepartureAirportCode());
         flight2.setArrivalTime(flight1.getArrivalTime());
-        flight2.setArrivalAirportCodeCode(flight1.getArrivalAirportCodeCode());
+        flight2.setArrivalAirportCode(flight1.getArrivalAirportCode());
         flight2.setFlightNumber(flight1.getFlightNumber());
         flight2.setConfirmationCode(flight1.getConfirmationCode());
 
@@ -74,13 +74,13 @@ class FlightDataTest {
         FlightData flightData = new TestHelpers.FlightDataBuilder().build();
 
         String expected = "FlightData{" +
-                "emailAddress='" + flightData.getEmailAddress() + '\'' +
-                ", departureTime=" + flightData.getDepartureTime() +
-                ", departureAirportCode='" + flightData.getDepartureAirportCodeCode() + '\'' +
-                ", arrivalTime=" + flightData.getArrivalTime() +
-                ", arrivalAirportCode='" + flightData.getArrivalAirportCodeCode() + '\'' +
-                ", flightNumber='" + flightData.getFlightNumber() + '\'' +
-                ", confirmationCode='" + flightData.getConfirmationCode() + '\'' +
+                "email_address='" + flightData.getEmailAddress() + '\'' +
+                ", departure_time=" + flightData.getDepartureTime() +
+                ", departure_airport_code='" + flightData.getDepartureAirportCode() + '\'' +
+                ", arrival_time=" + flightData.getArrivalTime() +
+                ", arrival_airport_code='" + flightData.getArrivalAirportCode() + '\'' +
+                ", flight_number='" + flightData.getFlightNumber() + '\'' +
+                ", confirmation_code='" + flightData.getConfirmationCode() + '\'' +
                 '}';
 
         System.out.println(flightData.toString());

@@ -14,6 +14,7 @@ import java.time.*;
 import java.util.*;
 
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SunsetAirFlightData {
     private String email_address;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
@@ -177,9 +178,9 @@ public class SunsetAirFlightData {
 
         flightData.setEmailAddress(getEmailAddress());
         flightData.setDepartureTime(getDepartureTime());
-        flightData.setDepartureAirportCodeCode(getDepartureAirportCode());
+        flightData.setDepartureAirportCode(getDepartureAirportCode());
         flightData.setArrivalTime(getArrivalTime());
-        flightData.setArrivalAirportCodeCode(getArrivalAirportCode());
+        flightData.setArrivalAirportCode(getArrivalAirportCode());
         flightData.setFlightNumber(getFlightNumber());
         flightData.setConfirmationCode(getConfirmationCode());
 
