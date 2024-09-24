@@ -22,6 +22,7 @@ services:
       - AWS_REGION=$AWS_REGION
       - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
       - AWS_S3_BUCKET=$AWS_S3_BUCKET
+      - FLINK_LANGUAGE=$FLINK_LANGUAGE
   # Apache Flink Task Manager
   taskmanager:
     build:
@@ -45,3 +46,4 @@ services:
       - AWS_REGION=$AWS_REGION
       - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
       - AWS_S3_BUCKET=$AWS_S3_BUCKET
+      - FLINK_LANGUAGE=$FLINK_LANGUAGE
