@@ -538,8 +538,8 @@ def execute_kafka_properties_udtf(tbl_env, for_consumer: bool, service_account_u
     # Join the Kafka Property Table with the UDTF
     func_results = kafka_property_table.join_lateral(kafka_properties_udtf.alias("key", "value")).select(col("key"), col("value"))
 
-    print("\n Kafka " + ("Consumer" if for_consumer else "Producer") + " Client Property Table Data:--->")
-    func_results.execute().print()
+    # print("\n Kafka " + ("Consumer" if for_consumer else "Producer") + " Client Property Table Data:--->")
+    # func_results.execute().print()
 
     # Convert the result into a Python dictionary
     result = func_results.execute().collect()
@@ -653,15 +653,31 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
         DataStream: the union of the SkyOne Airlines and Sunset Air flight data streams.
     """
 
-    all_airlines_stream = (skyone_stream
-                           .map(SkyOneAirlinesFlightData.to_flight_data)
-                           .filter(lambda flight: datetime.fromisoformat(str(flight.arrival_time)) > datetime.now()))
-                      
-    all_airlines_stream = all_airlines_stream.union(sunset_stream
-                                                    .map(SunsetAirFlightData.to_flight_data)
-                                                    .filter(lambda flight: datetime.fromisoformat(str(flight.arrival_time)) > datetime.now()))
+    try:
+        skyone_flight_stream = (skyone_stream
+                                .map(SkyOneAirlinesFlightData.to_flight_data)
+                                .filter(lambda flight: datetime.fromisoformat(str(flight.arrival_time)) > datetime.now()))
+    except Exception as e:
+        logging.warning(f"Warning got an error because {e}.")
+        pass
+
+    try:                      
+        sunset_flight_stream = (sunset_stream
+                                .map(SunsetAirFlightData.to_flight_data)
+                                .filter(lambda flight: datetime.fromisoformat(str(flight.arrival_time)) > datetime.now()))
+    except Exception as e:
+        logging.warning(f"Warning got an error because {e}.")
+        pass
     
-    return all_airlines_stream
+    # Return the union of the SkyOne Airlines and Sunset Air flight data streams
+    # or the SkyOne Airlines flight data stream if the Sunset Air flight data stream is empty
+    # or the Sunset Air flight data stream if the SkyOne Airlines flight data stream is empty
+    if skyone_flight_stream and sunset_flight_stream:
+        return skyone_flight_stream.union(sunset_flight_stream)
+    elif skyone_flight_stream:
+        return skyone_flight_stream
+    elif sunset_flight_stream:
+        return sunset_flight_stream
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
