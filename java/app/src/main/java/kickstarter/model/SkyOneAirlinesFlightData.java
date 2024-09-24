@@ -177,9 +177,9 @@ public class SkyOneAirlinesFlightData {
 
         flightData.setEmailAddress(getEmailAddress());
         flightData.setDepartureTime(getDepartureTime());
-        flightData.setDepartureAirportCodeCode(getDepartureAirportCode());
+        flightData.setDepartureAirportCode(getDepartureAirportCode());
         flightData.setArrivalTime(getArrivalTime());
-        flightData.setArrivalAirportCodeCode(getArrivalAirportCode());
+        flightData.setArrivalAirportCode(getArrivalAirportCode());
         flightData.setFlightNumber(getFlightNumber());
         flightData.setConfirmationCode(getConfirmationCode());
 

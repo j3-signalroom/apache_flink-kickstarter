@@ -228,7 +228,7 @@ public class TestHelpers {
             return this;
         }
 
-        public FlightDataBuilder setDepartureAirportCodeCode(String departureAirportCode) {
+        public FlightDataBuilder setDepartureAirportCode(String departureAirportCode) {
             this.departureAirportCode = departureAirportCode;
             return this;
         }
@@ -238,7 +238,7 @@ public class TestHelpers {
             return this;
         }
 
-        public FlightDataBuilder setArrivalAirportCodeCode(String arrivalAirportCode) {
+        public FlightDataBuilder setArrivalAirportCode(String arrivalAirportCode) {
             this.arrivalAirportCode = arrivalAirportCode;
             return this;
         }
@@ -258,9 +258,9 @@ public class TestHelpers {
 
             flightData.setEmailAddress(this.emailAddress);
             flightData.setDepartureTime(this.departureTime);
-            flightData.setDepartureAirportCodeCode(this.departureAirportCode);
+            flightData.setDepartureAirportCode(this.departureAirportCode);
             flightData.setArrivalTime(this.arrivalTime);
-            flightData.setArrivalAirportCodeCode(this.arrivalAirportCode);
+            flightData.setArrivalAirportCode(this.arrivalAirportCode);
             flightData.setFlightNumber(this.flightNumber);
             flightData.setConfirmationCode(this.confirmationCode);
 

@@ -75,17 +75,15 @@ class SkyOneAirlinesFlightDataTest {
         SkyOneAirlinesFlightData flightData = new TestHelpers.SkyOneBuilder().build();
 
         String expected = "SkyOneAirlinesFlightData{" +
-                "emailAddress='" + flightData.getEmailAddress() + '\'' +
-                ", flightDepartureTime=" + flightData.getDepartureTime() +
-                ", iataDepartureCode='" + flightData.getDepartureAirportCode() + '\'' +
-                ", flightArrivalTime=" + flightData.getArrivalTime() +
-                ", iataArrivalCode='" + flightData.getArrivalAirportCode() + '\'' +
-                ", flightNumber='" + flightData.getFlightNumber() + '\'' +
-                ", confirmation='" + flightData.getConfirmationCode() + '\'' +
+                "email_address='" + flightData.getEmailAddress() + '\'' +
+                ", departure_time=" + flightData.getDepartureTime() +
+                ", departure_airport_code='" + flightData.getDepartureAirportCode() + '\'' +
+                ", arrival_time=" + flightData.getArrivalTime() +
+                ", arrival_airport_code='" + flightData.getArrivalAirportCode() + '\'' +
+                ", flight_number='" + flightData.getFlightNumber() + '\'' +
+                ", confirmation_code='" + flightData.getConfirmationCode() + '\'' +
                 '}';
-
         assertNotEquals(expected, flightData.toString());
-
     }
 
     @Test
@@ -94,9 +92,9 @@ class SkyOneAirlinesFlightDataTest {
         FlightData expected = new FlightData();
         expected.setEmailAddress(skyOne.getEmailAddress());
         expected.setDepartureTime(skyOne.getDepartureTime());
-        expected.setDepartureAirportCodeCode(skyOne.getDepartureAirportCode());
+        expected.setDepartureAirportCode(skyOne.getDepartureAirportCode());
         expected.setArrivalTime(skyOne.getArrivalTime());
-        expected.setArrivalAirportCodeCode(skyOne.getArrivalAirportCode());
+        expected.setArrivalAirportCode(skyOne.getArrivalAirportCode());
         expected.setFlightNumber(skyOne.getFlightNumber());
         expected.setConfirmationCode(skyOne.getConfirmationCode());
 
