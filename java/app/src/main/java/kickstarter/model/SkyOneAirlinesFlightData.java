@@ -8,29 +8,26 @@
 package kickstarter.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.*;
-
+import java.math.*;
 import java.time.*;
 import java.util.*;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SkyOneAirlinesFlightData {
-    private String emailAddress;
-
+    private String email_address;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    private ZonedDateTime flightDepartureTime;
-
-    private String iataDepartureCode;
-
+    private ZonedDateTime departure_time;
+    private String departure_airport_code;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    private ZonedDateTime flightArrivalTime;
-    
-    private String iataArrivalCode;
-    private String flightNumber;
-    private String confirmation;
-    private float ticketPrice;
+    private ZonedDateTime arrival_time;
+    private String arrival_airport_code;
+    private Duration flight_duration;
+    private String flight_number;
+    private String confirmation_code;
+    private BigDecimal ticket_price;
     private String aircraft;
-    private String bookingAgencyEmail;
+    private String booking_agency_email;
 
     @JsonCreator
     public SkyOneAirlinesFlightData() {
@@ -38,83 +35,91 @@ public class SkyOneAirlinesFlightData {
     }
 
     public String getEmailAddress() {
-        return emailAddress;
+        return this.email_address;
     }
 
-    public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress;
+    public void setEmailAddress(String EmailAddress) {
+        this.email_address = EmailAddress;
     }
 
-    public ZonedDateTime getFlightDepartureTime() {
-        return flightDepartureTime;
+    public ZonedDateTime getDepartureTime() {
+        return this.departure_time;
     }
 
-    public void setFlightDepartureTime(ZonedDateTime flightDepartureTime) {
-        this.flightDepartureTime = flightDepartureTime;
+    public void setDepartureTime(ZonedDateTime departureTime) {
+        this.departure_time = departureTime;
     }
 
-    public String getIataDepartureCode() {
-        return iataDepartureCode;
+    public String getDepartureAirportCode() {
+        return this.departure_airport_code;
     }
 
-    public void setIataDepartureCode(String iataDepartureCode) {
-        this.iataDepartureCode = iataDepartureCode;
+    public void setDepartureAirportCode(String departureAirport) {
+        this.departure_airport_code = departureAirport;
     }
 
-    public ZonedDateTime getFlightArrivalTime() {
-        return flightArrivalTime;
+    public ZonedDateTime getArrivalTime() {
+        return this.arrival_time;
     }
 
-    public void setFlightArrivalTime(ZonedDateTime flightArrivalTime) {
-        this.flightArrivalTime = flightArrivalTime;
+    public void setArrivalTime(ZonedDateTime arrivalTime) {
+        this.arrival_time = arrivalTime;
     }
 
-    public String getIataArrivalCode() {
-        return iataArrivalCode;
+    public String getArrivalAirportCode() {
+        return this.arrival_airport_code;
     }
 
-    public void setIataArrivalCode(String iataArrivalCode) {
-        this.iataArrivalCode = iataArrivalCode;
+    public void setArrivalAirportCode(String arrivalAirport) {
+        this.arrival_airport_code = arrivalAirport;
+    }
+
+    public Duration getFlightDuration() {
+        return this.flight_duration;
+    }
+
+    public void setFlightDuration(Duration flightDuration) {
+        this.flight_duration = flightDuration;
     }
 
     public String getFlightNumber() {
-        return flightNumber;
+        return this.flight_number;
     }
 
-    public void setFlightNumber(String flightNumber) {
-        this.flightNumber = flightNumber;
+    public void setFlightNumber(String flightId) {
+        this.flight_number = flightId;
     }
 
-    public String getConfirmation() {
-        return confirmation;
+    public String getConfirmationCode() {
+        return this.confirmation_code;
     }
 
-    public void setConfirmation(String confirmation) {
-        this.confirmation = confirmation;
+    public void setConfirmationCode(String referenceNumber) {
+        this.confirmation_code = referenceNumber;
     }
 
-    public float getTicketPrice() {
-        return ticketPrice;
+    public BigDecimal getTicketPrice() {
+        return this.ticket_price;
     }
 
-    public void setTicketPrice(float ticketPrice) {
-        this.ticketPrice = ticketPrice;
+    public void setTicketPrice(BigDecimal totalPrice) {
+        this.ticket_price = totalPrice;
     }
 
     public String getAircraft() {
-        return aircraft;
+        return this.aircraft;
     }
 
-    public void setAircraft(String aircraft) {
-        this.aircraft = aircraft;
+    public void setAircraft(String aircraftDetails) {
+        this.aircraft = aircraftDetails;
     }
 
     public String getBookingAgencyEmail() {
-        return bookingAgencyEmail;
+        return this.booking_agency_email;
     }
 
     public void setBookingAgencyEmail(String bookingAgencyEmail) {
-        this.bookingAgencyEmail = bookingAgencyEmail;
+        this.booking_agency_email = bookingAgencyEmail;
     }
 
     @Override
@@ -122,27 +127,48 @@ public class SkyOneAirlinesFlightData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SkyOneAirlinesFlightData that = (SkyOneAirlinesFlightData) o;
-        return Float.compare(that.ticketPrice, ticketPrice) == 0 && Objects.equals(emailAddress, that.emailAddress) && Objects.equals(flightDepartureTime, that.flightDepartureTime) && Objects.equals(iataDepartureCode, that.iataDepartureCode) && Objects.equals(flightArrivalTime, that.flightArrivalTime) && Objects.equals(iataArrivalCode, that.iataArrivalCode) && Objects.equals(flightNumber, that.flightNumber) && Objects.equals(confirmation, that.confirmation) && Objects.equals(aircraft, that.aircraft) && Objects.equals(bookingAgencyEmail, that.bookingAgencyEmail);
+        return Objects.equals(this.email_address, that.email_address) && 
+                                Objects.equals(this.departure_time, that.departure_time) && 
+                                Objects.equals(this.departure_airport_code, that.departure_airport_code) && 
+                                Objects.equals(this.arrival_time, that.arrival_time) && 
+                                Objects.equals(this.arrival_airport_code, that.arrival_airport_code) && 
+                                Objects.equals(this.flight_duration, that.flight_duration) && 
+                                Objects.equals(this.flight_number, that.flight_number) && 
+                                Objects.equals(this.confirmation_code, that.confirmation_code) && 
+                                Objects.equals(this.ticket_price, that.ticket_price) && 
+                                Objects.equals(this.aircraft, that.aircraft) &&
+                                Objects.equals(this.booking_agency_email, that.booking_agency_email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(emailAddress, flightDepartureTime, iataDepartureCode, flightArrivalTime, iataArrivalCode, flightNumber, confirmation, ticketPrice, aircraft, bookingAgencyEmail);
+        return Objects.hash(this.email_address,
+                            this.departure_time, 
+                            this.departure_airport_code, 
+                            this.arrival_time, 
+                            this.arrival_airport_code, 
+                            this.flight_duration, 
+                            this.flight_number, 
+                            this.confirmation_code, 
+                            this.ticket_price, 
+                            this.aircraft,
+                            this.booking_agency_email);
     }
 
     @Override
     public String toString() {
-        return "SkyOneAirlinesFlightData{" +
-            "emailAddress='" + emailAddress + '\'' +
-            ", flightDepartureTime=" + flightDepartureTime +
-            ", iataDepartureCode='" + iataDepartureCode + '\'' +
-            ", flightArrivalTime=" + flightArrivalTime +
-            ", iataArrivalCode='" + iataArrivalCode + '\'' +
-            ", flightNumber='" + flightNumber + '\'' +
-            ", confirmation='" + confirmation + '\'' +
-            ", ticketPrice=" + ticketPrice +
-            ", aircraft='" + aircraft + '\'' +
-            ", bookingAgencyEmail='" + bookingAgencyEmail + '\'' +
+        return "SunsetAirFlightData{" +
+            "email_address='" + this.email_address + '\'' +
+            ", departure_time=" + this.departure_time +
+            ", departure_airport_code='" + this.departure_airport_code + '\'' +
+            ", arrival_time=" + this.arrival_time +
+            ", arrival_airport_code='" + this.arrival_airport_code + '\'' +
+            ", flight_duration=" + this.flight_duration +
+            ", flight_number='" + this.flight_number + '\'' +
+            ", confirmation_code='" + this.confirmation_code + '\'' +
+            ", ticket_price=" + this.ticket_price +
+            ", aircraft='" + this.aircraft + '\'' +
+            ", booking_agency_email='" + booking_agency_email + '\'' +
             '}';
     }
 
@@ -150,12 +176,12 @@ public class SkyOneAirlinesFlightData {
         FlightData flightData = new FlightData();
 
         flightData.setEmailAddress(getEmailAddress());
-        flightData.setDepartureTime(getFlightDepartureTime());
-        flightData.setDepartureAirportCode(getIataDepartureCode());
-        flightData.setArrivalTime(getFlightArrivalTime());
-        flightData.setArrivalAirportCode(getIataArrivalCode());
+        flightData.setDepartureTime(getDepartureTime());
+        flightData.setDepartureAirportCodeCode(getDepartureAirportCode());
+        flightData.setArrivalTime(getArrivalTime());
+        flightData.setArrivalAirportCodeCode(getArrivalAirportCode());
         flightData.setFlightNumber(getFlightNumber());
-        flightData.setConfirmationCode(getConfirmation());
+        flightData.setConfirmationCode(getConfirmationCode());
 
         return flightData;
     }

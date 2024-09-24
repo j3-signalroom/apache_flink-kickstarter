@@ -27,20 +27,20 @@ class SkyOneAirlinesFlightDataTest {
         SkyOneAirlinesFlightData expected = new TestHelpers.SkyOneBuilder().build();
         SkyOneAirlinesFlightData actual = new SkyOneAirlinesFlightData();
         actual.setEmailAddress(expected.getEmailAddress());
-        actual.setFlightDepartureTime(expected.getFlightDepartureTime());
-        actual.setIataDepartureCode(expected.getIataDepartureCode());
-        actual.setFlightArrivalTime(expected.getFlightArrivalTime());
-        actual.setIataArrivalCode(expected.getIataArrivalCode());
+        actual.setDepartureTime(expected.getDepartureTime());
+        actual.setDepartureAirportCode(expected.getDepartureAirportCode());
+        actual.setArrivalTime(expected.getArrivalTime());
+        actual.setArrivalAirportCode(expected.getArrivalAirportCode());
         actual.setFlightNumber(expected.getFlightNumber());
-        actual.setConfirmation(expected.getConfirmation());
+        actual.setConfirmationCode(expected.getConfirmationCode());
 
         assertEquals(expected.getEmailAddress(), actual.getEmailAddress());
-        assertEquals(expected.getFlightDepartureTime(), actual.getFlightDepartureTime());
-        assertEquals(expected.getIataDepartureCode(), actual.getIataDepartureCode());
-        assertEquals(expected.getFlightArrivalTime(), actual.getFlightArrivalTime());
-        assertEquals(expected.getIataArrivalCode(), actual.getIataArrivalCode());
+        assertEquals(expected.getDepartureTime(), actual.getDepartureTime());
+        assertEquals(expected.getDepartureAirportCode(), actual.getDepartureAirportCode());
+        assertEquals(expected.getArrivalTime(), actual.getArrivalTime());
+        assertEquals(expected.getArrivalAirportCode(), actual.getArrivalAirportCode());
         assertEquals(expected.getFlightNumber(), actual.getFlightNumber());
-        assertEquals(expected.getConfirmation(), actual.getConfirmation());
+        assertEquals(expected.getConfirmationCode(), actual.getConfirmationCode());
     }
 
     @Test
@@ -48,12 +48,12 @@ class SkyOneAirlinesFlightDataTest {
         SkyOneAirlinesFlightData flight1 = new TestHelpers.SkyOneBuilder().build();
         SkyOneAirlinesFlightData flight2 = new SkyOneAirlinesFlightData();
         flight2.setEmailAddress(flight1.getEmailAddress());
-        flight2.setFlightDepartureTime(flight1.getFlightDepartureTime());
-        flight2.setIataDepartureCode(flight1.getIataDepartureCode());
-        flight2.setFlightArrivalTime(flight1.getFlightArrivalTime());
-        flight2.setIataArrivalCode(flight1.getIataArrivalCode());
+        flight2.setDepartureTime(flight1.getDepartureTime());
+        flight2.setDepartureAirportCode(flight1.getDepartureAirportCode());
+        flight2.setArrivalTime(flight1.getArrivalTime());
+        flight2.setArrivalAirportCode(flight1.getArrivalAirportCode());
         flight2.setFlightNumber(flight1.getFlightNumber());
-        flight2.setConfirmation(flight1.getConfirmation());
+        flight2.setConfirmationCode(flight1.getConfirmationCode());
 
         assertNotSame(flight1, flight2);
         assertEquals(flight1, flight2);
@@ -76,12 +76,12 @@ class SkyOneAirlinesFlightDataTest {
 
         String expected = "SkyOneAirlinesFlightData{" +
                 "emailAddress='" + flightData.getEmailAddress() + '\'' +
-                ", flightDepartureTime=" + flightData.getFlightDepartureTime() +
-                ", iataDepartureCode='" + flightData.getIataDepartureCode() + '\'' +
-                ", flightArrivalTime=" + flightData.getFlightArrivalTime() +
-                ", iataArrivalCode='" + flightData.getIataArrivalCode() + '\'' +
+                ", flightDepartureTime=" + flightData.getDepartureTime() +
+                ", iataDepartureCode='" + flightData.getDepartureAirportCode() + '\'' +
+                ", flightArrivalTime=" + flightData.getArrivalTime() +
+                ", iataArrivalCode='" + flightData.getArrivalAirportCode() + '\'' +
                 ", flightNumber='" + flightData.getFlightNumber() + '\'' +
-                ", confirmation='" + flightData.getConfirmation() + '\'' +
+                ", confirmation='" + flightData.getConfirmationCode() + '\'' +
                 '}';
 
         assertNotEquals(expected, flightData.toString());
@@ -93,12 +93,12 @@ class SkyOneAirlinesFlightDataTest {
         SkyOneAirlinesFlightData skyOne = new TestHelpers.SkyOneBuilder().build();
         FlightData expected = new FlightData();
         expected.setEmailAddress(skyOne.getEmailAddress());
-        expected.setDepartureTime(skyOne.getFlightDepartureTime());
-        expected.setDepartureAirportCode(skyOne.getIataDepartureCode());
-        expected.setArrivalTime(skyOne.getFlightArrivalTime());
-        expected.setArrivalAirportCode(skyOne.getIataArrivalCode());
+        expected.setDepartureTime(skyOne.getDepartureTime());
+        expected.setDepartureAirportCodeCode(skyOne.getDepartureAirportCode());
+        expected.setArrivalTime(skyOne.getArrivalTime());
+        expected.setArrivalAirportCodeCode(skyOne.getArrivalAirportCode());
         expected.setFlightNumber(skyOne.getFlightNumber());
-        expected.setConfirmationCode(skyOne.getConfirmation());
+        expected.setConfirmationCode(skyOne.getConfirmationCode());
 
         FlightData actual = skyOne.toFlightData();
 

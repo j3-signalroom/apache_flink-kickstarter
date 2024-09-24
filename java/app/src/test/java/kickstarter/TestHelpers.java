@@ -84,22 +84,22 @@ public class TestHelpers {
             return this;
         }
 
-        public SkyOneBuilder setFlightDepartureTime(ZonedDateTime flightDepartureTime) {
+        public SkyOneBuilder setDepartureTime(ZonedDateTime flightDepartureTime) {
             this.flightDepartureTime = flightDepartureTime;
             return this;
         }
 
-        public SkyOneBuilder setIataDepartureCode(String iataDepartureCode) {
+        public SkyOneBuilder setDepartureAirportCode(String iataDepartureCode) {
             this.iataDepartureCode = iataDepartureCode;
             return this;
         }
 
-        public SkyOneBuilder setFlightArrivalTime(ZonedDateTime flightArrivalTime) {
+        public SkyOneBuilder setArrivalTime(ZonedDateTime flightArrivalTime) {
             this.flightArrivalTime = flightArrivalTime;
             return this;
         }
 
-        public SkyOneBuilder setIataArrivalCode(String iataArrivalCode) {
+        public SkyOneBuilder setArrivalAirportCode(String iataArrivalCode) {
             this.iataArrivalCode = iataArrivalCode;
             return this;
         }
@@ -118,19 +118,19 @@ public class TestHelpers {
             SkyOneAirlinesFlightData skyOne = new SkyOneAirlinesFlightData();
 
             skyOne.setEmailAddress(emailAddress);
-            skyOne.setFlightDepartureTime(flightDepartureTime);
-            skyOne.setIataDepartureCode(iataDepartureCode);
-            skyOne.setFlightArrivalTime(flightArrivalTime);
-            skyOne.setIataArrivalCode(iataArrivalCode);
+            skyOne.setDepartureTime(flightDepartureTime);
+            skyOne.setDepartureAirportCode(iataDepartureCode);
+            skyOne.setArrivalTime(flightArrivalTime);
+            skyOne.setArrivalAirportCode(iataArrivalCode);
             skyOne.setFlightNumber(flightNumber);
-            skyOne.setConfirmation(confirmation);
+            skyOne.setConfirmationCode(confirmation);
 
             return skyOne;
         }
     }
 
     public static class SunsetBuilder {
-        private String customerEmailAddress = generateEmail();
+        private String EmailAddress = generateEmail();
         private ZonedDateTime departureTime = generateDepartureTime();
         private String departureAirport = generateAirportCode();
         private ZonedDateTime arrivalTime = generateArrivalTime(departureTime);
@@ -139,7 +139,7 @@ public class TestHelpers {
         private String referenceNumber = "SUN"+generateString(8);
 
         public SunsetBuilder() {
-            this.customerEmailAddress = generateEmail();
+            this.EmailAddress = generateEmail();
             this.departureTime = generateDepartureTime();
             this.departureAirport = generateAirportCode();
             this.arrivalTime = generateArrivalTime(departureTime);
@@ -148,8 +148,8 @@ public class TestHelpers {
             this.referenceNumber = "SUN"+generateString(8);
         }
 
-        public SunsetBuilder setCustomerEmailAddress(String customerEmailAddress) {
-            this.customerEmailAddress = customerEmailAddress;
+        public SunsetBuilder setEmailAddress(String EmailAddress) {
+            this.EmailAddress = EmailAddress;
             return this;
         }
 
@@ -158,7 +158,7 @@ public class TestHelpers {
             return this;
         }
 
-        public SunsetBuilder setDepartureAirport(String departureAirport) {
+        public SunsetBuilder setDepartureAirportCode(String departureAirport) {
             this.departureAirport = departureAirport;
             return this;
         }
@@ -168,17 +168,17 @@ public class TestHelpers {
             return this;
         }
 
-        public SunsetBuilder setArrivalAirport(String arrivalAirport) {
+        public SunsetBuilder setArrivalAirportCode(String arrivalAirport) {
             this.arrivalAirport = arrivalAirport;
             return this;
         }
 
-        public SunsetBuilder setFlightId(String flightId) {
+        public SunsetBuilder setFlightNumber(String flightId) {
             this.flightId = flightId;
             return this;
         }
 
-        public SunsetBuilder setReferenceNumber(String referenceNumber) {
+        public SunsetBuilder setConfirmationCode(String referenceNumber) {
             this.referenceNumber = referenceNumber;
             return this;
         }
@@ -186,13 +186,13 @@ public class TestHelpers {
         public SunsetAirFlightData build() {
             SunsetAirFlightData sunset = new SunsetAirFlightData();
 
-            sunset.setCustomerEmailAddress(customerEmailAddress);
+            sunset.setEmailAddress(EmailAddress);
             sunset.setDepartureTime(departureTime);
-            sunset.setDepartureAirport(departureAirport);
+            sunset.setDepartureAirportCode(departureAirport);
             sunset.setArrivalTime(arrivalTime);
-            sunset.setArrivalAirport(arrivalAirport);
-            sunset.setFlightId(flightId);
-            sunset.setReferenceNumber(referenceNumber);
+            sunset.setArrivalAirportCode(arrivalAirport);
+            sunset.setFlightNumber(flightId);
+            sunset.setConfirmationCode(referenceNumber);
 
             return sunset;
         }
@@ -228,7 +228,7 @@ public class TestHelpers {
             return this;
         }
 
-        public FlightDataBuilder setDepartureAirportCode(String departureAirportCode) {
+        public FlightDataBuilder setDepartureAirportCodeCode(String departureAirportCode) {
             this.departureAirportCode = departureAirportCode;
             return this;
         }
@@ -238,7 +238,7 @@ public class TestHelpers {
             return this;
         }
 
-        public FlightDataBuilder setArrivalAirportCode(String arrivalAirportCode) {
+        public FlightDataBuilder setArrivalAirportCodeCode(String arrivalAirportCode) {
             this.arrivalAirportCode = arrivalAirportCode;
             return this;
         }
@@ -258,9 +258,9 @@ public class TestHelpers {
 
             flightData.setEmailAddress(this.emailAddress);
             flightData.setDepartureTime(this.departureTime);
-            flightData.setDepartureAirportCode(this.departureAirportCode);
+            flightData.setDepartureAirportCodeCode(this.departureAirportCode);
             flightData.setArrivalTime(this.arrivalTime);
-            flightData.setArrivalAirportCode(this.arrivalAirportCode);
+            flightData.setArrivalAirportCodeCode(this.arrivalAirportCode);
             flightData.setFlightNumber(this.flightNumber);
             flightData.setConfirmationCode(this.confirmationCode);
 

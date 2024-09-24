@@ -15,102 +15,111 @@ import java.util.*;
 
 
 public class SunsetAirFlightData {
-    private String customerEmailAddress;
+    private String email_address;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    private ZonedDateTime departureTime;
-    private String departureAirport;
+    private ZonedDateTime departure_time;
+    private String departure_airport_code;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    private ZonedDateTime arrivalTime;
-    private String arrivalAirport;
-    private Duration flightDuration;
-    private String flightId;
-    private String referenceNumber;
-    private BigDecimal totalPrice;
-    private String aircraftDetails;
+    private ZonedDateTime arrival_time;
+    private String arrival_airport_code;
+    private Duration flight_duration;
+    private String flight_number;
+    private String confirmation_code;
+    private BigDecimal ticket_price;
+    private String aircraft;
+    private String booking_agency_email;
 
     @JsonCreator
     public SunsetAirFlightData() {
         // --- Empty constructor
     }
 
-    public String getCustomerEmailAddress() {
-        return customerEmailAddress;
+    public String getEmailAddress() {
+        return this.email_address;
     }
 
-    public void setCustomerEmailAddress(String customerEmailAddress) {
-        this.customerEmailAddress = customerEmailAddress;
+    public void setEmailAddress(String EmailAddress) {
+        this.email_address = EmailAddress;
     }
 
     public ZonedDateTime getDepartureTime() {
-        return departureTime;
+        return this.departure_time;
     }
 
     public void setDepartureTime(ZonedDateTime departureTime) {
-        this.departureTime = departureTime;
+        this.departure_time = departureTime;
     }
 
-    public String getDepartureAirport() {
-        return departureAirport;
+    public String getDepartureAirportCode() {
+        return this.departure_airport_code;
     }
 
-    public void setDepartureAirport(String departureAirport) {
-        this.departureAirport = departureAirport;
+    public void setDepartureAirportCode(String departureAirport) {
+        this.departure_airport_code = departureAirport;
     }
 
     public ZonedDateTime getArrivalTime() {
-        return arrivalTime;
+        return this.arrival_time;
     }
 
     public void setArrivalTime(ZonedDateTime arrivalTime) {
-        this.arrivalTime = arrivalTime;
+        this.arrival_time = arrivalTime;
     }
 
-    public String getArrivalAirport() {
-        return arrivalAirport;
+    public String getArrivalAirportCode() {
+        return this.arrival_airport_code;
     }
 
-    public void setArrivalAirport(String arrivalAirport) {
-        this.arrivalAirport = arrivalAirport;
+    public void setArrivalAirportCode(String arrivalAirport) {
+        this.arrival_airport_code = arrivalAirport;
     }
 
     public Duration getFlightDuration() {
-        return flightDuration;
+        return this.flight_duration;
     }
 
     public void setFlightDuration(Duration flightDuration) {
-        this.flightDuration = flightDuration;
+        this.flight_duration = flightDuration;
     }
 
-    public String getFlightId() {
-        return flightId;
+    public String getFlightNumber() {
+        return this.flight_number;
     }
 
-    public void setFlightId(String flightId) {
-        this.flightId = flightId;
+    public void setFlightNumber(String flightId) {
+        this.flight_number = flightId;
     }
 
-    public String getReferenceNumber() {
-        return referenceNumber;
+    public String getConfirmationCode() {
+        return this.confirmation_code;
     }
 
-    public void setReferenceNumber(String referenceNumber) {
-        this.referenceNumber = referenceNumber;
+    public void setConfirmationCode(String referenceNumber) {
+        this.confirmation_code = referenceNumber;
     }
 
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
+    public BigDecimal getTicketPrice() {
+        return this.ticket_price;
     }
 
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
+    public void setTicketPrice(BigDecimal totalPrice) {
+        this.ticket_price = totalPrice;
     }
 
-    public String getAircraftDetails() {
-        return aircraftDetails;
+    public String getAircraft() {
+        return this.aircraft;
     }
 
-    public void setAircraftDetails(String aircraftDetails) {
-        this.aircraftDetails = aircraftDetails;
+    public void setAircraft(String aircraftDetails) {
+        this.aircraft = aircraftDetails;
+    }
+
+    public String getBookingAgencyEmail() {
+        return this.booking_agency_email;
+    }
+
+    public void setBookingAgencyEmail(String bookingAgencyEmail) {
+        this.booking_agency_email = bookingAgencyEmail;
     }
 
     @Override
@@ -118,40 +127,61 @@ public class SunsetAirFlightData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SunsetAirFlightData that = (SunsetAirFlightData) o;
-        return Objects.equals(customerEmailAddress, that.customerEmailAddress) && Objects.equals(departureTime, that.departureTime) && Objects.equals(departureAirport, that.departureAirport) && Objects.equals(arrivalTime, that.arrivalTime) && Objects.equals(arrivalAirport, that.arrivalAirport) && Objects.equals(flightDuration, that.flightDuration) && Objects.equals(flightId, that.flightId) && Objects.equals(referenceNumber, that.referenceNumber) && Objects.equals(totalPrice, that.totalPrice) && Objects.equals(aircraftDetails, that.aircraftDetails);
+        return Objects.equals(this.email_address, that.email_address) && 
+                                Objects.equals(this.departure_time, that.departure_time) && 
+                                Objects.equals(this.departure_airport_code, that.departure_airport_code) && 
+                                Objects.equals(this.arrival_time, that.arrival_time) && 
+                                Objects.equals(this.arrival_airport_code, that.arrival_airport_code) && 
+                                Objects.equals(this.flight_duration, that.flight_duration) && 
+                                Objects.equals(this.flight_number, that.flight_number) && 
+                                Objects.equals(this.confirmation_code, that.confirmation_code) && 
+                                Objects.equals(this.ticket_price, that.ticket_price) && 
+                                Objects.equals(this.aircraft, that.aircraft) &&
+                                Objects.equals(this.booking_agency_email, that.booking_agency_email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(customerEmailAddress, departureTime, departureAirport, arrivalTime, arrivalAirport, flightDuration, flightId, referenceNumber, totalPrice, aircraftDetails);
+        return Objects.hash(this.email_address,
+                            this.departure_time, 
+                            this.departure_airport_code, 
+                            this.arrival_time, 
+                            this.arrival_airport_code, 
+                            this.flight_duration, 
+                            this.flight_number, 
+                            this.confirmation_code, 
+                            this.ticket_price, 
+                            this.aircraft,
+                            this.booking_agency_email);
     }
 
     @Override
     public String toString() {
         return "SunsetAirFlightData{" +
-            "customerEmailAddress='" + customerEmailAddress + '\'' +
-            ", departureTime=" + departureTime +
-            ", departureAirport='" + departureAirport + '\'' +
-            ", arrivalTime=" + arrivalTime +
-            ", arrivalAirport='" + arrivalAirport + '\'' +
-            ", flightDuration=" + flightDuration +
-            ", flightId='" + flightId + '\'' +
-            ", referenceNumber='" + referenceNumber + '\'' +
-            ", totalPrice=" + totalPrice +
-            ", aircraftDetails='" + aircraftDetails + '\'' +
+            "email_address='" + this.email_address + '\'' +
+            ", departure_time=" + this.departure_time +
+            ", departure_airport_code='" + this.departure_airport_code + '\'' +
+            ", arrival_time=" + this.arrival_time +
+            ", arrival_airport_code='" + this.arrival_airport_code + '\'' +
+            ", flight_duration=" + this.flight_duration +
+            ", flight_number='" + this.flight_number + '\'' +
+            ", confirmation_code='" + this.confirmation_code + '\'' +
+            ", ticket_price=" + this.ticket_price +
+            ", aircraft='" + this.aircraft + '\'' +
+            ", booking_agency_email='" + booking_agency_email + '\'' +
             '}';
     }
 
     public FlightData toFlightData() {
         FlightData flightData = new FlightData();
 
-        flightData.setEmailAddress(getCustomerEmailAddress());
+        flightData.setEmailAddress(getEmailAddress());
         flightData.setDepartureTime(getDepartureTime());
-        flightData.setDepartureAirportCode(getDepartureAirport());
+        flightData.setDepartureAirportCodeCode(getDepartureAirportCode());
         flightData.setArrivalTime(getArrivalTime());
-        flightData.setArrivalAirportCode(getArrivalAirport());
-        flightData.setFlightNumber(getFlightId());
-        flightData.setConfirmationCode(getReferenceNumber());
+        flightData.setArrivalAirportCodeCode(getArrivalAirportCode());
+        flightData.setFlightNumber(getFlightNumber());
+        flightData.setConfirmationCode(getConfirmationCode());
 
         return flightData;
     }
