@@ -48,9 +48,9 @@ def serialize(obj):
 @dataclass
 class FlightData():
     email_address: str | None
-    departure_time: str | None
+    departure_time: Types.SQL_TIMESTAMP
     departure_airport_code: str | None
-    arrival_time: str | None
+    arrival_time: Types.SQL_TIMESTAMP
     arrival_airport_code: str | None
     flight_number: str | None
     confirmation_code: str | None
@@ -58,19 +58,19 @@ class FlightData():
 
 
     def get_duration(self):
-        return int((datetime.fromisoformat(self.arrival_time) - datetime.fromisoformat(self.departure_time)).seconds / 60)
+        return int((self.arrival_time - self.departure_time).seconds / 60)
     
     def to_row(self):
-        return Row(
-            email_address=self.email_address,
-            departure_time=serialize(self.departure_time),
-            departure_airport_code=self.departure_airport_code,
-            arrival_time=serialize(self.arrival_time),
-            arrival_airport_code=self.arrival_airport_code,
-            flight_number=self.flight_number,
-            confirmation_code=self.confirmation_code,
-            source=self.source,
-        )
+        return {
+            'email_address': self.email_address,
+            'departure_time': serialize(self.departure_time),
+            'departure_airport_code': self.departure_airport_code,
+            'arrival_time': serialize(self.arrival_time),
+            'arrival_airport_code': self.arrival_airport_code,
+            'flight_number': self.flight_number,
+            'confirmation_code': self.confirmation_code,
+            'source': self.source,
+        }
     
     @classmethod
     def from_row(cls, row: Row):
@@ -113,9 +113,9 @@ class FlightData():
 @dataclass
 class SkyOneAirlinesFlightData():
     email_address: str | None
-    departure_time: str | None
+    departure_time: Types.SQL_TIMESTAMP
     departure_airport_code: str | None
-    arrival_time: str | None
+    arrival_time: Types.SQL_TIMESTAMP
     arrival_airport_code: str | None
     flight_number: str | None
     confirmation_code: str | None
@@ -195,9 +195,9 @@ class SkyOneAirlinesFlightData():
 @dataclass
 class SunsetAirFlightData:
     email_address: str | None
-    departure_time: str | None
+    departure_time: Types.SQL_TIMESTAMP
     departure_airport_code: str | None
-    arrival_time: str | None
+    arrival_time: Types.SQL_TIMESTAMP
     arrival_airport_code: str | None
     flight_number: str | None
     confirmation_code: str | None
@@ -651,13 +651,20 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
         DataStream: the union of the SkyOne Airlines and Sunset Air flight data streams.
     """
 
+    def to_aware_datetime(dt):
+        if isinstance(dt, str):
+            dt = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S.%f%z")
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
+    
     skyone_flight_stream = (skyone_stream
                             .map(SkyOneAirlinesFlightData.to_flight_data)
-                            .filter(lambda flight: flight.arrival_time is not None and datetime.fromisoformat(flight.arrival_time) > datetime.now(timezone.utc)))
+                            .filter(lambda flight: flight.arrival_time is not None and to_aware_datetime(flight.arrival_time) > datetime.now(timezone.utc)))
 
     sunset_flight_stream = (sunset_stream
                             .map(SunsetAirFlightData.to_flight_data)
-                            .filter(lambda flight: flight.arrival_time is not None and datetime.fromisoformat(flight.arrival_time) > datetime.now(timezone.utc)))
+                            .filter(lambda flight: flight.arrival_time is not None and to_aware_datetime(flight.arrival_time) > datetime.now(timezone.utc)))
     
     # Return the union of the SkyOne Airlines and Sunset Air flight data streams
     # or the SkyOne Airlines flight data stream if the Sunset Air flight data stream is empty
