@@ -44,8 +44,6 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 2
-        taskmanager.memory.task.off-heap.size: 1g
-        taskmanager.memory.framework.off-heap.size: 256m
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
