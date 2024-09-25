@@ -48,10 +48,10 @@ do
             use_non_mac=false;;
         --flink_language=python)
             language_arg_provider=true
-            FLINK_LANGUAGE=python;;
+            FLINK_LANGUAGE="python";;
         --flink_language=java)
             language_arg_provider=true
-            FLINK_LANGUAGE=java;;
+            FLINK_LANGUAGE="java";;
     esac
 done
 

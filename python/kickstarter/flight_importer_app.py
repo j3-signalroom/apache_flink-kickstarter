@@ -310,9 +310,9 @@ class UserStatisticsData:
 
     def __str__(self):
         return (f"UserStatisticsData{{"
-                f"emailAddress='{self.email_address}', "
-                f"totalFlightDuration={self.total_flight_duration}, "
-                f"numberOfFlights={self.number_of_flights}}}")
+                f"email_address='{self.email_address}', "
+                f"total_flight_duration={self.total_flight_duration}, "
+                f"number_of_flights={self.number_of_flights}}}")
 
 class KafkaProperties(TableFunction):
     """This User-Defined Table Function (UDTF) is used to retrieve the Kafka Cluster properties
