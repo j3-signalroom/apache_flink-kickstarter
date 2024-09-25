@@ -60,8 +60,17 @@ class FlightData():
     def get_duration(self):
         return int((datetime.fromisoformat(self.arrival_time) - datetime.fromisoformat(self.departure_time)).seconds / 60)
     
-    def to_json(self):
-        return json.dumps(self.__dict__, default=str)
+    def to_row(self):
+        return {
+            'email_address': self.email_address,
+            'departure_time': serialize(self.departure_time),
+            'departure_airport_code': self.departure_airport_code,
+            'arrival_time': serialize(self.arrival_time),
+            'arrival_airport_code': self.arrival_airport_code,
+            'flight_number': self.flight_number,
+            'confirmation_code': self.confirmation_code,
+            'source': self.source,
+        }
     
     @classmethod
     def from_row(cls, row: Row):
@@ -622,7 +631,7 @@ def main(args):
 
     # Defines the workflow for the Flink job graph (DAG) by connecting the data streams
     (define_workflow(skyone_stream, sunset_stream)
-     .map(lambda d: d.to_json())
+     .map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
      .sink_to(flight_sink)
      .name("flightdata_sink"))
 
