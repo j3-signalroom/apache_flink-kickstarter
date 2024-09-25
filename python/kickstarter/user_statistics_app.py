@@ -1,5 +1,5 @@
 from pyflink.common import Row, WatermarkStrategy, Types
-from pyflink.datastream import StreamExecutionEnvironment, DataStream
+from pyflink.datastream import StreamExecutionEnvironment, DataStream, TumblingEventTimeWindows, TimeCharacteristic
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.datastream.state import ValueStateDescriptor
@@ -605,43 +605,18 @@ def main(args):
     env = StreamExecutionEnvironment.get_execution_environment()
     env.set_stream_time_characteristic(TimeCharacteristic.EventTime)
 
-    # Kafka Consumer Config
-    options = {
-        "consumer_kafka_client": True,
-        "s3_bucket_name": args.s3_bucket_name
-    }
-    data_stream_consumer_properties = (
-        env.from_collection([{}])
-        .map(KafkaClientPropertiesLookup(flag=None, options=options))
-        .name("kafka_consumer_properties")
-    )
+    # Create a Table Environment
+    tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
-    consumer_properties = {}
-    try:
-        for type_value in data_stream_consumer_properties.execute_and_collect():
-            consumer_properties.update(type_value)
-    except Exception as e:
-        print(f"The Flink App stopped during the reading of the custom data source stream because of the following: {e}")
-        sys.exit(1)
+    # Get the Kafka Cluster properties for the consumer
+    consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
-    # Kafka Producer Config
-    options = {
-        "consumer_kafka_client": False,
-        "s3_bucket_name": args.s3_bucket_name
-    }
-    data_stream_producer_properties = (
-        env.from_collection([{}])
-        .map(KafkaClientPropertiesLookup(flag=None, options=options))
-        .name("kafka_producer_properties")
-    )
-
-    producer_properties = {}
-    try:
-        for type_value in data_stream_producer_properties.execute_and_collect():
-            producer_properties.update(type_value)
-    except Exception as e:
-        print(f"The Flink App stopped during the reading of the custom data source stream because of the following: {e}")
-        sys.exit(1)
+    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.all`
+    # Get the Kafka Cluster properties for the producer
+    producer_properties = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
+    producer_properties.update({
+        'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
+    })
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.all`
     flight_data_source = KafkaSource.builder() \
@@ -675,11 +650,10 @@ def main(args):
         logger.error("The App stopped early due to the following: %s", e)
 
 def define_workflow(flight_data_source):
-    return flight_data_source \
-        .map(lambda flight: UserStatisticsData(flight)) \
-        .key_by(lambda stats: stats.email_address) \
-        .window(TumblingEventTimeWindows.of(timedelta(minutes=1))) \
-        .reduce(lambda a, b: a.merge(b), ProcessUserStatisticsDataFunction())
+    return (flight_data_source.map(lambda flight: UserStatisticsData(flight))
+                              .key_by(lambda stats: stats.email_address)
+                              .window(TumblingEventTimeWindows.of(timedelta(minutes=1)))
+                              .reduce(lambda a, b: a.merge(b), ProcessUserStatisticsDataFunction()))
 
 
 if __name__ == "__main__":

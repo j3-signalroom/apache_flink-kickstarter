@@ -526,7 +526,7 @@ def main(args):
     # Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
 
-    # Create a Table Environment for batch mode
+    # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Adjust resource configuration
