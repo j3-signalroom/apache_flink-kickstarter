@@ -13,18 +13,30 @@ import java.util.*;
 
 
 public class FlightData {
+    @JsonProperty("email_address")
     private String email_address;
+
+    @JsonProperty("departure_time")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     private ZonedDateTime departure_time;
+
+    @JsonProperty("departure_airport_code")
     private String departure_airport_code;
+
+    @JsonProperty("arrival_time")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     private ZonedDateTime arrival_time;
+
+    @JsonProperty("arrival_airport_code")
     private String arrival_airport_code;
+
+    @JsonProperty("flight_number")
     private String flight_number;
+
+    @JsonProperty("confirmation_code")
     private String confirmation_code;
 
     
-    @JsonCreator
     public FlightData() {
         // --- Do nothing
     }

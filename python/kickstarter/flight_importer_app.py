@@ -6,7 +6,7 @@ from pyflink.table import DataTypes, StreamTableEnvironment
 from pyflink.table.expressions import col
 from pyflink.table.udf import udtf, TableFunction
 from typing import Iterator
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import boto3
 from botocore.exceptions import ClientError
 import logging
@@ -41,10 +41,8 @@ def serialize(obj):
         ISO is returned (i.e., 'YYYY-MM-DD HH:MM:SS.mmmmmm').  If the obj is a 
         date object, the date is returned. Otherwise, the obj is returned as is.
     """
-    if isinstance(obj, datetime):
-        return obj.isoformat(timespec="milliseconds")
     if isinstance(obj, datetime.date):
-        return str(obj)
+        return obj.isoformat()
     return obj
 
 @dataclass
@@ -310,9 +308,9 @@ class UserStatisticsData:
 
     def __str__(self):
         return (f"UserStatisticsData{{"
-                f"emailAddress='{self.email_address}', "
-                f"totalFlightDuration={self.total_flight_duration}, "
-                f"numberOfFlights={self.number_of_flights}}}")
+                f"email_address='{self.email_address}', "
+                f"total_flight_duration={self.total_flight_duration}, "
+                f"number_of_flights={self.number_of_flights}}}")
 
 class KafkaProperties(TableFunction):
     """This User-Defined Table Function (UDTF) is used to retrieve the Kafka Cluster properties
@@ -655,11 +653,11 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
 
     skyone_flight_stream = (skyone_stream
                             .map(SkyOneAirlinesFlightData.to_flight_data)
-                            .filter(lambda flight: flight.arrival_time is not None and datetime.fromisoformat(str(flight.arrival_time)) > datetime.now()))
+                            .filter(lambda flight: flight.arrival_time is not None and datetime.fromisoformat(flight.arrival_time) > datetime.now(timezone.utc)))
 
     sunset_flight_stream = (sunset_stream
                             .map(SunsetAirFlightData.to_flight_data)
-                            .filter(lambda flight: flight.arrival_time is not None and datetime.fromisoformat(str(flight.arrival_time)) > datetime.now()))
+                            .filter(lambda flight: flight.arrival_time is not None and datetime.fromisoformat(flight.arrival_time) > datetime.now(timezone.utc)))
     
     # Return the union of the SkyOne Airlines and Sunset Air flight data streams
     # or the SkyOne Airlines flight data stream if the Sunset Air flight data stream is empty

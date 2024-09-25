@@ -15,21 +15,42 @@ import java.util.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SkyOneAirlinesFlightData {
+
+    @JsonProperty("email_address")
     private String email_address;
+
+    @JsonProperty("departure_time")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     private ZonedDateTime departure_time;
+
+    @JsonProperty("departure_airport_code")
     private String departure_airport_code;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+
+    @JsonProperty("arrival_time")
     private ZonedDateTime arrival_time;
+
+    @JsonProperty("arrival_airport_code")
     private String arrival_airport_code;
+
+    @JsonProperty("flight_duration")
     private Duration flight_duration;
+
+    @JsonProperty("flight_number")
     private String flight_number;
+
+    @JsonProperty("confirmation_code")
     private String confirmation_code;
+
+    @JsonProperty("ticket_price")
     private BigDecimal ticket_price;
+
+    @JsonProperty("aircraft")
     private String aircraft;
+
+    @JsonProperty("booking_agency_email")
     private String booking_agency_email;
 
-    @JsonCreator
     public SkyOneAirlinesFlightData() {
         // --- Empty constructor
     }

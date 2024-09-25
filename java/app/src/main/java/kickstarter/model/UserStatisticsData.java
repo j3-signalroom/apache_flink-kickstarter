@@ -7,13 +7,19 @@
  */
 package kickstarter.model;
 
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.*;
 import java.time.*;
 import java.util.*;
 
 
 public class UserStatisticsData {
+    @JsonProperty("email_address")
     private String email_address;
+
+    @JsonProperty("total_flight_duration")
     private Duration total_flight_duration;
+
+    @JsonProperty("number_of_flights")
     private long number_of_flights;
 
     public UserStatisticsData() {
