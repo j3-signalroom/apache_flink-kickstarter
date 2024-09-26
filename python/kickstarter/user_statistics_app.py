@@ -49,14 +49,14 @@ def serialize(obj):
 
 @dataclass
 class FlightData():
-    email_address: str | None
-    departure_time: Types.SQL_TIMESTAMP
-    departure_airport_code: str | None
-    arrival_time: Types.SQL_TIMESTAMP
-    arrival_airport_code: str | None
-    flight_number: str | None
-    confirmation_code: str | None
-    source: str | None
+    email_address: str
+    departure_time: str
+    departure_airport_code: str
+    arrival_time: str
+    arrival_airport_code: str
+    flight_number: str
+    confirmation_code: str
+    source: str
 
 
     def get_duration(self):
@@ -114,16 +114,16 @@ class FlightData():
 
 @dataclass
 class SkyOneAirlinesFlightData():
-    email_address: str | None
-    departure_time: Types.SQL_TIMESTAMP
-    departure_airport_code: str | None
-    arrival_time: Types.SQL_TIMESTAMP
-    arrival_airport_code: str | None
-    flight_number: str | None
-    confirmation_code: str | None
-    ticket_price: Decimal | None
-    aircraft: str | None
-    booking_agency_email: str | None
+    email_address: str
+    departure_time: str
+    departure_airport_code: str
+    arrival_time: str
+    arrival_airport_code: str
+    flight_number: str
+    confirmation_code: str
+    ticket_price: Decimal
+    aircraft: str
+    booking_agency_email: str
 
     
     @staticmethod
@@ -142,28 +142,28 @@ class SkyOneAirlinesFlightData():
     
     @classmethod
     def from_row(cls, row: Row):
-        return cls(email_address=row.email_address or "",
-                   departure_time=row.departure_time or None,
-                   departure_airport_code=row.departure_airport_code or "",
-                   arrival_time=row.arrival_time or None,
-                   arrival_airport_code=row.arrival_airport_code or "",
-                   flight_number=row.flight_number or "",
-                   confirmation_code=row.confirmation_code or "",
-                   ticket_price=row.ticket_price or 0,
-                   aircraft=row.aircraft or "",
-                   booking_agency_email=row.booking_agency_email or "")
+        return cls(email_address=row.email_address,
+                   departure_time=row.departure_time,
+                   departure_airport_code=row.departure_airport_code,
+                   arrival_time=row.arrival_time,
+                   arrival_airport_code=row.arrival_airport_code,
+                   flight_number=row.flight_number,
+                   confirmation_code=row.confirmation_code,
+                   ticket_price=row.ticket_price,
+                   aircraft=row.aircraft,
+                   booking_agency_email=row.booking_agency_email)
     
     def to_row(self):
-        return Row(email_address=self.email_address or "",
-                   departure_time=serialize(self.departure_time or None),
-                   departure_airport_code=self.departure_airport_code or "",
-                   arrival_time=serialize(self.arrival_time or None),
-                   arrival_airport_code=self.arrival_airport_code or "",
-                   flight_number=self.flight_number or "",
-                   confirmation_code=self.confirmation_code or "",
-                   ticket_price=self.ticket_price or 0,
-                   aircraft=self.aircraft or "",
-                   booking_agency_email=self.booking_agency_email or "")
+        return Row(email_address=self.email_address,
+                   departure_time=serialize(self.departure_time),
+                   departure_airport_code=self.departure_airport_code,
+                   arrival_time=serialize(self.arrival_time),
+                   arrival_airport_code=self.arrival_airport_code,
+                   flight_number=self.flight_number,
+                   confirmation_code=self.confirmation_code,
+                   ticket_price=self.ticket_price,
+                   aircraft=self.aircraft,
+                   booking_agency_email=self.booking_agency_email)
     
     @staticmethod
     def get_value_type_info():
@@ -196,16 +196,16 @@ class SkyOneAirlinesFlightData():
 
 @dataclass
 class SunsetAirFlightData:
-    email_address: str | None
-    departure_time: Types.SQL_TIMESTAMP
-    departure_airport_code: str | None
-    arrival_time: Types.SQL_TIMESTAMP
-    arrival_airport_code: str | None
-    flight_number: str | None
-    confirmation_code: str | None
-    ticket_price: Decimal | None
-    aircraft: str | None
-    booking_agency_email: str | None
+    email_address: str
+    departure_time: str
+    departure_airport_code: str
+    arrival_time: str
+    arrival_airport_code: str
+    flight_number: str
+    confirmation_code: str
+    ticket_price: Decimal
+    aircraft: str
+    booking_agency_email: str
 
         
     @staticmethod
@@ -224,28 +224,28 @@ class SunsetAirFlightData:
     
     @classmethod
     def from_row(cls, row: Row):
-        return cls(email_address=row.email_address or "",
-                   departure_time=row.departure_time or None,
-                   departure_airport_code=row.departure_airport_code or "",
-                   arrival_time=row.arrival_time or None,
-                   arrival_airport_code=row.arrival_airport_code or "",
-                   flight_number=row.flight_number or "",
-                   confirmation_code=row.confirmation_code or "",
-                   ticket_price=row.ticket_price or 0,
-                   aircraft=row.aircraft or "",
-                   booking_agency_email=row.booking_agency_email or "")
+        return cls(email_address=row.email_address,
+                   departure_time=row.departure_time,
+                   departure_airport_code=row.departure_airport_code,
+                   arrival_time=row.arrival_time,
+                   arrival_airport_code=row.arrival_airport_code,
+                   flight_number=row.flight_number,
+                   confirmation_code=row.confirmation_code,
+                   ticket_price=row.ticket_price,
+                   aircraft=row.aircraft,
+                   booking_agency_email=row.booking_agency_email)
 
     def to_row(self):
-        return Row(email_address=self.email_address or "",
-                   departure_time=serialize(self.departure_time or None),
-                   departure_airport_code=self.departure_airport_code or "",
-                   arrival_time=serialize(self.arrival_time or None),
-                   arrival_airport_code=self.arrival_airport_code or "",
-                   flight_number=self.flight_number or "",
-                   confirmation_code=self.confirmation_code or "",
-                   ticket_price=self.ticket_price or 0,
-                   aircraft=self.aircraft or "",
-                   booking_agency_email=self.booking_agency_email or "")
+        return Row(email_address=self.email_address,
+                   departure_time=serialize(self.departure_time),
+                   departure_airport_code=self.departure_airport_code,
+                   arrival_time=serialize(self.arrival_time),
+                   arrival_airport_code=self.arrival_airport_code,
+                   flight_number=self.flight_number,
+                   confirmation_code=self.confirmation_code,
+                   ticket_price=self.ticket_price,
+                   aircraft=self.aircraft,
+                   booking_agency_email=self.booking_agency_email)
     
     @staticmethod
     def get_value_type_info():
@@ -278,7 +278,7 @@ class SunsetAirFlightData:
 
 @dataclass
 class UserStatisticsData:
-    email_address: str | None
+    email_address: str
     total_flight_duration: Optional[timedelta] = timedelta(0)
     number_of_flights: int = 0
 
@@ -360,7 +360,7 @@ class KafkaProperties(TableFunction):
             for property_key, property_value in properties.items():
                 yield Row(str(property_key), str(property_value))
 
-    def get_kafka_properties(self, cluster_secrets_path: str, client_parameters_path: str) -> tuple[str, str | None]:
+    def get_kafka_properties(self, cluster_secrets_path: str, client_parameters_path: str) -> tuple[str, str]:
         """This method returns the Kafka Cluster properties from the AWS Secrets Manager and Parameter Store.
 
         Args:
@@ -369,7 +369,7 @@ class KafkaProperties(TableFunction):
             Parameter Store.
 
         Returns:
-            properties (tuple[str, str | None]): the Kafka Cluster properties collection if successful, otherwise None.
+            properties (tuple[str, str]): the Kafka Cluster properties collection if successful, otherwise None.
         """
         
         properties = {}

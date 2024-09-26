@@ -58,6 +58,7 @@ RUN apt update && apt install -y nano
 # Install openjdk-17-jdk-headless, a headless version of the OpenJDK 17 Java Development Kit (JDK) that does not include any graphical user interface (GUI) libraries or tools.
 RUN apt-get update && apt-get install -y \
     build-essential \
+    cmake \
     openjdk-17-jdk-headless \
     zlib1g-dev \
     libbz2-dev \
@@ -74,7 +75,33 @@ RUN apt-get update && apt-get install -y \
     git \
     python3-pip \
     python3-venv \
-    zip
+    zip \
+    libboost-all-dev \
+    libcurl4-openssl-dev \
+    libprotobuf-dev \
+    protobuf-compiler \
+    libsnappy-dev \
+    libthrift-dev \
+    libutf8proc-dev \
+    libboost-python-dev \
+    libboost-numpy-dev
+
+# Remove conflicting libraries that prevent Arrow for being properly installed
+RUN apt-get remove -y libthrift-dev libutf8proc-dev
+
+# Build and install Arrow C++ library from source
+RUN cd /tmp && \
+    wget https://archive.apache.org/dist/arrow/arrow-10.0.0/apache-arrow-10.0.0.tar.gz && \
+    tar -xzf apache-arrow-10.0.0.tar.gz && \
+    cd apache-arrow-10.0.0/cpp && \
+    mkdir release && \
+    cd release && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DARROW_PYTHON=ON -DARROW_PARQUET=ON -DARROW_BUILD_TESTS=OFF -DARROW_BOOST_USE_SHARED=ON && \
+    make -j$(nproc) && \
+    make install
+
+# Reinstall the removed libraries
+RUN apt-get install -y libthrift-dev libutf8proc-dev
 
 # Install Python from source
 RUN cd /usr/local && \
@@ -101,15 +128,19 @@ RUN python${PYTHON_VERSION} -m venv .venv
 RUN . .venv/bin/activate
 RUN pipenv --python ${PYTHON_VERSION} install "grpcio-tools>=1.29.0,<=1.50.0"
 RUN pipenv --python ${PYTHON_VERSION} install setuptools>=37.0.0
+RUN pipenv --python ${PYTHON_VERSION} install cloudpickle==2.2.0
+RUN pipenv --python ${PYTHON_VERSION} install "python-dateutil>=2.8.0,<3"
+RUN pipenv --python ${PYTHON_VERSION} install arrow
+RUN pipenv --python ${PYTHON_VERSION} install "apache-beam>=2.43.0,<2.49.0"
+RUN pipenv --python ${PYTHON_VERSION} install py4j==0.10.9.7
 RUN pipenv --python ${PYTHON_VERSION} install apache-flink==${APACHE_FLINK_VERSION_WITH_PATCH}
 RUN pipenv --python ${PYTHON_VERSION} install pyiceberg
 RUN pipenv --python ${PYTHON_VERSION} install boto3
 RUN pipenv --python ${PYTHON_VERSION} install s3fs
 RUN pipenv --python ${PYTHON_VERSION} install google-api-python-client
 RUN pipenv --python ${PYTHON_VERSION} install pyflink
-RUN pipenv --python ${PYTHON_VERSION} install py4j==0.10.9.7
 
-# This action forces the installation of the latest version of the AWS SDK and PyFlink
+# This action forces the insion of the latest version of the AWS SDK and PyFlink
 RUN pip install boto3
 RUN pip install apache-flink==${APACHE_FLINK_VERSION_WITH_PATCH}
 RUN pip install pyflink

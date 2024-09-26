@@ -1,6 +1,6 @@
 # Apache Flink Kickstarter
 ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png)
-To kickstart your journey in the wonderful world that the creators of Apache Flink have created for us all.  J3 started with the three primary Flink Apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
+To kickstart your journey in the wonderful world from the creators of Apache Flink.  J3 took the three primary Flink Apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
 
 App|Description
 -|-
@@ -8,7 +8,7 @@ App|Description
 `FlightImporterApp`|This app imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and converts it to a unified format for the `airline.all` Kafka topic.
 `UserStatisticsApp`|This app processes data from the `airline.all` Kafka topic to aggregate user statistics in the `airline.user_statistics` Kafka topic.
 
- Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/).  To that which would be familiar to most who attempted to learn 101 Java Flink implementation.  This repo is the extension of that work to showcase how Flink will practically work in the enterprise by showcasing best practices and how it works with other enterprise capabilities (e.g., AWS, Apache Iceberg):
+ Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/).  However, ITo that which would be familiar to most who attempted to learn 101 Java Flink implementation.  This repo is the extension of that work to showcase how Flink will practically work in the enterprise by showcasing best practices and how it works with other enterprise capabilities (e.g., AWS, Apache Iceberg):
 
 No.|Best Practice/Capability|Description
 -|-|-
