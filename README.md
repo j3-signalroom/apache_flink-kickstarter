@@ -1,23 +1,18 @@
-# Apache Flink Kickstarter
-![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png)
-To kickstart your journey in the wonderful world that the creators of Apache Flink have created for us all.  J3 started with the three primary Flink Apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
+# ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png) Apache Flink Kickstarter
+This repo was created to showcase the exceptional capabiliities of one of the core componements of the signalRoom tech Stack, Apache Flink.  In the spirit of one of our central tenet to share and spread knowledge to all.  We take the three primary Flink Apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
 
 App|Description
 -|-
-`DataGeneratorApp`|This app creates fake flight data for fictional airlines **Sunset Air** and **Sky One** Airlines," and sends it to the Kafka topics `airline.sunset` and `airline.skyone` respectively.
-`FlightImporterApp`|This app imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and converts it to a unified format for the `airline.all` Kafka topic.
-`UserStatisticsApp`|This app processes data from the `airline.all` Kafka topic to aggregate user statistics in the `airline.user_statistics` Kafka topic.
+`DataGeneratorApp`|This app creates fake flight data for fictional airlines **Sunset Air** and **Sky One** Airlines," and sends it to the Kafka topics `airline.sunset` and `airline.skyone` respectively.  Wrote it only in Java because PyFlink does not have a Data Generator source for Python.
+`FlightImporterApp`|This app imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and converts it to a unified format for the `airline.all` Kafka topic.  Wrote it both in Java and Python.
+`UserStatisticsApp`|This app processes data from the `airline.all` Kafka topic to aggregate user statistics in the `airline.user_statistics` Kafka topic.  Wrote it both in Java and Python.
 
- Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/).  To that which would be familiar to most who attempted to learn 101 Java Flink implementation.  This repo is the extension of that work to showcase how Flink will practically work in the enterprise by showcasing best practices and how it works with other enterprise capabilities (e.g., AWS, Apache Iceberg):
+ Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/).  So using those Flink Apps as a starting point, show you how you can within Flink:
 
-No.|Best Practice/Capability|Description
--|-|-
-1.|DevOps Infrastructure as Code (IaC)|As a best practice, we utilize GitHub Workflow/Actions and Terraform Cloud to automate the creation and teardown of the Confluent Cloud and AWS resources for you.
-2.|Read AWS Secrets Manager and AWS Systems Manager Parameter Store|Instead of relying on the local consumer and producer properties file, the Kafka Cluster API Key, and Kafka Consumer and Kafka Producer client configuration properties are read from the AWS Secrets Manager and AWS Systems Manager Parameter Store.
-3.|Custom Source Data Stream|An Apache Flink custom source data stream is a user-defined source of data that is integrated into a Flink application to read and process data from non-standard or custom sources. This custom source can be anything that isn't supported by Flink out of the box, such as proprietary REST APIs, specialized databases, custom hardware interfaces, etc. J3 utilizes a Custom Source Data Stream to read the AWS Secrets Manager secrets and AWS Systems Manager Parameter Store properties during the initial start of a App, then caches the properties for use by any subsequent events that need these properties.
-4.|Consume & Sink synthetic flight data to/from Apache Iceberg|The combination of Apache Flink and Apache Iceberg provides several advantages. Iceberg’s capabilities, including snapshot isolation for reads and writes, the ability to handle multiple concurrent operations, ACID-compliant queries, and incremental reads, enable Flink to perform operations that were traditionally challenging with older table formats. Together, they offer an efficient and scalable platform for processing large-scale data, especially for streaming use cases.
-
-One other thing, the examples are not only written in Java (duh!), but the Java examples have been translated to Python as well, were possible.  To showcase you how you can use this cool framework (Apache Flink) with another powerful language, Python.
+- read AWS Secrets Manager and AWS Systems Manager Parameter Store for your Kafka Cluster API Key, and Kafka client configuration properties, respectively.  Now, because we need to within Flink read from external data source, we have a few options:
+    + In Java, I used Apache Flink custom source data stream that utilizes the MapFunction, which is a user-defined source of data that is integrated into a Flink application to read and process data from non-standard or custom sources (e.g., AWS Secrets Manager and AWS Systems Manager Parameter Store).
+    + In Python, I used a User Defined Table Funciton (UDTF)
+- The combination of Apache Flink and Apache Iceberg provides several advantages. Iceberg’s capabilities, including snapshot isolation for reads and writes, the ability to handle multiple concurrent operations, ACID-compliant queries, and incremental reads, enable Flink to perform operations that were traditionally challenging with older table formats. Together, they offer an efficient and scalable platform for processing large-scale data, especially for streaming use cases.
 
 **Table of Contents**
 

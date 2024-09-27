@@ -41,36 +41,36 @@ def serialize(obj):
         ISO is returned (i.e., 'YYYY-MM-DD HH:MM:SS.mmmmmm').  If the obj is a 
         date object, the date is returned. Otherwise, the obj is returned as is.
     """
+    if isinstance(obj, datetime):
+        return obj.isoformat(timespec="milliseconds")
     if isinstance(obj, datetime.date):
-        return obj.isoformat()
+        return str(obj)
     return obj
 
 @dataclass
 class FlightData():
-    email_address: str | None
-    departure_time: Types.SQL_TIMESTAMP
-    departure_airport_code: str | None
-    arrival_time: Types.SQL_TIMESTAMP
-    arrival_airport_code: str | None
-    flight_number: str | None
-    confirmation_code: str | None
-    source: str | None
+    email_address: str
+    departure_time: str
+    departure_airport_code: str
+    arrival_time: str
+    arrival_airport_code: str
+    flight_number: str
+    confirmation_code: str
+    source: str
 
 
     def get_duration(self):
-        return int((self.arrival_time - self.departure_time).seconds / 60)
+        return int((datetime.fromisoformat(self.arrival_time) - datetime.fromisoformat(self.departure_time)).seconds / 60)
     
     def to_row(self):
-        return {
-            'email_address': self.email_address,
-            'departure_time': serialize(self.departure_time),
-            'departure_airport_code': self.departure_airport_code,
-            'arrival_time': serialize(self.arrival_time),
-            'arrival_airport_code': self.arrival_airport_code,
-            'flight_number': self.flight_number,
-            'confirmation_code': self.confirmation_code,
-            'source': self.source,
-        }
+        return Row(email_address=self.email_address,
+                   departure_time=serialize(self.departure_time),
+                   departure_airport_code=self.departure_airport_code,
+                   arrival_time=serialize(self.arrival_time),
+                   arrival_airport_code=self.arrival_airport_code,
+                   flight_number=self.flight_number,
+                   confirmation_code=self.confirmation_code,
+                   source=self.source)
     
     @classmethod
     def from_row(cls, row: Row):
@@ -112,16 +112,16 @@ class FlightData():
 
 @dataclass
 class SkyOneAirlinesFlightData():
-    email_address: str | None
-    departure_time: Types.SQL_TIMESTAMP
-    departure_airport_code: str | None
-    arrival_time: Types.SQL_TIMESTAMP
-    arrival_airport_code: str | None
-    flight_number: str | None
-    confirmation_code: str | None
-    ticket_price: Decimal | None
-    aircraft: str | None
-    booking_agency_email: str | None
+    email_address: str
+    departure_time: str
+    departure_airport_code: str
+    arrival_time: str
+    arrival_airport_code: str
+    flight_number: str
+    confirmation_code: str
+    ticket_price: Decimal
+    aircraft: str
+    booking_agency_email: str
 
     
     @staticmethod
@@ -140,28 +140,28 @@ class SkyOneAirlinesFlightData():
     
     @classmethod
     def from_row(cls, row: Row):
-        return cls(email_address=row.email_address or "",
-                   departure_time=row.departure_time or None,
-                   departure_airport_code=row.departure_airport_code or "",
-                   arrival_time=row.arrival_time or None,
-                   arrival_airport_code=row.arrival_airport_code or "",
-                   flight_number=row.flight_number or "",
-                   confirmation_code=row.confirmation_code or "",
-                   ticket_price=row.ticket_price or 0,
-                   aircraft=row.aircraft or "",
-                   booking_agency_email=row.booking_agency_email or "")
+        return cls(email_address=row.email_address,
+                   departure_time=row.departure_time,
+                   departure_airport_code=row.departure_airport_code,
+                   arrival_time=row.arrival_time,
+                   arrival_airport_code=row.arrival_airport_code,
+                   flight_number=row.flight_number,
+                   confirmation_code=row.confirmation_code,
+                   ticket_price=row.ticket_price,
+                   aircraft=row.aircraft,
+                   booking_agency_email=row.booking_agency_email)
     
     def to_row(self):
-        return Row(email_address=self.email_address or "",
-                   departure_time=serialize(self.departure_time or None),
-                   departure_airport_code=self.departure_airport_code or "",
-                   arrival_time=serialize(self.arrival_time or None),
-                   arrival_airport_code=self.arrival_airport_code or "",
-                   flight_number=self.flight_number or "",
-                   confirmation_code=self.confirmation_code or "",
-                   ticket_price=self.ticket_price or 0,
-                   aircraft=self.aircraft or "",
-                   booking_agency_email=self.booking_agency_email or "")
+        return Row(email_address=self.email_address,
+                   departure_time=serialize(self.departure_time),
+                   departure_airport_code=self.departure_airport_code,
+                   arrival_time=serialize(self.arrival_time),
+                   arrival_airport_code=self.arrival_airport_code,
+                   flight_number=self.flight_number,
+                   confirmation_code=self.confirmation_code,
+                   ticket_price=self.ticket_price,
+                   aircraft=self.aircraft,
+                   booking_agency_email=self.booking_agency_email)
     
     @staticmethod
     def get_value_type_info():
@@ -194,16 +194,16 @@ class SkyOneAirlinesFlightData():
 
 @dataclass
 class SunsetAirFlightData:
-    email_address: str | None
-    departure_time: Types.SQL_TIMESTAMP
-    departure_airport_code: str | None
-    arrival_time: Types.SQL_TIMESTAMP
-    arrival_airport_code: str | None
-    flight_number: str | None
-    confirmation_code: str | None
-    ticket_price: Decimal | None
-    aircraft: str | None
-    booking_agency_email: str | None
+    email_address: str
+    departure_time: str
+    departure_airport_code: str
+    arrival_time: str
+    arrival_airport_code: str
+    flight_number: str
+    confirmation_code: str
+    ticket_price: Decimal
+    aircraft: str
+    booking_agency_email: str
 
         
     @staticmethod
@@ -222,28 +222,28 @@ class SunsetAirFlightData:
     
     @classmethod
     def from_row(cls, row: Row):
-        return cls(email_address=row.email_address or "",
-                   departure_time=row.departure_time or None,
-                   departure_airport_code=row.departure_airport_code or "",
-                   arrival_time=row.arrival_time or None,
-                   arrival_airport_code=row.arrival_airport_code or "",
-                   flight_number=row.flight_number or "",
-                   confirmation_code=row.confirmation_code or "",
-                   ticket_price=row.ticket_price or 0,
-                   aircraft=row.aircraft or "",
-                   booking_agency_email=row.booking_agency_email or "")
+        return cls(email_address=row.email_address,
+                   departure_time=row.departure_time,
+                   departure_airport_code=row.departure_airport_code,
+                   arrival_time=row.arrival_time,
+                   arrival_airport_code=row.arrival_airport_code,
+                   flight_number=row.flight_number,
+                   confirmation_code=row.confirmation_code,
+                   ticket_price=row.ticket_price,
+                   aircraft=row.aircraft,
+                   booking_agency_email=row.booking_agency_email)
 
     def to_row(self):
-        return Row(email_address=self.email_address or "",
-                   departure_time=serialize(self.departure_time or None),
-                   departure_airport_code=self.departure_airport_code or "",
-                   arrival_time=serialize(self.arrival_time or None),
-                   arrival_airport_code=self.arrival_airport_code or "",
-                   flight_number=self.flight_number or "",
-                   confirmation_code=self.confirmation_code or "",
-                   ticket_price=self.ticket_price or 0,
-                   aircraft=self.aircraft or "",
-                   booking_agency_email=self.booking_agency_email or "")
+        return Row(email_address=self.email_address,
+                   departure_time=serialize(self.departure_time),
+                   departure_airport_code=self.departure_airport_code,
+                   arrival_time=serialize(self.arrival_time),
+                   arrival_airport_code=self.arrival_airport_code,
+                   flight_number=self.flight_number,
+                   confirmation_code=self.confirmation_code,
+                   ticket_price=self.ticket_price,
+                   aircraft=self.aircraft,
+                   booking_agency_email=self.booking_agency_email)
     
     @staticmethod
     def get_value_type_info():
@@ -319,7 +319,7 @@ class KafkaProperties(TableFunction):
             for property_key, property_value in properties.items():
                 yield Row(str(property_key), str(property_value))
 
-    def get_kafka_properties(self, cluster_secrets_path: str, client_parameters_path: str) -> tuple[str, str | None]:
+    def get_kafka_properties(self, cluster_secrets_path: str, client_parameters_path: str) -> tuple[str, str]:
         """This method returns the Kafka Cluster properties from the AWS Secrets Manager and Parameter Store.
 
         Args:
@@ -328,7 +328,7 @@ class KafkaProperties(TableFunction):
             Parameter Store.
 
         Returns:
-            properties (tuple[str, str | None]): the Kafka Cluster properties collection if successful, otherwise None.
+            properties (tuple[str, str]): the Kafka Cluster properties collection if successful, otherwise None.
         """
         
         properties = {}
@@ -526,7 +526,7 @@ def main(args):
     # Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
 
-    # Create a Table Environment for batch mode
+    # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Adjust resource configuration
@@ -590,7 +590,7 @@ def main(args):
                             .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
                             .build())
 
-    # Defines the workflow for the Flink job graph (DAG) by connecting the data streams
+    # Combines the two Kafka sources and sinks it to a single Kafka topic
     (define_workflow(skyone_stream, sunset_stream)
      .map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
      .sink_to(flight_sink)
@@ -620,22 +620,15 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
         return dt
     
     skyone_flight_stream = (skyone_stream
-                            .map(SkyOneAirlinesFlightData.to_flight_data)
-                            .filter(lambda flight: flight.arrival_time is not None and to_aware_datetime(flight.arrival_time) > datetime.now(timezone.utc)))
+                            .map(SkyOneAirlinesFlightData.to_flight_data))
+                            #.filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now()))
 
     sunset_flight_stream = (sunset_stream
-                            .map(SunsetAirFlightData.to_flight_data)
-                            .filter(lambda flight: flight.arrival_time is not None and to_aware_datetime(flight.arrival_time) > datetime.now(timezone.utc)))
+                            .map(SunsetAirFlightData.to_flight_data))
+                            #.filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now()))
     
-    # Return the union of the SkyOne Airlines and Sunset Air flight data streams
-    # or the SkyOne Airlines flight data stream if the Sunset Air flight data stream is empty
-    # or the Sunset Air flight data stream if the SkyOne Airlines flight data stream is empty
-    if skyone_flight_stream and sunset_flight_stream:
-        return skyone_flight_stream.union(sunset_flight_stream)
-    elif skyone_flight_stream:
-        return skyone_flight_stream
-    elif sunset_flight_stream:
-        return sunset_flight_stream
+    return skyone_flight_stream.union(sunset_flight_stream)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
