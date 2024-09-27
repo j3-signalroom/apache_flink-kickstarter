@@ -1,6 +1,5 @@
-# Apache Flink Kickstarter
-![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png)
-To kickstart your journey in the wonderful world from the creators of Apache Flink.  J3 took the three primary Flink Apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
+# ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png) Apache Flink Kickstarter
+This repo was created to showcase the exceptional capabiliities of one of the core componements of the signalRoom techStach.  I have found the Apache Flink data streaming framework gamechanging.  To kickstart your journey in the wonderful world from the creators of Apache Flink.  J3 took the three primary Flink Apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
 
 App|Description
 -|-
