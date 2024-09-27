@@ -63,16 +63,14 @@ class FlightData():
         return int((datetime.fromisoformat(self.arrival_time) - datetime.fromisoformat(self.departure_time)).seconds / 60)
     
     def to_row(self):
-        return {
-            'email_address': self.email_address,
-            'departure_time': serialize(self.departure_time),
-            'departure_airport_code': self.departure_airport_code,
-            'arrival_time': serialize(self.arrival_time),
-            'arrival_airport_code': self.arrival_airport_code,
-            'flight_number': self.flight_number,
-            'confirmation_code': self.confirmation_code,
-            'source': self.source,
-        }
+        return Row(email_address=self.email_address,
+                   departure_time=serialize(self.departure_time),
+                   departure_airport_code=self.departure_airport_code,
+                   arrival_time=serialize(self.arrival_time),
+                   arrival_airport_code=self.arrival_airport_code,
+                   flight_number=self.flight_number,
+                   confirmation_code=self.confirmation_code,
+                   source=self.source)
     
     @classmethod
     def from_row(cls, row: Row):
@@ -592,7 +590,7 @@ def main(args):
                             .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
                             .build())
 
-    # Defines the workflow for the Flink job graph (DAG) by connecting the data streams
+    # Combines the two Kafka sources and sinks it to a single Kafka topic
     (define_workflow(skyone_stream, sunset_stream)
      .map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
      .sink_to(flight_sink)
@@ -629,15 +627,7 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
                             .map(SunsetAirFlightData.to_flight_data))
                             #.filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now()))
     
-    # Return the union of the SkyOne Airlines and Sunset Air flight data streams
-    # or the SkyOne Airlines flight data stream if the Sunset Air flight data stream is empty
-    # or the Sunset Air flight data stream if the SkyOne Airlines flight data stream is empty
-    if skyone_flight_stream and sunset_flight_stream:
-        return skyone_flight_stream.union(sunset_flight_stream)
-    elif skyone_flight_stream:
-        return skyone_flight_stream
-    elif sunset_flight_stream:
-        return sunset_flight_stream
+    return skyone_flight_stream.union(sunset_flight_stream)
 
 
 if __name__ == "__main__":
