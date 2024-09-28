@@ -2,9 +2,10 @@ from pyflink.common import Row, WatermarkStrategy, Types
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
-from pyflink.table import DataTypes, StreamTableEnvironment
+from pyflink.table import DataTypes, StreamTableEnvironment, TableSchema
 from pyflink.table.expressions import col
 from pyflink.table.udf import udtf, TableFunction
+from pyflink.table.catalog import ObjectPath, CatalogBaseTable
 from typing import Iterator
 from datetime import datetime, timedelta, timezone
 import boto3
@@ -593,6 +594,89 @@ def main(args):
      .map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
      .sink_to(flight_sink)
      .name("flightdata_sink"))
+    
+    # Define the placheolder values for the preceeding Flink SQL statements
+    catalog_name = "apache_kickstarter"
+    database_name = "airlines"
+    aws_region = os.environ['AWS_REGION']
+    flight_table = "flight"
+
+    # Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
+    # using the HadoopCatalog to store metadata in AWS S3, a Hadoop-compatible 
+    # filesystem.  Then execute the Flink SQL statement to register the Iceberg catalog
+    tbl_env.execute_sql(f"""
+        CREATE CATALOG {catalog_name} WITH (
+            'type'='iceberg',
+            'catalog-type'='hadoop',
+            'catalog-impl'='org.apache.iceberg.flink.FlinkCatalog',
+            'warehouse'='{args.s3_bucket_name}',
+            'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
+            'aws.region' = '{aws_region}',
+            's3.endpoint' = 's3.{aws_region}.amazonaws.com'
+            );
+    """)
+    tbl_env.execute_sql(f"USE CATALOG {catalog_name};")
+
+    # Access the Iceberg catalog to create the airlines database and the Iceberg tables
+    catalog = tbl_env.get_catalog(catalog_name).get()
+
+    # Check if the database exists.  If it does not exist, create the database
+    try:
+        if not catalog.database_exists(database_name):
+            tbl_env.execute_sql(f"CREATE DATABASE IF NOT EXISTS {database_name};")
+            tbl_env.execute_sql(f"USE {database_name};")
+    except Exception as e:
+        print(f"A critical error occurred to during the processing of the database because {e}")
+        exit(1)
+
+    # An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
+    # catalog object, such as a table, view, or function.  It uniquely identifies an object
+    # within a catalog by encapsulating both the database name and the object name.  For 
+    # instance, this case we using it to get the fully qualified path of the `flight`
+    # table
+    flight_table_path = ObjectPath(database_name, flight_table)
+
+    # Check if the table exists.  If it does not exist, create the table
+    try:
+        if not catalog.table_exists(flight_table_path):
+            # Define the table schema
+            schema = (TableSchema.builder()
+                                 .field("email_address", DataTypes.STRING())
+                                 .field("departure_time", DataTypes.TIMESTAMP(3))
+                                 .field("departure_airport_code", DataTypes.STRING())
+                                 .field("arrival_time", DataTypes.TIMESTAMP(3))
+                                 .field("arrival_airport_code", DataTypes.STRING())
+                                 .field("flight_number", DataTypes.STRING())
+                                 .field("confirmation", DataTypes.STRING())
+                                 .field("source", DataTypes.STRING())
+                                 .build())
+            
+            # Define Apache Iceberg-specific table properties
+            properties = {
+                'connector': 'iceberg',
+                'catalog-type': 'hadoop',  # Type of Iceberg catalog (used for working with AWS S3)
+                'warehouse': f"'{args.s3_bucket_name}'",  # Warehouse directory where Iceberg stores data and metadata
+                'write.format.default': 'parquet',  # File format for Iceberg writes
+                'write.target-file-size-bytes': '134217728',  # Target size for files written by Iceberg (128 MB by default)
+                'partitioning': 'iata_arrival_code'  # Optional: Partitioning columns for Iceberg table
+            }
+
+            # Create a CatalogBaseTable instance, which is an instantiated object that represents the
+            # metadata of a table within a catalog.  It encapsulates all the necessary information
+            # about a table's schema, properties, and characteristics, allowing Flink to interact
+            # with various data sources and sinks in a unified and consistent manner
+            catalog_table = CatalogBaseTable.create_table(schema=schema, properties=properties, comment="The SkyOne Airlines table")
+
+            # Create the table in the catalog
+            catalog.create_table(flight_table_path, catalog_table, ignore_if_exists=True)
+
+            #
+            (tbl_env.from_data_stream(define_workflow(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info()),
+                                      schema)
+                    .execute_insert(flight_table_path))
+    except Exception as e:
+        print(f"A critical error occurred to during the processing of the table because {e}")
+        exit(1)
 
     try:
         env.execute("FlightImporterApp")
