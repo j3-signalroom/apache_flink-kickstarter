@@ -693,13 +693,6 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
     Returns:
         DataStream: the union of the SkyOne Airlines and Sunset Air flight data streams.
     """
-
-    def to_aware_datetime(dt):
-        if isinstance(dt, str):
-            dt = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S.%f%z")
-        if dt.tzinfo is None:
-            return dt.replace(tzinfo=timezone.utc)
-        return dt
     
     skyone_flight_stream = (skyone_stream
                             .map(SkyOneAirlinesFlightData.to_flight_data)
