@@ -37,15 +37,13 @@ def serialize(obj):
         obj (obj):  The object to serialize.
 
     Returns:
-        str:  If the obj is a datetime object, the time formatted according to 
-        ISO is returned (i.e., 'YYYY-MM-DD HH:MM:SS.mmmmmm').  If the obj is a 
-        date object, the date is returned. Otherwise, the obj is returned as is.
+        str:  If the obj is of type datetime or date, the objec is formatted 
+        according to ISO 8601 (i.e., 'YYYY-MM-DD HH:MM:SS.mmmmmm').  Otherwise, 
+        the obj is returned as is.
     """
-    if isinstance(obj, datetime):
-        return obj.isoformat(timespec="milliseconds")
-    if isinstance(obj, datetime.date):
-        return str(obj)
-    return obj
+    if isinstance(obj, str):
+        return obj
+    return obj.isoformat(timespec="milliseconds")
 
 @dataclass
 class FlightData():
@@ -620,12 +618,12 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
         return dt
     
     skyone_flight_stream = (skyone_stream
-                            .map(SkyOneAirlinesFlightData.to_flight_data))
-                            #.filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now()))
+                            .map(SkyOneAirlinesFlightData.to_flight_data)
+                            .filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now(timezone.utc)))
 
     sunset_flight_stream = (sunset_stream
-                            .map(SunsetAirFlightData.to_flight_data))
-                            #.filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now()))
+                            .map(SunsetAirFlightData.to_flight_data)
+                            .filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now(timezone.utc)))
     
     return skyone_flight_stream.union(sunset_flight_stream)
 
