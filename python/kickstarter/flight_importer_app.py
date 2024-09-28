@@ -670,7 +670,10 @@ def main(args):
             # Create the table in the catalog
             catalog.create_table(flight_table_path, catalog_table, ignore_if_exists=True)
 
-            tbl_env.from_elements([FlightData.to_row()], schema=schema).execute_insert(flight_table_path)
+            #
+            (tbl_env.from_data_stream(define_workflow(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info()),
+                                      schema)
+                    .execute_insert(flight_table_path))
     except Exception as e:
         print(f"A critical error occurred to during the processing of the table because {e}")
         exit(1)
