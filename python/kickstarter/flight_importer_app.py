@@ -598,10 +598,8 @@ def main(args):
     # Define the placheolder values for the preceeding Flink SQL statements
     catalog_name = "apache_kickstarter"
     database_name = "airlines"
-    s3_bucket = os.environ['AWS_S3_BUCKET']
     aws_region = os.environ['AWS_REGION']
-    skyone_airlines_table = "skyone_airlines"
-    sunset_air_table = "sunset_airlines"
+    flight_table = "flight"
 
     # Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
     # using the HadoopCatalog to store metadata in AWS S3, a Hadoop-compatible 
@@ -611,7 +609,7 @@ def main(args):
             'type'='iceberg',
             'catalog-type'='hadoop',
             'catalog-impl'='org.apache.iceberg.flink.FlinkCatalog',
-            'warehouse'='{s3_bucket}',
+            'warehouse'='{args.s3_bucket_name}',
             'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
             'aws.region' = '{aws_region}',
             's3.endpoint' = 's3.{aws_region}.amazonaws.com'
@@ -634,32 +632,30 @@ def main(args):
     # An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
     # catalog object, such as a table, view, or function.  It uniquely identifies an object
     # within a catalog by encapsulating both the database name and the object name.  For 
-    # instance, this case we using it to get the fully qualified path of the `skyone_airlines`
+    # instance, this case we using it to get the fully qualified path of the `flight`
     # table
-    skyone_airlines_table_path = ObjectPath(database_name, skyone_airlines_table)
+    flight_table_path = ObjectPath(database_name, flight_table)
 
     # Check if the table exists.  If it does not exist, create the table
     try:
-        if not catalog.table_exists(skyone_airlines_table_path):
+        if not catalog.table_exists(flight_table_path):
             # Define the table schema
-            schema = TableSchema.builder() \
-                .field("email_address", DataTypes.STRING()) \
-                .field("flight_departure_time", DataTypes.TIMESTAMP(3)) \
-                .field("iata_departure_code", DataTypes.STRING()) \
-                .field("flight_arrival_time", DataTypes.TIMESTAMP(3)) \
-                .field("iata_arrival_code", DataTypes.STRING()) \
-                .field("flight_number", DataTypes.STRING()) \
-                .field("confirmation", DataTypes.STRING()) \
-                .field("ticket_price", DataTypes.STRING()) \
-                .field("aircraft", DataTypes.STRING()) \
-                .field("booking_agency_email", DataTypes.STRING()) \
-                .build()
+            schema = (TableSchema.builder()
+                                 .field("email_address", DataTypes.STRING())
+                                 .field("departure_time", DataTypes.TIMESTAMP(3))
+                                 .field("departure_airport_code", DataTypes.STRING())
+                                 .field("arrival_time", DataTypes.TIMESTAMP(3))
+                                 .field("arrival_airport_code", DataTypes.STRING())
+                                 .field("flight_number", DataTypes.STRING())
+                                 .field("confirmation", DataTypes.STRING())
+                                 .field("source", DataTypes.STRING())
+                                 .build())
             
             # Define Apache Iceberg-specific table properties
             properties = {
                 'connector': 'iceberg',
                 'catalog-type': 'hadoop',  # Type of Iceberg catalog (used for working with AWS S3)
-                'warehouse': f"'{s3_bucket}'",  # Warehouse directory where Iceberg stores data and metadata
+                'warehouse': f"'{args.s3_bucket_name}'",  # Warehouse directory where Iceberg stores data and metadata
                 'write.format.default': 'parquet',  # File format for Iceberg writes
                 'write.target-file-size-bytes': '134217728',  # Target size for files written by Iceberg (128 MB by default)
                 'partitioning': 'iata_arrival_code'  # Optional: Partitioning columns for Iceberg table
@@ -672,10 +668,9 @@ def main(args):
             catalog_table = CatalogBaseTable.create_table(schema=schema, properties=properties, comment="The SkyOne Airlines table")
 
             # Create the table in the catalog
-            catalog.create_table(skyone_airlines_table_path, catalog_table, ignore_if_exists=True)
+            catalog.create_table(flight_table_path, catalog_table, ignore_if_exists=True)
 
-            tbl_env.from_elements([row.to_row()], schema=schema) \
-            .execute_insert(skyone_airlines_table_path)
+            tbl_env.from_elements([FlightData.to_row()], schema=schema).execute_insert(flight_table_path)
     except Exception as e:
         print(f"A critical error occurred to during the processing of the table because {e}")
         exit(1)
