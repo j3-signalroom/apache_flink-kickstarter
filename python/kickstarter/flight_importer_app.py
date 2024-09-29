@@ -607,8 +607,7 @@ def main(args):
     tbl_env.execute_sql(f"""
         CREATE CATALOG {catalog_name} WITH (
             'type'='iceberg',
-            'catalog-type'='hadoop',
-            'catalog-impl'='org.apache.iceberg.flink.FlinkCatalog',
+            'catalog-type'='hadoop',            
             'warehouse'='{args.s3_bucket_name}',
             'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
             'aws.region' = '{aws_region}',
@@ -618,7 +617,7 @@ def main(args):
     tbl_env.execute_sql(f"USE CATALOG {catalog_name};")
 
     # Access the Iceberg catalog to create the airlines database and the Iceberg tables
-    catalog = tbl_env.get_catalog(catalog_name).get()
+    catalog = tbl_env.get_catalog(catalog_name)
 
     # Check if the database exists.  If it does not exist, create the database
     try:
