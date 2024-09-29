@@ -617,7 +617,7 @@ def main(args):
     tbl_env.execute_sql(f"USE CATALOG {catalog_name};")
 
     # Access the Iceberg catalog to create the airlines database and the Iceberg tables
-    catalog = tbl_env.get_catalog(catalog_name).get()
+    catalog = tbl_env.get_catalog(catalog_name)
 
     # Check if the database exists.  If it does not exist, create the database
     try:
