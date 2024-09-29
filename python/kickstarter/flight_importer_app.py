@@ -607,8 +607,7 @@ def main(args):
     tbl_env.execute_sql(f"""
         CREATE CATALOG {catalog_name} WITH (
             'type'='iceberg',
-            'catalog-type'='hadoop',
-            'catalog-impl'='org.apache.iceberg.flink.FlinkCatalog',
+            'catalog-type'='hadoop',            
             'warehouse'='{args.s3_bucket_name}',
             'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
             'aws.region' = '{aws_region}',
