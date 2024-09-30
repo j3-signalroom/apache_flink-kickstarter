@@ -2,12 +2,12 @@ from pyflink.common import Row, WatermarkStrategy, Types
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
-from pyflink.table import DataTypes, StreamTableEnvironment, TableSchema
+from pyflink.table import DataTypes, StreamTableEnvironment
 from pyflink.table.expressions import col
 from pyflink.table.udf import udtf, TableFunction
-from pyflink.table.catalog import ObjectPath, CatalogBaseTable
+from pyflink.table.catalog import ObjectPath
 from typing import Iterator
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 import boto3
 from botocore.exceptions import ClientError
 import logging
@@ -17,7 +17,6 @@ from re import sub
 import os
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Optional
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -516,10 +515,11 @@ def execute_kafka_properties_udtf(tbl_env, for_consumer: bool, service_account_u
     return result_dict
 
 def main(args):
-    """This is the main function that sets up the Flink job graph (DAG) for the Flight Importer App.
+    """The entry point to the Flink App (a.k.a., Flink job graph --- DAG) for the
+    Flight Importer App.
         
     Args:
-        args (argparse.Namespace): is the arguments passed to the script.
+        args (str): is the arguments passed to the script.
     """
 
     # Create a blank Flink execution environment
@@ -531,7 +531,7 @@ def main(args):
     # Adjust resource configuration
     env.set_parallelism(1)  # Set parallelism to 1 for simplicity
 
-    # Get the Kafka Cluster properties for the consumer
+    # Get the Kafka Cluster properties for the Kafka consumer client
     consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
@@ -598,8 +598,6 @@ def main(args):
     # Define the placheolder values for the preceeding Flink SQL statements
     catalog_name = "apache_kickstarter"
     database_name = "airlines"
-    aws_region = os.environ['AWS_REGION']
-    flight_table = "flight"
 
     # Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
     # using the HadoopCatalog to store metadata in AWS S3, a Hadoop-compatible 
@@ -608,10 +606,10 @@ def main(args):
         CREATE CATALOG {catalog_name} WITH (
             'type'='iceberg',
             'catalog-type'='hadoop',            
-            'warehouse'='{args.s3_bucket_name}',
+            'warehouse'='s3://{args.s3_bucket_name}',
             'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
-            'aws.region' = '{aws_region}',
-            's3.endpoint' = 's3.{aws_region}.amazonaws.com'
+            'aws.region' = '{args.aws_region}',
+            's3.endpoint' = 'https://s3.{args.aws_region}.amazonaws.com'
             );
     """)
     tbl_env.execute_sql(f"USE CATALOG {catalog_name};")
@@ -633,46 +631,34 @@ def main(args):
     # within a catalog by encapsulating both the database name and the object name.  For 
     # instance, this case we using it to get the fully qualified path of the `flight`
     # table
-    flight_table_path = ObjectPath(database_name, flight_table)
+    flight_table_path = ObjectPath(database_name, "flight")
 
     # Check if the table exists.  If it does not exist, create the table
     try:
         if not catalog.table_exists(flight_table_path):
-            # Define the table schema
-            schema = (TableSchema.builder()
-                                 .field("email_address", DataTypes.STRING())
-                                 .field("departure_time", DataTypes.TIMESTAMP(3))
-                                 .field("departure_airport_code", DataTypes.STRING())
-                                 .field("arrival_time", DataTypes.TIMESTAMP(3))
-                                 .field("arrival_airport_code", DataTypes.STRING())
-                                 .field("flight_number", DataTypes.STRING())
-                                 .field("confirmation", DataTypes.STRING())
-                                 .field("source", DataTypes.STRING())
-                                 .build())
-            
-            # Define Apache Iceberg-specific table properties
-            properties = {
-                'connector': 'iceberg',
-                'catalog-type': 'hadoop',  # Type of Iceberg catalog (used for working with AWS S3)
-                'warehouse': f"'{args.s3_bucket_name}'",  # Warehouse directory where Iceberg stores data and metadata
-                'write.format.default': 'parquet',  # File format for Iceberg writes
-                'write.target-file-size-bytes': '134217728',  # Target size for files written by Iceberg (128 MB by default)
-                'partitioning': 'iata_arrival_code'  # Optional: Partitioning columns for Iceberg table
-            }
+            # Define the table
+            tbl_env.execute_sql(f"""
+                CREATE TABLE {flight_table_path.get_full_name()} (
+                    email_address STRING,
+                    departure_time TIMESTAMP(3),
+                    departure_airport_code STRING,
+                    arrival_time TIMESTAMP(3),
+                    arrival_airport_code STRING,
+                    flight_number STRING,
+                    confirmation STRING,
+                    source STRING
+                ) WITH (
+                    'write.format.default' = 'parquet',
+                    'write.target-file-size-bytes' = '134217728',
+                    'partitioning' = 'arrival_airport_code',
+                    'format-version' = '2'
+                )
+            """)
 
-            # Create a CatalogBaseTable instance, which is an instantiated object that represents the
-            # metadata of a table within a catalog.  It encapsulates all the necessary information
-            # about a table's schema, properties, and characteristics, allowing Flink to interact
-            # with various data sources and sinks in a unified and consistent manner
-            catalog_table = CatalogBaseTable.create_table(schema=schema, properties=properties, comment="The SkyOne Airlines table")
-
-            # Create the table in the catalog
-            catalog.create_table(flight_table_path, catalog_table, ignore_if_exists=True)
-
-            #
-            (tbl_env.from_data_stream(define_workflow(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info()),
-                                      schema)
-                    .execute_insert(flight_table_path))
+            # Populate the table with the data from the data stream
+            (tbl_env.from_data_stream(define_workflow(skyone_stream, sunset_stream)
+                                      .map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info()))
+                    .execute_insert(flight_table_path.get_full_name()))
     except Exception as e:
         print(f"A critical error occurred to during the processing of the table because {e}")
         exit(1)
@@ -706,10 +692,13 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--aws_s3_bucket',
-        dest='s3_bucket_name',
-        required=True,
-        help='The AWS S3 bucket name.')
+    parser.add_argument('--aws_s3_bucket',
+                        dest='s3_bucket_name',
+                        required=True,
+                        help='The AWS S3 bucket name.')
+    parser.add_argument('--aws_region',
+                        dest='aws_region',
+                        required=True,
+                        help='The AWS Region name.')
     known_args, _ = parser.parse_known_args()
     main(known_args)

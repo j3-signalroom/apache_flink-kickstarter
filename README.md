@@ -1,5 +1,5 @@
 # ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png) Apache Flink Kickstarter
-This repo was created to showcase the exceptional capabiliities of one of the core componements of the signalRoom tech Stack, Apache Flink.  In the spirit of one of our central tenet to share and spread knowledge to all.  We take the three primary Flink Apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
+This repo was created to demostrate the exceptional capabiliities of one of the core componements of the signalRoom tech Stack, Apache Flink.  In the spirit of one of our central tenet to share and spread knowledge to all.  I take the three Flink Apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
 
 App|Description
 -|-
@@ -7,9 +7,14 @@ App|Description
 `FlightImporterApp`|This app imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and converts it to a unified format for the `airline.all` Kafka topic.  Wrote it both in Java and Python.
 `UserStatisticsApp`|This app processes data from the `airline.all` Kafka topic to aggregate user statistics in the `airline.user_statistics` Kafka topic.  Wrote it both in Java and Python.
 
- Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/).  So using those Flink Apps as a starting point, show you how you can within Flink:
+ Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/).  Then, as a starting point, I evolve the Flink Apps from there with typical use cases one would find in an enterprise:
 
-- read AWS Secrets Manager and AWS Systems Manager Parameter Store for your Kafka Cluster API Key, and Kafka client configuration properties, respectively.  Now, because we need to within Flink read from external data source, we have a few options:
+- Reading the AWS Secrets Manager for the Kafka Cluster API Key and the AWS Systems Manager Parameter Store for Kafka client configuration properties.
+- Not only sinking transformation and enrichment of data to Kafka, but also to Apache Iceberg tables.
+- Writing Flink apps in both Java and Python.
+- In the same Flink app, we take advantage of its ability to support multiple APIs (i.e., Flink SQL, Table API, and DataFrame API) to facilitate a solution.
+
+  Now, because we need to within Flink read from external data source, we have a few options:
     + In Java, I used Apache Flink custom source data stream that utilizes the MapFunction, which is a user-defined source of data that is integrated into a Flink application to read and process data from non-standard or custom sources (e.g., AWS Secrets Manager and AWS Systems Manager Parameter Store).
     + In Python, I used a User Defined Table Funciton (UDTF)
 - The combination of Apache Flink and Apache Iceberg provides several advantages. Iceberg’s capabilities, including snapshot isolation for reads and writes, the ability to handle multiple concurrent operations, ACID-compliant queries, and incremental reads, enable Flink to perform operations that were traditionally challenging with older table formats. Together, they offer an efficient and scalable platform for processing large-scale data, especially for streaming use cases.
