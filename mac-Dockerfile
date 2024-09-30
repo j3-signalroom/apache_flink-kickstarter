@@ -12,6 +12,7 @@ ENV APACHE_FLINK_VERSION_WITH_PATCH=${APACHE_FLINK_VERSION}${APACHE_FLINK_PATCH}
 ENV PYTHON_VERSION=3.11
 ENV PYTHON_PATCH=.9
 ENV PYTHON_VERION_WITH_PATCH=${PYTHON_VERSION}${PYTHON_PATCH}
+ENV HADOOP_CONF_DIR=/opt/flink/conf
 
 # Container metadata
 LABEL maintainer="j3@thej3.com" \
@@ -117,6 +118,40 @@ RUN pip install boto3
 RUN pip install apache-flink==${APACHE_FLINK_VERSION_WITH_PATCH}
 RUN pip install pyflink
 RUN pip install google-api-python-client
+
+# Create core-site.xml
+RUN ECHO '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '<configuration>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    <!-- S3A Filesystem Implementation -->' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '        <name>fs.s3a.impl</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>' >> $HADOOP_CONF_DIR.core-site.xml && \
+    ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    <!-- AWS Credentials (using environment variables) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '        <name>fs.s3a.access.key</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '        <value>${AWS_ACCESS_KEY_ID}</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '        <name>fs.s3a.secret.key</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '        <value>${AWS_SECRET_ACCESS_KEY}</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    <!-- S3 Endpoint (optional) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '        <name>fs.s3a.endpoint</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '        <value>s3.amazonaws.com</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    <!-- Path Style Access -->' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '        <name>fs.s3a.path.style.access</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '        <value>false</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    <!-- Enable SSL (HTTPS) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '        <name>fs.s3a.connection.ssl.enabled</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '        <value>true</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '</configuration>' >> $HADOOP_CONF_DIR/core-site.xml
 
 # Set the entrypoint to Flink's entrypoint script
 ENTRYPOINT ["/docker-entrypoint.sh"]
