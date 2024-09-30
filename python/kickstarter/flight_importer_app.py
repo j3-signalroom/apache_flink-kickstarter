@@ -2,12 +2,12 @@ from pyflink.common import Row, WatermarkStrategy, Types
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
-from pyflink.table import DataTypes, StreamTableEnvironment, TableSchema
+from pyflink.table import DataTypes, StreamTableEnvironment
 from pyflink.table.expressions import col
 from pyflink.table.udf import udtf, TableFunction
-from pyflink.table.catalog import ObjectPath, CatalogBaseTable
+from pyflink.table.catalog import ObjectPath
 from typing import Iterator
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 import boto3
 from botocore.exceptions import ClientError
 import logging
@@ -17,7 +17,6 @@ from re import sub
 import os
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Optional
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -607,10 +606,10 @@ def main(args):
         CREATE CATALOG {catalog_name} WITH (
             'type'='iceberg',
             'catalog-type'='hadoop',            
-            'warehouse'='{args.s3_bucket_name}',
+            'warehouse'='s3://{args.s3_bucket_name}',
             'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
             'aws.region' = '{args.aws_region}',
-            's3.endpoint' = 's3.{args.aws_region}.amazonaws.com'
+            's3.endpoint' = 'https://s3.{args.aws_region}.amazonaws.com'
             );
     """)
     tbl_env.execute_sql(f"USE CATALOG {catalog_name};")
@@ -637,37 +636,29 @@ def main(args):
     # Check if the table exists.  If it does not exist, create the table
     try:
         if not catalog.table_exists(flight_table_path):
-            # Define the table schema
-            schema = (TableSchema.builder()
-                                 .field("email_address", DataTypes.STRING())
-                                 .field("departure_time", DataTypes.TIMESTAMP(3))
-                                 .field("departure_airport_code", DataTypes.STRING())
-                                 .field("arrival_time", DataTypes.TIMESTAMP(3))
-                                 .field("arrival_airport_code", DataTypes.STRING())
-                                 .field("flight_number", DataTypes.STRING())
-                                 .field("confirmation", DataTypes.STRING())
-                                 .field("source", DataTypes.STRING())
-                                 .build())
-            
-            # Define Apache Iceberg-specific table properties
-            properties = {'write.format.default': 'parquet',            # File format for Iceberg writes
-                          'write.target-file-size-bytes': '134217728',  # Target size for files written by Iceberg (128 MB by default)
-                          'partitioning': 'arrival_airport_code',       # Optional: Partitioning columns for Iceberg table
-                          'format.version': '2'}                        # Optional: Iceberg format version
-
-            # Create a CatalogBaseTable instance, which is an instantiated object that represents the
-            # metadata of a table within a catalog.  It encapsulates all the necessary information
-            # about a table's schema, properties, and characteristics, allowing Flink to interact
-            # with various data sources and sinks in a unified and consistent manner
-            catalog_table = CatalogBaseTable.create_table(schema=schema, properties=properties, comment="The Airlines table")
-
-            # Create the table in the catalog
-            catalog.create_table(flight_table_path, catalog_table, ignore_if_exists=True)
+            # Define the table
+            tbl_env.execute_sql(f"""
+                CREATE TABLE {flight_table_path.get_full_name()} (
+                    email_address STRING,
+                    departure_time TIMESTAMP(3),
+                    departure_airport_code STRING,
+                    arrival_time TIMESTAMP(3),
+                    arrival_airport_code STRING,
+                    flight_number STRING,
+                    confirmation STRING,
+                    source STRING
+                ) WITH (
+                    'write.format.default' = 'parquet',
+                    'write.target-file-size-bytes' = '134217728',
+                    'partitioning' = 'arrival_airport_code',
+                    'format-version' = '2'
+                )
+            """)
 
             # Populate the table with the data from the data stream
-            (tbl_env.from_data_stream(define_workflow(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info()),
-                                      schema)
-                    .execute_insert(flight_table_path))
+            (tbl_env.from_data_stream(define_workflow(skyone_stream, sunset_stream)
+                                      .map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info()))
+                    .execute_insert(flight_table_path.get_full_name()))
     except Exception as e:
         print(f"A critical error occurred to during the processing of the table because {e}")
         exit(1)
