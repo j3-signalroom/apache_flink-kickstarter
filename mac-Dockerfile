@@ -30,10 +30,13 @@ RUN curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector
 RUN curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.4.0/hadoop-common-3.4.0.jar" -o "/opt/flink/lib/hadoop-common-3.4.0.jar"
 
 # --- Hadoop AWS Classes
+RUN curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.4.0/hadoop-aws-3.4.0.jar" -o "/opt/flink/lib/hadoop-aws-3.4.0.jar"
+
+# --- Hadoop Shaded Classes
 RUN curl -L "https://repo.maven.apache.org/maven2/org/apache/flink/flink-shaded-hadoop-2-uber/2.8.3-10.0/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" -o "/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" 
 
 # --- AWS Bundled Classes
-RUN curl -L "https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.27.9/bundle-2.27.9.jar" -o "/opt/flink/lib/bundle-2.27.9.jar"
+RUN curl -L "https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.28.9/bundle-2.28.9.jar" -o "/opt/flink/lib/bundle-2.28.9.jar"
 
 # --- Kafka Flink SQL Library
 RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "/opt/flink/lib/flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar"; fi'
