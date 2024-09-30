@@ -516,10 +516,11 @@ def execute_kafka_properties_udtf(tbl_env, for_consumer: bool, service_account_u
     return result_dict
 
 def main(args):
-    """This is the main function that sets up the Flink job graph (DAG) for the Flight Importer App.
+    """The entry point to the Flink App (a.k.a., Flink job graph --- DAG) for the
+    Flight Importer App.
         
     Args:
-        args (argparse.Namespace): is the arguments passed to the script.
+        args (str): is the arguments passed to the script.
     """
 
     # Create a blank Flink execution environment
@@ -531,7 +532,7 @@ def main(args):
     # Adjust resource configuration
     env.set_parallelism(1)  # Set parallelism to 1 for simplicity
 
-    # Get the Kafka Cluster properties for the consumer
+    # Get the Kafka Cluster properties for the Kafka consumer client
     consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
@@ -598,8 +599,6 @@ def main(args):
     # Define the placheolder values for the preceeding Flink SQL statements
     catalog_name = "apache_kickstarter"
     database_name = "airlines"
-    aws_region = os.environ['AWS_REGION']
-    flight_table = "flight"
 
     # Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
     # using the HadoopCatalog to store metadata in AWS S3, a Hadoop-compatible 
@@ -610,8 +609,8 @@ def main(args):
             'catalog-type'='hadoop',            
             'warehouse'='{args.s3_bucket_name}',
             'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
-            'aws.region' = '{aws_region}',
-            's3.endpoint' = 's3.{aws_region}.amazonaws.com'
+            'aws.region' = '{args.aws_region}',
+            's3.endpoint' = 's3.{args.aws_region}.amazonaws.com'
             );
     """)
     tbl_env.execute_sql(f"USE CATALOG {catalog_name};")
@@ -633,7 +632,7 @@ def main(args):
     # within a catalog by encapsulating both the database name and the object name.  For 
     # instance, this case we using it to get the fully qualified path of the `flight`
     # table
-    flight_table_path = ObjectPath(database_name, flight_table)
+    flight_table_path = ObjectPath(database_name, "flight")
 
     # Check if the table exists.  If it does not exist, create the table
     try:
@@ -651,14 +650,9 @@ def main(args):
                                  .build())
             
             # Define Apache Iceberg-specific table properties
-            properties = {
-                'connector': 'iceberg',
-                'catalog-type': 'hadoop',  # Type of Iceberg catalog (used for working with AWS S3)
-                'warehouse': f"'{args.s3_bucket_name}'",  # Warehouse directory where Iceberg stores data and metadata
-                'write.format.default': 'parquet',  # File format for Iceberg writes
-                'write.target-file-size-bytes': '134217728',  # Target size for files written by Iceberg (128 MB by default)
-                'partitioning': 'iata_arrival_code'  # Optional: Partitioning columns for Iceberg table
-            }
+            properties = {'write.format.default': 'parquet',            # File format for Iceberg writes
+                          'write.target-file-size-bytes': '134217728',  # Target size for files written by Iceberg (128 MB by default)
+                          'partitioning': 'arrival_airport_code'}       # Optional: Partitioning columns for Iceberg table
 
             # Create a CatalogBaseTable instance, which is an instantiated object that represents the
             # metadata of a table within a catalog.  It encapsulates all the necessary information
@@ -706,10 +700,13 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--aws_s3_bucket',
-        dest='s3_bucket_name',
-        required=True,
-        help='The AWS S3 bucket name.')
+    parser.add_argument('--aws_s3_bucket',
+                        dest='s3_bucket_name',
+                        required=True,
+                        help='The AWS S3 bucket name.')
+    parser.add_argument('--aws_region',
+                        dest='aws_region',
+                        required=True,
+                        help='The AWS Region name.')
     known_args, _ = parser.parse_known_args()
     main(known_args)
