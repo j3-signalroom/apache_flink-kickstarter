@@ -652,18 +652,19 @@ def main(args):
             # Define Apache Iceberg-specific table properties
             properties = {'write.format.default': 'parquet',            # File format for Iceberg writes
                           'write.target-file-size-bytes': '134217728',  # Target size for files written by Iceberg (128 MB by default)
-                          'partitioning': 'arrival_airport_code'}       # Optional: Partitioning columns for Iceberg table
+                          'partitioning': 'arrival_airport_code',       # Optional: Partitioning columns for Iceberg table
+                          'format.version': '2'}                        # Optional: Iceberg format version
 
             # Create a CatalogBaseTable instance, which is an instantiated object that represents the
             # metadata of a table within a catalog.  It encapsulates all the necessary information
             # about a table's schema, properties, and characteristics, allowing Flink to interact
             # with various data sources and sinks in a unified and consistent manner
-            catalog_table = CatalogBaseTable.create_table(schema=schema, properties=properties, comment="The SkyOne Airlines table")
+            catalog_table = CatalogBaseTable.create_table(schema=schema, properties=properties, comment="The Airlines table")
 
             # Create the table in the catalog
             catalog.create_table(flight_table_path, catalog_table, ignore_if_exists=True)
 
-            #
+            # Populate the table with the data from the data stream
             (tbl_env.from_data_stream(define_workflow(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info()),
                                       schema)
                     .execute_insert(flight_table_path))
