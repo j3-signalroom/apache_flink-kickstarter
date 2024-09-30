@@ -171,7 +171,7 @@ RUN ECHO '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/hdfs-site.x
     ECHO '        <name>dfs.permissions</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
     ECHO '        <value>false</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
     ECHO '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    ECHO '</configuration>' >> $HADOOP_CONF_DIR/core-site.xml
+    ECHO '</configuration>' >> $HADOOP_CONF_DIR/hdfs-site.xml
 
 # Set the entrypoint to Flink's entrypoint script
 ENTRYPOINT ["/docker-entrypoint.sh"]
