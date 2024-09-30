@@ -125,7 +125,7 @@ RUN ECHO '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/core-site.x
     ECHO '    <!-- S3A Filesystem Implementation -->' >> $HADOOP_CONF_DIR/core-site.xml && \
     ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
     ECHO '        <name>fs.s3a.impl</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>' >> $HADOOP_CONF_DIR.core-site.xml && \
+    ECHO '        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
     ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
     ECHO '    <!-- AWS Credentials (using environment variables) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
     ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
@@ -151,6 +151,26 @@ RUN ECHO '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/core-site.x
     ECHO '        <name>fs.s3a.connection.ssl.enabled</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
     ECHO '        <value>true</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
     ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    ECHO '</configuration>' >> $HADOOP_CONF_DIR/core-site.xml
+
+# Create hdfs-site.xml
+RUN ECHO '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '<configuration>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '    <!-- Replication factor for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '        <name>dfs.replication</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '        <value>1</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '    <!-- Block size for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '        <name>dfs.blocksize</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '        <value>134217728</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '    <!-- Permissions for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '        <name>dfs.permissions</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '        <value>false</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    ECHO '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
     ECHO '</configuration>' >> $HADOOP_CONF_DIR/core-site.xml
 
 # Set the entrypoint to Flink's entrypoint script

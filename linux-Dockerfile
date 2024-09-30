@@ -153,5 +153,26 @@ RUN ECHO '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/core-site.x
     ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
     ECHO '</configuration>' >> $HADOOP_CONF_DIR/core-site.xml
 
+
+# Create hdfs-site.xml
+RUN ECHO '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '<configuration>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '    <!-- Replication factor for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '        <name>dfs.replication</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '        <value>1</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '    <!-- Block size for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '        <name>dfs.blocksize</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '        <value>134217728</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '    <!-- Permissions for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '        <name>dfs.permissions</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '        <value>false</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+ECHO '</configuration>' >> $HADOOP_CONF_DIR/hdfs-site.xml
+
 # Set the entrypoint to Flink's entrypoint script
 CMD ["./bin/start-cluster.sh"]
