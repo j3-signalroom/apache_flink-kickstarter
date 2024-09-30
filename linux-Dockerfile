@@ -120,59 +120,58 @@ RUN pip install pyflink
 RUN pip install google-api-python-client
 
 # Create core-site.xml
-RUN ECHO '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '<configuration>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    <!-- S3A Filesystem Implementation -->' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '        <name>fs.s3a.impl</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>' >> $HADOOP_CONF_DIR.core-site.xml && \
-    ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    <!-- AWS Credentials (using environment variables) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '        <name>fs.s3a.access.key</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '        <value>${AWS_ACCESS_KEY_ID}</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '        <name>fs.s3a.secret.key</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '        <value>${AWS_SECRET_ACCESS_KEY}</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    <!-- S3 Endpoint (optional) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '        <name>fs.s3a.endpoint</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '        <value>s3.amazonaws.com</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    <!-- Path Style Access -->' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '        <name>fs.s3a.path.style.access</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '        <value>false</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    <!-- Enable SSL (HTTPS) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '        <name>fs.s3a.connection.ssl.enabled</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '        <value>true</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    ECHO '</configuration>' >> $HADOOP_CONF_DIR/core-site.xml
-
+RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/core-site.xml && \
+    echo '<configuration>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    <!-- S3A Filesystem Implementation -->' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.impl</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    <!-- AWS Credentials (using environment variables) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.access.key</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <value>${AWS_ACCESS_KEY_ID}</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.secret.key</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <value>${AWS_SECRET_ACCESS_KEY}</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    <!-- S3 Endpoint (optional) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.endpoint</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <value>s3.amazonaws.com</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    <!-- Path Style Access -->' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.path.style.access</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <value>false</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    <!-- Enable SSL (HTTPS) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.connection.ssl.enabled</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <value>true</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '</configuration>' >> $HADOOP_CONF_DIR/core-site.xml
 
 # Create hdfs-site.xml
-RUN ECHO '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '<configuration>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '    <!-- Replication factor for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '        <name>dfs.replication</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '        <value>1</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '    <!-- Block size for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '        <name>dfs.blocksize</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '        <value>134217728</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '    <!-- Permissions for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '        <name>dfs.permissions</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '        <value>false</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-ECHO '</configuration>' >> $HADOOP_CONF_DIR/hdfs-site.xml
+RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '<configuration>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '    <!-- Replication factor for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '        <name>dfs.replication</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '        <value>1</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '    <!-- Block size for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '        <name>dfs.blocksize</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '        <value>134217728</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '    <!-- Permissions for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '        <name>dfs.permissions</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '        <value>false</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
+    echo '</configuration>' >> $HADOOP_CONF_DIR/hdfs-site.xml
 
 # Set the entrypoint to Flink's entrypoint script
 CMD ["./bin/start-cluster.sh"]
