@@ -130,16 +130,16 @@ RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/core-site.x
     echo '    <!-- AWS Credentials (using environment variables) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '        <name>fs.s3a.access.key</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <value>${AWS_ACCESS_KEY_ID}</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo "        <value>${AWS_ACCESS_KEY_ID}</value>" >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '        <name>fs.s3a.secret.key</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <value>${AWS_SECRET_ACCESS_KEY}</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo "        <value>${AWS_SECRET_ACCESS_KEY}</value>" >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    <!-- S3 Endpoint (optional) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '        <name>fs.s3a.endpoint</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <value>s3.amazonaws.com</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo "        <value>s3.${AWS_REGION}.amazonaws.com</value>" >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    <!-- Path Style Access -->' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
