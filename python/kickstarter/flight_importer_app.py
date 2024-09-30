@@ -654,14 +654,14 @@ def main(args):
                     'format-version' = '2'
                 )
             """)
-
-            # Populate the table with the data from the data stream
-            (tbl_env.from_data_stream(define_workflow(skyone_stream, sunset_stream)
-                                      .map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info()))
-                    .execute_insert(flight_table_path.get_full_name()))
     except Exception as e:
         print(f"A critical error occurred to during the processing of the table because {e}")
         exit(1)
+
+    # Populate the table with the data from the data stream
+    (tbl_env.from_data_stream(define_workflow(skyone_stream, sunset_stream)
+                                .map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info()))
+            .execute_insert(flight_table_path.get_full_name()))
 
     try:
         env.execute("FlightImporterApp")
