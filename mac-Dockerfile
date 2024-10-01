@@ -107,7 +107,7 @@ RUN curl -L "https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-core/${AW
 RUN curl -L "https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-s3/${AWS_SDK_VERSION}/aws-java-sdk-s3-${AWS_SDK_VERSION}.jar" -o "/opt/flink/lib/aws-java-sdk-s3-${AWS_SDK_VERSION}.jar"
 
 # --- AWS SDK Bundle Classes
-RUN curl -L "https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-s3/${AWS_SDK_VERSION}/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar" -o "/opt/flink/lib/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar"
+RUN curl -L "https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${AWS_SDK_VERSION}/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar" -o "/opt/flink/lib/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar"
 
 # --- Hadoop AWS Classes
 RUN curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_VERSON}/hadoop-aws-${HADOOP_VERSON}.jar" -o "/opt/flink/lib/hadoop-aws-${HADOOP_VERSON}.jar"
