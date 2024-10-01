@@ -6,6 +6,9 @@ services:
       dockerfile: linux-Dockerfile
       args:
         FLINK_LANGUAGE: ${FLINK_LANGUAGE}
+        AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+        AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+        AWS_REGION: ${AWS_REGION}
     ports:
       - 8081:8081
       - 9092:9092
@@ -32,6 +35,9 @@ services:
       dockerfile: linux-Dockerfile
       args:
         FLINK_LANGUAGE: ${FLINK_LANGUAGE}
+        AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+        AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+        AWS_REGION: ${AWS_REGION}
     depends_on:
       - jobmanager
     command: taskmanager
