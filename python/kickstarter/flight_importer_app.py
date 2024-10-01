@@ -600,13 +600,14 @@ def main(args):
     database_name = "airlines"
 
     # Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
-    # using the HadoopCatalog to store metadata in AWS S3, a Hadoop-compatible 
-    # filesystem.  Then execute the Flink SQL statement to register the Iceberg catalog
+    # using the HadoopCatalog to store metadata in AWS S3 (i.e., s3a://), a Hadoop- 
+    # compatible filesystem.  Then execute the Flink SQL statement to register the
+    # Iceberg catalog
     tbl_env.execute_sql(f"""
         CREATE CATALOG {catalog_name} WITH (
             'type'='iceberg',
             'catalog-type'='hadoop',            
-            'warehouse'='s3://{args.s3_bucket_name}',
+            'warehouse'='s3a://{args.s3_bucket_name}',
             'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
             'aws.region' = '{args.aws_region}',
             's3.endpoint' = 'https://s3.{args.aws_region}.amazonaws.com'
