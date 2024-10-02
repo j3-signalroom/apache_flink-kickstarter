@@ -1,7 +1,6 @@
 # Base image from https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/deployment/resource-providers/standalone/docker/
 FROM flink:1.19.1-scala_2.12-java17
 
-
 # Build argument(s)
 ARG FLINK_LANGUAGE
 ARG AWS_ACCESS_KEY_ID
@@ -12,18 +11,19 @@ ARG AWS_REGION
 ENV FLINK_LANGUAGE=${FLINK_LANGUAGE}
 ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-ENV AWS_REGION=${AWS_REGION}
+ENV AWS_REGION=${AWS_REGION}x
 ENV APACHE_FLINK_VERSION=1.19
 ENV APACHE_FLINK_PATCH=.1
 ENV APACHE_FLINK_VERSION_WITH_PATCH=${APACHE_FLINK_VERSION}${APACHE_FLINK_PATCH}
 ENV PYTHON_VERSION=3.11
 ENV PYTHON_PATCH=.9
-ENV PYTHON_VERION_WITH_PATCH=${PYTHON_VERSION}${PYTHON_PATCH}
+ENV PYTHON_VERSION_WITH_PATCH=${PYTHON_VERSION}${PYTHON_PATCH}
+ENV HADOOP_VERSION=3.4.0
 ENV HADOOP_CONF_DIR=/opt/flink/conf
 
 # Container metadata
 LABEL maintainer="j3@thej3.com" \
-      description="Apache Flink ${APACHE_FLINK_VERSION_WITH_PATCH} container with Python ${PYTHON_VERION_WITH_PATCH} installed."
+      description="Apache Flink ${APACHE_FLINK_VERSION_WITH_PATCH} container with Python ${PYTHON_VERSION_WITH_PATCH} installed."
 
 # Install Python dependencies and whatever utilities are needed to install Python from source
 # Install libbz2-dev, a development package for the bzip2 library (libbz2), which is used for compressing and decompressing data using the Burrows-Wheeler block-sorting text compression algorithm and Huffman coding.
@@ -53,18 +53,18 @@ RUN apt-get update && apt-get install -y \
 
 # Install Python from source
 RUN cd /usr/local && \
-    wget https://www.python.org/ftp/python/${PYTHON_VERION_WITH_PATCH}/Python-${PYTHON_VERION_WITH_PATCH}.tgz && \
-    tar -xf Python-${PYTHON_VERION_WITH_PATCH}.tgz && \
-    cd Python-${PYTHON_VERION_WITH_PATCH} && \
+    wget https://www.python.org/ftp/python/${PYTHON_VERSION_WITH_PATCH}/Python-${PYTHON_VERSION_WITH_PATCH}.tgz && \
+    tar -xf Python-${PYTHON_VERSION_WITH_PATCH}.tgz && \
+    cd Python-${PYTHON_VERSION_WITH_PATCH} && \
     ./configure --enable-optimizations && \
     make -j$(nproc) && \
     make altinstall
 
 # Create a symbolic link to the Python binary
-RUN ln -s /usr/local/Python-${PYTHON_VERION_WITH_PATCH} /usr/bin/python
+RUN ln -s /usr/local/Python-${PYTHON_VERSION_WITH_PATCH} /usr/bin/python
 
 # Set the PATH environment variable with the path to the Python binary
-ENV PATH="/usr/local/Python-${PYTHON_VERION_WITH_PATCH}:${PATH}"
+ENV PATH="/usr/local/Python-${PYTHON_VERSION_WITH_PATCH}:${PATH}"
 
 # Set JAVA_HOME
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
@@ -90,26 +90,14 @@ RUN pip install apache-flink==${APACHE_FLINK_VERSION_WITH_PATCH}
 RUN pip install pyflink
 RUN pip install google-api-python-client
 
-# ---
-# Download JARs to FLINK_HOME/lib to make them available to Flink
-# ---
 # --- Iceberg Flink Library
-RUN curl -L "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-${APACHE_FLINK_VERSION}/1.6.1/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-1.6.1.jar" -o "/opt/flink/lib/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-1.6.1.jar"
+RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-${APACHE_FLINK_VERSION}/1.6.1/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-1.6.1.jar" -o "/opt/flink/lib/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-1.6.1.jar"; fi'
 
-# --- Hive Flink Library
-RUN curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-sql-connector-hive-3.1.3_2.12-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "/opt/flink/lib/flink-sql-connector-hive-3.1.3_2.12-${APACHE_FLINK_VERSION_WITH_PATCH}.jar"
+# --- S3 Flink Library
+RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "/opt/flink/lib/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar"; fi'
 
-# --- Hadoop AWS Classes
-RUN curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.1/hadoop-aws-3.3.1.jar" -o "/opt/flink/lib/hadoop-aws-3.3.1.jar"
-
-# --- Hadoop Common Classes
-RUN curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.3.1/hadoop-common-3.3.1.jar" -o "/opt/flink/lib/hadoop-common-3.3.1.jar"
-
-# --- Hadoop Shaded Classes
-RUN curl -L "https://repo.maven.apache.org/maven2/org/apache/flink/flink-shaded-hadoop-2-uber/2.8.3-10.0/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" -o "/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" 
-
-# --- AWS Bundled Classes
-RUN curl -L "https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.17.106/bundle-2.17.106.jar" -o "/opt/flink/lib/bundle-2.17.106.jar"
+# --- Hadoop HDFS Classes
+RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-hdfs/${HADOOP_VERSION}/hadoop-hdfs-${HADOOP_VERSION}.jar" -o "/opt/flink/lib/hadoop-hdfs-${HADOOP_VERSION}.jar"; fi'
 
 # --- Kafka Flink SQL Library
 RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "/opt/flink/lib/flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar"; fi'
@@ -122,6 +110,9 @@ RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://rep
 
 # --- Kafka Client
 RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.7.0/kafka-clients-3.7.0.jar" -o "/opt/flink/lib/kafka-clients-3.7.0.jar"; fi'
+
+# Set CLASSPATH environment variable
+ENV CLASSPATH="/opt/flink/lib/*"
 
 # Install Nano to edit files
 RUN apt update && apt install -y nano
