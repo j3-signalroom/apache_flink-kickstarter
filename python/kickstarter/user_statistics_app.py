@@ -729,12 +729,22 @@ def main(args):
     except Exception as e:
         logger.error("The App stopped early due to the following: %s", e)
 
-def define_workflow(flight_data_stream: DataStream):
+def define_workflow(flight_data_stream: DataStream) -> DataStream:
+    """This method defines a data processing workflow for a stream of flight data using Apache
+    Flink.  This workflow processes the data to compute user statistics over tumbling time
+    windows.
+
+    Args:
+        flight_data_stream (DataStream): The datastream that will have a workflow defined for it.
+
+    Returns:
+        DataStream: The defined workflow of the inputted datastream.
+    """
     return (flight_data_stream
-            .map(FlightData.to_user_statistics_data)
-            .key_by(lambda s: s.email_address)
-            .window(TumblingEventTimeWindows.of(Time.minutes(1)))
-            .reduce(UserStatisticsData.merge, window_function=ProcessUserStatisticsDataFunction()))
+            .map(FlightData.to_user_statistics_data)    # Transforms each element in the datastream to a UserStatisticsData object
+            .key_by(lambda s: s.email_address)          # Groups the data by email address
+            .window(TumblingEventTimeWindows.of(Time.minutes(1)))   # Each window will contain all events that occur within that 1-minute period
+            .reduce(UserStatisticsData.merge, window_function=ProcessUserStatisticsDataFunction())) # Applies a reduce function to each window
 
 
 if __name__ == "__main__":
