@@ -1,14 +1,15 @@
 from pyflink.common import Row, WatermarkStrategy, Types
-from pyflink.datastream import StreamExecutionEnvironment, DataStream, TumblingEventTimeWindows, TimeCharacteristic
+from pyflink.datastream import StreamExecutionEnvironment, DataStream, TimeCharacteristic, TumblingEventTimeWindows
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
-from pyflink.datastream.state import ValueStateDescriptor
-from pyflink.datastream.functions import ProcessWindowFunction
 from pyflink.table import DataTypes, StreamTableEnvironment
+from pyflink.datastream.state import ValueStateDescriptor
 from pyflink.table.expressions import col
+from pyflink.datastream.functions import ProcessWindowFunction
 from pyflink.table.udf import udtf, TableFunction
+from pyflink.table.catalog import ObjectPath
 from typing import Iterator
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone, timedelta
 import boto3
 from botocore.exceptions import ClientError
 import logging
@@ -47,6 +48,22 @@ def serialize(obj):
         return obj.isoformat()
     return obj
 
+def serialize(obj):
+    """
+    This method serializes the `obj` parameter to a string.
+
+    Args:
+        obj (obj):  The object to serialize.
+
+    Returns:
+        str:  If the obj is of type datetime or date, the objec is formatted 
+        according to ISO 8601 (i.e., 'YYYY-MM-DD HH:MM:SS.mmmmmm').  Otherwise, 
+        the obj is returned as is.
+    """
+    if isinstance(obj, str):
+        return obj
+    return obj.isoformat(timespec="milliseconds")
+
 @dataclass
 class FlightData():
     email_address: str
@@ -60,19 +77,17 @@ class FlightData():
 
 
     def get_duration(self):
-        return int((self.arrival_time - self.departure_time).seconds / 60)
+        return int((datetime.fromisoformat(self.arrival_time) - datetime.fromisoformat(self.departure_time)).seconds / 60)
     
     def to_row(self):
-        return {
-            'email_address': self.email_address,
-            'departure_time': serialize(self.departure_time),
-            'departure_airport_code': self.departure_airport_code,
-            'arrival_time': serialize(self.arrival_time),
-            'arrival_airport_code': self.arrival_airport_code,
-            'flight_number': self.flight_number,
-            'confirmation_code': self.confirmation_code,
-            'source': self.source,
-        }
+        return Row(email_address=self.email_address,
+                   departure_time=serialize(self.departure_time),
+                   departure_airport_code=self.departure_airport_code,
+                   arrival_time=serialize(self.arrival_time),
+                   arrival_airport_code=self.arrival_airport_code,
+                   flight_number=self.flight_number,
+                   confirmation_code=self.confirmation_code,
+                   source=self.source)
     
     @classmethod
     def from_row(cls, row: Row):
@@ -275,7 +290,6 @@ class SunsetAirFlightData:
                 Types.STRING(),
             ],
         )
-
 @dataclass
 class UserStatisticsData:
     email_address: str
@@ -658,10 +672,13 @@ def define_workflow(flight_data_source):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--aws_s3_bucket',
-        dest='s3_bucket_name',
-        required=True,
-        help='The AWS S3 bucket name.')
+    parser.add_argument('--aws_s3_bucket',
+                        dest='s3_bucket_name',
+                        required=True,
+                        help='The AWS S3 bucket name.')
+    parser.add_argument('--aws_region',
+                        dest='aws_region',
+                        required=True,
+                        help='The AWS Region name.')
     known_args, _ = parser.parse_known_args()
     main(known_args)

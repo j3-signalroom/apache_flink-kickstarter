@@ -271,6 +271,7 @@ class SunsetAirFlightData:
                 Types.STRING(),
             ],
         )
+
 class KafkaProperties(TableFunction):
     """This User-Defined Table Function (UDTF) is used to retrieve the Kafka Cluster properties
     from the AWS Secrets Manager and Parameter Store.
