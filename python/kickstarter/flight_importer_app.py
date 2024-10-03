@@ -271,6 +271,7 @@ class SunsetAirFlightData:
                 Types.STRING(),
             ],
         )
+
 class KafkaProperties(TableFunction):
     """This User-Defined Table Function (UDTF) is used to retrieve the Kafka Cluster properties
     from the AWS Secrets Manager and Parameter Store.
@@ -603,14 +604,25 @@ def main(args):
     # using the HadoopCatalog to store metadata in AWS S3 (i.e., s3a://), a Hadoop- 
     # compatible filesystem.  Then execute the Flink SQL statement to register the
     # Iceberg catalog
+    # tbl_env.execute_sql(f"""
+    #     CREATE CATALOG {catalog_name} WITH (
+    #         'type' = 'iceberg',
+    #         'catalog-type' = 'hadoop',            
+    #         'warehouse' = 's3a://{args.s3_bucket_name}',
+    #         'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
+    #         'aws.region' = '{args.aws_region}',
+    #         's3.endpoint' = 'https://s3.{args.aws_region}.amazonaws.com'
+    #         );
+    # """)
+
     tbl_env.execute_sql(f"""
-        CREATE CATALOG {catalog_name} WITH (
-            'type'='iceberg',
-            'catalog-type'='hadoop',            
-            'warehouse'='s3a://{args.s3_bucket_name}',
+        CREATE CATALOG my_iceberg_catalog WITH (
+            'type' = 'iceberg',
+            'catalog-type' = 'hadoop',            
+            'warehouse' = 's3a://tf_snowflake_user/warehouse',
             'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
-            'aws.region' = '{args.aws_region}',
-            's3.endpoint' = 'https://s3.{args.aws_region}.amazonaws.com'
+            'aws.region' = 'us-east-1',
+            's3.endpoint' = 'https://s3.us-east-1.amazonaws.com'
             );
     """)
     tbl_env.execute_sql(f"USE CATALOG {catalog_name};")

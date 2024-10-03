@@ -1,14 +1,15 @@
 from pyflink.common import Row, WatermarkStrategy, Types
-from pyflink.datastream import StreamExecutionEnvironment, DataStream, TumblingEventTimeWindows, TimeCharacteristic
+from pyflink.datastream.window import TumblingEventTimeWindows, Time
+from pyflink.datastream import StreamExecutionEnvironment, DataStream, TimeCharacteristic
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
-from pyflink.datastream.state import ValueStateDescriptor
-from pyflink.datastream.functions import ProcessWindowFunction
 from pyflink.table import DataTypes, StreamTableEnvironment
+from pyflink.datastream.state import ValueStateDescriptor
 from pyflink.table.expressions import col
+from pyflink.datastream.functions import ProcessWindowFunction, RuntimeContext
 from pyflink.table.udf import udtf, TableFunction
-from typing import Iterator
-from datetime import datetime, timedelta, timezone
+from typing import Iterator, Iterable
+from datetime import datetime
 import boto3
 from botocore.exceptions import ClientError
 import logging
@@ -18,7 +19,6 @@ from re import sub
 import os
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Optional
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -39,13 +39,13 @@ def serialize(obj):
         obj (obj):  The object to serialize.
 
     Returns:
-        str:  If the obj is a datetime object, the time formatted according to 
-        ISO is returned (i.e., 'YYYY-MM-DD HH:MM:SS.mmmmmm').  If the obj is a 
-        date object, the date is returned. Otherwise, the obj is returned as is.
+        str:  If the obj is of type datetime or date, the objec is formatted 
+        according to ISO 8601 (i.e., 'YYYY-MM-DD HH:MM:SS.mmmmmm').  Otherwise, 
+        the obj is returned as is.
     """
-    if isinstance(obj, datetime.date):
-        return obj.isoformat()
-    return obj
+    if isinstance(obj, str):
+        return obj
+    return obj.isoformat(timespec="milliseconds")
 
 @dataclass
 class FlightData():
@@ -60,19 +60,17 @@ class FlightData():
 
 
     def get_duration(self):
-        return int((self.arrival_time - self.departure_time).seconds / 60)
+        return int((datetime.fromisoformat(self.arrival_time) - datetime.fromisoformat(self.departure_time)).seconds / 60)
     
     def to_row(self):
-        return {
-            'email_address': self.email_address,
-            'departure_time': serialize(self.departure_time),
-            'departure_airport_code': self.departure_airport_code,
-            'arrival_time': serialize(self.arrival_time),
-            'arrival_airport_code': self.arrival_airport_code,
-            'flight_number': self.flight_number,
-            'confirmation_code': self.confirmation_code,
-            'source': self.source,
-        }
+        return Row(email_address=self.email_address,
+                   departure_time=serialize(self.departure_time),
+                   departure_airport_code=self.departure_airport_code,
+                   arrival_time=serialize(self.arrival_time),
+                   arrival_airport_code=self.arrival_airport_code,
+                   flight_number=self.flight_number,
+                   confirmation_code=self.confirmation_code,
+                   source=self.source)
     
     @classmethod
     def from_row(cls, row: Row):
@@ -111,6 +109,12 @@ class FlightData():
                 Types.STRING(),
             ],
         )
+    
+    @staticmethod
+    def to_user_statistics_data(row: Row):
+        data = FlightData.from_row(row)
+        return UserStatisticsData(data.email_address, data.get_duration(), 1)
+
 
 @dataclass
 class SkyOneAirlinesFlightData():
@@ -279,8 +283,8 @@ class SunsetAirFlightData:
 @dataclass
 class UserStatisticsData:
     email_address: str
-    total_flight_duration: Optional[timedelta] = timedelta(0)
-    number_of_flights: int = 0
+    total_flight_duration: int
+    number_of_flights: int
 
     def __init__(self, flight_data=None):
         if flight_data:
@@ -313,6 +317,42 @@ class UserStatisticsData:
                 f"email_address='{self.email_address}', "
                 f"total_flight_duration={self.total_flight_duration}, "
                 f"number_of_flights={self.number_of_flights}}}")
+    
+    @classmethod
+    def from_flight(cls, data: FlightData):
+        return cls(
+            email_address=data.email_address,
+            total_flight_duration=data.get_duration(),
+            number_of_flights=1,
+        )
+
+    @classmethod
+    def from_row(cls, row: Row):
+        return cls(
+            email_address=row.email_address,
+            total_flight_duration=row.total_flight_duration,
+            number_of_flights=row.number_of_flights,
+        )
+    
+    def to_row(self):
+        return Row(email_address=self.email_address,
+                   total_flight_duration=self.total_flight_duration,
+                   number_of_flights=self.number_of_flights)
+    
+    @staticmethod
+    def get_value_type_info():
+        return Types.ROW_NAMED(
+            field_names=[
+                "email_address",
+                "total_flight_duration",
+                "number_of_flights",
+            ],
+            field_types=[
+                Types.STRING(),
+                Types.INT(),
+                Types.INT(),
+            ],
+        )
 
 class KafkaProperties(TableFunction):
     """This User-Defined Table Function (UDTF) is used to retrieve the Kafka Cluster properties
@@ -558,47 +598,72 @@ def execute_kafka_properties_udtf(tbl_env, for_consumer: bool, service_account_u
     return result_dict
 
 class ProcessUserStatisticsDataFunction(ProcessWindowFunction):
+    """This class is a custom implementation of a ProcessWindowFunction in Apache Flink.
+    This class is designed to process elements within a window, manage state, and yield
+    accumulated statistics for user data.
+    """
+
     def __init__(self):
-        super(ProcessUserStatisticsDataFunction, self).__init__()
-        self.state_descriptor = ValueStateDescriptor("User Statistics", UserStatisticsData)
+        """The purpose of this constructor is to set up the initial state of the instance by
+        defining the state_descriptor attribute and initializing it to None.
+        """
 
-    def open(self, parameters):
-        """
-        The open method is called when the function is first initialized.
-        
-        :param parameters: The configuration parameters for the function.
-        :raises Exception: Implementations may forward exceptions, which are caught.
-        """
-        super(ProcessUserStatisticsDataFunction, self).open(parameters)
+        self.state_descriptor = None
 
-    def process(self, email_address, context: ProcessWindowFunction.Context, stats_list, collector):
+    def open(self, context: RuntimeContext):
+        """The purpose of this open method is to set up the state descriptor that will be used
+        later in the process method to manage state. By defining the state descriptor in the
+        open method, the state is correctly initialized and available for use when processing
+        elements.
+
+        Args:
+            context (RuntimeContext): An instance of the RuntimeContext class, which provides
+            information about the runtime environment in which the function is executed.  This
+            context can be used to access various runtime features, such as state, metrics, and
+            configuration.
         """
-        The process method is called for each window, and it processes the elements in the window.
-        
-        :param email_address: The email address of the user.
-        :param context: The context for this window.
-        :param stats_list: The list of statistics for the user.
-        :param collector: The collector for emitting results.
-        :raises Exception: Implementations may forward exceptions, which are caught.
+
+        self.state_descriptor = ValueStateDescriptor("User Statistics Data", UserStatisticsData.get_value_type_info())
+
+    def process(self, key: str, context: "ProcessWindowFunction.Context", elements: Iterable[UserStatisticsData]) -> Iterable:
+        """This method processes elements within a window, updates the state, and yields
+        the accumulated statistics.
+
+        Args:
+            key (str): Represents the key for the current group of elements.  This is useful
+            for operations that need to be performed on a per-key basis.
+            context (ProcessWindowFunction.Context): Provides access to the window's metadata,
+            state, and timers.
+            elements (Iterable[UserStatisticsData]): An iterable collection of `UserStatisticsData`
+            objects that belong to the current window and key.  The method processes these elements
+            to compute the result.
+
+        Yields:
+            Iterable: yeilds the accumulated statistics as a `UserStatisticsData` object.
         """
-        # Retrieve the state
+
+        # Retrieves the state associated with the current window
         state = context.global_state().get_state(self.state_descriptor)
 
-        # Get the accumulated stats
+        # Get's the current state
         accumulated_stats = state.value()
 
-        # Merge the stats
-        for new_stats in stats_list:
+        # Iterates over the elements in the window
+        for new_stats in elements:
             if accumulated_stats is None:
-                accumulated_stats = new_stats
+                # Initializes the first element's row representation
+                accumulated_stats = new_stats.to_row()
             else:
-                accumulated_stats = accumulated_stats.merge(new_stats)
+                # Merges the current `accumulated_stats` with the new element's statistics
+                # and updates the state
+                accumulated_stats = UserStatisticsData.merge(UserStatisticsData.from_row(accumulated_stats), new_stats).to_row()
 
-        # Update the state
+        # Updates the state with the new accumulated statistics
         state.update(accumulated_stats)
 
-        # Emit the accumulated stats
-        collector.collect(accumulated_stats)
+        # Yields the accumulated statistics as a `UserStatisticsData` object
+        yield UserStatisticsData.from_row(accumulated_stats)
+
 
 def main(args):
     # Create a blank Flink execution environment
@@ -611,57 +676,86 @@ def main(args):
     # Get the Kafka Cluster properties for the consumer
     consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
-    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.all`
+    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.all`
+    flight_source = (KafkaSource.builder()
+                                .set_properties(consumer_properties)
+                                .set_topics("airline.all")
+                                .set_group_id("flight_group")
+                                .set_starting_offsets(KafkaOffsetsInitializer.earliest())
+                                .set_value_only_deserializer(JsonRowDeserializationSchema
+                                                             .builder()
+                                                             .type_info(FlightData.get_value_type_info())
+                                                             .build())
+                                .build())
+
+    # Takes the results of the Kafka source and attaches the unbounded data stream
+    flight_data_stream = env.from_source(flight_source, WatermarkStrategy.for_monotonous_timestamps(), "flight_data_source")
+
     # Get the Kafka Cluster properties for the producer
     producer_properties = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
     producer_properties.update({
         'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
     })
 
-    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.all`
-    flight_data_source = KafkaSource.builder() \
-        .set_properties(consumer_properties) \
-        .set_topics("airline.all") \
-        .set_starting_offsets(KafkaOffsetsInitializer.earliest()) \
-        .set_value_only_deserializer(JsonRowDeserializationSchema(FlightData)) \
-        .build()
-
-    # Takes the results of the Kafka source and attaches the unbounded data stream
-    flight_data_stream = env.from_source(flight_data_source, WatermarkStrategy.for_monotonous_timestamps(), "flightdata_source")
-
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.user_statistics`
-    statistics_serializer = KafkaRecordSerializationSchema.builder() \
-        .set_topic("airline.user_statistics") \
-        .set_value_serialization_schema(JsonRowSerializationSchema(UserStatisticsData)) \
-        .build()
-
-    stats_sink = KafkaSink.builder() \
-        .set_kafka_producer_config(producer_properties) \
-        .set_record_serializer(statistics_serializer) \
-        .set_delivery_guarantee(KafkaSink.DeliveryGuarantee.AT_LEAST_ONCE) \
-        .build()
+    stats_sink = (KafkaSink.builder()
+                           .set_bootstrap_servers(producer_properties['bootstrap.servers'])
+                           .set_property("security.protocol", producer_properties['security.protocol'])
+                           .set_property("sasl.mechanism", producer_properties['sasl.mechanism'])
+                           .set_property("sasl.jaas.config", producer_properties['sasl.jaas.config'])
+                           .set_property("acks", producer_properties['acks'])
+                           .set_property("client.dns.lookup", producer_properties['client.dns.lookup'])
+                           .set_property("transaction.timeout.ms", producer_properties['transaction.timeout.ms'])
+                           .set_record_serializer(KafkaRecordSerializationSchema
+                                                  .builder()
+                                                  .set_topic("airline.user_statistics")
+                                                  .set_value_serialization_schema(JsonRowSerializationSchema
+                                                                                  .builder()
+                                                                                  .with_type_info(UserStatisticsData.get_value_type_info())
+                                                                                  .build())
+                                                  .build())
+                            .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                            .build())
 
     # Defines the workflow for the Flink job graph (DAG) by connecting the data streams
-    define_workflow(flight_data_stream).sink_to(stats_sink).name("userstatistics_sink").uid("userstatistics_sink")
+    (define_workflow(flight_data_stream)
+     .map(lambda d: d.to_row(), output_type=UserStatisticsData.get_value_type_info())
+     .sink_to(stats_sink)
+     .name("userstatistics_sink")
+     .uid("userstatistics_sink"))
 
     try:
         env.execute("UserStatisticsApp")
     except Exception as e:
         logger.error("The App stopped early due to the following: %s", e)
 
-def define_workflow(flight_data_source):
-    return (flight_data_source.map(lambda flight: UserStatisticsData(flight))
-                              .key_by(lambda stats: stats.email_address)
-                              .window(TumblingEventTimeWindows.of(timedelta(minutes=1)))
-                              .reduce(lambda a, b: a.merge(b), ProcessUserStatisticsDataFunction()))
+def define_workflow(flight_data_stream: DataStream) -> DataStream:
+    """This method defines a data processing workflow for a stream of flight data using Apache
+    Flink.  This workflow processes the data to compute user statistics over tumbling time
+    windows.
+
+    Args:
+        flight_data_stream (DataStream): The datastream that will have a workflow defined for it.
+
+    Returns:
+        DataStream: The defined workflow of the inputted datastream.
+    """
+    return (flight_data_stream
+            .map(FlightData.to_user_statistics_data)    # Transforms each element in the datastream to a UserStatisticsData object
+            .key_by(lambda s: s.email_address)          # Groups the data by email address
+            .window(TumblingEventTimeWindows.of(Time.minutes(1)))   # Each window will contain all events that occur within that 1-minute period
+            .reduce(UserStatisticsData.merge, window_function=ProcessUserStatisticsDataFunction())) # Applies a reduce function to each window
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--aws_s3_bucket',
-        dest='s3_bucket_name',
-        required=True,
-        help='The AWS S3 bucket name.')
+    parser.add_argument('--aws_s3_bucket',
+                        dest='s3_bucket_name',
+                        required=True,
+                        help='The AWS S3 bucket name.')
+    parser.add_argument('--aws_region',
+                        dest='aws_region',
+                        required=True,
+                        help='The AWS Region name.')
     known_args, _ = parser.parse_known_args()
     main(known_args)

@@ -96,8 +96,14 @@ RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://rep
 # --- S3 Flink Library
 RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "/opt/flink/lib/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar"; fi'
 
+# --- Hadoop Common Classes
+RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/${HADOOP_VERSION}/hadoop-common-${HADOOP_VERSION}.jar" -o "/opt/flink/lib/hadoop-common-${HADOOP_VERSION}.jar"; fi'
+
 # --- Hadoop HDFS Classes
 RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-hdfs/${HADOOP_VERSION}/hadoop-hdfs-${HADOOP_VERSION}.jar" -o "/opt/flink/lib/hadoop-hdfs-${HADOOP_VERSION}.jar"; fi'
+
+# --- Hadoop HDFS Client Classes
+RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-hdfs-client/${HADOOP_VERSION}/hadoop-hdfs-${HADOOP_VERSION}.jar" -o "/opt/flink/lib/hadoop-hdfs-client-${HADOOP_VERSION}.jar"; fi'
 
 # --- Kafka Flink SQL Library
 RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "/opt/flink/lib/flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar"; fi'

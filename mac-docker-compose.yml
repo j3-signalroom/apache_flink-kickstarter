@@ -23,6 +23,8 @@ services:
         jobmanager.rpc.address: jobmanager
         rest.flamegraph.enabled: true
         web.backpressure.refresh-interval: 10000
+        fs.s3a.access.key: $AWS_ACCESS_KEY_ID
+        fs.s3a.secret.key: $AWS_SECRET_ACCESS_KEY
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
@@ -52,6 +54,8 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 2
+        fs.s3a.access.key: $AWS_ACCESS_KEY_ID
+        fs.s3a.secret.key: $AWS_SECRET_ACCESS_KEY
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
