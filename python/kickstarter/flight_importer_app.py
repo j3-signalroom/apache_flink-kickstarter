@@ -3,12 +3,12 @@ from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
-from pyflink.table.expressions import col
 from pyflink.table.catalog import ObjectPath
+from pyflink.common import Configuration
 from datetime import datetime, timezone
 import logging
 import argparse
-from re import sub
+import os
 
 from model.flight_data import FlightData
 from model.skyone_airline_flight_data import SkyOneAirlinesFlightData
@@ -120,7 +120,10 @@ def main(args):
         CREATE CATALOG {catalog_name} WITH (
             'type' = 'iceberg',
             'catalog-type' = 'hadoop',            
-            'warehouse' = 's3a://{args.s3_bucket_name}/warehouse'
+            'warehouse' = 's3a://{args.s3_bucket_name.replace("_", "-")}',
+            'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
+            'aws.region' = '{args.aws_region}',
+            's3.endpoint' = 'https://s3.{args.aws_region}.amazonaws.com'
             );
     """)
     tbl_env.execute_sql(f"USE CATALOG {catalog_name};")
