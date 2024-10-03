@@ -608,10 +608,7 @@ def main(args):
         CREATE CATALOG {catalog_name} WITH (
             'type' = 'iceberg',
             'catalog-type' = 'hadoop',            
-            'warehouse' = 's3a://{args.s3_bucket_name}',
-            'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
-            'aws.region' = '{args.aws_region}',
-            's3.endpoint' = 'https://s3.{args.aws_region}.amazonaws.com'
+            'warehouse' = 's3a://{args.s3_bucket_name}/warehouse'
             );
     """)
     tbl_env.execute_sql(f"USE CATALOG {catalog_name};")
