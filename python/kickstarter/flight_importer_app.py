@@ -28,8 +28,7 @@ logger = logging.getLogger('FlightImporterApp')
 
 
 def main(args):
-    """The entry point to the Flink App (a.k.a., Flink job graph --- DAG) for the
-    Flight Importer App.
+    """The entry point to the Flight Importer Flink App (a.k.a., Flink job graph --- DAG).
         
     Args:
         args (str): is the arguments passed to the script.
@@ -48,6 +47,8 @@ def main(args):
     consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
+    # Note: KafkaSource was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
+    # you will need to use the FlinkKafkaConsumer class.
     skyone_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
                                 .set_topics("airline.skyone")
@@ -83,6 +84,8 @@ def main(args):
     producer_properties.update({
         'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
     })
+    # Note: KafkaSink was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
+    # you will need to use the FlinkKafkaProducer class.
     flight_sink = (KafkaSink.builder()
                             .set_bootstrap_servers(producer_properties['bootstrap.servers'])
                             .set_property("security.protocol", producer_properties['security.protocol'])
@@ -108,19 +111,17 @@ def main(args):
      .sink_to(flight_sink)
      .name("flightdata_sink"))
     
-    # Define the placheolder values for the preceeding Flink SQL statements
-    catalog_name = "apache_kickstarter"
-    database_name = "airlines"
-
     # Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
     # using the HadoopCatalog to store metadata in AWS S3 (i.e., s3a://), a Hadoop- 
     # compatible filesystem.  Then execute the Flink SQL statement to register the
     # Iceberg catalog
+    catalog_name = "apache_kickstarter"
+    bucket_name = args.s3_bucket_name.replace("_", "-") # Replace underscores with hyphens that follow the S3 bucket naming convention
     tbl_env.execute_sql(f"""
         CREATE CATALOG {catalog_name} WITH (
             'type' = 'iceberg',
             'catalog-type' = 'hadoop',            
-            'warehouse' = 's3a://{args.s3_bucket_name.replace("_", "-")}/airlines/warehouse'
+            'warehouse' = 's3a://{bucket_name}'
             );
     """)
     tbl_env.execute_sql(f"USE CATALOG {catalog_name};")
@@ -128,14 +129,23 @@ def main(args):
     # Access the Iceberg catalog to create the airlines database and the Iceberg tables
     catalog = tbl_env.get_catalog(catalog_name)
 
+    # Get the current catalog name
+    print(f"Current catalog: {tbl_env.get_current_catalog()}")
+
     # Check if the database exists.  If it does not exist, create the database
+    database_name = "airlines"
     try:
         if not catalog.database_exists(database_name):
             tbl_env.execute_sql(f"CREATE DATABASE IF NOT EXISTS {database_name};")
-            tbl_env.execute_sql(f"USE {database_name};")
+        else:
+            print(f"The {database_name} database already exists.")
+        tbl_env.execute_sql(f"USE {database_name};")
     except Exception as e:
         print(f"A critical error occurred to during the processing of the database because {e}")
         exit(1)
+
+    # Get the current database name
+    print(f"Current database: {tbl_env.get_current_database()}")
 
     # An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
     # catalog object, such as a table, view, or function.  It uniquely identifies an object
@@ -151,9 +161,9 @@ def main(args):
             tbl_env.execute_sql(f"""
                 CREATE TABLE {flight_table_path.get_full_name()} (
                     email_address STRING,
-                    departure_time TIMESTAMP(3),
+                    departure_time STRING,
                     departure_airport_code STRING,
-                    arrival_time TIMESTAMP(3),
+                    arrival_time STRING,
                     arrival_airport_code STRING,
                     flight_number STRING,
                     confirmation STRING,
@@ -170,8 +180,7 @@ def main(args):
         exit(1)
 
     # Populate the table with the data from the data stream
-    (tbl_env.from_data_stream(define_workflow(skyone_stream, sunset_stream)
-                                .map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info()))
+    (tbl_env.from_data_stream(define_workflow(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info()))
             .execute_insert(flight_table_path.get_full_name()))
 
     try:

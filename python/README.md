@@ -10,9 +10,15 @@ Examples of Apache Flink® applications showcasing the [DataStream API](https://
 
 ## 1.0 Try out these Flink Apps
 
+App|Description
+-|-
+`FlightImporterApp`|This Python-based app imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and converts it to a unified format and stores the result in the `airline.all` Kafka topic.  Also, the apps stores the unified flight data in an Apache Iceberg table.
+`UserStatisticsApp`|This Python-based app processes data from the `airline.all` Kafka topic to aggregate user statistics in the `airline.user_statistics` Kafka topic.
 
 ## 2.0 Resources
 
 [Flink Python Docs](https://nightlies.apache.org/flink/flink-docs-master/api/python/)
+
+[PyFlink API Reference](https://nightlies.apache.org/flink/flink-docs-release-1.20/api/python/reference/index.html)
 
 [Apache Flink® Table API on Confluent Cloud - Examples](https://github.com/confluentinc/flink-table-api-python-examples)
