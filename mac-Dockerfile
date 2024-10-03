@@ -20,6 +20,8 @@ ENV PYTHON_PATCH=.9
 ENV PYTHON_VERSION_WITH_PATCH=${PYTHON_VERSION}${PYTHON_PATCH}
 ENV HADOOP_VERSION=3.4.0
 ENV HADOOP_CONF_DIR=/opt/flink/conf
+ENV ICEBERG_VERSION=1.6.1
+ENV AWS_SDK_VERSION=2.27.12
 
 # Container metadata
 LABEL maintainer="j3@thej3.com" \
@@ -92,6 +94,21 @@ RUN pip install google-api-python-client
 
 # --- Iceberg Flink Library
 RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-${APACHE_FLINK_VERSION}/1.6.1/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-1.6.1.jar" -o "/opt/flink/lib/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-1.6.1.jar"; fi'
+
+# --- AWS SDK S3 Library
+RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/software/amazon/awssdk/s3/${AWS_SDK_VERSION}/s3-${AWS_SDK_VERSION}.jar" -o "/opt/flink/lib/s3-${AWS_SDK_VERSION}.jar"; fi'
+
+# --- AWS SDK Core Library
+RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/software/amazon/awssdk/sdk-core/${AWS_SDK_VERSION}/sdk-core-${AWS_SDK_VERSION}.jar" -o "/opt/flink/lib/sdk-core-${AWS_SDK_VERSION}.jar"; fi'
+
+# --- AWS SDK Utils Library
+RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/software/amazon/awssdk/utils/${AWS_SDK_VERSION}/utils-${AWS_SDK_VERSION}.jar" -o "/opt/flink/lib/utils-${AWS_SDK_VERSION}.jar"; fi'
+
+# --- Caffine Library
+RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/com/github/ben-manes/caffeine/caffeine/2.9.2/caffeine-2.9.2.jar" -o "/opt/flink/lib/caffeine-2.9.2.jar"; fi'
+
+# --- Iceberg AWS Library
+RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws/${ICEBERG_VERSION}/iceberg-aws-${ICEBERG_VERSION}.jar" -o "/opt/flink/lib/iceberg-aws-${ICEBERG_VERSION}.jar"; fi'
 
 # --- S3 Flink Library
 RUN /bin/bash -c 'if [ "$FLINK_LANGUAGE" = "python" ]; then curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "/opt/flink/lib/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar"; fi'

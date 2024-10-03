@@ -7,17 +7,11 @@ App|Description
 `FlightImporterApp`|This app imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and converts it to a unified format for the `airline.all` Kafka topic.  Wrote it both in Java and Python.
 `UserStatisticsApp`|This app processes data from the `airline.all` Kafka topic to aggregate user statistics in the `airline.user_statistics` Kafka topic.  Wrote it both in Java and Python.
 
- Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/).  Then, as a starting point, I evolve the Flink Apps from there with typical use cases one would find in an enterprise:
+ Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/).  We kick off by evolving Flink applications with real-world enterprise use cases. First, we tap into _**AWS Secrets Manager**_ to securely fetch the Kafka Cluster API key, and leverage _**AWS Systems Manager Parameter**_ Store to retrieve critical Kafka client configuration properties.
 
-- Reading the AWS Secrets Manager for the Kafka Cluster API Key and the AWS Systems Manager Parameter Store for Kafka client configuration properties.
-- Not only sinking transformation and enrichment of data to Kafka, but also to Apache Iceberg tables.
-- Writing Flink apps in both Java and Python.
-- In the same Flink app, we take advantage of its ability to support multiple APIs (i.e., Flink SQL, Table API, and DataFrame API) to facilitate a solution.
+But we don't stop there—beyond simply transforming and enriching data, we stream it into both Kafka and _**Apache Iceberg tables**_, enabling highly scalable, real-time data processing and storage.
 
-  Now, because we need to within Flink read from external data source, we have a few options:
-    + In Java, I used Apache Flink custom source data stream that utilizes the MapFunction, which is a user-defined source of data that is integrated into a Flink application to read and process data from non-standard or custom sources (e.g., AWS Secrets Manager and AWS Systems Manager Parameter Store).
-    + In Python, I used a User Defined Table Funciton (UDTF)
-- The combination of Apache Flink and Apache Iceberg provides several advantages. Iceberg’s capabilities, including snapshot isolation for reads and writes, the ability to handle multiple concurrent operations, ACID-compliant queries, and incremental reads, enable Flink to perform operations that were traditionally challenging with older table formats. Together, they offer an efficient and scalable platform for processing large-scale data, especially for streaming use cases.
+Our journey with Flink apps doesn't end at just Java—_**Python-based**_ Flink apps take the stage, utilizing all the powerful APIs that Apache Flink offers. This includes Flink SQL, the Table API, and the DataFrame API, providing a seamless, flexible approach to solving complex streaming challenges. By combining these technologies, we unlock an optimal solution architecture that is as efficient as it is scalable.
 
 **Table of Contents**
 
