@@ -2,5 +2,5 @@
 .DS_Store
 __pycache__
 .pytest_cache
-python_scripts.zip
+python_files.zip
 tf_snowflake_user

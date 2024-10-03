@@ -21,6 +21,9 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
+        fs.s3a.access.key: $AWS_ACCESS_KEY_ID
+        fs.s3a.secret.key: $AWS_SECRET_ACCESS_KEY
+        fs.s3a.endpoint: s3.$AWS_REGION.amazonaws.com
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
@@ -50,6 +53,13 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 2
+        fs.s3a.access.key: $AWS_ACCESS_KEY_ID
+        fs.s3a.secret.key: $AWS_SECRET_ACCESS_KEY
+        fs.s3a.endpoint: s3.$AWS_REGION.amazonaws.com
+        taskmanager.memory.task.off-heap.size: 256m
+        taskmanager.memory.process.size: 2048m
+        taskmanager.memory.network.fraction: 0.2
+        python.fn-execution.memory.limit: 512mb
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
