@@ -4,7 +4,6 @@ from pyflink.datastream import StreamExecutionEnvironment, DataStream, TimeChara
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
-from pyflink.table.expressions import col
 import logging
 import argparse
 
