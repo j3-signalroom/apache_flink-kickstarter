@@ -137,7 +137,9 @@ def main(args):
     try:
         if not catalog.database_exists(database_name):
             tbl_env.execute_sql(f"CREATE DATABASE IF NOT EXISTS {database_name};")
-            tbl_env.execute_sql(f"USE {database_name};")
+        else:
+            print(f"The {database_name} database already exists.")
+        tbl_env.execute_sql(f"USE {database_name};")
     except Exception as e:
         print(f"A critical error occurred to during the processing of the database because {e}")
         exit(1)
