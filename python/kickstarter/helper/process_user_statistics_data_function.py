@@ -78,5 +78,3 @@ class ProcessUserStatisticsDataFunction(ProcessWindowFunction):
 
         # Yields the accumulated statistics as a `UserStatisticsData` object
         yield UserStatisticsData.from_row(accumulated_stats)
-
-

@@ -15,4 +15,6 @@ Examples of Apache Flink® applications showcasing the [DataStream API](https://
 
 [Flink Python Docs](https://nightlies.apache.org/flink/flink-docs-master/api/python/)
 
+[PyFlink API Reference](https://nightlies.apache.org/flink/flink-docs-release-1.20/api/python/reference/index.html)
+
 [Apache Flink® Table API on Confluent Cloud - Examples](https://github.com/confluentinc/flink-table-api-python-examples)

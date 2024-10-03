@@ -1,5 +1,5 @@
 # ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png) Apache Flink Kickstarter
-This repo was created to demostrate the exceptional capabiliities of one of the core componements of the signalRoom tech Stack, Apache Flink.  In the spirit of one of our central tenet to share and spread knowledge to all.  I take the three Flink Apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
+This repo was created to demostrate the exceptional capabiliities of one of the core componements of the signalRoom tech Stack, Apache Flink.  In the spirit of one of our central tenet to share and spread knowledge to all.  We take the three Flink Apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
 
 App|Description
 -|-
@@ -24,8 +24,8 @@ Our journey with Flink apps doesn't end at just Java—_**Python-based**_ Flink 
         + [2.2.1 Deploy Terraform from the cloud](#221-deploy-terraform-from-the-cloud)
     - [2.3 Power up the Apache Flink Docker containers](#23-power-up-the-apache-flink-docker-containers)
 + [3.0 Examples to get you kickstarted!](#30-examples-to-get-you-kickstarted)
-    - [3.1 Flink Apps in Action written in Java](#31-flink-apps-in-action-written-in-java)
-    - [3.2 Flink Apps in Action written in Python](#32-flink-apps-in-action-written-in-python)
+    - [3.1 Java-based Flink Apps](#31-java-based-flink-apps)
+    - [3.2 Python-based Flink Apps](#32-python-based-flink-apps)
 + [4.0 Resources](#40-resources)
 <!-- tocstop -->
 
@@ -127,10 +127,10 @@ Argument placeholder|Replace with
 
 ## 3.0 Examples to get you kickstarted!
 
-### 3.1 Flink Apps in Action written in Java
+### 3.1 Java-based Flink Apps
 [Let's get started!](java/README.md)
 
-### 3.2 Flink Apps in Action written in Python
+### 3.2 Python-based Flink Apps
 [Let's get started!](python/README.md)
 
 ## 4.0 Resources
