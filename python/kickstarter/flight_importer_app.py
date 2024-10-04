@@ -3,11 +3,10 @@ from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
-from pyflink.table.catalog import ObjectPath, CatalogDatabase
+from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
 import logging
 import argparse
-import os
 
 from model.flight_data import FlightData
 from model.skyone_airline_flight_data import SkyOneAirlinesFlightData
@@ -115,13 +114,13 @@ def main(args):
     # compatible filesystem.  Then execute the Flink SQL statement to register the
     # Iceberg catalog
     catalog_name = "apache_kickstarter"
-    bucket_name = args.s3_bucket_name.replace("_", "-") # Replace underscores with hyphens to ensure that the name follows the S3 bucket naming convention
+    bucket_name = args.s3_bucket_name.replace("_", "-") # To follow S3 bucket naming convention, replace underscores with hyphens if exist
     try:
         catalog_result = tbl_env.execute_sql(f"""
             CREATE CATALOG {catalog_name} WITH (
                 'type' = 'iceberg',
                 'catalog-type' = 'hadoop',            
-                'warehouse' = 's3a://{bucket_name}/warehouse',
+                'warehouse' = 's3a://{bucket_name}',
                 'property-version' = '1',
                 'aws.region' = '{args.aws_region}',
                 'io-impl' = 'org.apache.iceberg.hadoop.HadoopFileIO',
@@ -140,8 +139,8 @@ def main(args):
     # Get the current catalog name
     print(f"Current catalog: {tbl_env.get_current_catalog()}")
 
-    database_name = "airlines"
     # Check if the database exists.  If it does not exist, create the database
+    database_name = "airlines"
     try:
         if not catalog.database_exists(database_name):
             tbl_env.execute_sql(f"CREATE DATABASE IF NOT EXISTS {database_name};")
@@ -167,7 +166,7 @@ def main(args):
         if not catalog.table_exists(flight_table_path):
             # Define the table
             tbl_env.execute_sql(f"""
-                CREATE TABLE flight (
+                CREATE TABLE {flight_table_path.get_full_name()} (
                     email_address STRING,
                     departure_time STRING,
                     departure_airport_code STRING,
