@@ -12,7 +12,7 @@ Examples of Apache Flink® applications showcasing the [DataStream API](https://
 
 App|Description
 -|-
-`FlightImporterApp`|This Python-based app imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and converts it to a unified format and stores the result in the `airline.all` Kafka topic.  Also, the apps stores the unified flight data in an Apache Iceberg table.
+`FlightImporterApp`|This Python-based app imports flight data from the Kafka topics `airline.sunset` and `airline.skyone`, converts it to a unified format, and then stores the result in the Kafka topic `airline.all`.  Additionally, the app stores the unified flight data in an Apache Iceberg table.
 `UserStatisticsApp`|This Python-based app processes data from the `airline.all` Kafka topic to aggregate user statistics in the `airline.user_statistics` Kafka topic.
 
 ## 2.0 Resources

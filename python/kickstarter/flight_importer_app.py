@@ -3,8 +3,7 @@ from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
-from pyflink.table.catalog import ObjectPath
-from pyflink.common import Configuration
+from pyflink.table.catalog import ObjectPath, CatalogDatabase
 from datetime import datetime, timezone
 import logging
 import argparse
@@ -116,15 +115,24 @@ def main(args):
     # compatible filesystem.  Then execute the Flink SQL statement to register the
     # Iceberg catalog
     catalog_name = "apache_kickstarter"
-    bucket_name = args.s3_bucket_name.replace("_", "-") # Replace underscores with hyphens that follow the S3 bucket naming convention
-    tbl_env.execute_sql(f"""
-        CREATE CATALOG {catalog_name} WITH (
-            'type' = 'iceberg',
-            'catalog-type' = 'hadoop',            
-            'warehouse' = 's3a://{bucket_name}'
-            );
-    """)
-    tbl_env.execute_sql(f"USE CATALOG {catalog_name};")
+    bucket_name = args.s3_bucket_name.replace("_", "-") # Replace underscores with hyphens to ensure that the name follows the S3 bucket naming convention
+    try:
+        catalog_result = tbl_env.execute_sql(f"""
+            CREATE CATALOG {catalog_name} WITH (
+                'type' = 'iceberg',
+                'catalog-type' = 'hadoop',            
+                'warehouse' = 's3a://{bucket_name}/warehouse',
+                'property-version' = '1',
+                'aws.region' = '{args.aws_region}',
+                'io-impl' = 'org.apache.iceberg.hadoop.HadoopFileIO',
+                's3.endpoint' = 'https://s3.{args.aws_region}.amazonaws.com'
+                );
+        """)
+    except Exception as e:
+        print(f"A critical error occurred to during the processing of the catalog because {e}")
+        exit(1)
+
+    tbl_env.use_catalog(catalog_name)
 
     # Access the Iceberg catalog to create the airlines database and the Iceberg tables
     catalog = tbl_env.get_catalog(catalog_name)
@@ -132,8 +140,8 @@ def main(args):
     # Get the current catalog name
     print(f"Current catalog: {tbl_env.get_current_catalog()}")
 
-    # Check if the database exists.  If it does not exist, create the database
     database_name = "airlines"
+    # Check if the database exists.  If it does not exist, create the database
     try:
         if not catalog.database_exists(database_name):
             tbl_env.execute_sql(f"CREATE DATABASE IF NOT EXISTS {database_name};")
@@ -159,7 +167,7 @@ def main(args):
         if not catalog.table_exists(flight_table_path):
             # Define the table
             tbl_env.execute_sql(f"""
-                CREATE TABLE {flight_table_path.get_full_name()} (
+                CREATE TABLE flight (
                     email_address STRING,
                     departure_time STRING,
                     departure_airport_code STRING,
