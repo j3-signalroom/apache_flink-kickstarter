@@ -4,11 +4,9 @@ from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRec
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
-from pyflink.common import Configuration
 from datetime import datetime, timezone
 import logging
 import argparse
-import os
 
 from model.flight_data import FlightData
 from model.skyone_airline_flight_data import SkyOneAirlinesFlightData
@@ -116,15 +114,24 @@ def main(args):
     # compatible filesystem.  Then execute the Flink SQL statement to register the
     # Iceberg catalog
     catalog_name = "apache_kickstarter"
-    bucket_name = args.s3_bucket_name.replace("_", "-") # Replace underscores with hyphens that follow the S3 bucket naming convention
-    tbl_env.execute_sql(f"""
-        CREATE CATALOG {catalog_name} WITH (
-            'type' = 'iceberg',
-            'catalog-type' = 'hadoop',            
-            'warehouse' = 's3a://{bucket_name}'
-            );
-    """)
-    tbl_env.execute_sql(f"USE CATALOG {catalog_name};")
+    bucket_name = args.s3_bucket_name.replace("_", "-") # To follow S3 bucket naming convention, replace underscores with hyphens if exist
+    try:
+        catalog_result = tbl_env.execute_sql(f"""
+            CREATE CATALOG {catalog_name} WITH (
+                'type' = 'iceberg',
+                'catalog-type' = 'hadoop',            
+                'warehouse' = 's3a://{bucket_name}',
+                'property-version' = '1',
+                'aws.region' = '{args.aws_region}',
+                'io-impl' = 'org.apache.iceberg.hadoop.HadoopFileIO',
+                's3.endpoint' = 'https://s3.{args.aws_region}.amazonaws.com'
+                );
+        """)
+    except Exception as e:
+        print(f"A critical error occurred to during the processing of the catalog because {e}")
+        exit(1)
+
+    tbl_env.use_catalog(catalog_name)
 
     # Access the Iceberg catalog to create the airlines database and the Iceberg tables
     catalog = tbl_env.get_catalog(catalog_name)

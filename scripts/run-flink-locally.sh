@@ -118,9 +118,9 @@ then
 
     if [ $use_non_mac = true ]
     then
-        docker-compose -f linux-docker-compose.yml up --build --force-recreate -d 
+        docker-compose -f linux-docker-compose.yml up -d 
     else
-        docker-compose -f mac-docker-compose.yml up --build --force-recreate -d
+        docker-compose -f mac-docker-compose.yml up -d
     fi
 else
     if [ $use_non_mac = true ]
