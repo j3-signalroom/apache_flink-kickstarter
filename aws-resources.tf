@@ -127,6 +127,32 @@ resource "aws_s3_bucket" "iceberg_bucket" {
   bucket = replace(local.secrets_insert, "_", "-")
 }
 
+resource "aws_s3_bucket_policy" "iceberg_bucket_policy" {
+  bucket = aws_s3_bucket.iceberg_bucket.bucket
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = "*"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "${aws_s3_bucket.iceberg_bucket.arn}/*"
+      },
+      {
+        Effect = "Allow"
+        Principal = "*"
+        Action = "s3:ListBucket"
+        Resource = aws_s3_bucket.iceberg_bucket.arn
+      }
+    ]
+  })
+}
+
 data "aws_secretsmanager_secret" "admin_public_keys" {
   name = "/snowflake_admin_credentials"
 }
