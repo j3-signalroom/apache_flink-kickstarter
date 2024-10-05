@@ -137,8 +137,8 @@ resource "aws_s3_bucket_public_access_block" "iceberg_bucket_public_access_block
   restrict_public_buckets = true
 }
 
-resource "aws_iam_role" "iceberg_bucket_role" {
-  name = "iceberg_bucket_role"
+resource "aws_iam_role" "iceberg_bucket" {
+  name = "iceberg_bucket"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -167,19 +167,19 @@ resource "aws_iam_policy" "s3_access_policy" {
           "s3:PutObject",
           "s3:DeleteObject"
         ]
-        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket_role.bucket}/*"
+        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/*"
       },
       {
         Effect = "Allow"
         Action = "s3:ListBucket"
-        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket_role.bucket}"
+        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}"
       }
     ]
   })
 }
 
 resource "aws_iam_role_policy_attachment" "s3_access_attachment" {
-  role       = aws_iam_role.iceberg_bucket_role.name
+  role       = aws_iam_role.iceberg_bucket.name
   policy_arn = aws_iam_policy.s3_access_policy.arn
 }
 
