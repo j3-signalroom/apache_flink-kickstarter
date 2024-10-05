@@ -1,17 +1,19 @@
 # ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png) Apache Flink Kickstarter
-This repo was created to demostrate the exceptional capabiliities of one of the core componements of the signalRoom tech Stack, Apache Flink.  In the spirit of one of our central tenet to share and spread knowledge to all.  We take the three Flink Apps from the blog series on [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/):
+This repository showcases the exceptional capabilities of Apache Flink, known for its high performance, scalability, and advanced stream processing features, which is a core component of the signalRoom technology stack. Staying true to our mission of empowering developers by sharing practical knowledge, we demonstrate the use of Flink through real-world examples based on the blog series ["Building Apache Flink Applications in Java."](https://developer.confluent.io/courses/flink-java/overview/)
 
-App|Description
+Flink App|Description
 -|-
-`DataGeneratorApp`|This app creates fake flight data for fictional airlines **Sunset Air** and **Sky One** Airlines," and sends it to the Kafka topics `airline.sunset` and `airline.skyone` respectively.  Wrote it only in Java because PyFlink does not have a Data Generator source for Python.
-`FlightImporterApp`|This app imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and converts it to a unified format for the `airline.all` Kafka topic.  Wrote it both in Java and Python.
-`UserStatisticsApp`|This app processes data from the `airline.all` Kafka topic to aggregate user statistics in the `airline.user_statistics` Kafka topic.  Wrote it both in Java and Python.
+`DataGeneratorApp`|Generates realistic flight data for fictional airlines **Sunset Air** and **Sky One** Airlines, publishing to Kafka topics `airline.sunset` and `airline.skyone`. Implemented in Java, as PyFlink lacks a data generator source for Python.
+`FlightImporterApp`|Imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and standardizes them into a unified `airline.all` Kafka topic. Implemented in both Java and Python.
+`UserStatisticsApp`|Processes data from the `airline.all` Kafka topic to aggregate user statistics into the `airline.user_statistics` Kafka topic. Implemented in both Java and Python.
 
- Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/).  We kick off by evolving Flink applications with real-world enterprise use cases. First, we tap into _**AWS Secrets Manager**_ to securely fetch the Kafka Cluster API key, and leverage _**AWS Systems Manager Parameter**_ Store to retrieve critical Kafka client configuration properties.
+Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/), these applications are designed to handle enterprise-scale use cases to demonstrate Flink's potential for real-world applications. This will start with securely fetching Kafka Cluster API keys via _**AWS Secrets Manager**_ and retrieving essential Kafka client configuration properties through the _**AWS Systems Manager Parameter**_.
 
-But we don't stop there—beyond simply transforming and enriching data, we stream it into both Kafka and _**Apache Iceberg tables**_, enabling highly scalable, real-time data processing and storage.
+Beyond simply transforming and enriching data, we stream it into Kafka topics and _**Apache Iceberg tables**_, designed for high-performance, large-scale analytics with support for ACID transactions, offering highly scalable, real-time data processing and durable storage.
 
-Our journey with Flink apps doesn't end at just Java—_**Python-based**_ Flink apps take the stage, utilizing all the powerful APIs that Apache Flink offers. This includes Flink SQL, the Table API, and the DataFrame API, providing a seamless, flexible approach to solving complex streaming challenges. By combining these technologies, we unlock an optimal solution architecture that is as efficient as it is scalable.
+Our journey with Flink doesn’t end with Java; Python-based Flink applications also shine in this repository, leveraging Flink SQL, Table API, and DataFrame API, each offering unique advantages: Flink SQL for declarative queries, Table API for a mix of SQL-like syntax and programmatic control, and DataFrame API for efficient data manipulation similar to pandas or R. This provides a seamless, flexible approach to solving complex streaming challenges, ultimately unlocking an efficient and scalable architecture for modern data needs.
+
+Explore the repo, run the Docker containers (compatible with both Mac M chips and non-Mac M chips), and see how Apache Flink can be utilized to build robust, enterprise-grade streaming applications.
 
 **Table of Contents**
 
