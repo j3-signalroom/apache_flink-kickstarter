@@ -27,15 +27,11 @@ terraform {
     }
 }
 
-data "aws_caller_identity" "current" {}
-
 locals {
   cloud                         = "AWS"
   secrets_insert                = lower(var.service_account_user)
   confluent_secrets_path_prefix = "/confluent_cloud_resource/${local.secrets_insert}"
   snowflake_secrets_path_prefix = "/snowflake_resource/${local.secrets_insert}"
-  sso_role_arn                  = data.aws_caller_identity.current.arn
-  sso_role_name                 = regex("role/(.*)$", local.sso_role_arn)[0]
 }
 
 
