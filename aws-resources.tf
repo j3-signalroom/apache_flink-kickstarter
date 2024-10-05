@@ -167,19 +167,19 @@ resource "aws_iam_policy" "s3_access_policy" {
           "s3:PutObject",
           "s3:DeleteObject"
         ]
-        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/*"
+        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket_role.bucket}/*"
       },
       {
         Effect = "Allow"
         Action = "s3:ListBucket"
-        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}"
+        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket_role.bucket}"
       }
     ]
   })
 }
 
 resource "aws_iam_role_policy_attachment" "s3_access_attachment" {
-  role       = aws_iam_role.iceberg_bucket.name
+  role       = aws_iam_role.iceberg_bucket_role.name
   policy_arn = aws_iam_policy.s3_access_policy.arn
 }
 
