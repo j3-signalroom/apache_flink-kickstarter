@@ -165,13 +165,11 @@ resource "aws_iam_policy" "s3_access_policy" {
   })
 }
 
-data "external" "aws_sso_role" {
-  program = ["bash", "scripts/get_aws_sso_role_name.sh"]
-}
+data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role_policy_attachment" "s3_access_attachment" {
   # The role name is extracted from the ARN of the current caller
-  role       = "aws_iam_role.${data.external.aws_sso_role.result.role_name}.name"
+  role       = regex("role/([^/]*)/", data.aws_caller_identity.current.arn)[0]
   policy_arn = aws_iam_policy.s3_access_policy.arn
 }
 
