@@ -1,16 +1,13 @@
-import boto3
+#!/bin/bash
 
-# Initialize STS client
-sts_client = boto3.client('sts')
-
-# Get the caller identity
-response = sts_client.get_caller_identity()
-arn = response['Arn']
+# Get caller identity to get the ARN
+caller_identity=$(aws sts get-caller-identity --query "Arn" --output text)
 
 # Check if the caller identity contains a role
-if "assumed-role" in arn:
-    # Extract role name
-    role_name = arn.split('/')[1]
-    print(f"Role Name: {role_name}")
-else:
-    print(f"Not an assumed role: {arn}")
+if [[ $caller_identity == *":assumed-role/"* ]]; then
+    # Extract role name from ARN
+    role_name=$(echo $caller_identity | awk -F'/' '{print $2}')
+    echo "Role Name: $role_name"
+else
+    echo "Not an assumed role: $caller_identity"
+fi

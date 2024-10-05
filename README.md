@@ -68,7 +68,7 @@ To help you start quickly, the repo comes with **_Docker containers_** for Mac M
     > - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
     > - [Java JDK (Java Development Kit) 11](https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html)
     > - [Python 3.11](https://www.python.org/downloads/release/python-3119/)
-    > - [Terraform CLI version 1.85 or higher](https://developer.hashicorp.com/terraform/install)
+    > - [Terraform CLI version 1.93 or higher](https://developer.hashicorp.com/terraform/install)
 
 2. Clone the repo:
     ```bash
@@ -90,8 +90,25 @@ Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials
 
 #### 2.1.1 Run locally
 ```bash
-scripts/run-terraform-locally.sh --profile=<PROFILE_NAME> --confluent_cloud_api_key=<CONFLUENT_CLOUD_API_KEY> --confluent_cloud_api_secret=<CONFLUENT_CLOUD_API_SECRETS> 
+scripts/run-terraform-locally.sh <create | delete> --profile=<SSO_PROFILE_NAME> \
+                                                   --confluent_api_key=<CONFLUENT_API_KEY> \
+                                                   --confluent_api_secret=<CONFLUENT_API_SECRET> \
+                                                   --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> \
+                                                   --service_account_user=<SERVICE_ACCOUNT_USER> \
+                                                   --day_count=<DAY_COUNT> \
+                                                   --auto_offset_reset=<earliest | latest> \
+                                                   --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>
 ```
+Argument placeholder|Replace with
+-|-
+`<SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
+`<CONFLUENT_API_KEY>`|your organization's Confluent Cloud API Key (also referred as Cloud API ID).
+`<CONFLUENT_API_SECRET>`|your organization's Confluent Cloud API Secret.
+`<SNOWFLAKE_WAREHOUSE>`|the Snowflake warehouse (or "virtual warehouse") you choose to run the resources in Snowflake.
+`<SERVICE_ACCOUNT_USER>`|the Snowflake service account user who is to be assigned the RSA key pairs for its authentication.
+`<DAY_COUNT>`|how many day(s) should the API Key be rotated for.
+`<AUTO_OFFSET_RESET>`|Specify where a Kafka Consumer should begin reading from in the Kafka Topic when it doesn't have any other valid offsets to start from.
+`<NUMBER_OF_API_KEYS_TO_RETAIN>`|Specifies the number of API keys to create and retain.
 
 ### 2.2 DevOps in Action: Running Terraform in the cloud
 In order to run the Terraform configuration from GitHub, the Terraform Cloud API token and Confluent Cloud API Key are required as GitHub Secret variables.  Learn how to do to get the Terraform Cloud API token and Confluent Cloud API key [here](.blog/setup-github.md).
@@ -144,7 +161,10 @@ By following these steps, you will run the Terraform configuration directly from
 This section guides you through the local setup (on one machine but in separate containers) of the Apache Flink cluster in Session mode using Docker containers with support for Apache Iceberg.  Run the `bash` script below to start the Apache Flink cluster in Session Mode on your machine:
 
 ```bash
-scripts/run-flink-locally.sh <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | armd64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
+scripts/run-flink-locally.sh <on | down> --profile=<AWS_SSO_PROFILE_NAME>
+                                         --chip=<amd64 | armd64>
+                                         --flink_language=<python | java>
+                                         [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
 ```
 Argument placeholder|Replace with
 -|-
