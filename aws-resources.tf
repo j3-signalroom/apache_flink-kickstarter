@@ -124,7 +124,17 @@ resource "aws_ssm_parameter" "producer_kafka_client_acks" {
 }
 
 resource "aws_s3_bucket" "iceberg_bucket" {
+  # Ensure the bucket name adheres to the S3 bucket naming conventions
   bucket = replace(local.secrets_insert, "_", "-")
+}
+
+resource "aws_s3_bucket_public_access_block" "iceberg_bucket_public_access_block" {
+  bucket = aws_s3_bucket.iceberg_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 data "aws_secretsmanager_secret" "admin_public_keys" {

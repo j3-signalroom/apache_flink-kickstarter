@@ -131,12 +131,13 @@ def main(args):
         print(f"A critical error occurred to during the processing of the catalog because {e}")
         exit(1)
 
+    # Use the Iceberg catalog
     tbl_env.use_catalog(catalog_name)
 
     # Access the Iceberg catalog to create the airlines database and the Iceberg tables
     catalog = tbl_env.get_catalog(catalog_name)
 
-    # Get the current catalog name
+    # Print the current catalog name
     print(f"Current catalog: {tbl_env.get_current_catalog()}")
 
     # Check if the database exists.  If it does not exist, create the database
@@ -151,7 +152,7 @@ def main(args):
         print(f"A critical error occurred to during the processing of the database because {e}")
         exit(1)
 
-    # Get the current database name
+    # Print the current database name
     print(f"Current database: {tbl_env.get_current_database()}")
 
     # An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
@@ -164,7 +165,7 @@ def main(args):
     # Check if the table exists.  If it does not exist, create the table
     try:
         if not catalog.table_exists(flight_table_path):
-            # Define the table
+            # Define the table using Flink SQL
             tbl_env.execute_sql(f"""
                 CREATE TABLE {flight_table_path.get_full_name()} (
                     email_address STRING,
@@ -190,10 +191,12 @@ def main(args):
     (tbl_env.from_data_stream(define_workflow(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info()))
             .execute_insert(flight_table_path.get_full_name()))
 
+    # Execute the Flink job graph (DAG)
     try:
         env.execute("FlightImporterApp")
     except Exception as e:
         logger.error("The App stopped early due to the following: %s", e)
+
 
 def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> DataStream:
     """This method defines the workflow for the Flink job graph (DAG) by connecting the data streams.
@@ -206,14 +209,17 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
         DataStream: the union of the SkyOne Airlines and Sunset Air flight data streams.
     """
     
+    # Map the data streams to the FlightData model and filter out Skyone flights that have already arrived
     skyone_flight_stream = (skyone_stream
                             .map(SkyOneAirlinesFlightData.to_flight_data)
                             .filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now(timezone.utc)))
 
+    # Map the data streams to the FlightData model and filter out Sunset flights that have already arrived
     sunset_flight_stream = (sunset_stream
                             .map(SunsetAirFlightData.to_flight_data)
                             .filter(lambda flight: datetime.fromisoformat(flight.arrival_time) > datetime.now(timezone.utc)))
     
+    # Return the union of the two data streams
     return skyone_flight_stream.union(sunset_flight_stream)
 
 
