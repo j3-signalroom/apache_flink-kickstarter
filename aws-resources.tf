@@ -124,33 +124,17 @@ resource "aws_ssm_parameter" "producer_kafka_client_acks" {
 }
 
 resource "aws_s3_bucket" "iceberg_bucket" {
+  # Ensure the bucket name adheres to the S3 bucket naming conventions
   bucket = replace(local.secrets_insert, "_", "-")
 }
 
-resource "aws_s3_bucket_policy" "iceberg_bucket_policy" {
-  bucket = aws_s3_bucket.iceberg_bucket.bucket
+resource "aws_s3_bucket_public_access_block" "iceberg_bucket_public_access_block" {
+  bucket = aws_s3_bucket.iceberg_bucket.id
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = "*"
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject"
-        ]
-        Resource = "${aws_s3_bucket.iceberg_bucket.arn}/*"
-      },
-      {
-        Effect = "Allow"
-        Principal = "*"
-        Action = "s3:ListBucket"
-        Resource = aws_s3_bucket.iceberg_bucket.arn
-      }
-    ]
-  })
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 data "aws_secretsmanager_secret" "admin_public_keys" {

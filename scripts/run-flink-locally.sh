@@ -90,8 +90,8 @@ then
         exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
     fi
 
-    # Get the SSO AWS_ACCESS_KEY_ID, AWS_ACCESS_SECRET_KEY, AWS_SESSION_TOKEN, and AWS_REGION, and
-    # set them as an environmental variables
+    # Retrieve from the AWS SSO account information to set the SSO AWS_ACCESS_KEY_ID, 
+    # AWS_ACCESS_SECRET_KEY, AWS_SESSION_TOKEN, and AWS_REGION environmental variables
     aws sso login $AWS_PROFILE
     eval $(aws2-wrap $AWS_PROFILE --export)
     export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
