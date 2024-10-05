@@ -159,7 +159,7 @@ fi
 aws sso login $AWS_PROFILE
 eval $(aws2-wrap $AWS_PROFILE --export)
 export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
-export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity $AWS_PROFILE --query "Account" --output text)
 
 # Create terraform.tfvars file
 if [ create_action = true ]

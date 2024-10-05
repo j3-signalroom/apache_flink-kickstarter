@@ -137,6 +137,42 @@ resource "aws_s3_bucket_public_access_block" "iceberg_bucket_public_access_block
   restrict_public_buckets = true
 }
 
+resource "aws_iam_policy" "s3_access_policy" {
+  name        = "iceberg_bucket-s3-policy"
+  description = "Policy to allow Flink access to S3 bucket"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}"
+      },
+      {
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/*"
+      }
+    ]
+  })
+}
+
+data "aws_caller_identity" "current" {}
+
+resource "aws_iam_role_policy_attachment" "s3_access_attachment" {
+  # The role name is extracted from the ARN of the current caller
+  role       = regex("role/([^/]*)/", data.aws_caller_identity.current.arn)[0]
+  policy_arn = aws_iam_policy.s3_access_policy.arn
+}
+
 data "aws_secretsmanager_secret" "admin_public_keys" {
   name = "/snowflake_admin_credentials"
 }
