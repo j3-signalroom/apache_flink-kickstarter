@@ -147,6 +147,10 @@ RUN echo "<?xml version='1.0' encoding='UTF-8'?>" > $HADOOP_CONF_DIR/core-site.x
     echo '        <name>fs.s3a.connection.ssl.enabled</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '        <value>true</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.aws.credentials.provider</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <value>org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo "</configuration>" >> $HADOOP_CONF_DIR/core-site.xml
 
 # Create hdfs-site.xml

@@ -131,10 +131,10 @@ resource "aws_s3_bucket" "iceberg_bucket" {
 resource "aws_s3_bucket_public_access_block" "iceberg_bucket_public_access_block" {
   bucket = aws_s3_bucket.iceberg_bucket.id
 
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
 }
 
 resource "aws_iam_role" "iceberg_bucket" {
@@ -171,6 +171,34 @@ resource "aws_iam_policy" "s3_access_policy" {
       },
       {
         Effect = "Allow"
+        Action = "s3:ListBucket"
+        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}"
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_policy" "s3_bucket_policy" {
+  bucket = aws_s3_bucket.iceberg_bucket.bucket
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+            "AWS": aws_iam_role.iceberg_bucket.arn
+        }
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/*"
+      },
+      {
+        Effect = "Allow"
+        Principal = "*"
         Action = "s3:ListBucket"
         Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}"
       }
