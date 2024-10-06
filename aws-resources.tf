@@ -146,7 +146,7 @@ resource "aws_iam_role" "iceberg_bucket" {
       {
         Effect = "Allow"
         Principal = {
-          Service = "lambda.amazonaws.com"
+          AWS = data.aws_caller_identity.current.arn
         }
         Action = "sts:AssumeRole"
       }
@@ -164,7 +164,8 @@ resource "aws_iam_policy" "s3_access_policy" {
         Effect = "Allow"
         Action = "*"
         Resource = [
-          "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/*",
+          "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/warehouse/airlines/*",
+          "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/warehouse/*",
           "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}"
         ]
       }
@@ -183,7 +184,8 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy" {
         Principal = "*"
         Action = "*"
         Resource = [
-          "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/*",
+          "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/warehouse/airlines/*",
+          "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/warehouse/*",
           "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}"
         ]
       }
