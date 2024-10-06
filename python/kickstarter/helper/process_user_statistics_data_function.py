@@ -17,12 +17,10 @@ class ProcessUserStatisticsDataFunction(ProcessWindowFunction):
     This class is designed to process elements within a window, manage state, and yield
     accumulated statistics for user data.
     """
-
     def __init__(self):
         """The purpose of this constructor is to set up the initial state of the instance by
         defining the state_descriptor attribute and initializing it to None.
         """
-
         self.state_descriptor = None
 
     def open(self, context: RuntimeContext):
@@ -37,7 +35,6 @@ class ProcessUserStatisticsDataFunction(ProcessWindowFunction):
             context can be used to access various runtime features, such as state, metrics, and
             configuration.
         """
-
         self.state_descriptor = ValueStateDescriptor("User Statistics Data", UserStatisticsData.get_value_type_info())
 
     def process(self, key: str, context: "ProcessWindowFunction.Context", elements: Iterable[UserStatisticsData]) -> Iterable:
@@ -56,7 +53,6 @@ class ProcessUserStatisticsDataFunction(ProcessWindowFunction):
         Yields:
             Iterable: yeilds the accumulated statistics as a `UserStatisticsData` object.
         """
-
         # Retrieves the state associated with the current window
         state = context.global_state().get_state(self.state_descriptor)
 

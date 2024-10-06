@@ -1,8 +1,6 @@
 from pyflink.common import Row, Types
 from dataclasses import dataclass
-from decimal import Decimal
 
-from helper.utilities import serialize
 from model.flight_data import FlightData
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"

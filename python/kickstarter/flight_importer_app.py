@@ -31,7 +31,6 @@ def main(args):
     Args:
         args (str): is the arguments passed to the script.
     """
-
     # Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
 
@@ -116,9 +115,9 @@ def main(args):
                 'catalog-type' = 'hadoop',            
                 'warehouse' = 's3a://{bucket_name}',
                 'property-version' = '1',
-                'aws.region' = '{args.aws_region}',
                 'io-impl' = 'org.apache.iceberg.hadoop.HadoopFileIO',
-                's3.endpoint' = 'https://s3.{args.aws_region}.amazonaws.com'
+                'fs.s3a.endpoint' = 's3.{args.aws_region}.amazonaws.com',
+                'fs.s3a.aws.region=' = '{args.aws_region}'
                 );
         """)
     except Exception as e:
@@ -134,7 +133,7 @@ def main(args):
     # Print the current catalog name
     print(f"Current catalog: {tbl_env.get_current_catalog()}")
 
-    # Check if the database exists.  If it does not exist, create the database
+    # Check if the database exists.  If not, create it
     database_name = "airlines"
     try:
         if not catalog.database_exists(database_name):
@@ -156,7 +155,7 @@ def main(args):
     # table
     flight_table_path = ObjectPath(database_name, "flight")
 
-    # Check if the table exists.  If it does not exist, create the table
+    # Check if the table exists.  If not, create it
     try:
         if not catalog.table_exists(flight_table_path):
             # Define the table using Flink SQL
@@ -207,7 +206,6 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
     Returns:
         DataStream: the union of the SkyOne Airlines and Sunset Air flight data streams.
     """
-    
     # Map the data streams to the FlightData model and filter out Skyone flights that have already arrived
     skyone_flight_stream = (skyone_stream
                             .map(SkyOneAirlinesFlightData.to_flight_data)
