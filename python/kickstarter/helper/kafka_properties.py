@@ -22,7 +22,6 @@ class KafkaProperties(TableFunction):
     """This User-Defined Table Function (UDTF) is used to retrieve the Kafka Cluster properties
     from the AWS Secrets Manager and Parameter Store.
     """
-
     def __init__(self, for_consumer: bool, service_account_user: str):
         """Initializes the UDTF with the necessary parameters.
 
@@ -32,7 +31,6 @@ class KafkaProperties(TableFunction):
             the prefix to the path of the Kafka Cluster secrets in the AWS Secrets Manager and
             the Kafka Client parameters in the AWS Systems Manager Parameter Store.
         """
-
         self._for_consumer = for_consumer
         self._service_account_user = service_account_user
         self._aws_region_name = os.environ['AWS_REGION']
@@ -50,7 +48,6 @@ class KafkaProperties(TableFunction):
         Yields:
             Iterator[Row]: combination of Kafka Cluster properties and Kafka Client parameters.
         """
-
         # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
         secret_path_prefix = f"/confluent_cloud_resource/{self._service_account_user}"
 
@@ -75,7 +72,6 @@ class KafkaProperties(TableFunction):
         Returns:
             properties (tuple[str, str]): the Kafka Cluster properties collection if successful, otherwise None.
         """
-        
         properties = {}
 
         # Retrieve the SECRET properties from the AWS Secrets Manager
@@ -121,7 +117,6 @@ class KafkaProperties(TableFunction):
             that doesn't exist. The resource might not be specified correctly, or its status might not
             be ACTIVE.
         """
-        
         # Create a Secrets Manager client
         session = boto3.session.Session()
         client = session.client(service_name='secretsmanager', region_name=self._aws_region_name)
@@ -157,8 +152,7 @@ class KafkaProperties(TableFunction):
         Return(s):
             parameters (dict): Goes throught recursively and returns all the parameters
             within a hierarchy.
-        """
-        
+        """        
         session = boto3.session.Session()
         client = session.client(service_name='ssm', region_name=self._aws_region_name)
         
@@ -213,7 +207,6 @@ def execute_kafka_properties_udtf(tbl_env, for_consumer: bool, service_account_u
     Returns:
         dict: combination of Kafka Cluster properties and Kafka Client parameters.
     """
-
     # Define the schema for the table and the return result of the UDTF
     schema = DataTypes.ROW([
         DataTypes.FIELD('property_key', DataTypes.STRING()),

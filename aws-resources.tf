@@ -162,17 +162,11 @@ resource "aws_iam_policy" "s3_access_policy" {
     Statement = [
       {
         Effect = "Allow"
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject"
+        Action = "*"
+        Resource = [
+          "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/*",
+          "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}"
         ]
-        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/*"
-      },
-      {
-        Effect = "Allow"
-        Action = "s3:ListBucket"
-        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}"
       }
     ]
   })
@@ -186,21 +180,12 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy" {
     Statement = [
       {
         Effect = "Allow"
-        Principal = {
-            "AWS": aws_iam_role.iceberg_bucket.arn
-        }
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject"
-        ]
-        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/*"
-      },
-      {
-        Effect = "Allow"
         Principal = "*"
-        Action = "s3:ListBucket"
-        Resource = "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}"
+        Action = "*"
+        Resource = [
+          "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/*",
+          "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}"
+        ]
       }
     ]
   })

@@ -112,12 +112,15 @@ RUN pip install apache-flink==${APACHE_FLINK_VERSION_WITH_PATCH}
 RUN pip install pyflink
 RUN pip install google-api-python-client
 
+# Install AWS CLI to interact with AWS services for debugging services
+RUN pip --no-cache-dir install --upgrade awscli
+
 # Install Nano to edit files
 RUN apt update && apt install -y nano
 
 # Create core-site.xml
-RUN echo "<?xml version='1.0' encoding='UTF-8'?>" > $HADOOP_CONF_DIR/core-site.xml && \
-    echo "<configuration>" >> $HADOOP_CONF_DIR/core-site.xml && \
+RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/core-site.xml && \
+    echo '<configuration>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    <!-- S3A Filesystem Implementation -->' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '        <name>fs.s3a.impl</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
@@ -151,7 +154,7 @@ RUN echo "<?xml version='1.0' encoding='UTF-8'?>" > $HADOOP_CONF_DIR/core-site.x
     echo '        <name>fs.s3a.aws.credentials.provider</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '        <value>org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo "</configuration>" >> $HADOOP_CONF_DIR/core-site.xml
+    echo '</configuration>' >> $HADOOP_CONF_DIR/core-site.xml
 
 # Create hdfs-site.xml
 RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/hdfs-site.xml && \
@@ -172,6 +175,6 @@ RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/hdfs-site.x
     echo '        <value>false</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
     echo '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
     echo '</configuration>' >> $HADOOP_CONF_DIR/hdfs-site.xml
-    
+
 # Set the entrypoint to Flink's entrypoint script
 CMD ["./bin/start-cluster.sh"]

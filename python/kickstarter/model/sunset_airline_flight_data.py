@@ -2,7 +2,7 @@ from pyflink.common import Row, Types
 from dataclasses import dataclass
 from decimal import Decimal
 
-from helper.utilities import serialize
+from helper.utilities import serialize_date
 from model.flight_data import FlightData
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
@@ -56,9 +56,9 @@ class SunsetAirFlightData:
 
     def to_row(self):
         return Row(email_address=self.email_address,
-                   departure_time=serialize(self.departure_time),
+                   departure_time=serialize_date(self.departure_time),
                    departure_airport_code=self.departure_airport_code,
-                   arrival_time=serialize(self.arrival_time),
+                   arrival_time=serialize_date(self.arrival_time),
                    arrival_airport_code=self.arrival_airport_code,
                    flight_number=self.flight_number,
                    confirmation_code=self.confirmation_code,
