@@ -102,12 +102,6 @@ def main(args):
                                                    .build())
                             .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
                             .build())
-
-    # Combines the two Kafka sources and sinks it to a single Kafka topic
-    (define_workflow(skyone_stream, sunset_stream)
-     .map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
-     .sink_to(flight_sink)
-     .name("flightdata_sink"))
     
     # Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
     # using the HadoopCatalog to store metadata in AWS S3 (i.e., s3a://), a Hadoop- 
@@ -187,10 +181,15 @@ def main(args):
         print(f"A critical error occurred to during the processing of the table because {e}")
         exit(1)
 
-    # Populate the table with the data from the data stream
-    (tbl_env.from_data_stream(define_workflow(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info()))
-            .execute_insert(flight_table_path.get_full_name()))
+    # Define the workflow for the Flink job graph (DAG)
+    flight_datastream = define_workflow(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
 
+    # Populate the table with the data from the data stream
+    tbl_env.from_data_stream(flight_datastream).execute_insert(flight_table_path.get_full_name())
+
+    # Sinks the Flight DataStream into a single Kafka topic
+    flight_datastream.sink_to(flight_sink).name("flightdata_sink")
+    
     # Execute the Flink job graph (DAG)
     try:
         env.execute("FlightImporterApp")
