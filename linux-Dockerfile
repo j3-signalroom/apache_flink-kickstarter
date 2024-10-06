@@ -62,6 +62,7 @@ RUN if [ "$FLINK_LANGUAGE" = "python" ]; then \
     curl -L "${APACHE_ROOT_URL}flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
     curl -L "${APACHE_ROOT_URL}hadoop/hadoop-common/${HADOOP_VERSION}/hadoop-common-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-common-${HADOOP_VERSION}.jar" && \
     curl -L "${APACHE_ROOT_URL}hadoop/hadoop-hdfs/${HADOOP_VERSION}/hadoop-hdfs-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-hdfs-${HADOOP_VERSION}.jar" && \
+    curl -L "${APACHE_ROOT_URL}hadoop/hadoop-aws/${HADOOP_VERSION}/hadoop-aws-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-aws-${HADOOP_VERSION}.jar" && \
     curl -L "${APACHE_ROOT_URL}hadoop/hadoop-hdfs-client/${HADOOP_VERSION}/hadoop-hdfs-client-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-hdfs-client-${HADOOP_VERSION}.jar" && \
     curl -L "${APACHE_ROOT_URL}flink/flink-sql-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" && \
     curl -L "${APACHE_ROOT_URL}flink/flink-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" && \
@@ -146,6 +147,10 @@ RUN echo "<?xml version='1.0' encoding='UTF-8'?>" > $HADOOP_CONF_DIR/core-site.x
     echo '        <name>fs.s3a.connection.ssl.enabled</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '        <value>true</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.aws.credentials.provider</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '        <value>org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
     echo "</configuration>" >> $HADOOP_CONF_DIR/core-site.xml
 
 # Create hdfs-site.xml
@@ -167,6 +172,6 @@ RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/hdfs-site.x
     echo '        <value>false</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
     echo '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
     echo '</configuration>' >> $HADOOP_CONF_DIR/hdfs-site.xml
-
+    
 # Set the entrypoint to Flink's entrypoint script
 CMD ["./bin/start-cluster.sh"]
