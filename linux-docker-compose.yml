@@ -21,6 +21,8 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
+        rest.flamegraph.enabled: true
+        web.backpressure.refresh-interval: 10000
         fs.s3a.access.key: $AWS_ACCESS_KEY_ID
         fs.s3a.secret.key: $AWS_SECRET_ACCESS_KEY
         fs.s3a.endpoint: s3.$AWS_REGION.amazonaws.com

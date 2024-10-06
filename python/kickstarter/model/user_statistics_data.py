@@ -23,16 +23,6 @@ class UserStatisticsData:
             self.total_flight_duration = flight_data.arrival_time - flight_data.departure_time
             self.number_of_flights = 1
 
-    def merge(self, that):
-        if self.email_address != that.email_address:
-            raise ValueError("Cannot merge UserStatisticsData for different email addresses")
-
-        merged = UserStatisticsData()
-        merged.email_address = self.email_address
-        merged.total_flight_duration = self.total_flight_duration + that.total_flight_duration
-        merged.number_of_flights = self.number_of_flights + that.number_of_flights
-        return merged
-
     def __eq__(self, other):
         if not isinstance(other, UserStatisticsData):
             return False
@@ -48,6 +38,16 @@ class UserStatisticsData:
                 f"email_address='{self.email_address}', "
                 f"total_flight_duration={self.total_flight_duration}, "
                 f"number_of_flights={self.number_of_flights}}}")
+    
+    def merge(self, that):
+        if self.email_address != that.email_address:
+            raise ValueError("Cannot merge UserStatisticsData for different email addresses")
+
+        merged = UserStatisticsData()
+        merged.email_address = self.email_address
+        merged.total_flight_duration = self.total_flight_duration + that.total_flight_duration
+        merged.number_of_flights = self.number_of_flights + that.number_of_flights
+        return merged
     
     @classmethod
     def from_flight(cls, data: FlightData):

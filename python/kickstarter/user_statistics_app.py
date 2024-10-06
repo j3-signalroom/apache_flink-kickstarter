@@ -76,11 +76,10 @@ def main(args):
                             .build())
 
     # Defines the workflow for the Flink job graph (DAG) by connecting the data streams
-    (define_workflow(flight_data_stream)
-     .map(lambda d: d.to_row(), output_type=UserStatisticsData.get_value_type_info())
-     .sink_to(stats_sink)
-     .name("userstatistics_sink")
-     .uid("userstatistics_sink"))
+    (define_workflow(flight_data_stream).map(lambda d: d.to_row(), output_type=UserStatisticsData.get_value_type_info())
+                                        .sink_to(stats_sink)
+                                        .name("userstatistics_sink")
+                                        .uid("userstatistics_sink"))
 
     try:
         env.execute("UserStatisticsApp")

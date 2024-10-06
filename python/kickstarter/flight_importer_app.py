@@ -5,7 +5,6 @@ from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRo
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
-import logging
 import argparse
 
 from model.flight_data import FlightData
@@ -19,10 +18,6 @@ __license__    = "MIT"
 __maintainer__ = "Jeffrey Jonathan Jennings"
 __email__      = "j3@thej3.com"
 __status__     = "dev"
-
-
-# Setup the logger
-logger = logging.getLogger('FlightImporterApp')
 
 
 def main(args):
@@ -58,7 +53,8 @@ def main(args):
                                 .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
-    skyone_stream = env.from_source(skyone_source, WatermarkStrategy.no_watermarks(), "skyone_source")
+    skyone_stream = (env.from_source(skyone_source, WatermarkStrategy.no_watermarks(), "skyone_source")
+                        .uid("skyone_source"))
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset`
     sunset_source = (KafkaSource.builder()
@@ -73,7 +69,8 @@ def main(args):
                                 .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
-    sunset_stream = env.from_source(sunset_source, WatermarkStrategy.no_watermarks(), "sunset_source")
+    sunset_stream = (env.from_source(sunset_source, WatermarkStrategy.no_watermarks(), "sunset_source")
+                        .uid("sunset_source"))
 
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.all`
     # Get the Kafka Cluster properties for the producer
@@ -81,6 +78,7 @@ def main(args):
     producer_properties.update({
         'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
     })
+
     # Note: KafkaSink was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
     # you will need to use the FlinkKafkaProducer class.
     flight_sink = (KafkaSink.builder()
@@ -113,7 +111,7 @@ def main(args):
             CREATE CATALOG {catalog_name} WITH (
                 'type' = 'iceberg',
                 'catalog-type' = 'hadoop',            
-                'warehouse' = 's3a://{bucket_name}',
+                'warehouse' = 's3a://{bucket_name}/warehouse',
                 'property-version' = '1',
                 'io-impl' = 'org.apache.iceberg.hadoop.HadoopFileIO',
                 'fs.s3a.endpoint' = 's3.{args.aws_region}.amazonaws.com',
@@ -184,16 +182,19 @@ def main(args):
     flight_datastream = define_workflow(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
 
     # Populate the table with the data from the data stream
-    tbl_env.from_data_stream(flight_datastream).execute_insert(flight_table_path.get_full_name())
+    (tbl_env.from_data_stream(flight_datastream)
+            .execute_insert(flight_table_path.get_full_name()))
 
     # Sinks the Flight DataStream into a single Kafka topic
-    flight_datastream.sink_to(flight_sink).name("flightdata_sink")
+    (flight_datastream.sink_to(flight_sink)
+                      .name("flightdata_sink")
+                      .uid("flightdata_sink"))
     
     # Execute the Flink job graph (DAG)
     try:
         env.execute("FlightImporterApp")
     except Exception as e:
-        logger.error("The App stopped early due to the following: %s", e)
+        print(f"The App stopped early due to the following: {e}.")
 
 
 def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> DataStream:
