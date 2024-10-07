@@ -123,8 +123,8 @@ then
         docker-compose -f mac-docker-compose.yml up --build -d
     fi
 
-    # Zip the python files when building the docker containers for Python use
-    if [ "python" = "python" ]
+    # Zip the Python files when building the docker containers for Python use
+    if [ $FLINK_LANGUAGE = "python" ]
     then
         docker exec -it -w /opt/flink/python_apps/kickstarter apache_flink-kickstarter-jobmanager-1 /bin/bash -c "zip python_files.zip * -r"
     fi
