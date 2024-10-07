@@ -11,6 +11,7 @@ from model.flight_data import FlightData
 from model.skyone_airline_flight_data import SkyOneAirlinesFlightData
 from model.sunset_airline_flight_data import SunsetAirFlightData
 from helper.kafka_properties import execute_kafka_properties_udtf
+from helper.utilities import catalog_exist
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -107,15 +108,18 @@ def main(args):
     catalog_name = "apache_kickstarter"
     bucket_name = args.s3_bucket_name.replace("_", "-") # To follow S3 bucket naming convention, replace underscores with hyphens if exist
     try:
-        catalog_result = tbl_env.execute_sql(f"""
-            CREATE CATALOG {catalog_name} WITH (
-                'type' = 'iceberg',
-                'catalog-type' = 'hadoop',            
-                'warehouse' = 's3a://{bucket_name}/warehouse',
-                'property-version' = '1',
-                'io-impl' = 'org.apache.iceberg.hadoop.HadoopFileIO'
-                );
-        """)
+        if not catalog_exist(tbl_env, catalog_name):
+            tbl_env.execute_sql(f"""
+                CREATE CATALOG {catalog_name} WITH (
+                    'type' = 'iceberg',
+                    'catalog-type' = 'hadoop',            
+                    'warehouse' = 's3a://{bucket_name}/warehouse',
+                    'property-version' = '1',
+                    'io-impl' = 'org.apache.iceberg.hadoop.HadoopFileIO'
+                    );
+            """)
+        else:
+            print(f"The {catalog_name} catalog already exists.")
     except Exception as e:
         print(f"A critical error occurred to during the processing of the catalog because {e}")
         exit(1)
