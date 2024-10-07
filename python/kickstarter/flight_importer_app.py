@@ -82,24 +82,26 @@ def main(args):
 
     # Note: KafkaSink was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
     # you will need to use the FlinkKafkaProducer class.
-    flight_sink = (KafkaSink.builder()
-                            .set_bootstrap_servers(producer_properties['bootstrap.servers'])
-                            .set_property("security.protocol", producer_properties['security.protocol'])
-                            .set_property("sasl.mechanism", producer_properties['sasl.mechanism'])
-                            .set_property("sasl.jaas.config", producer_properties['sasl.jaas.config'])
-                            .set_property("acks", producer_properties['acks'])
-                            .set_property("client.dns.lookup", producer_properties['client.dns.lookup'])
-                            .set_property("transaction.timeout.ms", producer_properties['transaction.timeout.ms'])
-                            .set_record_serializer(KafkaRecordSerializationSchema
-                                                   .builder()
-                                                   .set_topic("airline.all")
-                                                   .set_value_serialization_schema(JsonRowSerializationSchema
-                                                                                   .builder()
-                                                                                   .with_type_info(FlightData.get_value_type_info())
-                                                                                   .build())
-                                                   .build())
-                            .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                            .build())
+    # Initialize the KafkaSink builder
+    kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
+
+    # Loop through the producer properties and set each property
+    for key, value in producer_properties.items():
+        if key != 'bootstrap.servers':  # Skip the bootstrap.servers as it is already set
+            kafka_sink_builder.set_property(key, value)
+
+    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.user_statistics`
+    flight_sink = (kafka_sink_builder                            
+                   .set_record_serializer(KafkaRecordSerializationSchema
+                                          .builder()
+                                          .set_topic("airline.all")
+                                          .set_value_serialization_schema(JsonRowSerializationSchema
+                                                                          .builder()
+                                                                          .with_type_info(FlightData.get_value_type_info())
+                                                                          .build())
+                                          .build())
+                    .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                    .build())
     
     # Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
     # using the HadoopCatalog to store metadata in AWS S3 (i.e., s3a://), a Hadoop- 

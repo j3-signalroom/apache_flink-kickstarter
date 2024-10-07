@@ -57,25 +57,28 @@ def main(args):
         'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
     })
 
+    # Note: KafkaSink was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
+    # you will need to use the FlinkKafkaProducer class.
+    # Initialize the KafkaSink builder
+    kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
+
+    # Loop through the producer properties and set each property
+    for key, value in producer_properties.items():
+        if key != 'bootstrap.servers':  # Skip the bootstrap.servers as it is already set
+            kafka_sink_builder.set_property(key, value)
+
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.user_statistics`
-    stats_sink = (KafkaSink.builder()
-                           .set_bootstrap_servers(producer_properties['bootstrap.servers'])
-                           .set_property("security.protocol", producer_properties['security.protocol'])
-                           .set_property("sasl.mechanism", producer_properties['sasl.mechanism'])
-                           .set_property("sasl.jaas.config", producer_properties['sasl.jaas.config'])
-                           .set_property("acks", producer_properties['acks'])
-                           .set_property("client.dns.lookup", producer_properties['client.dns.lookup'])
-                           .set_property("transaction.timeout.ms", producer_properties['transaction.timeout.ms'])
-                           .set_record_serializer(KafkaRecordSerializationSchema
-                                                  .builder()
-                                                  .set_topic("airline.user_statistics")
-                                                  .set_value_serialization_schema(JsonRowSerializationSchema
-                                                                                  .builder()
-                                                                                  .with_type_info(UserStatisticsData.get_value_type_info())
-                                                                                  .build())
-                                                  .build())
-                            .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                            .build())
+    stats_sink = (kafka_sink_builder
+                  .set_record_serializer(KafkaRecordSerializationSchema
+                                         .builder()
+                                         .set_topic("airline.user_statistics")
+                                         .set_value_serialization_schema(JsonRowSerializationSchema
+                                                                         .builder()
+                                                                         .with_type_info(UserStatisticsData.get_value_type_info())
+                                                                         .build())
+                                         .build())
+                  .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                  .build())
 
     # Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
     # using the HadoopCatalog to store metadata in AWS S3 (i.e., s3a://), a Hadoop- 
@@ -152,22 +155,23 @@ def main(args):
         exit(1)
 
     # Define the workflow for the Flink job graph (DAG)
-    stat_datastream = define_workflow(flight_data_stream).map(lambda d: d.to_row(), output_type=UserStatisticsData.get_value_type_info())
+    stats_datastream = define_workflow(flight_data_stream).map(lambda d: d.to_row(), output_type=UserStatisticsData.get_value_type_info())
 
     # Populate the table with the data from the data stream
-    (tbl_env.from_data_stream(stat_datastream)
+    (tbl_env.from_data_stream(stats_datastream)
             .execute_insert(stats_table_path.get_full_name()))
 
     # Sinks the User Statistics DataStream Kafka topic
-    (stat_datastream.sink_to(stats_sink)
-                    .name("stats_sink")
-                    .uid("stats_sink"))
+    (stats_datastream.sink_to(stats_sink)
+                     .name("stats_sink")
+                     .uid("stats_sink"))
 
     # Execute the Flink job graph (DAG)
     try:
         env.execute("UserStatisticsApp")
     except Exception as e:
         logger.error("The App stopped early due to the following: %s", e)
+
 
 def define_workflow(flight_data_stream: DataStream) -> DataStream:
     """This method defines a data processing workflow for a stream of flight data using Apache
