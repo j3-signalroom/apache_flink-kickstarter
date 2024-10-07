@@ -107,7 +107,7 @@ Argument placeholder|Replace with
 `<SNOWFLAKE_WAREHOUSE>`|the Snowflake warehouse (or "virtual warehouse") you choose to run the resources in Snowflake.
 `<SERVICE_ACCOUNT_USER>`|the Snowflake service account user who is to be assigned the RSA key pairs for its authentication.
 `<DAY_COUNT>`|how many day(s) should the API Key be rotated for.
-`<AUTO_OFFSET_RESET>`|Specify where a Kafka Consumer should begin reading from in the Kafka Topic when it doesn't have any other valid offsets to start from.
+`<AUTO_OFFSET_RESET>`|Use `earliest`, when you want to read the first event in a Kafka topic.  Otherwise, specify `latest`.
 `<NUMBER_OF_API_KEYS_TO_RETAIN>`|Specifies the number of API keys to create and retain.
 
 ### 2.2 DevOps in Action: Running Terraform in the cloud
@@ -153,7 +153,7 @@ By following these steps, you will run the Terraform configuration directly from
 > brew install aws2-wrap
 > ````
 >
-> Or, make sure you have Python3.x installed on your machine, and run this command from your Terminal:
+> If you do not, make sure you have Python3.x installed on your machine, and run this command from your Terminal:
 > ```bash
 > pip install aws2-wrap
 > ```
@@ -168,10 +168,10 @@ scripts/run-flink-locally.sh <on | down> --profile=<AWS_SSO_PROFILE_NAME>
 ```
 Argument placeholder|Replace with
 -|-
-`<on | off>`|use `on` to turn on Flink locally, otherwise `off` to turn Flink off.
+`<ACTIVATE_DOCKER_CONTAINER>`|use `on` to turn on Flink locally, otherwise `off` to turn Flink off.
 `<AWS_SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
-`<amd64 | armd64>`|if you are running on a Mac with M1, M2, or M3 chip, use `arm64`.  Otherwise, use `amd64`.
-`<python | java>`|specify the language base of the Flink Apps you plan on running.
+`<CHIP>`|if you are running on a Mac with M1, M2, or M3 chip, use `arm64`.  Otherwise, use `amd64`.
+`<FLINK_LANGUAGE>`|specify the language base of the Flink Apps you plan on running.
 `<AWS_S3_BUCKET_NAME>`|**[Optional]** can specify the name of the AWS S3 bucket used to store Apache Iceberg files.
 
 ## 3.0 Kickstart examples!

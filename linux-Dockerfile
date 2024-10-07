@@ -6,12 +6,14 @@ ARG FLINK_LANGUAGE
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
 ARG AWS_REGION
+ARG AWS_S3_BUCKET
 
 # Map build argument(s) to container environment variable(s)
 ENV FLINK_LANGUAGE=${FLINK_LANGUAGE}
 ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 ENV AWS_REGION=${AWS_REGION}
+ENV AWS_S3_BUCKET=${AWS_S3_BUCKET}
 
 # Create/set version number container environment variable(s)
 ENV APACHE_FLINK_VERSION=1.19
@@ -24,10 +26,12 @@ ENV HADOOP_VERSION=3.4.0
 ENV ICEBERG_VERSION=1.6.1
 ENV AWS_SDK_VERSION=1.12.772
 
-# Create/set folder/url contianer environment variable(s)
+# Create/set folder contianer environment variable(s)
 ENV FLINK_CONF_DIR=/opt/flink/conf
 ENV FLINK_LIB_DIR=/opt/flink/lib/
-ENV APACHE_ROOT_URL=https://repo1.maven.org/maven2/org/apache/
+
+# Create/set URL contianer environment variable(s)
+ENV MAVEN_ROOT_URL=https://repo1.maven.org/maven2/org/apache/
 
 # Container metadata
 LABEL maintainer="j3@thej3.com" \
@@ -63,14 +67,14 @@ RUN curl -L "https://repo.maven.apache.org/maven2/org/apache/flink/flink-shaded-
 
 # Download and install the Flink libraries and plugins
 RUN if [ "$FLINK_LANGUAGE" = "python" ]; then \
-    curl -L "${APACHE_ROOT_URL}flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
-    curl -L "${APACHE_ROOT_URL}iceberg/iceberg-flink-runtime-${APACHE_FLINK_VERSION}/${ICEBERG_VERSION}/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" && \
-    curl -L "${APACHE_ROOT_URL}iceberg/iceberg-aws-bundle/${ICEBERG_VERSION}/iceberg-aws-bundle-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-aws-bundle-${ICEBERG_VERSION}.jar" && \
-    curl -L "${APACHE_ROOT_URL}hadoop/hadoop-common/${HADOOP_VERSION}/hadoop-common-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-common-${HADOOP_VERSION}.jar" && \
-    curl -L "${APACHE_ROOT_URL}flink/flink-sql-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" && \
-    curl -L "${APACHE_ROOT_URL}flink/flink-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" && \
-    curl -L "${APACHE_ROOT_URL}flink/flink-json/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
-    curl -L "${APACHE_ROOT_URL}kafka/kafka-clients/3.7.0/kafka-clients-3.7.0.jar" -o "${FLINK_LIB_DIR}kafka-clients-3.7.0.jar"; \
+    curl -L "${MAVEN_ROOT_URL}flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
+    curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-flink-runtime-${APACHE_FLINK_VERSION}/${ICEBERG_VERSION}/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" && \
+    curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-aws-bundle/${ICEBERG_VERSION}/iceberg-aws-bundle-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-aws-bundle-${ICEBERG_VERSION}.jar" && \
+    curl -L "${MAVEN_ROOT_URL}hadoop/hadoop-common/${HADOOP_VERSION}/hadoop-common-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-common-${HADOOP_VERSION}.jar" && \
+    curl -L "${MAVEN_ROOT_URL}flink/flink-sql-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" && \
+    curl -L "${MAVEN_ROOT_URL}flink/flink-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" && \
+    curl -L "${MAVEN_ROOT_URL}flink/flink-json/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
+    curl -L "${MAVEN_ROOT_URL}kafka/kafka-clients/3.7.0/kafka-clients-3.7.0.jar" -o "${FLINK_LIB_DIR}kafka-clients-3.7.0.jar"; \
 fi
 
 # Set CLASSPATH environment variable
@@ -182,6 +186,17 @@ RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $FLINK_CONF_DIR/hdfs-site.xm
     echo '        <value>false</value>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
     echo '    </property>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
     echo '</configuration>' >> $FLINK_CONF_DIR/hdfs-site.xml
+
+# Create SQL Client Defaults
+RUN echo 'catalogs:' > $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo '  apache_kickstarter:' >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo '    type: iceberg' >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo '    property-version: 1' >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo '    catalog-type: hadoop' >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo "    warehouse: s3a://${AWS_S3_BUCKET}/warehouse" >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo "    fs.s3a.endpoint: s3.${AWS_REGION}.amazonaws.com" >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo "    fs.s3a.access.key: ${AWS_ACCESS_KEY_ID}" >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo "    fs.s3a.secret.key: ${AWS_SECRET_ACCESS_KEY}" >> $FLINK_CONF_DIR/sql-client-defaults.yaml
 
 # Set the entrypoint to Flink's entrypoint script
 CMD ["./bin/start-cluster.sh"]

@@ -128,57 +128,19 @@ resource "aws_s3_bucket" "iceberg_bucket" {
   bucket = replace(local.secrets_insert, "_", "-")
 }
 
-resource "aws_s3_bucket_public_access_block" "iceberg_bucket_public_access_block" {
-  bucket = aws_s3_bucket.iceberg_bucket.id
+# resource "aws_s3_bucket_public_access_block" "iceberg_bucket_public_access_block" {
+#   bucket = aws_s3_bucket.iceberg_bucket.id
 
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+#   block_public_acls       = false
+#   block_public_policy     = false
+#   ignore_public_acls      = false
+#   restrict_public_buckets = false
+# }
+
+resource "aws_s3_object" "warehouse" {
+  bucket = aws_s3_bucket.iceberg_bucket.bucket
+  key    = "warehouse/"
 }
-
-# data "aws_caller_identity" "current" {}
-
-# resource "aws_iam_role" "iceberg_bucket_role" {
-#   name = "iceberg_bucket_role"
-
-#   assume_role_policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Effect = "Allow"
-#         Principal = {
-#           AWS = data.aws_caller_identity.current.arn
-#         }
-#         Action = "sts:AssumeRole"
-#       }
-#     ]
-#   })
-# }
-
-# resource "aws_iam_policy" "s3_access_policy" {
-#   name        = "iceberg_bucket-s3-policy"
-#   description = "Policy for accessing the S3 bucket"
-#   policy      = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Effect = "Allow"
-#         Action = "*"
-#         Resource = [
-#           "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/warehouse/airlines/*",
-#           "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}/warehouse/*",
-#           "arn:aws:s3:::${aws_s3_bucket.iceberg_bucket.bucket}"
-#         ]
-#       }
-#     ]
-#   })
-# }
-
-# resource "aws_iam_role_policy_attachment" "s3_access_attachment" {
-#   role       = aws_iam_role.iceberg_bucket_role.name
-#   policy_arn = aws_iam_policy.s3_access_policy.arn
-# }
 
 data "aws_secretsmanager_secret" "admin_public_keys" {
   name = "/snowflake_admin_credentials"
