@@ -3,10 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.30.00.000] - TBD
+## [0.30.00.000] - 2024-10-07
 ### Added
-- AWS, Kafka, and Schema Registry Python helper classes.
-- DataGeneratorApp sinks synthetic flight data to Apache Iceberg tables.
+- Converted FlightImporterApp.java to flight_importer_app.py.
+- Converted UserStatisticsApp.java to user_statistics_app.py.
+- Sink FlightImporterApp and UserStatisticsApp Apache Iceberg tables.
+- Use User-Defined Table Function in Python to call AWS Services.
 
 ### Changed
 - try-wtih-resources
