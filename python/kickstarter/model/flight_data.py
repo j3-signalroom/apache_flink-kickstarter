@@ -3,6 +3,7 @@ from datetime import datetime
 from dataclasses import dataclass
 
 from helper.utilities import serialize_date
+from model.user_statistics_data import UserStatisticsData
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -74,3 +75,11 @@ class FlightData():
                 Types.STRING(),
             ],
         )
+
+    @staticmethod
+    def to_user_statistics_data(row: Row):
+        data = FlightData.from_row(row)
+        return UserStatisticsData(
+            data.email_address, 
+            data.get_duration(), 
+            1)
