@@ -25,7 +25,7 @@ ENV ICEBERG_VERSION=1.6.1
 ENV AWS_SDK_VERSION=1.12.772
 
 # Create/set folder/url contianer environment variable(s)
-ENV HADOOP_CONF_DIR=/opt/flink/conf
+ENV FLINK_CONF_DIR=/opt/flink/conf
 ENV FLINK_LIB_DIR=/opt/flink/lib/
 ENV APACHE_ROOT_URL=https://repo1.maven.org/maven2/org/apache/
 
@@ -122,77 +122,77 @@ RUN pip --no-cache-dir install --upgrade awscli
 RUN apt update && apt install -y nano
 
 # Create core-site.xml
-RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/core-site.xml && \
-    echo '<configuration>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    <!-- S3A Filesystem Implementation -->' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.impl</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    <!-- AWS Credentials (using environment variables) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.access.key</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo "        <value>${AWS_ACCESS_KEY_ID}</value>" >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.secret.key</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo "        <value>${AWS_SECRET_ACCESS_KEY}</value>" >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    <!-- S3 Endpoint (optional) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.endpoint</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo "        <value>s3.${AWS_REGION}.amazonaws.com</value>" >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    <!-- Path Style Access -->' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.path.style.access</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <value>false</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    <!-- Enable SSL (HTTPS) -->' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.connection.ssl.enabled</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <value>true</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.aws.credentials.provider</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <value>org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.connection.maximum</name>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '        <value>200</value>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $HADOOP_CONF_DIR/core-site.xml && \
-    echo '</configuration>' >> $HADOOP_CONF_DIR/core-site.xml
+RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $FLINK_CONF_DIR/core-site.xml && \
+    echo '<configuration>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    <!-- S3A Filesystem Implementation -->' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.impl</name>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    <!-- AWS Credentials (using environment variables) -->' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.access.key</name>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo "        <value>${AWS_ACCESS_KEY_ID}</value>" >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.secret.key</name>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo "        <value>${AWS_SECRET_ACCESS_KEY}</value>" >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    <!-- S3 Endpoint (optional) -->' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.endpoint</name>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo "        <value>s3.${AWS_REGION}.amazonaws.com</value>" >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    <!-- Path Style Access -->' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.path.style.access</name>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '        <value>false</value>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    <!-- Enable SSL (HTTPS) -->' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.connection.ssl.enabled</name>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '        <value>true</value>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.aws.credentials.provider</name>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '        <value>org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider</value>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '        <name>fs.s3a.connection.maximum</name>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '        <value>200</value>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
+    echo '</configuration>' >> $FLINK_CONF_DIR/core-site.xml
 
 # Create hdfs-site.xml
-RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '<configuration>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '    <!-- Replication factor for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '        <name>dfs.replication</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '        <value>1</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '    <!-- Block size for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '        <name>dfs.blocksize</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '        <value>134217728</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '    <!-- Permissions for HDFS files -->' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '    <property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '        <name>dfs.permissions</name>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '        <value>false</value>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
-    echo '</configuration>' >> $HADOOP_CONF_DIR/hdfs-site.xml
+RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '<configuration>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '    <!-- Replication factor for HDFS files -->' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '    <property>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '        <name>dfs.replication</name>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '        <value>1</value>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '    </property>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '    <!-- Block size for HDFS files -->' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '    <property>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '        <name>dfs.blocksize</name>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '        <value>134217728</value>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '    </property>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '    <!-- Permissions for HDFS files -->' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '    <property>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '        <name>dfs.permissions</name>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '        <value>false</value>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '    </property>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
+    echo '</configuration>' >> $FLINK_CONF_DIR/hdfs-site.xml
 
 # Create SQL Client Defaults
-RUN echo 'catalogs:' > $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
-    echo '  apache_kickstarter:' >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
-    echo '    type: iceberg' >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
-    echo '    property-version: 1' >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
-    echo '    catalog-type: hadoop' >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
-    echo "    warehouse: s3a://flink-kickstarter/warehouse" >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
-    echo "    fs.s3a.endpoint: s3.${AWS_REGION}.amazonaws.com" >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
-    echo "    fs.s3a.access.key: ${AWS_ACCESS_KEY_ID}" >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
-    echo "    fs.s3a.secret.key: ${AWS_SECRET_ACCESS_KEY}" >> $HADOOP_CONF_DIR/sql-client-defaults.yaml
+RUN echo 'catalogs:' > $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo '  apache_kickstarter:' >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo '    type: iceberg' >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo '    property-version: 1' >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo '    catalog-type: hadoop' >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo "    warehouse: s3a://${AWS_S3_BUCKET}/warehouse" >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo "    fs.s3a.endpoint: s3.${AWS_REGION}.amazonaws.com" >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo "    fs.s3a.access.key: ${AWS_ACCESS_KEY_ID}" >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
+    echo "    fs.s3a.secret.key: ${AWS_SECRET_ACCESS_KEY}" >> $FLINK_CONF_DIR/sql-client-defaults.yaml
 
 # Set the entrypoint to Flink's entrypoint script
 ENTRYPOINT ["/docker-entrypoint.sh"]
