@@ -63,17 +63,18 @@ RUN apt-get update && apt-get install -y \
     python3-venv \
     zip
 
+# Download and install the Flink plugins
 RUN curl -L "https://repo.maven.apache.org/maven2/org/apache/flink/flink-shaded-hadoop-2-uber/2.8.3-10.0/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" -o "/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" 
+RUN curl -L "${MAVEN_ROOT_URL}flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar"
+RUN curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-flink-runtime-${APACHE_FLINK_VERSION}/${ICEBERG_VERSION}/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar"
+RUN curl -L "${MAVEN_ROOT_URL}flink/flink-sql-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar"
+RUN curl -L "${MAVEN_ROOT_URL}flink/flink-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar"
+RUN curl -L "${MAVEN_ROOT_URL}flink/flink-json/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar"
 
-# Download and install the Flink libraries and plugins
-RUN if [ "$FLINK_LANGUAGE" = "python" ]; then \
-    curl -L "${MAVEN_ROOT_URL}flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
-    curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-flink-runtime-${APACHE_FLINK_VERSION}/${ICEBERG_VERSION}/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" && \
+# Download and install the Flink libraries that work with your Python-based Flink Apps
+RUN if [ "$FLINK_LANGUAGE" = "python" ]; then \    
     curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-aws-bundle/${ICEBERG_VERSION}/iceberg-aws-bundle-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-aws-bundle-${ICEBERG_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}hadoop/hadoop-common/${HADOOP_VERSION}/hadoop-common-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-common-${HADOOP_VERSION}.jar" && \
-    curl -L "${MAVEN_ROOT_URL}flink/flink-sql-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" && \
-    curl -L "${MAVEN_ROOT_URL}flink/flink-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" && \
-    curl -L "${MAVEN_ROOT_URL}flink/flink-json/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
     curl -L "${MAVEN_ROOT_URL}kafka/kafka-clients/3.7.0/kafka-clients-3.7.0.jar" -o "${FLINK_LIB_DIR}kafka-clients-3.7.0.jar"; \
 fi
 
