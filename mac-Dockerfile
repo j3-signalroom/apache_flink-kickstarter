@@ -183,5 +183,16 @@ RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $HADOOP_CONF_DIR/hdfs-site.x
     echo '    </property>' >> $HADOOP_CONF_DIR/hdfs-site.xml && \
     echo '</configuration>' >> $HADOOP_CONF_DIR/hdfs-site.xml
 
+# Create SQL Client Defaults
+RUN echo 'catalogs:' > $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
+    echo '  apache_kickstarter:' >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
+    echo '    type: iceberg' >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
+    echo '    property-version: 1' >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
+    echo '    catalog-type: hadoop' >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
+    echo "    warehouse: s3a://flink-kickstarter/warehouse" >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
+    echo "    fs.s3a.endpoint: s3.${AWS_REGION}.amazonaws.com" >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
+    echo "    fs.s3a.access.key: ${AWS_ACCESS_KEY_ID}" >> $HADOOP_CONF_DIR/sql-client-defaults.yaml && \
+    echo "    fs.s3a.secret.key: ${AWS_SECRET_ACCESS_KEY}" >> $HADOOP_CONF_DIR/sql-client-defaults.yaml
+
 # Set the entrypoint to Flink's entrypoint script
 ENTRYPOINT ["/docker-entrypoint.sh"]
