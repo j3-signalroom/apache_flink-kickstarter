@@ -2,7 +2,7 @@ from pyflink.datastream.state import ValueStateDescriptor
 from pyflink.datastream.functions import ProcessWindowFunction, RuntimeContext
 from typing import Iterable
 
-from model.user_statistics_data import UserStatisticsData
+from model.flight_data import UserStatisticsData
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
