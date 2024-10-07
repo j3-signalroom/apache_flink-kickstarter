@@ -7,8 +7,7 @@ from pyflink.table import StreamTableEnvironment
 import logging
 import argparse
 
-from model.flight_data import FlightData
-from model.user_statistics_data import UserStatisticsData
+from model.flight_data import FlightData, UserStatisticsData
 from helper.kafka_properties import execute_kafka_properties_udtf
 from helper.process_user_statistics_data_function import ProcessUserStatisticsDataFunction
 
