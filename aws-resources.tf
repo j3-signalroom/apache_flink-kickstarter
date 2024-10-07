@@ -128,15 +128,6 @@ resource "aws_s3_bucket" "iceberg_bucket" {
   bucket = replace(local.secrets_insert, "_", "-")
 }
 
-# resource "aws_s3_bucket_public_access_block" "iceberg_bucket_public_access_block" {
-#   bucket = aws_s3_bucket.iceberg_bucket.id
-
-#   block_public_acls       = false
-#   block_public_policy     = false
-#   ignore_public_acls      = false
-#   restrict_public_buckets = false
-# }
-
 resource "aws_s3_object" "warehouse" {
   bucket = aws_s3_bucket.iceberg_bucket.bucket
   key    = "warehouse/"
