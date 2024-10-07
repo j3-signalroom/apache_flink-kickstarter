@@ -18,7 +18,7 @@ Explore the repo, run the Docker containers (compatible with both Mac M chips an
 **Table of Contents**
 
 <!-- toc -->
-+ [1.0 What do we call these examples, Flink Jobs or Flink Applications?](#10-what-do-we-call-these-examples-flink-jobs-or-flink-applications)
++ [1.0 Are these examples better described as Flink Jobs or Flink Applications-—and why does the distinction matter?](#10-are-these-examples-better-described-as-flink-jobs-or-flink-applications-and-why-does-the-distinction-matter)
 + [2.0 Let's get started!](#20-lets-get-started)
     - [2.1 DevOps in Action: Running Terraform Locally](#21-devops-in-action-running-terraform-locally)
         + [2.1.1 Run locally](#211-run-locally)
@@ -31,7 +31,7 @@ Explore the repo, run the Docker containers (compatible with both Mac M chips an
 + [4.0 Resources](#40-resources)
 <!-- tocstop -->
 
-## 1.0 What do we call these examples, Flink Jobs or Flink Applications?
+## 1.0 Are these examples better described as Flink Jobs or Flink Applications-—and why does the distinction matter?
 
 > _"What's in a name? That which we call a rose by any other name would smell just as sweet."_
 >
