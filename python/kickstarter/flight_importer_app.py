@@ -113,9 +113,7 @@ def main(args):
                 'catalog-type' = 'hadoop',            
                 'warehouse' = 's3a://{bucket_name}/warehouse',
                 'property-version' = '1',
-                'io-impl' = 'org.apache.iceberg.hadoop.HadoopFileIO',
-                'fs.s3a.endpoint' = 's3.{args.aws_region}.amazonaws.com',
-                'fs.s3a.aws.region=' = '{args.aws_region}'
+                'io-impl' = 'org.apache.iceberg.hadoop.HadoopFileIO'
                 );
         """)
     except Exception as e:
