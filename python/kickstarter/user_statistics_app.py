@@ -4,12 +4,14 @@ from pyflink.datastream import StreamExecutionEnvironment, DataStream, TimeChara
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
+from pyflink.table.catalog import ObjectPath
 import logging
 import argparse
 
 from model.flight_data import FlightData, UserStatisticsData
 from helper.kafka_properties import execute_kafka_properties_udtf
 from helper.process_user_statistics_data_function import ProcessUserStatisticsDataFunction
+from helper.utilities import catalog_exist
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -26,6 +28,7 @@ def main(args):
     # Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
     env.set_stream_time_characteristic(TimeCharacteristic.EventTime)
+    env.set_parallelism(1)  # Set parallelism to 1 for simplicity
 
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
@@ -74,12 +77,93 @@ def main(args):
                             .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
                             .build())
 
-    # Defines the workflow for the Flink job graph (DAG) by connecting the data streams
-    (define_workflow(flight_data_stream).map(lambda d: d.to_row(), output_type=UserStatisticsData.get_value_type_info())
-                                        .sink_to(stats_sink)
-                                        .name("userstatistics_sink")
-                                        .uid("userstatistics_sink"))
+    # Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
+    # using the HadoopCatalog to store metadata in AWS S3 (i.e., s3a://), a Hadoop- 
+    # compatible filesystem.  Then execute the Flink SQL statement to register the
+    # Iceberg catalog
+    catalog_name = "apache_kickstarter"
+    bucket_name = args.s3_bucket_name.replace("_", "-") # To follow S3 bucket naming convention, replace underscores with hyphens if exist
+    try:
+        if not catalog_exist(tbl_env, catalog_name):
+            tbl_env.execute_sql(f"""
+                CREATE CATALOG {catalog_name} WITH (
+                    'type' = 'iceberg',
+                    'catalog-type' = 'hadoop',            
+                    'warehouse' = 's3a://{bucket_name}/warehouse',
+                    'property-version' = '1',
+                    'io-impl' = 'org.apache.iceberg.hadoop.HadoopFileIO'
+                    );
+            """)
+        else:
+            print(f"The {catalog_name} catalog already exists.")
+    except Exception as e:
+        print(f"A critical error occurred to during the processing of the catalog because {e}")
+        exit(1)
 
+    # Use the Iceberg catalog
+    tbl_env.use_catalog(catalog_name)
+
+    # Access the Iceberg catalog to create the airlines database and the Iceberg tables
+    catalog = tbl_env.get_catalog(catalog_name)
+
+    # Print the current catalog name
+    print(f"Current catalog: {tbl_env.get_current_catalog()}")
+
+    # Check if the database exists.  If not, create it
+    database_name = "airlines"
+    try:
+        if not catalog.database_exists(database_name):
+            tbl_env.execute_sql(f"CREATE DATABASE IF NOT EXISTS {database_name};")
+        else:
+            print(f"The {database_name} database already exists.")
+        tbl_env.execute_sql(f"USE {database_name};")
+    except Exception as e:
+        print(f"A critical error occurred to during the processing of the database because {e}")
+        exit(1)
+
+    # Print the current database name
+    print(f"Current database: {tbl_env.get_current_database()}")
+
+    # An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
+    # catalog object, such as a table, view, or function.  It uniquely identifies an object
+    # within a catalog by encapsulating both the database name and the object name.  For 
+    # instance, this case we using it to get the fully qualified path of the `user_statistics`
+    # table
+    stats_table_path = ObjectPath(database_name, "stats")
+
+    # Check if the table exists.  If not, create it
+    try:
+        if not catalog.table_exists(stats_table_path):
+            # Define the table using Flink SQL
+            tbl_env.execute_sql(f"""
+                CREATE TABLE {stats_table_path.get_full_name()} (
+                    email_address STRING,
+                    total_flight_duration INT,
+                    number_of_flights INT
+                ) WITH (
+                    'write.format.default' = 'parquet',
+                    'write.target-file-size-bytes' = '134217728',
+                    'partitioning' = 'email_address',
+                    'format-version' = '2'
+                )
+            """)
+    except Exception as e:
+        print(f"A critical error occurred to during the processing of the table because {e}")
+        exit(1)
+
+    # Define the workflow for the Flink job graph (DAG)
+    stat_datastream = define_workflow(flight_data_stream).map(lambda d: d.to_row(), output_type=UserStatisticsData.get_value_type_info())
+
+    # Populate the table with the data from the data stream
+    (tbl_env.from_data_stream(stat_datastream)
+            .execute_insert(stats_table_path.get_full_name()))
+
+    # Sinks the User Statistics DataStream Kafka topic
+    (stat_datastream.sink_to(stats_sink)
+                    .name("stats_sink")
+                    .uid("stats_sink"))
+
+    # Execute the Flink job graph (DAG)
     try:
         env.execute("UserStatisticsApp")
     except Exception as e:
