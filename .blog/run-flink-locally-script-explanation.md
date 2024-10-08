@@ -41,7 +41,10 @@ This script is used to manage a local Apache Flink environment using Docker Comp
 The script should be run with the following syntax:
 
 ```bash
-scripts/run-flink-locally.sh <on | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
+scripts/run-flink-locally.sh <on | down> --profile=<AWS_SSO_PROFILE_NAME>
+                                         --chip=<amd64 | arm64>
+                                         --flink_language=<python | java>
+                                         [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
 ```
 
 - **on**: Start the environment.
