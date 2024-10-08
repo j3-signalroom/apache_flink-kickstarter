@@ -231,9 +231,5 @@ if __name__ == "__main__":
                         dest='s3_bucket_name',
                         required=True,
                         help='The AWS S3 bucket name.')
-    parser.add_argument('--aws_region',
-                        dest='aws_region',
-                        required=True,
-                        help='The AWS Region name.')
     known_args, _ = parser.parse_known_args()
     main(known_args)
