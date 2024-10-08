@@ -261,7 +261,7 @@ public class DataGeneratorApp {
             }
         }
 
-        // Convert DataStream to Table
+        // --- Convert DataStream to Table
         Table skyOneTable = ((StreamTableEnvironment) tblEnv).fromDataStream(skyOneStream, Schema.newBuilder()
             .column("email_address", DataTypes.STRING())
             .column("departure_time", DataTypes.STRING())
@@ -276,10 +276,10 @@ public class DataGeneratorApp {
             .build());
         tblEnv.createTemporaryView("skyone_airline", skyOneTable);
 
-        // Insert DataStream into the table
+        // --- Insert DataStream into the table
         tblEnv.executeSql("INSERT INTO " + databaseName + "." + tableNames[0] + " SELECT * FROM " + skyOneTable);
 
-        // Convert DataStream to Table
+        // --- Convert DataStream to Table
         Table sunsetTable = ((StreamTableEnvironment) tblEnv).fromDataStream(sunsetStream, Schema.newBuilder()
             .column("email_address", DataTypes.STRING())
             .column("departure_time", DataTypes.STRING())
@@ -294,7 +294,7 @@ public class DataGeneratorApp {
             .build());
         tblEnv.createTemporaryView("sunset_airline", sunsetTable);
 
-        // Insert DataStream into the table
+        // --- Insert DataStream into the table
         tblEnv.executeSql("INSERT INTO " + databaseName + "." + tableNames[1] + " SELECT * FROM " + sunsetTable);
 
         try {

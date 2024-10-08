@@ -15,11 +15,10 @@ This script is used to manage a local Apache Flink environment using Docker Comp
    - Parses optional arguments such as:
      - `--profile`: AWS SSO profile name.
      - `--chip`: Specifies the target architecture (amd64 or arm64).
-     - `--flink_language`: Specifies the language to be used (Python or Java).
      - `--aws_s3_bucket`: Optionally specifies the AWS S3 bucket name.
 
 3. **Validation Checks**:
-   - Checks if required arguments (`--profile`, `--chip`, `--flink_language`) are provided.
+   - Checks if required arguments (`--profile`, `--chip`) are provided.
    - If any of these required arguments are missing, it displays an appropriate error message and terminates.
 
 4. **AWS SSO Login**:
@@ -31,10 +30,7 @@ This script is used to manage a local Apache Flink environment using Docker Comp
    - Depending on the chip architecture, it runs either `linux-docker-compose.yml` or `mac-docker-compose.yml` to start the Flink containers.
    - The `.env` file is used to pass AWS credentials and settings to the Docker containers.
 
-6. **Python Application Handling**:
-   - If `flink_language` is set to `python`, it zips Python files in the `python_apps/kickstarter` directory within the Docker container. This likely helps to package the Python Flink jobs.
-
-7. **Stopping the Environment**:
+6. **Stopping the Environment**:
    - If the `off` argument is supplied, the script brings down the Docker Compose setup using the appropriate YAML file (`linux-docker-compose.yml` or `mac-docker-compose.yml`).
 
 ### Usage Example
@@ -43,7 +39,6 @@ The script should be run with the following syntax:
 ```bash
 scripts/run-flink-locally.sh <on | down> --profile=<AWS_SSO_PROFILE_NAME>
                                          --chip=<amd64 | arm64>
-                                         --flink_language=<python | java>
                                          [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
 ```
 
@@ -51,7 +46,6 @@ scripts/run-flink-locally.sh <on | down> --profile=<AWS_SSO_PROFILE_NAME>
 - **down**: Stop the environment.
 - `--profile=<AWS_SSO_PROFILE_NAME>`: The AWS SSO profile to use.
 - `--chip=<amd64 | arm64>`: Specify the chip architecture.
-- `--flink_language=<python | java>`: Specify the language to use for Flink applications.
 - `[--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]`: Optionally specify an S3 bucket name.
 
 ### Summary
