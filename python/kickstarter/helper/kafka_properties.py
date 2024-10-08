@@ -2,6 +2,7 @@ from pyflink.common import Row
 from pyflink.table import DataTypes
 from pyflink.table.expressions import col
 from pyflink.table.udf import udtf, TableFunction
+from pyflink.table import StreamTableEnvironment
 from typing import Iterator
 import boto3
 from botocore.exceptions import ClientError
@@ -190,7 +191,7 @@ class KafkaProperties(TableFunction):
             return parameters
 
 
-def execute_kafka_properties_udtf(tbl_env, for_consumer: bool, service_account_user: str) -> dict:
+def execute_kafka_properties_udtf(tbl_env: StreamTableEnvironment, for_consumer: bool, service_account_user: str) -> dict:
     """This method retrieves the Kafka Cluster properties from the AWS Secrets Manager 
     and AWS Systems Manager.
 
