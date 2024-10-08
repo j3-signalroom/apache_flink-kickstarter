@@ -162,7 +162,7 @@ This section guides you through the local setup (on one machine but in separate 
 
 ```bash
 scripts/run-flink-locally.sh <on | down> --profile=<AWS_SSO_PROFILE_NAME>
-                                         --chip=<amd64 | armd64>
+                                         --chip=<amd64 | arm64>
                                          --flink_language=<python | java>
                                          [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
 ```
