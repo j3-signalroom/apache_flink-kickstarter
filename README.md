@@ -99,16 +99,18 @@ scripts/run-terraform-locally.sh <create | delete> --profile=<SSO_PROFILE_NAME> 
                                                    --auto_offset_reset=<earliest | latest> \
                                                    --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>
 ```
-Argument placeholder|Replace with
--|-
-`<SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
-`<CONFLUENT_API_KEY>`|your organization's Confluent Cloud API Key (also referred as Cloud API ID).
-`<CONFLUENT_API_SECRET>`|your organization's Confluent Cloud API Secret.
-`<SNOWFLAKE_WAREHOUSE>`|the Snowflake warehouse (or "virtual warehouse") you choose to run the resources in Snowflake.
-`<SERVICE_ACCOUNT_USER>`|the Snowflake service account user who is to be assigned the RSA key pairs for its authentication.
-`<DAY_COUNT>`|how many day(s) should the API Key be rotated for.
-`<AUTO_OFFSET_RESET>`|Use `earliest`, when you want to read the first event in a Kafka topic.  Otherwise, specify `latest`.
-`<NUMBER_OF_API_KEYS_TO_RETAIN>`|Specifies the number of API keys to create and retain.
+> Argument placeholder|Replace with
+> -|-
+> `<SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
+> `<CONFLUENT_API_KEY>`|your organization's Confluent Cloud API Key (also referred as Cloud API ID).
+> `<CONFLUENT_API_SECRET>`|your organization's Confluent Cloud API Secret.
+> `<SNOWFLAKE_WAREHOUSE>`|the Snowflake warehouse (or "virtual warehouse") you choose to run the resources in Snowflake.
+> `<SERVICE_ACCOUNT_USER>`|the Snowflake service account user who is to be assigned the RSA key pairs for its authentication.
+> `<DAY_COUNT>`|how many day(s) should the API Key be rotated for.
+> `<AUTO_OFFSET_RESET>`|Use `earliest`, when you want to read the first event in a Kafka topic.  Otherwise, specify `latest`.
+> `<NUMBER_OF_API_KEYS_TO_RETAIN>`|Specifies the number of API keys to create and retain.
+
+To learn more about this script, click [here](.blog/run-terraform-locally-script-explanation.md).
 
 ### 2.2 DevOps in Action: Running Terraform in the cloud
 In order to run the Terraform configuration from GitHub, the Terraform Cloud API token and Confluent Cloud API Key are required as GitHub Secret variables.  Learn how to do to get the Terraform Cloud API token and Confluent Cloud API key [here](.blog/setup-github.md).
@@ -166,13 +168,15 @@ scripts/run-flink-locally.sh <on | down> --profile=<AWS_SSO_PROFILE_NAME>
                                          --flink_language=<python | java>
                                          [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
 ```
-Argument placeholder|Replace with
--|-
-`<ACTIVATE_DOCKER_CONTAINER>`|use `on` to turn on Flink locally, otherwise `off` to turn Flink off.
-`<AWS_SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
-`<CHIP>`|if you are running on a Mac with M1, M2, or M3 chip, use `arm64`.  Otherwise, use `amd64`.
-`<FLINK_LANGUAGE>`|specify the language base of the Flink Apps you plan on running.
-`<AWS_S3_BUCKET_NAME>`|**[Optional]** can specify the name of the AWS S3 bucket used to store Apache Iceberg files.
+> Argument placeholder|Replace with
+> -|-
+> `<ACTIVATE_DOCKER_CONTAINER>`|use `on` to turn on Flink locally, otherwise `off` to turn Flink off.
+> `<AWS_SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
+> `<CHIP>`|if you are running on a Mac with M1, M2, or M3 chip, use `arm64`.  Otherwise, use `amd64`.
+> `<FLINK_LANGUAGE>`|specify the language base of the Flink Apps you plan on running.
+> `<AWS_S3_BUCKET_NAME>`|**[Optional]** can specify the name of the AWS S3 bucket used to store Apache Iceberg files.
+
+To learn more about this script, click [here](.blog/run-flink-locally-script-explanation.md).
 
 ## 3.0 Kickstart examples!
 
