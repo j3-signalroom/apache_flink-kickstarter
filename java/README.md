@@ -26,7 +26,7 @@ Next, let’s build the JAR file containing all the Flink applications:
 
 Now, to access the JobManager (`apache_flink-kickstarter-jobmanager-1`) container, open the interactive shell by running:
 ```bash
-docker exec -it -w /opt/flink mac_flink_with_iceberg-jobmanager-1 /bin/bash
+docker exec -it -w /opt/flink/java_apps apache_flink-kickstarter-jobmanager-1 /bin/bash
 ```
 
 This command drops you right into the container, giving you full control to execute commands, explore the file system, or handle any tasks directly.
@@ -38,3 +38,7 @@ Flink App|Flink Run Command
 **`DataGeneratorApp`**|`flink run --class kickstarter.DataGeneratorApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
 **`FlightImporterApp`**|`flink run --class kickstarter.FlightImporterApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
 **`UserStatisticsApp`**|`flink run --class kickstarter.UserStatisticsApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
+
+Argument placeholder|Replace with
+-|-
+`<SERVICE_ACCOUNT_USER>`|specify the name of the service account user, used in the the AWS Secrets and Parameter Store Path name.
