@@ -17,8 +17,9 @@ import org.apache.flink.formats.json.JsonSerializationSchema;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.*;
 import org.apache.flink.table.api.*;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+
 import java.util.stream.StreamSupport;
-import org.apache.flink.table.api.TableResult;
 import java.util.*;
 
 import kickstarter.model.*;
@@ -164,7 +165,7 @@ public class DataGeneratorApp {
             EnvironmentSettings.newInstance()
                                .inStreamingMode()
                                .build();
-        TableEnvironment tblEnv = TableEnvironment.create(settings);
+        TableEnvironment tblEnv = StreamTableEnvironment.create(env, settings);
 
         /*
          * Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
@@ -259,6 +260,42 @@ public class DataGeneratorApp {
                 System.exit(1);
             }
         }
+
+        // Convert DataStream to Table
+        Table skyOneTable = ((StreamTableEnvironment) tblEnv).fromDataStream(skyOneStream, Schema.newBuilder()
+            .column("email_address", DataTypes.STRING())
+            .column("departure_time", DataTypes.STRING())
+            .column("departure_airport_code", DataTypes.STRING())
+            .column("arrival_time", DataTypes.STRING())
+            .column("arrival_airport_code", DataTypes.STRING())
+            .column("flight_number", DataTypes.STRING())
+            .column("confirmation", DataTypes.STRING())
+            .column("ticket_price", DataTypes.DECIMAL(10, 2))
+            .column("aircraft", DataTypes.STRING())
+            .column("booking_agency_email", DataTypes.STRING())
+            .build());
+        tblEnv.createTemporaryView("skyone_airline", skyOneTable);
+
+        // Insert DataStream into the table
+        tblEnv.executeSql("INSERT INTO " + databaseName + "." + tableNames[0] + " SELECT * FROM " + skyOneTable);
+
+        // Convert DataStream to Table
+        Table sunsetTable = ((StreamTableEnvironment) tblEnv).fromDataStream(sunsetStream, Schema.newBuilder()
+            .column("email_address", DataTypes.STRING())
+            .column("departure_time", DataTypes.STRING())
+            .column("departure_airport_code", DataTypes.STRING())
+            .column("arrival_time", DataTypes.STRING())
+            .column("arrival_airport_code", DataTypes.STRING())
+            .column("flight_number", DataTypes.STRING())
+            .column("confirmation", DataTypes.STRING())
+            .column("ticket_price", DataTypes.DECIMAL(10, 2))
+            .column("aircraft", DataTypes.STRING())
+            .column("booking_agency_email", DataTypes.STRING())
+            .build());
+        tblEnv.createTemporaryView("sunset_airline", sunsetTable);
+
+        // Insert DataStream into the table
+        tblEnv.executeSql("INSERT INTO " + databaseName + "." + tableNames[1] + " SELECT * FROM " + sunsetTable);
 
         try {
             // --- Execute the Flink job graph (DAG)
