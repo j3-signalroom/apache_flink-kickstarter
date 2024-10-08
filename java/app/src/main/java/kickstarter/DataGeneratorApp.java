@@ -16,8 +16,7 @@ import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.formats.json.JsonSerializationSchema;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.*;
-import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.TableEnvironment;
+import org.apache.flink.table.api.*;
 import java.util.stream.StreamSupport;
 import org.apache.flink.table.api.TableResult;
 import java.util.*;
@@ -221,8 +220,45 @@ public class DataGeneratorApp {
         }
 
         // --- Print the current database name
-        System.out.println("Current database: " + tblEnv.getCurrentDatabase() + "\n");
+        System.out.println("Current database: " + tblEnv.getCurrentDatabase());
 
+        // --- Check if the table(s) exists.  If not, create them
+        String tableNames[] = {"skyone_airline", "sunset_airline"};
+        for (String tableName : tableNames) {
+            try {
+                TableResult result = tblEnv.executeSql("SHOW TABLES IN " + databaseName);
+                @SuppressWarnings("null")
+                boolean tableExists = StreamSupport.stream(
+                    Spliterators.spliteratorUnknownSize(result.collect(), Spliterator.ORDERED), false)
+                    .anyMatch(row -> row.getField(0).equals(tableName));
+                if(!tableExists) {
+                    // --- Define the table using Flink SQL
+                    tblEnv.executeSql(
+                        "CREATE TABLE " + databaseName + "." + tableName + " ("
+                            + "email_address STRING, "
+                            + "departure_time STRING, "
+                            + "departure_airport_code STRING, "
+                            + "arrival_time STRING, "
+                            + "arrival_airport_code STRING, "
+                            + "flight_number STRING, "
+                            + "confirmation STRING, "
+                            + "ticket_price DECIMAL, "
+                            + "aircraft STRING, "
+                            + "booking_agency_email STRING) "
+                            + "WITH ("
+                                + "'write.format.default' = 'parquet',"
+                                + "'write.target-file-size-bytes' = '134217728',"
+                                + "'partitioning' = 'arrival_airport_code',"
+                                + "'format-version' = '2');"
+                    );
+                } else {
+                    System.out.println("The " + tableName + " table already exists.");
+                }
+            } catch(final Exception e) {
+                System.out.println("A critical error occurred to during the processing of the table because " + e.getMessage());
+                System.exit(1);
+            }
+        }
 
         try {
             // --- Execute the Flink job graph (DAG)
