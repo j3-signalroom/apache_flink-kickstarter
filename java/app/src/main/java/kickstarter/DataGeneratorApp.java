@@ -18,9 +18,10 @@ import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.*;
 import org.apache.flink.table.api.*;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-
-import java.util.stream.StreamSupport;
+import org.apache.flink.table.catalog.CatalogDatabaseImpl;
+import org.apache.iceberg.flink.FlinkCatalog;
 import java.util.*;
+import java.util.stream.StreamSupport;
 
 import kickstarter.model.*;
 
@@ -165,7 +166,7 @@ public class DataGeneratorApp {
             EnvironmentSettings.newInstance()
                                .inStreamingMode()
                                .build();
-        TableEnvironment tblEnv = StreamTableEnvironment.create(env, settings);
+        StreamTableEnvironment tblEnv = StreamTableEnvironment.create(env, settings);
 
         /*
          * Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
@@ -202,21 +203,19 @@ public class DataGeneratorApp {
 
         // --- Check if the database exists.  If not, create it
         String databaseName = "airlines";
+
+        // Check if the namespace exists, if not, create it
         try {
-            TableResult result = tblEnv.executeSql("SHOW DATABASES");
-            @SuppressWarnings("null")
-            boolean databaseExists = StreamSupport.stream(
-                Spliterators.spliteratorUnknownSize(result.collect(), Spliterator.ORDERED), false)
-                .anyMatch(row -> row.getField(0).equals(databaseName));
-            
-            if(!databaseExists) {
-                tblEnv.executeSql("CREATE DATABASE IF NOT EXISTS " + databaseName + ";");
-            } else {
-                System.out.println("The " + databaseName + " database already exists.");
+            org.apache.flink.table.catalog.Catalog catalog = tblEnv.getCatalog("apache_kickstarter").orElseThrow(() -> new RuntimeException("Catalog not found"));
+            if (catalog instanceof FlinkCatalog) {
+                FlinkCatalog flinkCatalog = (FlinkCatalog) catalog;
+                if (!flinkCatalog.databaseExists(databaseName)) {
+                    flinkCatalog.createDatabase(databaseName, new CatalogDatabaseImpl(new HashMap<>(), ""), false);
+                }
             }
-            tblEnv.executeSql("USE " + databaseName + ";");
-        } catch(final Exception e) {
-            System.out.println("A critical error occurred to during the processing of the database because " + e.getMessage());
+            tblEnv.executeSql("USE " + databaseName);
+        } catch (Exception e) {
+            System.out.println("A critical error occurred during the processing of the database because " + e.getMessage());
             System.exit(1);
         }
 
@@ -225,7 +224,26 @@ public class DataGeneratorApp {
 
         // --- Check if the table(s) exists.  If not, create them
         String tableNames[] = {"skyone_airline", "sunset_airline"};
+        Schema schema = Schema.newBuilder()
+            .column("email_address", DataTypes.STRING())
+            .column("departure_time", DataTypes.STRING())
+            .column("departure_airport_code", DataTypes.STRING())
+            .column("arrival_time", DataTypes.STRING())
+            .column("arrival_airport_code", DataTypes.STRING())
+            .column("flight_number", DataTypes.STRING())
+            .column("confirmation_code", DataTypes.STRING())
+            .column("ticket_price", DataTypes.DECIMAL(10, 2))
+            .column("aircraft", DataTypes.STRING())
+            .column("booking_agency_email", DataTypes.STRING())
+            .build();
+
+        // --- Convert DataStream to Table
+        Table tables[] = {tblEnv.fromDataStream(skyOneStream, schema), tblEnv.fromDataStream(sunsetStream, schema)};
+
+        // ---
+        int index = -1;
         for (String tableName : tableNames) {
+            index += 1;
             try {
                 TableResult result = tblEnv.executeSql("SHOW TABLES IN " + databaseName);
                 @SuppressWarnings("null")
@@ -259,49 +277,19 @@ public class DataGeneratorApp {
                 System.out.println("A critical error occurred to during the processing of the table because " + e.getMessage());
                 System.exit(1);
             }
+
+            tblEnv.createTemporaryView(tableName + "_view", tables[index]);
+
+            // --- Insert DataStream into the table
+            tblEnv.executeSql("INSERT INTO " + tableName + " SELECT * FROM " + tables[index]);
         }
-
-        // --- Convert DataStream to Table
-        Table skyOneTable = ((StreamTableEnvironment) tblEnv).fromDataStream(skyOneStream, Schema.newBuilder()
-            .column("email_address", DataTypes.STRING())
-            .column("departure_time", DataTypes.STRING())
-            .column("departure_airport_code", DataTypes.STRING())
-            .column("arrival_time", DataTypes.STRING())
-            .column("arrival_airport_code", DataTypes.STRING())
-            .column("flight_number", DataTypes.STRING())
-            .column("confirmation_code", DataTypes.STRING())
-            .column("ticket_price", DataTypes.DECIMAL(10, 2))
-            .column("aircraft", DataTypes.STRING())
-            .column("booking_agency_email", DataTypes.STRING())
-            .build());
-        tblEnv.createTemporaryView("skyone_airline", skyOneTable);
-
-        // --- Insert DataStream into the table
-        tblEnv.executeSql("INSERT INTO " + databaseName + "." + tableNames[0] + " SELECT * FROM " + skyOneTable);
-
-        // --- Convert DataStream to Table
-        Table sunsetTable = ((StreamTableEnvironment) tblEnv).fromDataStream(sunsetStream, Schema.newBuilder()
-            .column("email_address", DataTypes.STRING())
-            .column("departure_time", DataTypes.STRING())
-            .column("departure_airport_code", DataTypes.STRING())
-            .column("arrival_time", DataTypes.STRING())
-            .column("arrival_airport_code", DataTypes.STRING())
-            .column("flight_number", DataTypes.STRING())
-            .column("confirmation_code", DataTypes.STRING())
-            .column("ticket_price", DataTypes.DECIMAL(10, 2))
-            .column("aircraft", DataTypes.STRING())
-            .column("booking_agency_email", DataTypes.STRING())
-            .build());
-        tblEnv.createTemporaryView("sunset_airline", sunsetTable);
-
-        // --- Insert DataStream into the table
-        tblEnv.executeSql("INSERT INTO " + databaseName + "." + tableNames[1] + " SELECT * FROM " + sunsetTable);
 
         try {
             // --- Execute the Flink job graph (DAG)
             env.execute("DataGeneratorApp");
         } catch (Exception e) {
             System.out.println("The Flink App stopped early due to the following: " + e.getMessage());
+            e.printStackTrace();
         }
 	}
 }

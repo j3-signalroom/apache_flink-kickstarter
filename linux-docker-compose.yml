@@ -9,6 +9,7 @@ services:
         AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
         AWS_REGION: ${AWS_REGION}
         AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+        FLINK_LANGUAGE: ${FLINK_LANGUAGE}
     ports:
       - 8081:8081
       - 9092:9092
@@ -32,6 +33,7 @@ services:
       - AWS_REGION=$AWS_REGION
       - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
       - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+      - FLINK_LANGUAGE=${FLINK_LANGUAGE}
   # Apache Flink Task Manager
   taskmanager:
     build:
@@ -42,6 +44,7 @@ services:
         AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
         AWS_REGION: ${AWS_REGION}
         AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+        FLINK_LANGUAGE: ${FLINK_LANGUAGE}
     depends_on:
       - jobmanager
     command: taskmanager
@@ -67,3 +70,4 @@ services:
       - AWS_REGION=$AWS_REGION
       - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
       - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+      - FLINK_LANGUAGE=${FLINK_LANGUAGE}

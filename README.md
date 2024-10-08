@@ -167,6 +167,7 @@ This section guides you through the local setup (on one machine but in separate 
 ```bash
 scripts/run-flink-locally.sh <on | down> --profile=<AWS_SSO_PROFILE_NAME>
                                          --chip=<amd64 | arm64>
+                                         --flink_language=<python | java>
                                          [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
 ```
 > Argument placeholder|Replace with
@@ -174,6 +175,7 @@ scripts/run-flink-locally.sh <on | down> --profile=<AWS_SSO_PROFILE_NAME>
 > `<ACTIVATE_DOCKER_CONTAINER>`|use `on` to turn on Flink locally, otherwise `off` to turn Flink off.
 > `<AWS_SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
 > `<CHIP>`|if you are running on a Mac with M1, M2, or M3 chip, use `arm64`.  Otherwise, use `amd64`.
+> `<FLINK_LANGUAGE>`|specify the language base of the Flink Apps you plan on running.
 > `<AWS_S3_BUCKET_NAME>`|**[Optional]** can specify the name of the AWS S3 bucket used to store Apache Iceberg files.
 
 To learn more about this script, click [here](.blog/run-flink-locally-script-explanation.md).
