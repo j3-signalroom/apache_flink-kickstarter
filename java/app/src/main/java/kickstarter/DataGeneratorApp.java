@@ -242,7 +242,7 @@ public class DataGeneratorApp {
                             + "arrival_time STRING, "
                             + "arrival_airport_code STRING, "
                             + "flight_number STRING, "
-                            + "confirmation STRING, "
+                            + "confirmation_code STRING, "
                             + "ticket_price DECIMAL, "
                             + "aircraft STRING, "
                             + "booking_agency_email STRING) "
@@ -269,7 +269,7 @@ public class DataGeneratorApp {
             .column("arrival_time", DataTypes.STRING())
             .column("arrival_airport_code", DataTypes.STRING())
             .column("flight_number", DataTypes.STRING())
-            .column("confirmation", DataTypes.STRING())
+            .column("confirmation_code", DataTypes.STRING())
             .column("ticket_price", DataTypes.DECIMAL(10, 2))
             .column("aircraft", DataTypes.STRING())
             .column("booking_agency_email", DataTypes.STRING())
@@ -287,7 +287,7 @@ public class DataGeneratorApp {
             .column("arrival_time", DataTypes.STRING())
             .column("arrival_airport_code", DataTypes.STRING())
             .column("flight_number", DataTypes.STRING())
-            .column("confirmation", DataTypes.STRING())
+            .column("confirmation_code", DataTypes.STRING())
             .column("ticket_price", DataTypes.DECIMAL(10, 2))
             .column("aircraft", DataTypes.STRING())
             .column("booking_agency_email", DataTypes.STRING())
