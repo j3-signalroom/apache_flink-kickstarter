@@ -1,5 +1,5 @@
 # Java-based Flink Apps
-Examples of Apache Flink® applications showcasing the [DataStream API](https://nightlies.apache.org/flink/flink-docs-master/docs/learn-flink/datastream_api/) and [Table API](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/overview/) in Java, featuring AWS, GitHub, Terraform, and Apache Iceberg.  What's the difference between the DataStream API and Table API?  Click [how](../.blog/datastream-vs-table-api.md) to learn the differences. 
+Examples of Apache Flink® applications showcasing the [DataStream API](https://nightlies.apache.org/flink/flink-docs-master/docs/learn-flink/datastream_api/) and [Table API](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/overview/) in Java, featuring AWS, GitHub, Terraform, and Apache Iceberg.  What's the difference between the DataStream API and Table API?  Click [here](../.blog/datastream-vs-table-api.md) to learn the differences. 
 
 **Table of Contents**
 
@@ -8,35 +8,37 @@ Examples of Apache Flink® applications showcasing the [DataStream API](https://
 <!-- tocstop -->
 
 ## 1.0 Try out these Flink Apps
-Before we start, I wanted to mention that in the project, I used ![gradle](../.blog/images/gradle-logo.png)[Gradle](https://gradle.com/) instead of Maven for the build automation.  Gradle is more straightforward, flexible, and powerful than its counterpart, Maven.  For instance, I use the Kotlin-supported version of Gradle to write the build because Kotlin offers type safety, IDE support, modern language features (i.e., not an XML derivative you'll find with Maven), and faster builds.
+Before diving in, I want to point out a choice I made for the project: I used Gradle instead of Maven for build automation. Why ![gradle](../.blog/images/gradle-logo.png)[Gradle](https://gradle.com/)? Well, it's not just more straightforward—it's also more flexible and powerful. I opted for the Kotlin-supported version of Gradle, which brings some major perks: type safety, seamless IDE support, and the benefits of a modern programming language, unlike Maven's XML-heavy approach. Plus, Kotlin's features help speed up our builds, which is always a nice bonus.
 
-Okay, let's start by opening the project from the `Java` subfolder. Then run:
+Alright, let’s get hands-on! First, navigate to the project located in the Java subfolder, and let’s start with a clean slate. Run:
 
 ```bash
 ./gradlew app:clean
 ```
 
-> *This command ensures a pristine build environment.  By removing previous build artifacts, this command guarantees that developers initiate their projects from a clean slate, minimizing inconsistencies and fostering a more reliable build process.*
+This command wipes out any previous build artifacts, ensuring we start with a pristine environment. It helps us avoid inconsistencies and makes the build process more reliable for everyone involved.
 
-
-Now build JAR file that contains all the Flink Apps on it, by running:
+Next, let’s build the JAR file containing all the Flink applications:
 
 ```bash
 ./gradlew app:build
 ```
 
-Logon to the `apache_flink-kickstarter-jobmanager-1` container's Interative Shell:
-
+Now, to access the JobManager (`apache_flink-kickstarter-jobmanager-1`) container, open the interactive shell by running:
 ```bash
-docker exec -it -w /opt/flink mac_flink_with_iceberg-jobmanager-1 /bin/bash
+docker exec -it -w /opt/flink/java_apps apache_flink-kickstarter-jobmanager-1 /bin/bash
 ```
 
-> *This allows you to interact with the container as if you were inside its terminal, enabling you to run commands, inspect the file system, or perform other tasks interactively within the container.*
+This command drops you right into the container, giving you full control to execute commands, explore the file system, or handle any tasks directly.
 
-Finally, to run any of the Flink Apps, choose the app and then enter the corresponding CLI command from the table below:
+Finally, to launch one of the Flink applications, choose your app and use the corresponding Flink Run command listed below. Let’s have some fun with Flink!
 
-App|Commands for CLI
+Flink App|Flink Run Command
 -|-
 **`DataGeneratorApp`**|`flink run --class kickstarter.DataGeneratorApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
 **`FlightImporterApp`**|`flink run --class kickstarter.FlightImporterApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
 **`UserStatisticsApp`**|`flink run --class kickstarter.UserStatisticsApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
+
+Argument placeholder|Replace with
+-|-
+`<SERVICE_ACCOUNT_USER>`|specify the name of the service account user, used in the the AWS Secrets and Parameter Store Path name.
