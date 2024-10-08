@@ -92,13 +92,13 @@ Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials
 
 #### 2.1.1 Run locally
 ```bash
-scripts/run-terraform-locally.sh <create | delete> --profile=<SSO_PROFILE_NAME> \
-                                                   --confluent_api_key=<CONFLUENT_API_KEY> \
-                                                   --confluent_api_secret=<CONFLUENT_API_SECRET> \
-                                                   --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE> \
-                                                   --service_account_user=<SERVICE_ACCOUNT_USER> \
-                                                   --day_count=<DAY_COUNT> \
-                                                   --auto_offset_reset=<earliest | latest> \
+scripts/run-terraform-locally.sh <create | delete> --profile=<SSO_PROFILE_NAME>
+                                                   --confluent_api_key=<CONFLUENT_API_KEY>
+                                                   --confluent_api_secret=<CONFLUENT_API_SECRET>
+                                                   --snowflake_warehouse=<SNOWFLAKE_WAREHOUSE>
+                                                   --service_account_user=<SERVICE_ACCOUNT_USER>
+                                                   --day_count=<DAY_COUNT>
+                                                   --auto_offset_reset=<earliest | latest>
                                                    --number_of_api_keys_to_retain=<NUMBER_OF_API_KEYS_TO_RETAIN>
 ```
 > Argument placeholder|Replace with
