@@ -39,6 +39,6 @@ Flink App|Flink Run Command
 **`FlightImporterApp`**|`flink run --class kickstarter.FlightImporterApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
 **`UserStatisticsApp`**|`flink run --class kickstarter.UserStatisticsApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
 
-Argument placeholder|Replace with
--|-
-`<SERVICE_ACCOUNT_USER>`|specify the name of the service account user, used in the the AWS Secrets and Parameter Store Path name.
+> Argument placeholder|Replace with
+> -|-
+> `<SERVICE_ACCOUNT_USER>`|specify the name of the service account user, used in the the AWS Secrets and Parameter Store Path name.
