@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.02.000] - 2024-10-08
+### Added
+- Markdowns that explain in detail the `run-terraform-locally.sh` and `run-flink-locally.sh`, respectively.
+
+### Changed
+- Tweaked main `README.md`.
+
+### Fixed
+- Typo in the comments on the `run-flink-locally.sh` BASH script.
+
 ## [0.30.01.000] - 2024-10-07
 ### Changed
 - Tweaked the Java and Python `README.md`s, respectively.
