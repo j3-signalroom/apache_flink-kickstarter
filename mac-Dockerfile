@@ -81,8 +81,8 @@ RUN if [ "$FLINK_LANGUAGE" = "java" ]; then \
     curl -L "https://repo.maven.apache.org/maven2/org/apache/flink/flink-shaded-hadoop-2-uber/2.8.3-10.0/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" -o "/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" && \
     curl -L "${MAVEN_ROOT_URL}flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
     curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-flink-runtime-${APACHE_FLINK_VERSION}/${ICEBERG_VERSION}/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" && \
-    curl -L "${MAVEN_ROOT_URL}hadoop/hadoop-common/${HADOOP_VERSION}/hadoop-common-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-common-${HADOOP_VERSION}.jar" && \
-    curl -L "https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.27.9/bundle-2.27.9.jar" -o "/opt/flink/lib/bundle-2.27.9.jar"; \
+    curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-aws-bundle/${ICEBERG_VERSION}/iceberg-aws-bundle-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-aws-bundle-${ICEBERG_VERSION}.jar" && \
+    curl -L "${MAVEN_ROOT_URL}hadoop/hadoop-common/${HADOOP_VERSION}/hadoop-common-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-common-${HADOOP_VERSION}.jar" \
 fi
 
 # Set CLASSPATH environment variable
