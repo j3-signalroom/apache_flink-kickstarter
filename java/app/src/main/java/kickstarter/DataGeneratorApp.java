@@ -195,6 +195,7 @@ public class DataGeneratorApp {
             }
         } catch(final Exception e) {
             System.out.println("A critical error occurred to during the processing of the catalog because " + e.getMessage());
+            e.printStackTrace();
             System.exit(1);
         }
 
@@ -219,6 +220,7 @@ public class DataGeneratorApp {
             tblEnv.useDatabase(databaseName);
         } catch (Exception e) {
             System.out.println("A critical error occurred during the processing of the database because " + e.getMessage());
+            e.printStackTrace();
             System.exit(1);
         }
 
@@ -227,20 +229,6 @@ public class DataGeneratorApp {
 
         // --- Check if the table(s) exists.  If not, create them
         String tableNames[] = {"skyone_airline", "sunset_airline"};
-
-        // --- Define the schema that will be used for the two tables
-        Schema schema = Schema.newBuilder()
-            .column("email_address", DataTypes.STRING())
-            .column("departure_time", DataTypes.STRING())
-            .column("departure_airport_code", DataTypes.STRING())
-            .column("arrival_time", DataTypes.STRING())
-            .column("arrival_airport_code", DataTypes.STRING())
-            .column("flight_number", DataTypes.STRING())
-            .column("confirmation_code", DataTypes.STRING())
-            .column("ticket_price", DataTypes.DECIMAL(10, 2))
-            .column("aircraft", DataTypes.STRING())
-            .column("booking_agency_email", DataTypes.STRING())
-            .build();
 
         /*
          * Check if the table exists.  If not, create it.  Then insert the data into
@@ -254,13 +242,24 @@ public class DataGeneratorApp {
                                                            .spliteratorUnknownSize(result.collect(), Spliterator.ORDERED), false)
                                                            .anyMatch(row -> row.getField(0).equals(tableName));
                 if(!tableExists) {
-                    tblEnv.createTable(tableName, TableDescriptor
-                        .forConnector("iceberg")
-                        .schema(schema)
-                        .option("warehouse", "s3a://" + bucketName + "/warehouse")
-                        .option("database-name", databaseName)
-                        .option("write.format.default", "parquet")
-                        .build());
+                    tblEnv.executeSql(
+                        "CREATE TABLE " + databaseName + "." + tableName + " ("
+                            + "email_address STRING, "
+                            + "departure_time STRING, "
+                            + "departure_airport_code STRING, "
+                            + "arrival_time STRING, "
+                            + "arrival_airport_code STRING, "
+                            + "flight_number STRING, "
+                            + "confirmation_code STRING, "
+                            + "ticket_price DECIMAL(10,2), "
+                            + "aircraft STRING, "
+                            + "booking_agency_email STRING) "
+                            + "WITH ("
+                                + "'write.format.default' = 'parquet',"
+                                + "'write.target-file-size-bytes' = '134217728',"
+                                + "'partitioning' = 'arrival_airport_code',"
+                                + "'format-version' = '2');"
+                    );
                 } else {
                     System.out.println("The " + tableName + " table already exists.");
                 }
@@ -269,6 +268,22 @@ public class DataGeneratorApp {
                 e.printStackTrace();
                 System.exit(1);
             }
+
+            // --- Define the sink schema
+            Schema schema = 
+                Schema
+                    .newBuilder()
+                    .column("email_address", DataTypes.STRING())
+                    .column("departure_time", DataTypes.STRING())
+                    .column("departure_airport_code", DataTypes.STRING())
+                    .column("arrival_time", DataTypes.STRING())
+                    .column("arrival_airport_code", DataTypes.STRING())
+                    .column("flight_number", DataTypes.STRING())
+                    .column("confirmation_code", DataTypes.STRING())
+                    .column("ticket_price", DataTypes.DECIMAL(10, 2))
+                    .column("aircraft", DataTypes.STRING())
+                    .column("booking_agency_email", DataTypes.STRING())
+                    .build();
 
             /*
              * Converts the datastream into a table, and insert's the converted table's
