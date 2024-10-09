@@ -178,6 +178,9 @@ public class DataGeneratorApp {
         String bucketName = Common.getAppOptions(args).replace("_", "-");  // --- To follow S3 bucket naming convention, replace underscores with hyphens if exist
         try {
             if(!Common.isCatalogExist(tblEnv, catalogName)) {
+                /*
+                 * Execute the CREATE CATALOG Flink SQL statement to register the Iceberg catalog.
+                 */
                 tblEnv.executeSql(
                     "CREATE CATALOG " + catalogName + " WITH (" 
                         + "'type' = 'iceberg',"
@@ -192,6 +195,7 @@ public class DataGeneratorApp {
             }
         } catch(final Exception e) {
             System.out.println("A critical error occurred to during the processing of the catalog because " + e.getMessage());
+            e.printStackTrace();
             System.exit(1);
         }
 
@@ -210,12 +214,13 @@ public class DataGeneratorApp {
             if (catalog instanceof FlinkCatalog) {
                 FlinkCatalog flinkCatalog = (FlinkCatalog) catalog;
                 if (!flinkCatalog.databaseExists(databaseName)) {
-                    flinkCatalog.createDatabase(databaseName, new CatalogDatabaseImpl(new HashMap<>(), ""), false);
+                    flinkCatalog.createDatabase(databaseName, new CatalogDatabaseImpl(new HashMap<>(), "The Airlines flight data database."), false);
                 }
             }
-            tblEnv.executeSql("USE " + databaseName);
+            tblEnv.useDatabase(databaseName);
         } catch (Exception e) {
             System.out.println("A critical error occurred during the processing of the database because " + e.getMessage());
+            e.printStackTrace();
             System.exit(1);
         }
 
@@ -224,34 +229,19 @@ public class DataGeneratorApp {
 
         // --- Check if the table(s) exists.  If not, create them
         String tableNames[] = {"skyone_airline", "sunset_airline"};
-        Schema schema = Schema.newBuilder()
-            .column("email_address", DataTypes.STRING())
-            .column("departure_time", DataTypes.STRING())
-            .column("departure_airport_code", DataTypes.STRING())
-            .column("arrival_time", DataTypes.STRING())
-            .column("arrival_airport_code", DataTypes.STRING())
-            .column("flight_number", DataTypes.STRING())
-            .column("confirmation_code", DataTypes.STRING())
-            .column("ticket_price", DataTypes.DECIMAL(10, 2))
-            .column("aircraft", DataTypes.STRING())
-            .column("booking_agency_email", DataTypes.STRING())
-            .build();
 
-        // --- Convert DataStream to Table
-        Table tables[] = {tblEnv.fromDataStream(skyOneStream, schema), tblEnv.fromDataStream(sunsetStream, schema)};
-
-        // ---
-        int index = -1;
+        /*
+         * Check if the table exists.  If not, create it.  Then insert the data into
+         * the table(s).
+         */
         for (String tableName : tableNames) {
-            index += 1;
             try {
                 TableResult result = tblEnv.executeSql("SHOW TABLES IN " + databaseName);
                 @SuppressWarnings("null")
-                boolean tableExists = StreamSupport.stream(
-                    Spliterators.spliteratorUnknownSize(result.collect(), Spliterator.ORDERED), false)
-                    .anyMatch(row -> row.getField(0).equals(tableName));
+                boolean tableExists = StreamSupport.stream(Spliterators
+                                                           .spliteratorUnknownSize(result.collect(), Spliterator.ORDERED), false)
+                                                           .anyMatch(row -> row.getField(0).equals(tableName));
                 if(!tableExists) {
-                    // --- Define the table using Flink SQL
                     tblEnv.executeSql(
                         "CREATE TABLE " + databaseName + "." + tableName + " ("
                             + "email_address STRING, "
@@ -261,7 +251,7 @@ public class DataGeneratorApp {
                             + "arrival_airport_code STRING, "
                             + "flight_number STRING, "
                             + "confirmation_code STRING, "
-                            + "ticket_price DECIMAL, "
+                            + "ticket_price DECIMAL(10,2), "
                             + "aircraft STRING, "
                             + "booking_agency_email STRING) "
                             + "WITH ("
@@ -275,13 +265,35 @@ public class DataGeneratorApp {
                 }
             } catch(final Exception e) {
                 System.out.println("A critical error occurred to during the processing of the table because " + e.getMessage());
+                e.printStackTrace();
                 System.exit(1);
             }
 
-            tblEnv.createTemporaryView(tableName + "_view", tables[index]);
+            // --- Define the sink schema
+            Schema schema = 
+                Schema
+                    .newBuilder()
+                    .column("email_address", DataTypes.STRING())
+                    .column("departure_time", DataTypes.STRING())
+                    .column("departure_airport_code", DataTypes.STRING())
+                    .column("arrival_time", DataTypes.STRING())
+                    .column("arrival_airport_code", DataTypes.STRING())
+                    .column("flight_number", DataTypes.STRING())
+                    .column("confirmation_code", DataTypes.STRING())
+                    .column("ticket_price", DataTypes.DECIMAL(10, 2))
+                    .column("aircraft", DataTypes.STRING())
+                    .column("booking_agency_email", DataTypes.STRING())
+                    .build();
 
-            // --- Insert DataStream into the table
-            tblEnv.executeSql("INSERT INTO " + tableName + " SELECT * FROM " + tables[index]);
+            /*
+             * Converts the datastream into a table, and insert's the converted table's
+             * data into the destinated table
+             */
+            if(tableName.equals(tableNames[0])) {
+                tblEnv.fromDataStream(skyOneStream, schema).executeInsert(tableName);
+            } else {
+                tblEnv.fromDataStream(sunsetStream, schema).executeInsert(tableName);
+            }
         }
 
         try {
