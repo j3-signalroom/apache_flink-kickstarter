@@ -224,6 +224,8 @@ public class DataGeneratorApp {
 
         // --- Check if the table(s) exists.  If not, create them
         String tableNames[] = {"skyone_airline", "sunset_airline"};
+
+        // --- Define the schema for the table(s)
         Schema schema = Schema.newBuilder()
             .column("email_address", DataTypes.STRING())
             .column("departure_time", DataTypes.STRING())
@@ -237,7 +239,7 @@ public class DataGeneratorApp {
             .column("booking_agency_email", DataTypes.STRING())
             .build();
 
-        // --- Convert DataStream to Table
+        // --- Convert DataStreams in collection to their corresponding tables
         Table tables[] = {tblEnv.fromDataStream(skyOneStream, schema), tblEnv.fromDataStream(sunsetStream, schema)};
 
         // ---
@@ -251,25 +253,13 @@ public class DataGeneratorApp {
                     Spliterators.spliteratorUnknownSize(result.collect(), Spliterator.ORDERED), false)
                     .anyMatch(row -> row.getField(0).equals(tableName));
                 if(!tableExists) {
-                    // --- Define the table using Flink SQL
-                    tblEnv.executeSql(
-                        "CREATE TABLE " + databaseName + "." + tableName + " ("
-                            + "email_address STRING, "
-                            + "departure_time STRING, "
-                            + "departure_airport_code STRING, "
-                            + "arrival_time STRING, "
-                            + "arrival_airport_code STRING, "
-                            + "flight_number STRING, "
-                            + "confirmation_code STRING, "
-                            + "ticket_price DECIMAL, "
-                            + "aircraft STRING, "
-                            + "booking_agency_email STRING) "
-                            + "WITH ("
-                                + "'write.format.default' = 'parquet',"
-                                + "'write.target-file-size-bytes' = '134217728',"
-                                + "'partitioning' = 'arrival_airport_code',"
-                                + "'format-version' = '2');"
-                    );
+                    tblEnv.createTable(databaseName + "." + tableName, TableDescriptor
+                        .forConnector("iceberg")
+                        .schema(schema)
+                        .option("warehouse", "s3a://" + bucketName + "/warehouse")
+                        .option("database-name", databaseName)
+                        .option("write.format.default", "parquet")
+                        .build());
                 } else {
                     System.out.println("The " + tableName + " table already exists.");
                 }
@@ -278,6 +268,7 @@ public class DataGeneratorApp {
                 System.exit(1);
             }
 
+            // --- Register the table as a view
             tblEnv.createTemporaryView(tableName + "_view", tables[index]);
 
             // --- Insert DataStream into the table
