@@ -60,48 +60,66 @@ RUN apt-get update && apt-get install -y \
     git \
     python3-pip \
     python3-venv \
-    zip \
-    nano
+    zip
 
-# Download and install the Flink libraries and plugins for use when writing Python-based Flink Apps
+# Download JAR files for Python
 RUN if [ "$FLINK_LANGUAGE" = "python" ]; then \
-    curl -L "https://repo.maven.apache.org/maven2/org/apache/flink/flink-shaded-hadoop-2-uber/2.8.3-10.0/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" -o "/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" && \
+    curl -L "${MAVEN_ROOT_URL}org/apache/flink/flink-shaded-hadoop-2-uber/2.8.3-10.0/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" -o "${FLINK_LIB_DIR}flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" && \
     curl -L "${MAVEN_ROOT_URL}flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
     curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-flink-runtime-${APACHE_FLINK_VERSION}/${ICEBERG_VERSION}/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-aws-bundle/${ICEBERG_VERSION}/iceberg-aws-bundle-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-aws-bundle-${ICEBERG_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}hadoop/hadoop-common/${HADOOP_VERSION}/hadoop-common-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-common-${HADOOP_VERSION}.jar" && \
+    curl -L "${MAVEN_ROOT_URL}hadoop/hadoop-hdfs-client/${HADOOP_VERSION}/hadoop-hdfs-client-${HADOOP_VERSION}.jar" -o "/opt/flink/lib/hadoop-hdfs-client-${HADOOP_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}flink/flink-sql-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}flink/flink-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}flink/flink-json/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
-    curl -L "${MAVEN_ROOT_URL}kafka/kafka-clients/3.7.0/kafka-clients-3.7.0.jar" -o "${FLINK_LIB_DIR}kafka-clients-3.7.0.jar" && \
-    cd /usr/local && \
+    curl -L "${MAVEN_ROOT_URL}kafka/kafka-clients/3.7.0/kafka-clients-3.7.0.jar" -o "${FLINK_LIB_DIR}kafka-clients-3.7.0.jar"; \
+fi
+
+# Install Python from source
+RUN cd /usr/local && \
     wget https://www.python.org/ftp/python/${PYTHON_VERSION_WITH_PATCH}/Python-${PYTHON_VERSION_WITH_PATCH}.tgz && \
     tar -xf Python-${PYTHON_VERSION_WITH_PATCH}.tgz && \
     cd Python-${PYTHON_VERSION_WITH_PATCH} && \
     ./configure --enable-optimizations && \
     make -j$(nproc) && \
-    make altinstall && \
-    ln -s /usr/local/Python-${PYTHON_VERSION_WITH_PATCH} /usr/bin/python && \
-    python${PYTHON_VERSION} -m pip install --upgrade pip && \
-    python${PYTHON_VERSION} -m pip install pipenv && \
-    python${PYTHON_VERSION} -m venv .venv && \
-    . .venv/bin/activate && \
-    pipenv --python ${PYTHON_VERSION} install "grpcio-tools>=1.29.0,<=1.50.0" && \
-    pipenv --python ${PYTHON_VERSION} install setuptools>=37.0.0 && \
-    pipenv --python ${PYTHON_VERSION} install apache-flink==${APACHE_FLINK_VERSION_WITH_PATCH} && \
-    pipenv --python ${PYTHON_VERSION} install pyiceberg && \
-    pipenv --python ${PYTHON_VERSION} install boto3 && \
-    pipenv --python ${PYTHON_VERSION} install s3fs && \
-    pipenv --python ${PYTHON_VERSION} install google-api-python-client && \
-    pipenv --python ${PYTHON_VERSION} install pyflink && \
-    pipenv --python ${PYTHON_VERSION} install py4j==0.10.9.7 && \
-    pip install boto3 && \
-    pip install apache-flink==${APACHE_FLINK_VERSION_WITH_PATCH} && \
-    pip install pyflink && \
-    pip install google-api-python-client && \
-    pip --no-cache-dir install --upgrade awscli && \
-    export PATH="/usr/local/Python-${PYTHON_VERSION_WITH_PATCH}:${PATH}"; \
-fi
+    make altinstall
+
+# Create a symbolic link to the Python binary
+RUN ln -s /usr/local/Python-${PYTHON_VERSION_WITH_PATCH} /usr/bin/python
+
+# Set the PATH environment variable with the path to the Python binary
+ENV PATH="/usr/local/Python-${PYTHON_VERSION_WITH_PATCH}:${PATH}"
+
+# Set JAVA_HOME
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
+
+# Install PyFlink, PyIceberg, AWS SDK, and other Python dependencies
+RUN python${PYTHON_VERSION} -m pip install --upgrade pip
+RUN python${PYTHON_VERSION} -m pip install pipenv
+RUN python${PYTHON_VERSION} -m venv .venv
+RUN . .venv/bin/activate
+RUN pipenv --python ${PYTHON_VERSION} install "grpcio-tools>=1.29.0,<=1.50.0"
+RUN pipenv --python ${PYTHON_VERSION} install setuptools>=37.0.0
+RUN pipenv --python ${PYTHON_VERSION} install apache-flink==${APACHE_FLINK_VERSION_WITH_PATCH}
+RUN pipenv --python ${PYTHON_VERSION} install pyiceberg
+RUN pipenv --python ${PYTHON_VERSION} install boto3
+RUN pipenv --python ${PYTHON_VERSION} install s3fs
+RUN pipenv --python ${PYTHON_VERSION} install google-api-python-client
+RUN pipenv --python ${PYTHON_VERSION} install pyflink
+RUN pipenv --python ${PYTHON_VERSION} install py4j==0.10.9.7
+
+# This action forces the installation of the latest version of the AWS SDK and PyFlink
+RUN pip install boto3
+RUN pip install apache-flink==${APACHE_FLINK_VERSION_WITH_PATCH}
+RUN pip install pyflink
+RUN pip install google-api-python-client
+
+# Install AWS CLI to interact with AWS services for debugging services
+RUN pip --no-cache-dir install --upgrade awscli
+
+# Install Nano to edit files
+RUN apt update && apt install -y nano
 
 # Download and install the Flink libraries and plugins for use when writing Java-based Flink Apps
 RUN if [ "$FLINK_LANGUAGE" = "java" ]; then \
