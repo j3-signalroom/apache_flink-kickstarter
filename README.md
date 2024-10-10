@@ -5,7 +5,7 @@ Flink App|Description
 -|-
 `DataGeneratorApp`|Generates realistic flight data for fictional airlines **Sunset Air** and **Sky One** Airlines, publishing to Kafka topics `airline.sunset` and `airline.skyone`. Implemented in Java, as PyFlink lacks a data generator source for Python.
 `FlightImporterApp`|Imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and standardizes them into a unified `airline.all` Kafka topic. Implemented in both Java and Python.
-`UserStatisticsApp`|Processes data from the `airline.all` Kafka topic to aggregate user statistics into the `airline.user_statistics` Kafka topic. Implemented in both Java and Python.
+`FlyerStatsApp`|Processes data from the `airline.all` Kafka topic to aggregate flyer statistics into the `airline.user_statistics` Kafka topic. Implemented in both Java and Python.
 
 Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/), these applications are designed to handle enterprise-scale use cases to demonstrate Flink's potential for real-world applications. This will start with securely fetching Kafka Cluster API keys via _**AWS Secrets Manager**_ and retrieving essential Kafka client configuration properties through the _**AWS Systems Manager Parameter**_.
 

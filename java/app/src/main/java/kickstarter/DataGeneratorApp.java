@@ -95,26 +95,26 @@ public class DataGeneratorApp {
         /*
          * Create a data generator source
          */
-        DataGeneratorSource<DetailFlightData> skyOneSource =
+        DataGeneratorSource<AirlineData> skyOneSource =
             new DataGeneratorSource<>(
                 index -> DataGenerator.generateAirlineFlightData("SKY1"),
                 Long.MAX_VALUE,
                 RateLimiterStrategy.perSecond(1),
-                Types.POJO(DetailFlightData.class)
+                Types.POJO(AirlineData.class)
             );
 
         /*
          * Sets up a Flink POJO source to consume data
          */
-        DataStream<DetailFlightData> skyOneStream = 
+        DataStream<AirlineData> skyOneStream = 
             env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
         /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone` with the
          * specified serializer
          */
-        KafkaRecordSerializationSchema<DetailFlightData> skyOneSerializer = 
-            KafkaRecordSerializationSchema.<DetailFlightData>builder()
+        KafkaRecordSerializationSchema<AirlineData> skyOneSerializer = 
+            KafkaRecordSerializationSchema.<AirlineData>builder()
                 .setTopic("airline.skyone")
                 .setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
                 .build();
@@ -123,8 +123,8 @@ public class DataGeneratorApp {
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
-        KafkaSink<DetailFlightData> skyOneSink = 
-            KafkaSink.<DetailFlightData>builder()
+        KafkaSink<AirlineData> skyOneSink = 
+            KafkaSink.<AirlineData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(skyOneSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
@@ -139,23 +139,23 @@ public class DataGeneratorApp {
         /*
          * Sets up a Flink POJO source to consume data
          */
-        DataGeneratorSource<DetailFlightData> sunsetSource =
+        DataGeneratorSource<AirlineData> sunsetSource =
             new DataGeneratorSource<>(
                 index -> DataGenerator.generateAirlineFlightData("SUN"),
                 Long.MAX_VALUE,
                 RateLimiterStrategy.perSecond(1),
-                Types.POJO(DetailFlightData.class)
+                Types.POJO(AirlineData.class)
             );
 
-        DataStream<DetailFlightData> sunsetStream = 
+        DataStream<AirlineData> sunsetStream = 
             env.fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
         /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset` with the
          * specified serializer
          */
-        KafkaRecordSerializationSchema<DetailFlightData> sunsetSerializer = 
-            KafkaRecordSerializationSchema.<DetailFlightData>builder()
+        KafkaRecordSerializationSchema<AirlineData> sunsetSerializer = 
+            KafkaRecordSerializationSchema.<AirlineData>builder()
                 .setTopic("airline.sunset")
                 .setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
                 .build();
@@ -164,8 +164,8 @@ public class DataGeneratorApp {
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
-        KafkaSink<DetailFlightData> sunsetSink = 
-            KafkaSink.<DetailFlightData>builder()
+        KafkaSink<AirlineData> sunsetSink = 
+            KafkaSink.<AirlineData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(sunsetSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)

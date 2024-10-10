@@ -50,11 +50,11 @@ class FlightImporterAppTest {
 
     @Test
     void defineWorkflow_shouldConvertDataFromTwoStreams() throws Exception {
-        SkyOneAirlinesFlightData skyOneFlight = new TestHelpers.SkyOneBuilder().build();
-        SunsetAirFlightData sunsetFlight = new TestHelpers.SunsetBuilder().build();
+        AirlineData skyOneFlight = new TestHelpers.AirlineDataBuilder().build();
+        AirlineData sunsetFlight = new TestHelpers.AirlineDataBuilder().build();
 
-        DataStreamSource<SkyOneAirlinesFlightData> skyOneStream = env.fromData(skyOneFlight);
-        DataStreamSource<SunsetAirFlightData> sunsetStream = env.fromData(sunsetFlight);
+        DataStreamSource<AirlineData> skyOneStream = env.fromData(skyOneFlight);
+        DataStreamSource<AirlineData> sunsetStream = env.fromData(sunsetFlight);
 
         FlightImporterApp
                 .defineWorkflow(skyOneStream, sunsetStream)
@@ -67,22 +67,22 @@ class FlightImporterAppTest {
 
     @Test
     void defineWorkflow_shouldFilterOutFlightsInThePast() throws Exception {
-        SkyOneAirlinesFlightData newSkyOneFlight = new TestHelpers.SkyOneBuilder()
-                .setArrivalTime(ZonedDateTime.now().plusMinutes(1))
+        AirlineData newSkyOneFlight = new TestHelpers.AirlineDataBuilder()
+                .setArrivalTime((ZonedDateTime.now().plusMinutes(1)).toString())
                 .build();
-        SkyOneAirlinesFlightData oldSkyOneFlight = new TestHelpers.SkyOneBuilder()
-                .setArrivalTime(ZonedDateTime.now().minusSeconds(1))
-                .build();
-
-        SunsetAirFlightData newSunsetFlight = new TestHelpers.SunsetBuilder()
-                .setArrivalTime(ZonedDateTime.now().plusMinutes(1))
-                .build();
-        SunsetAirFlightData oldSunsetFlight = new TestHelpers.SunsetBuilder()
-                .setArrivalTime(ZonedDateTime.now().minusSeconds(1))
+        AirlineData oldSkyOneFlight = new TestHelpers.AirlineDataBuilder()
+                .setArrivalTime((ZonedDateTime.now().minusSeconds(1)).toString())
                 .build();
 
-        DataStreamSource<SkyOneAirlinesFlightData> skyOneStream = env.fromData(newSkyOneFlight, oldSkyOneFlight);
-        DataStreamSource<SunsetAirFlightData> sunsetStream = env.fromData(newSunsetFlight, oldSunsetFlight);
+        AirlineData newSunsetFlight = new TestHelpers.AirlineDataBuilder()
+                .setArrivalTime((ZonedDateTime.now().plusMinutes(1)).toString())
+                .build();
+        AirlineData oldSunsetFlight = new TestHelpers.AirlineDataBuilder()
+                .setArrivalTime((ZonedDateTime.now().minusSeconds(1)).toString())
+                .build();
+
+        DataStreamSource<AirlineData> skyOneStream = env.fromData(newSkyOneFlight, oldSkyOneFlight);
+        DataStreamSource<AirlineData> sunsetStream = env.fromData(newSunsetFlight, oldSunsetFlight);
 
         FlightImporterApp
                 .defineWorkflow(skyOneStream, sunsetStream)
