@@ -80,10 +80,10 @@ public class DataGenerator {
         flightData.setDepartureAirportCode(generateAirportCode());
         flightData.setArrivalTime(generateArrivalTime(departureTime).toString());
         flightData.setArrivalAirportCode(generateAirportCode());
-        //flightData.setFlightDuration(Duration.between(departureTime, arrivalTime).toMillis());
+        flightData.setFlightDuration(Duration.between(departureTime, arrivalTime).toMillis());
         flightData.setFlightNumber(airlinePrefix + random.nextInt(1000));
         flightData.setConfirmationCode(airlinePrefix + generateString(6));
-        //flightData.setTicketPrice(BigDecimal.valueOf(500L + (long)random.nextInt(1000)));
+        flightData.setTicketPrice(BigDecimal.valueOf(500L + (long)random.nextInt(1000)));
         flightData.setAircraft("Aircraft"+generateString(3));
         flightData.setBookingAgencyEmail(generateEmail());
 

@@ -265,10 +265,10 @@ public class DataGeneratorApp {
                             + "departure_airport_code STRING, "
                             + "arrival_time STRING, "
                             + "arrival_airport_code STRING, "
-                            //+ "flight_duration BIGINT,"
+                            + "flight_duration BIGINT,"
                             + "flight_number STRING, "
                             + "confirmation_code STRING, "
-                            //+ "ticket_price DECIMAL(10,2), "
+                            + "ticket_price DECIMAL(10,2), "
                             + "aircraft STRING, "
                             + "booking_agency_email STRING) "
                             + "WITH ("
@@ -299,10 +299,10 @@ public class DataGeneratorApp {
                         $("departure_airport_code"),
                         $("arrival_time").cast(DataTypes.STRING()).as("arrival_time"),
                         $("arrival_airport_code"),
-                        //$("flight_duration").cast(DataTypes.BIGINT()).as("flight_duration"),
+                        $("flight_duration").cast(DataTypes.BIGINT()).as("flight_duration"),
                         $("flight_number"),
                         $("confirmation_code"),
-                        //$("ticket_price").cast(DataTypes.DECIMAL(10, 2)).as("ticket_price"),
+                        $("ticket_price").cast(DataTypes.DECIMAL(10, 2)).as("ticket_price"),
                         $("aircraft"),
                         $("booking_agency_email")
                     );
@@ -314,10 +314,10 @@ public class DataGeneratorApp {
                         $("departure_airport_code"),
                         $("arrival_time").cast(DataTypes.STRING()).as("arrival_time"),
                         $("arrival_airport_code"),
-                        //$("flight_duration").cast(DataTypes.BIGINT()).as("flight_duration"),
+                        $("flight_duration").cast(DataTypes.BIGINT()).as("flight_duration"),
                         $("flight_number"),
                         $("confirmation_code"),
-                        //$("ticket_price").cast(DataTypes.DECIMAL(10, 2)).as("ticket_price"),
+                        $("ticket_price").cast(DataTypes.DECIMAL(10, 2)).as("ticket_price"),
                         $("aircraft"),
                         $("booking_agency_email")
                     );
