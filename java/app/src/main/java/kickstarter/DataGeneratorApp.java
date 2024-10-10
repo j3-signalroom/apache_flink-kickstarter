@@ -62,6 +62,13 @@ public class DataGeneratorApp {
          */
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
 
+        // --- Create a TableEnvironment
+        EnvironmentSettings settings = 
+            EnvironmentSettings.newInstance()
+                               .inStreamingMode()
+                               .build();
+        StreamTableEnvironment tblEnv = StreamTableEnvironment.create(env, settings);
+
 		/*
 		 * --- Kafka Producer Config
 		 * Retrieve the properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
@@ -102,11 +109,31 @@ public class DataGeneratorApp {
                 Types.POJO(AirlineData.class)
             );
 
+        // --- Define the schema for the in-memory table
+        Schema schema = 
+            Schema.newBuilder()
+                   .column("email_address", DataTypes.STRING())
+                   .column("departure_time", DataTypes.STRING())
+                   .column("departure_airport_code", DataTypes.STRING())
+                   .column("arrival_time", DataTypes.STRING())
+                   .column("arrival_airport_code", DataTypes.STRING())
+                   .column("flight_duration", DataTypes.BIGINT())
+                   .column("flight_number", DataTypes.STRING())
+                   .column("confirmation_code", DataTypes.STRING())
+                   .column("ticket_price", DataTypes.DECIMAL(10, 2))
+                   .column("aircraft", DataTypes.STRING())
+                   .column("booking_agency_email", DataTypes.STRING())
+                   .build();
+
         /*
          * Sets up a Flink POJO source to consume data
          */
         DataStream<AirlineData> skyOneStream = 
             env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
+
+        // --- Convert DataStream to Table
+        Table skyOneTable = tblEnv.fromDataStream(skyOneStream, schema);
+        tblEnv.createTemporaryView("SkyOneTable", skyOneTable);
 
         /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone` with the
@@ -149,6 +176,11 @@ public class DataGeneratorApp {
         DataStream<AirlineData> sunsetStream = 
             env.fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
+
+        // --- Convert DataStream to Table
+        Table sunsetTable = tblEnv.fromDataStream(sunsetStream, schema);
+        tblEnv.createTemporaryView("SunsetTable", sunsetTable);
+
         /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset` with the
          * specified serializer
@@ -175,13 +207,6 @@ public class DataGeneratorApp {
          * once the StreamExecutionEnvironment.execute() method is called
          */
         sunsetStream.sinkTo(sunsetSink).name("sunset_sink");
-
-        // --- Create a TableEnvironment
-        EnvironmentSettings settings = 
-            EnvironmentSettings.newInstance()
-                               .inStreamingMode()
-                               .build();
-        StreamTableEnvironment tblEnv = StreamTableEnvironment.create(env, settings);
 
         /*
          * Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
@@ -242,39 +267,21 @@ public class DataGeneratorApp {
         // --- Print the current database name
         System.out.println("Current database: " + tblEnv.getCurrentDatabase());
 
-
-        // --- Define the schema for the in-memory table
-        Schema schema = 
-            Schema.newBuilder()
-                   .column("email_address", DataTypes.STRING())
-                   .column("departure_time", DataTypes.STRING())
-                   .column("departure_airport_code", DataTypes.STRING())
-                   .column("arrival_time", DataTypes.STRING())
-                   .column("arrival_airport_code", DataTypes.STRING())
-                   .column("flight_duration", DataTypes.BIGINT())
-                   .column("flight_number", DataTypes.STRING())
-                   .column("confirmation_code", DataTypes.STRING())
-                   .column("ticket_price", DataTypes.DECIMAL(10, 2))
-                   .column("aircraft", DataTypes.STRING())
-                   .column("booking_agency_email", DataTypes.STRING())
-                   .build();
-
-        // --- Create an in-memory table for the SkyOne DataStream
-        Table skyoneInMemoryTable = tblEnv.fromDataStream(skyOneStream, schema);
-        Table sunsetInMemoryTable = tblEnv.fromDataStream(sunsetStream, schema);
-
-        // --- Register the in-memory table as a temporary view
-        tblEnv.createTemporaryView("SkyOneInMemoryView", skyoneInMemoryTable);
-        tblEnv.createTemporaryView("SunsetInMemoryView", sunsetInMemoryTable);
-
         // --- Check if the table(s) exists.  If not, create them
         String tableNames[] = {"skyone_airline", "sunset_airline"};
+        Table tables[] = {skyOneTable, sunsetTable};
+        int tableIndex = -1;
 
         /*
          * Check if the table exists.  If not, create it.  Then insert the data into
          * the table(s).
          */
         for (String tableName : tableNames) {
+            tableIndex++;
+            
+            // --- Create the table path
+            String tablePath = databaseName + "." + tableName;
+
             try {
                 TableResult result = tblEnv.executeSql("SHOW TABLES IN " + databaseName);
                 @SuppressWarnings("null")
@@ -283,7 +290,7 @@ public class DataGeneratorApp {
                                                            .anyMatch(row -> row.getField(0).equals(tableName));
                 if(!tableExists) {
                     tblEnv.executeSql(
-                        "CREATE TABLE " + databaseName + "." + tableName + " ("
+                        "CREATE TABLE " + tablePath + " ("
                             + "email_address STRING, "
                             + "departure_time STRING, "
                             + "departure_airport_code STRING, "
@@ -302,7 +309,7 @@ public class DataGeneratorApp {
                                 + "'format-version' = '2');"
                     );
                 } else {
-                    System.out.println("The " + tableName + " table already exists.");
+                    System.out.println("The " + tablePath + " table already exists.");
                 }
             } catch(final Exception e) {
                 System.out.println("A critical error occurred to during the processing of the table because " + e.getMessage());
@@ -311,14 +318,11 @@ public class DataGeneratorApp {
             }
 
             /*
-             * Insert data from the temporary view into the table
+             * Convert datastream into table and then insert data into physical table
              */
-            if(tableName.equals(tableNames[0])) {                
-                tblEnv.executeSql("INSERT INTO " + databaseName + "." + tableName + " SELECT * FROM SkyOneInMemoryView");
-            } else {
-                tblEnv.executeSql("INSERT INTO " + databaseName + "." + tableName + " SELECT * FROM SunsetInMemoryView");
-            }
+            tables[tableIndex].executeInsert(tablePath);
         }
+
         try {
             // --- Execute the Flink job graph (DAG)
             env.execute("DataGeneratorApp");
