@@ -3,7 +3,7 @@ This repository showcases the exceptional capabilities of Apache Flink, known fo
 
 Flink App|Description
 -|-
-`DataGeneratorApp`|Generates realistic flight data for fictional airlines **Sunset Air** and **Sky One** Airlines, publishing to Kafka topics `airline.sunset` and `airline.skyone`. Implemented in Java, as PyFlink lacks a data generator source for Python.
+`DataGeneratorApp`|This Flink App generates realistic flight data for the fictional airlines Sunset Air and Sky One Airlines, seamlessly integrating modern data streaming technologies. Flight events are published to dedicated Kafka topics (`airline.sunset` and `airline.skyone`), enabling real-time processing and analysis. Simultaneously, the synthetic data flows into ![apache-iceberg-logo](.blog/images/apache-iceberg-logo.png) Apache Iceberg tables , stored in an AWS S3 bucket, providing a robust, scalable foundation for historical data analytics.  The entire solution is implemented in Java, overcoming limitations in PyFlink, which currently lacks a Python-based data generator source. This design ensures a powerful, flexible data pipeline, ideal for both real-time and batch use cases. 
 `FlightImporterApp`|Imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and standardizes them into a unified `airline.all` Kafka topic. Implemented in both Java and Python.
 `FlyerStatsApp`|Processes data from the `airline.all` Kafka topic to aggregate flyer statistics into the `airline.user_statistics` Kafka topic. Implemented in both Java and Python.
 
