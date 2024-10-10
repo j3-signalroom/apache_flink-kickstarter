@@ -20,7 +20,6 @@ import org.apache.flink.table.api.*;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.CatalogDatabaseImpl;
 import org.apache.iceberg.flink.FlinkCatalog;
-import static org.apache.flink.table.api.Expressions.$;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
@@ -243,6 +242,31 @@ public class DataGeneratorApp {
         // --- Print the current database name
         System.out.println("Current database: " + tblEnv.getCurrentDatabase());
 
+
+        // --- Define the schema for the in-memory table
+        Schema schema = 
+            Schema.newBuilder()
+                   .column("email_address", DataTypes.STRING())
+                   .column("departure_time", DataTypes.STRING())
+                   .column("departure_airport_code", DataTypes.STRING())
+                   .column("arrival_time", DataTypes.STRING())
+                   .column("arrival_airport_code", DataTypes.STRING())
+                   .column("flight_duration", DataTypes.BIGINT())
+                   .column("flight_number", DataTypes.STRING())
+                   .column("confirmation_code", DataTypes.STRING())
+                   .column("ticket_price", DataTypes.DECIMAL(10, 2))
+                   .column("aircraft", DataTypes.STRING())
+                   .column("booking_agency_email", DataTypes.STRING())
+                   .build();
+
+        // --- Create an in-memory table for the SkyOne DataStream
+        Table skyoneInMemoryTable = tblEnv.fromDataStream(skyOneStream, schema);
+        Table sunsetInMemoryTable = tblEnv.fromDataStream(sunsetStream, schema);
+
+        // --- Register the in-memory table as a temporary view
+        tblEnv.createTemporaryView("SkyOneInMemoryView", skyoneInMemoryTable);
+        tblEnv.createTemporaryView("SunsetInMemoryView", sunsetInMemoryTable);
+
         // --- Check if the table(s) exists.  If not, create them
         String tableNames[] = {"skyone_airline", "sunset_airline"};
 
@@ -287,42 +311,13 @@ public class DataGeneratorApp {
             }
 
             /*
-             * Converts the datastream into a table, and insert's the converted table's
-             * data into the sink table
+             * Insert data from the temporary view into the table
              */
-            Table dataTable;
-            if(tableName.equals(tableNames[0])) {
-                dataTable = tblEnv.fromDataStream(skyOneStream)
-                    .select(
-                        $("email_address"),
-                        $("departure_time").cast(DataTypes.STRING()).as("departure_time"),
-                        $("departure_airport_code"),
-                        $("arrival_time").cast(DataTypes.STRING()).as("arrival_time"),
-                        $("arrival_airport_code"),
-                        $("flight_duration").cast(DataTypes.BIGINT()).as("flight_duration"),
-                        $("flight_number"),
-                        $("confirmation_code"),
-                        $("ticket_price").cast(DataTypes.DECIMAL(10, 2)).as("ticket_price"),
-                        $("aircraft"),
-                        $("booking_agency_email")
-                    );
+            if(tableName.equals(tableNames[0])) {                
+                tblEnv.executeSql("INSERT INTO " + databaseName + "." + tableName + " SELECT * FROM SkyOneInMemoryView");
             } else {
-                dataTable = tblEnv.fromDataStream(sunsetStream)
-                    .select(
-                        $("email_address"),
-                        $("departure_time").cast(DataTypes.STRING()).as("departure_time"),
-                        $("departure_airport_code"),
-                        $("arrival_time").cast(DataTypes.STRING()).as("arrival_time"),
-                        $("arrival_airport_code"),
-                        $("flight_duration").cast(DataTypes.BIGINT()).as("flight_duration"),
-                        $("flight_number"),
-                        $("confirmation_code"),
-                        $("ticket_price").cast(DataTypes.DECIMAL(10, 2)).as("ticket_price"),
-                        $("aircraft"),
-                        $("booking_agency_email")
-                    );
+                tblEnv.executeSql("INSERT INTO " + databaseName + "." + tableName + " SELECT * FROM SunsetInMemoryView");
             }
-            dataTable.executeInsert(tableName);
         }
         try {
             // --- Execute the Flink job graph (DAG)
