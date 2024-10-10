@@ -39,7 +39,7 @@ Flink App|Flink Run Command
 -|-
 **`DataGeneratorApp`**|`flink run --class kickstarter.DataGeneratorApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
 **`FlightImporterApp`**|`flink run --class kickstarter.FlightImporterApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
-**`UserStatisticsApp`**|`flink run --class kickstarter.UserStatisticsApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
+**`FlyerStatssApp`**|`flink run --class kickstarter.FlyerStatsApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
 
 > Argument placeholder|Replace with
 > -|-

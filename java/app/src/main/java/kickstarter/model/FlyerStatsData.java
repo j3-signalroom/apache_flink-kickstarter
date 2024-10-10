@@ -12,7 +12,7 @@ import java.time.*;
 import java.util.*;
 
 
-public class UserStatisticsData {
+public class FlyerStatsData {
     @JsonProperty("email_address")
     private String email_address;
 
@@ -22,15 +22,12 @@ public class UserStatisticsData {
     @JsonProperty("number_of_flights")
     private long number_of_flights;
 
-    public UserStatisticsData() {
+    public FlyerStatsData() {
     }
 
-    public UserStatisticsData(FlightData flightData) {
+    public FlyerStatsData(FlightData flightData) {
         this.email_address = flightData.getEmailAddress();
-        this.total_flight_duration = Duration.between(
-                flightData.getDepartureTime(),
-                flightData.getArrivalTime()
-        );
+        this.total_flight_duration = Duration.between(ZonedDateTime.parse(flightData.getDepartureTime()), ZonedDateTime.parse(flightData.getArrivalTime()));
         this.number_of_flights = 1;
     }
 
@@ -62,7 +59,7 @@ public class UserStatisticsData {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UserStatisticsData that = (UserStatisticsData) o;
+        FlyerStatsData that = (FlyerStatsData) o;
         return this.number_of_flights == that.number_of_flights && 
                 Objects.equals(this.email_address, that.email_address) &&
                 Objects.equals(this.total_flight_duration, that.total_flight_duration);
@@ -75,16 +72,16 @@ public class UserStatisticsData {
 
     @Override
     public String toString() {
-        return "UserStatistics{" +
+        return "FlyerStatsData{" +
                 "email_address='" + this.email_address + '\'' +
                 ", totalFlightDuration=" + this.total_flight_duration +
                 ", number_of_flights=" + this.number_of_flights +
                 '}';
     }
 
-    public UserStatisticsData merge(UserStatisticsData that) {
+    public FlyerStatsData merge(FlyerStatsData that) {
         if(this.email_address.equals(that.email_address)) {
-            UserStatisticsData merged = new UserStatisticsData();
+            FlyerStatsData merged = new FlyerStatsData();
 
             merged.setEmailAddress(this.email_address);
             merged.setTotalFlightDuration(this.total_flight_duration.plus(that.getTotalFlightDuration()));
@@ -92,7 +89,7 @@ public class UserStatisticsData {
 
             return merged;
         } else {
-            throw new IllegalArgumentException("Cannot merge UserStatisticsData for different email addresses");
+            throw new IllegalArgumentException("Cannot merge FlyerStatsData for different email addresses");
         }
     }
 }

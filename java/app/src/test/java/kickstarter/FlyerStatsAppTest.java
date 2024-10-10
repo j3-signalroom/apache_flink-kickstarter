@@ -21,12 +21,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import kickstarter.model.*;
 
 
-class UserStatisticsAppTest {
+class FlyerStatsAppTest {
 
     StreamExecutionEnvironment env;
     WatermarkStrategy<FlightData> defaultWatermarkStrategy;
 
-    DataStream.Collector<UserStatisticsData> collector;
+    DataStream.Collector<FlyerStatsData> collector;
 
     static final MiniClusterResourceConfiguration miniClusterConfig = new MiniClusterResourceConfiguration.Builder()
             .setNumberSlotsPerTaskManager(2)
@@ -36,8 +36,8 @@ class UserStatisticsAppTest {
     @RegisterExtension
     static final MiniClusterExtension FLINK = new MiniClusterExtension(miniClusterConfig);
 
-    private void assertContains(DataStream.Collector<UserStatisticsData> collector, List<UserStatisticsData> expected) {
-        List<UserStatisticsData> actual = new ArrayList<>();
+    private void assertContains(DataStream.Collector<FlyerStatsData> collector, List<FlyerStatsData> expected) {
+        List<FlyerStatsData> actual = new ArrayList<>();
         collector.getOutput().forEachRemaining(actual::add);
 
         assertEquals(expected.size(), actual.size());
@@ -56,21 +56,12 @@ class UserStatisticsAppTest {
     }
 
     @Test
-    void defineWorkflow_shouldConvertFlightDataToUserStatisticsData() throws Exception {
+    void defineWorkflow_shouldConvertFlightDataToFlyerStatsData() throws Exception {
         FlightData flight = new TestHelpers.FlightDataBuilder().build();
-
-        DataStream<FlightData> stream = env
-                .fromData(flight)
-                .assignTimestampsAndWatermarks(defaultWatermarkStrategy);
-
-        UserStatisticsApp
-                .defineWorkflow(stream)
-                .collectAsync(collector);
-
+        DataStream<FlightData> stream = env.fromData(flight).assignTimestampsAndWatermarks(defaultWatermarkStrategy);
+        FlyerStatsApp.defineWorkflow(stream).collectAsync(collector);
         env.executeAsync();
-
-        UserStatisticsData expected = new UserStatisticsData(flight);
-
+        FlyerStatsData expected = new FlyerStatsData(flight);
         assertContains(collector, Arrays.asList(expected));
     }
 
@@ -87,14 +78,14 @@ class UserStatisticsAppTest {
                 .fromData(flight1, flight2, flight3)
                 .assignTimestampsAndWatermarks(defaultWatermarkStrategy);
 
-        UserStatisticsApp
+        FlyerStatsApp
                 .defineWorkflow(stream)
                 .collectAsync(collector);
 
         env.executeAsync();
 
-        UserStatisticsData expected1 = new UserStatisticsData(flight1).merge(new UserStatisticsData(flight3));
-        UserStatisticsData expected2 = new UserStatisticsData(flight2);
+        FlyerStatsData expected1 = new FlyerStatsData(flight1).merge(new FlyerStatsData(flight3));
+        FlyerStatsData expected2 = new FlyerStatsData(flight2);
 
         assertContains(collector, Arrays.asList(expected1, expected2));
     }
@@ -121,14 +112,14 @@ class UserStatisticsAppTest {
                 .fromData(flight1, flight2, flight3)
                 .assignTimestampsAndWatermarks(watermarkStrategy);
 
-        UserStatisticsApp
+        FlyerStatsApp
                 .defineWorkflow(stream)
                 .collectAsync(collector);
 
         env.executeAsync();
 
-        UserStatisticsData expected1 = new UserStatisticsData(flight1).merge(new UserStatisticsData(flight2));
-        UserStatisticsData expected2 = expected1.merge(new UserStatisticsData(flight3));
+        FlyerStatsData expected1 = new FlyerStatsData(flight1).merge(new FlyerStatsData(flight2));
+        FlyerStatsData expected2 = expected1.merge(new FlyerStatsData(flight3));
 
         assertContains(collector, Arrays.asList(expected1, expected2));
     }

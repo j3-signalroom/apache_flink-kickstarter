@@ -27,8 +27,8 @@ import org.slf4j.*;
 import kickstarter.model.*;
 
 
-public class UserStatisticsApp {
-    private static final Logger logger = LoggerFactory.getLogger(UserStatisticsApp.class);
+public class FlyerStatsApp {
+    private static final Logger logger = LoggerFactory.getLogger(FlyerStatsApp.class);
 
 
 	/**
@@ -116,6 +116,7 @@ public class UserStatisticsApp {
             KafkaSource.<FlightData>builder()
                 .setProperties(consumerProperties)
                 .setTopics("airline.all")
+                .setGroupId("flight_group")
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new JsonDeserializationSchema<>(FlightData.class))
                 .build();
@@ -131,9 +132,9 @@ public class UserStatisticsApp {
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.user_statistics` with the
          * specified serializer
          */
-        KafkaRecordSerializationSchema<UserStatisticsData> statisticsSerializer = 
+        KafkaRecordSerializationSchema<FlyerStatsData> statisticsSerializer = 
             KafkaRecordSerializationSchema
-                .<UserStatisticsData>builder()
+                .<FlyerStatsData>builder()
                 .setTopic("airline.user_statistics")
                 .setValueSerializationSchema(new JsonSerializationSchema<>(() -> new ObjectMapper().registerModule(new JavaTimeModule())))
                 .build();
@@ -142,8 +143,8 @@ public class UserStatisticsApp {
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
-        KafkaSink<UserStatisticsData> statsSink = 
-            KafkaSink.<UserStatisticsData>builder()
+        KafkaSink<FlyerStatsData> statsSink = 
+            KafkaSink.<FlyerStatsData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(statisticsSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
@@ -160,7 +161,7 @@ public class UserStatisticsApp {
 
         try {
             // --- Execute the Flink job graph (DAG)
-            env.execute("UserStatisticsApp");
+            env.execute("FlyerStatsApp");
         } catch (Exception e) {
             logger.error("The App stopped early due to the following: {}", e.getMessage());
         }        
@@ -173,11 +174,11 @@ public class UserStatisticsApp {
      * @param flightDataSource the data stream from the `airline.all` Kafka topic.
      * @return the data stream to the `airline.user_statistics` Kafka topic.
      */
-    public static DataStream<UserStatisticsData> defineWorkflow(DataStream<FlightData> flightDataSource) {
+    public static DataStream<FlyerStatsData> defineWorkflow(DataStream<FlightData> flightDataSource) {
         return flightDataSource
-            .map(UserStatisticsData::new)
-            .keyBy(UserStatisticsData::getEmailAddress)
+            .map(FlyerStatsData::new)
+            .keyBy(FlyerStatsData::getEmailAddress)
             .window(TumblingEventTimeWindows.of(Duration.ofMinutes(1)))
-            .reduce(UserStatisticsData::merge, new ProcessUserStatisticsDataFunction());
+            .reduce(FlyerStatsData::merge, new ProcessUserStatisticsDataFunction());
     }
 }

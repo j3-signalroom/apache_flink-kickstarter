@@ -116,36 +116,38 @@ public class FlightImporterApp {
          * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
          */
         @SuppressWarnings("unchecked")
-        KafkaSource<SkyOneAirlinesFlightData> skyOneSource = KafkaSource.<SkyOneAirlinesFlightData>builder()
+        KafkaSource<AirlineData> skyOneSource = KafkaSource.<AirlineData>builder()
             .setProperties(consumerProperties)
             .setTopics("airline.skyone")
+            .setGroupId("skyone_group")
             .setStartingOffsets(OffsetsInitializer.earliest())
-            .setValueOnlyDeserializer(new JsonDeserializationSchema(SkyOneAirlinesFlightData.class))
+            .setValueOnlyDeserializer(new JsonDeserializationSchema(AirlineData.class))
             .build();
 
         /*
          * Takes the results of the Kafka source and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
-        DataStream<SkyOneAirlinesFlightData> skyOneStream = env
+        DataStream<AirlineData> skyOneStream = env
             .fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
         /*
          * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset`
          */
 		@SuppressWarnings("unchecked")
-        KafkaSource<SunsetAirFlightData> sunsetSource = KafkaSource.<SunsetAirFlightData>builder()
+        KafkaSource<AirlineData> sunsetSource = KafkaSource.<AirlineData>builder()
             .setProperties(consumerProperties)
             .setTopics("airline.sunset")
+            .setGroupId("sunset_group")
             .setStartingOffsets(OffsetsInitializer.earliest())
-            .setValueOnlyDeserializer(new JsonDeserializationSchema(SunsetAirFlightData.class))
+            .setValueOnlyDeserializer(new JsonDeserializationSchema(AirlineData.class))
             .build();
 
         /*
          * Takes the results of the Kafka source and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
-        DataStream<SunsetAirFlightData> sunsetStream = env
+        DataStream<AirlineData> sunsetStream = env
             .fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
         /*
@@ -190,13 +192,13 @@ public class FlightImporterApp {
      * @param sunsetSource - The data stream source for the `airline.sunset` Kafka topic
      * @return The data stream that is the result of the transformations
      */
-	public static DataStream<FlightData> defineWorkflow(DataStream<SkyOneAirlinesFlightData> skyOneSource, DataStream<SunsetAirFlightData> sunsetSource) {
+	public static DataStream<FlightData> defineWorkflow(DataStream<AirlineData> skyOneSource, DataStream<AirlineData> sunsetSource) {
         DataStream<FlightData> skyOneFlightStream =  skyOneSource
-			.filter(flight -> flight.getArrivalTime().isAfter(ZonedDateTime.now()))
-			.map(SkyOneAirlinesFlightData::toFlightData);
+			.filter(flight -> ZonedDateTime.parse(flight.getArrivalTime()).isAfter(ZonedDateTime.now()))
+			.map(AirlineData::toFlightData);
 
 		DataStream<FlightData> sunsetFlightStream = sunsetSource
-            .filter(flight -> flight.getArrivalTime().isAfter(ZonedDateTime.now()))
+            .filter(flight -> ZonedDateTime.parse(flight.getArrivalTime()).isAfter(ZonedDateTime.now()))
             .map(flight -> flight.toFlightData());
 
 		return skyOneFlightStream.union(sunsetFlightStream);

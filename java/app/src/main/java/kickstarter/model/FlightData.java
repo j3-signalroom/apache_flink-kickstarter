@@ -8,7 +8,6 @@
 package kickstarter.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.*;
-import java.time.*;
 import java.util.*;
 
 
@@ -17,15 +16,13 @@ public class FlightData {
     private String email_address;
 
     @JsonProperty("departure_time")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    private ZonedDateTime departure_time;
+    private String departure_time;
 
     @JsonProperty("departure_airport_code")
     private String departure_airport_code;
 
     @JsonProperty("arrival_time")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    private ZonedDateTime arrival_time;
+    private String arrival_time;
 
     @JsonProperty("arrival_airport_code")
     private String arrival_airport_code;
@@ -49,11 +46,11 @@ public class FlightData {
         this.email_address = EmailAddress;
     }
 
-    public ZonedDateTime getDepartureTime() {
+    public String getDepartureTime() {
         return this.departure_time;
     }
 
-    public void setDepartureTime(ZonedDateTime departureTime) {
+    public void setDepartureTime(String departureTime) {
         this.departure_time = departureTime;
     }
 
@@ -65,11 +62,11 @@ public class FlightData {
         this.departure_airport_code = departureAirport;
     }
 
-    public ZonedDateTime getArrivalTime() {
+    public String getArrivalTime() {
         return this.arrival_time;
     }
 
-    public void setArrivalTime(ZonedDateTime arrivalTime) {
+    public void setArrivalTime(String arrivalTime) {
         this.arrival_time = arrivalTime;
     }
 
@@ -85,8 +82,8 @@ public class FlightData {
         return this.flight_number;
     }
 
-    public void setFlightNumber(String flightId) {
-        this.flight_number = flightId;
+    public void setFlightNumber(String flightNumber) {
+        this.flight_number = flightNumber;
     }
 
     public String getConfirmationCode() {

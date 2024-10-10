@@ -16,8 +16,8 @@ import org.apache.flink.util.*;
 import kickstarter.model.*;
 
 
-class ProcessUserStatisticsDataFunction extends ProcessWindowFunction<UserStatisticsData, UserStatisticsData, String, TimeWindow> {
-    private ValueStateDescriptor<UserStatisticsData> stateDescriptor;
+class ProcessUserStatisticsDataFunction extends ProcessWindowFunction<FlyerStatsData, FlyerStatsData, String, TimeWindow> {
+    private ValueStateDescriptor<FlyerStatsData> stateDescriptor;
 
     /**
      * The open method is called when the function is first initialized.
@@ -27,7 +27,7 @@ class ProcessUserStatisticsDataFunction extends ProcessWindowFunction<UserStatis
      */
     @Override
     public void open(Configuration parameters) throws Exception {
-        stateDescriptor = new ValueStateDescriptor<>("User Statistics", UserStatisticsData.class);
+        stateDescriptor = new ValueStateDescriptor<>("User Statistics", FlyerStatsData.class);
         super.open(parameters);
     }
 
@@ -41,15 +41,15 @@ class ProcessUserStatisticsDataFunction extends ProcessWindowFunction<UserStatis
      * @throws Exception - Implementations may forward exceptions, which are caught
      */
     @Override
-    public void process(String emailAddress, ProcessWindowFunction<UserStatisticsData, UserStatisticsData, String, TimeWindow>.Context context, Iterable<UserStatisticsData> statsList, Collector<UserStatisticsData> collector) throws Exception {
+    public void process(String emailAddress, ProcessWindowFunction<FlyerStatsData, FlyerStatsData, String, TimeWindow>.Context context, Iterable<FlyerStatsData> statsList, Collector<FlyerStatsData> collector) throws Exception {
         // --- Retrieve the state
-        ValueState<UserStatisticsData> state = context.globalState().getState(stateDescriptor);
+        ValueState<FlyerStatsData> state = context.globalState().getState(stateDescriptor);
 
         // --- Get the accumulated stats
-        UserStatisticsData accumulatedStats = state.value();
+        FlyerStatsData accumulatedStats = state.value();
 
         // --- Merge the stats
-        for (UserStatisticsData newStats: statsList) {
+        for (FlyerStatsData newStats: statsList) {
             if(accumulatedStats == null)
                 accumulatedStats = newStats;
             else

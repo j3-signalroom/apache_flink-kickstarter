@@ -70,8 +70,8 @@ public class DataGenerator {
      * @param airlinePrefix The prefix for the airline.
      * @return An AirlineFlightData object.
      */
-    public static DetailFlightData generateAirlineFlightData(final String airlinePrefix) {
-        DetailFlightData flightData = new DetailFlightData();
+    public static AirlineData generateAirlineFlightData(final String airlinePrefix) {
+        AirlineData flightData = new AirlineData();
         ZonedDateTime departureTime = generateDepartureTime();
         ZonedDateTime arrivalTime = generateArrivalTime(departureTime);
 

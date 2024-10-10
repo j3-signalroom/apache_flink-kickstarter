@@ -60,159 +60,93 @@ public class TestHelpers {
         return Duration.ofMinutes(random.nextInt(300));
     }
 
-    public static class SkyOneBuilder {
+    public static class AirlineDataBuilder {
         private String emailAddress;
-        private ZonedDateTime flightDepartureTime;
+        private String flightDepartureTime;
         private String iataDepartureCode;
-        private ZonedDateTime flightArrivalTime;
+        private String flightArrivalTime;
         private String iataArrivalCode;
         private String flightNumber;
         private String confirmation;
 
-        public SkyOneBuilder() {
+        public AirlineDataBuilder() {
+            ZonedDateTime departure = generateDepartureTime();
+
             this.emailAddress = generateEmail();
-            this.flightDepartureTime = generateDepartureTime();
+            this.flightDepartureTime = departure.toString();
             this.iataDepartureCode = generateAirportCode();
-            this.flightArrivalTime = generateArrivalTime(flightDepartureTime);
+            this.flightArrivalTime = generateArrivalTime(departure).toString();
             this.iataArrivalCode = generateAirportCode();
             this.flightNumber = "SKY1"+random.nextInt(1000);
             this.confirmation = "SKY1"+generateString(6);
         }
 
-        public SkyOneBuilder setEmailAddress(String emailAddress) {
+        public AirlineDataBuilder setEmailAddress(String emailAddress) {
             this.emailAddress = emailAddress;
             return this;
         }
 
-        public SkyOneBuilder setDepartureTime(ZonedDateTime flightDepartureTime) {
+        public AirlineDataBuilder setDepartureTime(String flightDepartureTime) {
             this.flightDepartureTime = flightDepartureTime;
             return this;
         }
 
-        public SkyOneBuilder setDepartureAirportCode(String iataDepartureCode) {
+        public AirlineDataBuilder setDepartureAirportCode(String iataDepartureCode) {
             this.iataDepartureCode = iataDepartureCode;
             return this;
         }
 
-        public SkyOneBuilder setArrivalTime(ZonedDateTime flightArrivalTime) {
+        public AirlineDataBuilder setArrivalTime(String flightArrivalTime) {
             this.flightArrivalTime = flightArrivalTime;
             return this;
         }
 
-        public SkyOneBuilder setArrivalAirportCode(String iataArrivalCode) {
+        public AirlineDataBuilder setArrivalAirportCode(String iataArrivalCode) {
             this.iataArrivalCode = iataArrivalCode;
             return this;
         }
 
-        public SkyOneBuilder setFlightNumber(String flightNumber) {
+        public AirlineDataBuilder setFlightNumber(String flightNumber) {
             this.flightNumber = flightNumber;
             return this;
         }
 
-        public SkyOneBuilder setConfirmation(String confirmation) {
+        public AirlineDataBuilder setConfirmation(String confirmation) {
             this.confirmation = confirmation;
             return this;
         }
 
-        public SkyOneAirlinesFlightData build() {
-            SkyOneAirlinesFlightData skyOne = new SkyOneAirlinesFlightData();
+        public AirlineData build() {
+            AirlineData airlineData = new AirlineData();
 
-            skyOne.setEmailAddress(emailAddress);
-            skyOne.setDepartureTime(flightDepartureTime);
-            skyOne.setDepartureAirportCode(iataDepartureCode);
-            skyOne.setArrivalTime(flightArrivalTime);
-            skyOne.setArrivalAirportCode(iataArrivalCode);
-            skyOne.setFlightNumber(flightNumber);
-            skyOne.setConfirmationCode(confirmation);
+            airlineData.setEmailAddress(emailAddress);
+            airlineData.setDepartureTime(flightDepartureTime);
+            airlineData.setDepartureAirportCode(iataDepartureCode);
+            airlineData.setArrivalTime(flightArrivalTime);
+            airlineData.setArrivalAirportCode(iataArrivalCode);
+            airlineData.setFlightNumber(flightNumber);
+            airlineData.setConfirmationCode(confirmation);
 
-            return skyOne;
+            return airlineData;
         }
     }
-
-    public static class SunsetBuilder {
-        private String EmailAddress = generateEmail();
-        private ZonedDateTime departureTime = generateDepartureTime();
-        private String departureAirport = generateAirportCode();
-        private ZonedDateTime arrivalTime = generateArrivalTime(departureTime);
-        private String arrivalAirport = generateAirportCode();
-        private String flightId = "SUN"+random.nextInt(1000);
-        private String referenceNumber = "SUN"+generateString(8);
-
-        public SunsetBuilder() {
-            this.EmailAddress = generateEmail();
-            this.departureTime = generateDepartureTime();
-            this.departureAirport = generateAirportCode();
-            this.arrivalTime = generateArrivalTime(departureTime);
-            this.arrivalAirport = generateAirportCode();
-            this.flightId = "SUN"+random.nextInt(1000);
-            this.referenceNumber = "SUN"+generateString(8);
-        }
-
-        public SunsetBuilder setEmailAddress(String EmailAddress) {
-            this.EmailAddress = EmailAddress;
-            return this;
-        }
-
-        public SunsetBuilder setDepartureTime(ZonedDateTime departureTime) {
-            this.departureTime = departureTime;
-            return this;
-        }
-
-        public SunsetBuilder setDepartureAirportCode(String departureAirport) {
-            this.departureAirport = departureAirport;
-            return this;
-        }
-
-        public SunsetBuilder setArrivalTime(ZonedDateTime arrivalTime) {
-            this.arrivalTime = arrivalTime;
-            return this;
-        }
-
-        public SunsetBuilder setArrivalAirportCode(String arrivalAirport) {
-            this.arrivalAirport = arrivalAirport;
-            return this;
-        }
-
-        public SunsetBuilder setFlightNumber(String flightId) {
-            this.flightId = flightId;
-            return this;
-        }
-
-        public SunsetBuilder setConfirmationCode(String referenceNumber) {
-            this.referenceNumber = referenceNumber;
-            return this;
-        }
-
-        public SunsetAirFlightData build() {
-            SunsetAirFlightData sunset = new SunsetAirFlightData();
-
-            sunset.setEmailAddress(EmailAddress);
-            sunset.setDepartureTime(departureTime);
-            sunset.setDepartureAirportCode(departureAirport);
-            sunset.setArrivalTime(arrivalTime);
-            sunset.setArrivalAirportCode(arrivalAirport);
-            sunset.setFlightNumber(flightId);
-            sunset.setConfirmationCode(referenceNumber);
-
-            return sunset;
-        }
-    }
-
 
     public static class FlightDataBuilder {
         private String emailAddress;
-        private ZonedDateTime departureTime;
+        private String departureTime;
         private String departureAirportCode;
-        private ZonedDateTime arrivalTime;
+        private String arrivalTime;
         private String arrivalAirportCode;
         private String flightNumber;
         private String confirmationCode;
 
         public FlightDataBuilder() {
+            ZonedDateTime departure = generateDepartureTime();
+
             emailAddress = generateEmail();
-            departureTime = generateDepartureTime();
+            departureTime = departure.toString();
             departureAirportCode = generateAirportCode();
-            arrivalTime = generateArrivalTime(departureTime);
+            arrivalTime = generateArrivalTime(departure).toString();
             arrivalAirportCode = generateAirportCode();
             flightNumber = "Flight"+random.nextInt(1000);
             confirmationCode = "Confirmation"+generateString(5);
@@ -223,7 +157,7 @@ public class TestHelpers {
             return this;
         }
 
-        public FlightDataBuilder setDepartureTime(ZonedDateTime departureTime) {
+        public FlightDataBuilder setDepartureTime(String departureTime) {
             this.departureTime = departureTime;
             return this;
         }
@@ -233,7 +167,7 @@ public class TestHelpers {
             return this;
         }
 
-        public FlightDataBuilder setArrivalTime(ZonedDateTime arrivalTime) {
+        public FlightDataBuilder setArrivalTime(String arrivalTime) {
             this.arrivalTime = arrivalTime;
             return this;
         }
@@ -268,12 +202,12 @@ public class TestHelpers {
         }
     }
 
-    public static class UserStatisticsBuilder {
+    public static class FlyerStatsDataBuilder {
         private String emailAddress;
         private Duration totalFlightDuration;
         private long numberOfFlights;
 
-        public UserStatisticsBuilder() {
+        public FlyerStatsDataBuilder() {
             this.emailAddress = generateEmail();
             ZonedDateTime departure = generateDepartureTime();
             ZonedDateTime arrival = generateArrivalTime(departure);
@@ -281,23 +215,23 @@ public class TestHelpers {
             this.numberOfFlights = random.nextInt(5);
         }
 
-        public UserStatisticsBuilder setEmailAddress(String emailAddress) {
+        public FlyerStatsDataBuilder setEmailAddress(String emailAddress) {
             this.emailAddress = emailAddress;
             return this;
         }
 
-        public UserStatisticsBuilder setTotalFlightDuration(Duration totalFlightDuration) {
+        public FlyerStatsDataBuilder setTotalFlightDuration(Duration totalFlightDuration) {
             this.totalFlightDuration = totalFlightDuration;
             return this;
         }
 
-        public UserStatisticsBuilder setNumberOfFlights(long numberOfFlights) {
+        public FlyerStatsDataBuilder setNumberOfFlights(long numberOfFlights) {
             this.numberOfFlights = numberOfFlights;
             return this;
         }
 
-        public UserStatisticsData build() {
-            UserStatisticsData stats = new UserStatisticsData();
+        public FlyerStatsData build() {
+            FlyerStatsData stats = new FlyerStatsData();
 
             stats.setEmailAddress(emailAddress);
             stats.setTotalFlightDuration(totalFlightDuration);

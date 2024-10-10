@@ -8,26 +8,25 @@
 package kickstarter;
 
 import org.junit.jupiter.api.Test;
+import static org.apache.flink.types.PojoTestUtils.assertSerializedAsPojo;
+import static org.junit.jupiter.api.Assertions.*;
+import java.time.*;
 
 import kickstarter.model.*;
 
-import java.time.Duration;
-import static org.apache.flink.types.PojoTestUtils.assertSerializedAsPojo;
-import static org.junit.jupiter.api.Assertions.*;
-
-class UserStatisticsTest {
+class FlyerStatsDataTest {
 
     @Test
     void theClass_shouldBeSerializableAsAPOJO() {
-        assertSerializedAsPojo(UserStatisticsData.class);
+        assertSerializedAsPojo(FlyerStatsData.class);
     }
 
     @Test
     void constructor_shouldCreateStatisticsUsingFlightData() {
         FlightData flightData = new TestHelpers.FlightDataBuilder().build();
-        UserStatisticsData stats = new UserStatisticsData(flightData);
+        FlyerStatsData stats = new FlyerStatsData(flightData);
 
-        Duration expectedDuration = Duration.between(flightData.getDepartureTime(), flightData.getArrivalTime());
+        Duration expectedDuration = Duration.between(ZonedDateTime.parse(flightData.getDepartureTime()), ZonedDateTime.parse(flightData.getArrivalTime()));
 
         assertEquals(flightData.getEmailAddress(), stats.getEmailAddress());
         assertEquals(expectedDuration, stats.getTotalFlightDuration());
@@ -36,8 +35,8 @@ class UserStatisticsTest {
 
     @Test
     void setters_shouldPopulateExpectedFields() {
-        UserStatisticsData expected = new TestHelpers.UserStatisticsBuilder().build();
-        UserStatisticsData actual = new UserStatisticsData();
+        FlyerStatsData expected = new TestHelpers.FlyerStatsDataBuilder().build();
+        FlyerStatsData actual = new FlyerStatsData();
         actual.setEmailAddress(expected.getEmailAddress());
         actual.setTotalFlightDuration(expected.getTotalFlightDuration());
         actual.setNumberOfFlights(expected.getNumberOfFlights());
@@ -49,8 +48,8 @@ class UserStatisticsTest {
 
     @Test
     void equals_shouldReturnTrue_forTwoEquivalentUserStatistics() {
-        UserStatisticsData stats1 = new TestHelpers.UserStatisticsBuilder().build();
-        UserStatisticsData stats2 = new UserStatisticsData();
+        FlyerStatsData stats1 = new TestHelpers.FlyerStatsDataBuilder().build();
+        FlyerStatsData stats2 = new FlyerStatsData();
         stats2.setEmailAddress(stats1.getEmailAddress());
         stats2.setTotalFlightDuration(stats1.getTotalFlightDuration());
         stats2.setNumberOfFlights(stats1.getNumberOfFlights());
@@ -62,8 +61,8 @@ class UserStatisticsTest {
 
     @Test
     void equals_shouldReturnFalse_forTwoDifferentUserStatistics() {
-        UserStatisticsData stats1 = new TestHelpers.UserStatisticsBuilder().build();
-        UserStatisticsData stats2 = new TestHelpers.UserStatisticsBuilder().build();
+        FlyerStatsData stats1 = new TestHelpers.FlyerStatsDataBuilder().build();
+        FlyerStatsData stats2 = new TestHelpers.FlyerStatsDataBuilder().build();
 
         assertNotSame(stats1, stats2);
         assertNotEquals(stats1, stats2);
@@ -72,12 +71,12 @@ class UserStatisticsTest {
 
     @Test
     void merge_shouldMergeTheUserStatistics() {
-        UserStatisticsData stats1 = new TestHelpers.UserStatisticsBuilder().build();
-        UserStatisticsData stats2 = new TestHelpers.UserStatisticsBuilder()
+        FlyerStatsData stats1 = new TestHelpers.FlyerStatsDataBuilder().build();
+        FlyerStatsData stats2 = new TestHelpers.FlyerStatsDataBuilder()
             .setEmailAddress(stats1.getEmailAddress())
             .build();
 
-        UserStatisticsData merged = stats1.merge(stats2);
+        FlyerStatsData merged = stats1.merge(stats2);
 
         assertEquals(stats1.getEmailAddress(), merged.getEmailAddress());
         assertEquals(stats1.getTotalFlightDuration().plus(stats2.getTotalFlightDuration()), merged.getTotalFlightDuration());
@@ -86,8 +85,8 @@ class UserStatisticsTest {
 
     @Test
     void merge_shouldFailIfTheEmailAddressesAreDifferent() {
-        UserStatisticsData stats1 = new TestHelpers.UserStatisticsBuilder().build();
-        UserStatisticsData stats2 = new TestHelpers.UserStatisticsBuilder().setEmailAddress("notthesame@email.com").build();
+        FlyerStatsData stats1 = new TestHelpers.FlyerStatsDataBuilder().build();
+        FlyerStatsData stats2 = new TestHelpers.FlyerStatsDataBuilder().setEmailAddress("notthesame@email.com").build();
 
         assertNotEquals(stats1.getEmailAddress(), stats2.getEmailAddress());
 

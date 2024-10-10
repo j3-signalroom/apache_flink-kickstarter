@@ -15,17 +15,17 @@ import kickstarter.*;
 
 
 
-class SkyOneAirlinesFlightDataTest {
+class AirlineFlightDataTest {
 
     @Test
     void theClass_shouldBeSerializableAsAPOJO() {
-        assertSerializedAsPojo(SkyOneAirlinesFlightData.class);
+        assertSerializedAsPojo(AirlineData.class);
     }
 
     @Test
     void setters_shouldPopulateExpectedFields() {
-        SkyOneAirlinesFlightData expected = new TestHelpers.SkyOneBuilder().build();
-        SkyOneAirlinesFlightData actual = new SkyOneAirlinesFlightData();
+        AirlineData expected = new TestHelpers.AirlineDataBuilder().build();
+        AirlineData actual = new AirlineData();
         actual.setEmailAddress(expected.getEmailAddress());
         actual.setDepartureTime(expected.getDepartureTime());
         actual.setDepartureAirportCode(expected.getDepartureAirportCode());
@@ -45,8 +45,8 @@ class SkyOneAirlinesFlightDataTest {
 
     @Test
     void equals_shouldReturnTrue_forTwoEquivalentFlights() {
-        SkyOneAirlinesFlightData flight1 = new TestHelpers.SkyOneBuilder().build();
-        SkyOneAirlinesFlightData flight2 = new SkyOneAirlinesFlightData();
+        AirlineData flight1 = new TestHelpers.AirlineDataBuilder().build();
+        AirlineData flight2 = new AirlineData();
         flight2.setEmailAddress(flight1.getEmailAddress());
         flight2.setDepartureTime(flight1.getDepartureTime());
         flight2.setDepartureAirportCode(flight1.getDepartureAirportCode());
@@ -62,8 +62,8 @@ class SkyOneAirlinesFlightDataTest {
 
     @Test
     void equals_shouldReturnFalse_forTwoDifferentFlights() {
-        SkyOneAirlinesFlightData flight1 = new TestHelpers.SkyOneBuilder().build();
-        SkyOneAirlinesFlightData flight2 = new TestHelpers.SkyOneBuilder().build();
+        AirlineData flight1 = new TestHelpers.AirlineDataBuilder().build();
+        AirlineData flight2 = new TestHelpers.AirlineDataBuilder().build();
 
         assertNotSame(flight1, flight2);
         assertNotEquals(flight1, flight2);
@@ -72,9 +72,9 @@ class SkyOneAirlinesFlightDataTest {
 
     @Test
     void toString_shouldReturnTheExpectedResults() {
-        SkyOneAirlinesFlightData flightData = new TestHelpers.SkyOneBuilder().build();
+        AirlineData flightData = new TestHelpers.AirlineDataBuilder().build();
 
-        String expected = "SkyOneAirlinesFlightData{" +
+        String expected = "AirlineData{" +
                 "email_address='" + flightData.getEmailAddress() + '\'' +
                 ", departure_time=" + flightData.getDepartureTime() +
                 ", departure_airport_code='" + flightData.getDepartureAirportCode() + '\'' +
@@ -88,7 +88,7 @@ class SkyOneAirlinesFlightDataTest {
 
     @Test
     void toFlightData_shouldConvertToAFlightDataObject() {
-        SkyOneAirlinesFlightData skyOne = new TestHelpers.SkyOneBuilder().build();
+        AirlineData skyOne = new TestHelpers.AirlineDataBuilder().build();
         FlightData expected = new FlightData();
         expected.setEmailAddress(skyOne.getEmailAddress());
         expected.setDepartureTime(skyOne.getDepartureTime());
