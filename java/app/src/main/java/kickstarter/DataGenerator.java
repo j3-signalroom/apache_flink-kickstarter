@@ -71,22 +71,22 @@ public class DataGenerator {
      * @return An AirlineFlightData object.
      */
     public static AirlineData generateAirlineFlightData(final String airlinePrefix) {
-        AirlineData flightData = new AirlineData();
+        AirlineData airlineData = new AirlineData();
         ZonedDateTime departureTime = generateDepartureTime();
         ZonedDateTime arrivalTime = generateArrivalTime(departureTime);
 
-        flightData.setEmailAddress(generateEmail());
-        flightData.setDepartureTime(departureTime.toString());
-        flightData.setDepartureAirportCode(generateAirportCode());
-        flightData.setArrivalTime(generateArrivalTime(departureTime).toString());
-        flightData.setArrivalAirportCode(generateAirportCode());
-        //flightData.setFlightDuration(Duration.between(departureTime, arrivalTime).toMillis());
-        flightData.setFlightNumber(airlinePrefix + random.nextInt(1000));
-        flightData.setConfirmationCode(airlinePrefix + generateString(6));
-        //flightData.setTicketPrice(BigDecimal.valueOf(500L + (long)random.nextInt(1000)));
-        flightData.setAircraft("Aircraft"+generateString(3));
-        flightData.setBookingAgencyEmail(generateEmail());
+        airlineData.setEmailAddress(generateEmail());
+        airlineData.setDepartureTime(departureTime.toString());
+        airlineData.setDepartureAirportCode(generateAirportCode());
+        airlineData.setArrivalTime(generateArrivalTime(departureTime).toString());
+        airlineData.setArrivalAirportCode(generateAirportCode());
+        airlineData.setFlightDuration(Duration.between(departureTime, arrivalTime).toMillis());
+        airlineData.setFlightNumber(airlinePrefix + random.nextInt(1000));
+        airlineData.setConfirmationCode(airlinePrefix + generateString(6));
+        airlineData.setTicketPrice(BigDecimal.valueOf(500L + (long)random.nextInt(1000)));
+        airlineData.setAircraft("Aircraft"+generateString(3));
+        airlineData.setBookingAgencyEmail(generateEmail());
 
-        return flightData;
+        return airlineData;
     }
 }

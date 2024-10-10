@@ -2,10 +2,9 @@ package kickstarter.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.*;
 import java.math.*;
-import java.time.*;
 import java.util.*;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+
 public class AirlineData {
     @JsonProperty("email_address")
     private String email_address;
@@ -22,8 +21,8 @@ public class AirlineData {
     @JsonProperty("arrival_airport_code")
     private String arrival_airport_code;
 
-    // @JsonProperty("flight_duration")
-    // private long flight_duration;
+    @JsonProperty("flight_duration")
+    private long flight_duration;
 
     @JsonProperty("flight_number")
     private String flight_number;
@@ -31,8 +30,8 @@ public class AirlineData {
     @JsonProperty("confirmation_code")
     private String confirmation_code;
 
-    // @JsonProperty("ticket_price")
-    // private BigDecimal ticket_price;
+    @JsonProperty("ticket_price")
+    private BigDecimal ticket_price;
 
     @JsonProperty("aircraft")
     private String aircraft;
@@ -81,13 +80,13 @@ public class AirlineData {
         this.arrival_airport_code = arrivalAirport;
     }
 
-    // public long getFlightDuration() {
-    //     return this.flight_duration;
-    // }
+    public long getFlightDuration() {
+        return this.flight_duration;
+    }
 
-    // public void setFlightDuration(long flightDuration) {
-    //     this.flight_duration = flightDuration;
-    // }
+    public void setFlightDuration(long flightDuration) {
+        this.flight_duration = flightDuration;
+    }
 
     public String getFlightNumber() {
         return this.flight_number;
@@ -105,13 +104,13 @@ public class AirlineData {
         this.confirmation_code = confirmationCode;
     }
 
-    // public BigDecimal getTicketPrice() {
-    //     return this.ticket_price;
-    // }
+    public BigDecimal getTicketPrice() {
+        return this.ticket_price;
+    }
 
-    // public void setTicketPrice(BigDecimal totalPrice) {
-    //     this.ticket_price = totalPrice;
-    // }
+    public void setTicketPrice(BigDecimal totalPrice) {
+        this.ticket_price = totalPrice;
+    }
 
     public String getAircraft() {
         return this.aircraft;
@@ -139,10 +138,10 @@ public class AirlineData {
                                 Objects.equals(this.departure_airport_code, that.departure_airport_code) && 
                                 Objects.equals(this.arrival_time, that.arrival_time) && 
                                 Objects.equals(this.arrival_airport_code, that.arrival_airport_code) && 
-                                //Objects.equals(this.flight_duration, that.flight_duration) && 
+                                Objects.equals(this.flight_duration, that.flight_duration) && 
                                 Objects.equals(this.flight_number, that.flight_number) && 
                                 Objects.equals(this.confirmation_code, that.confirmation_code) && 
-                                //Objects.equals(this.ticket_price, that.ticket_price) && 
+                                Objects.equals(this.ticket_price, that.ticket_price) && 
                                 Objects.equals(this.aircraft, that.aircraft) &&
                                 Objects.equals(this.booking_agency_email, that.booking_agency_email);
     }
@@ -154,10 +153,10 @@ public class AirlineData {
                             this.departure_airport_code, 
                             this.arrival_time, 
                             this.arrival_airport_code, 
-                            //this.flight_duration, 
+                            this.flight_duration, 
                             this.flight_number, 
                             this.confirmation_code, 
-                            //this.ticket_price, 
+                            this.ticket_price, 
                             this.aircraft,
                             this.booking_agency_email);
     }
@@ -170,10 +169,10 @@ public class AirlineData {
             ", departure_airport_code='" + this.departure_airport_code + '\'' +
             ", arrival_time=" + this.arrival_time +
             ", arrival_airport_code='" + this.arrival_airport_code + '\'' +
-            //", flight_duration=" + this.flight_duration +
+            ", flight_duration=" + this.flight_duration +
             ", flight_number='" + this.flight_number + '\'' +
             ", confirmation_code='" + this.confirmation_code + '\'' +
-            //", ticket_price=" + this.ticket_price +
+            ", ticket_price=" + this.ticket_price +
             ", aircraft='" + this.aircraft + '\'' +
             ", booking_agency_email='" + booking_agency_email + '\'' +
             '}';
