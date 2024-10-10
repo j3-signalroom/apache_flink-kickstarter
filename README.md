@@ -29,6 +29,7 @@ Explore the repo, run the Docker containers (compatible with both Mac M chips an
     - [3.1 Java-based Flink Apps](#31-java-based-flink-apps)
     - [3.2 Python-based Flink Apps](#32-python-based-flink-apps)
 + [4.0 Resources](#40-resources)
++ [5.0 Special Notes](#50-special-notes)
 <!-- tocstop -->
 
 ## 1.0 Are these examples better described as Flink Jobs or Flink Applications-—and why does the distinction matter?
@@ -199,3 +200,6 @@ To learn more about this script, click [here](.blog/run-flink-locally-script-exp
 [Building Apache Flink Applications in Java](https://developer.confluent.io/courses/flink-java/overview/)
 
 [J3's techStack Lexicon](https://github.com/j3-signalroom/j3-techstack-lexicon/blob/main/README.md)
+
+## 5.0 Special Notes
+[Known Issues](KNOWNISSUES.md)
