@@ -1,9 +1,9 @@
-# ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png) Apache Flink Kickstarter
-This repository showcases the exceptional capabilities of Apache Flink, known for its high performance, scalability, and advanced stream processing features, which is a core component of the signalRoom technology stack. Staying true to our mission of empowering developers by sharing practical knowledge, we demonstrate the use of Flink through real-world examples based on the blog series ["Building Apache Flink Applications in Java."](https://developer.confluent.io/courses/flink-java/overview/)
+# ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png) Apache Flink Kickstarter using ![apache-kafka-logo](.blog/images/apache-kafka-logo.png) & ![apache-iceberg-logo](.blog/images/apache-iceberg-logo.png)
+This project showcases the exceptional capabilities of Apache Flink, known for its high performance, scalability, and advanced stream processing features, which is a core component of the signalRoom technology stack. Staying true to our mission of empowering developers by sharing practical knowledge, we demonstrate the use of Flink through real-world examples based on the blog series ["Building Apache Flink Applications in Java."](https://developer.confluent.io/courses/flink-java/overview/)
 
 Flink App|Description
 -|-
-`DataGeneratorApp`|This Flink App generates realistic flight data for the fictional airlines Sunset Air and Sky One Airlines, seamlessly integrating modern data streaming technologies. Flight events are published to dedicated Kafka topics (`airline.sunset` and `airline.skyone`), enabling real-time processing and analysis. Simultaneously, the synthetic data flows into ![apache-iceberg-logo](.blog/images/apache-iceberg-logo.png) Apache Iceberg tables , stored in an AWS S3 bucket, providing a robust, scalable foundation for historical data analytics.  The entire solution is implemented in Java, overcoming limitations in PyFlink, which currently lacks a Python-based data generator source. This design ensures a powerful, flexible data pipeline, ideal for both real-time and batch use cases. 
+`DataGeneratorApp`|This Flink App generates realistic flight data for the fictional airlines Sunset Air and Sky One Airlines, seamlessly integrating modern data streaming technologies. Flight events are published to dedicated Kafka topics (`airline.sunset` and `airline.skyone`), enabling real-time processing and analysis. Simultaneously, the synthetic data flows into Apache Iceberg tables , stored in an AWS S3 bucket, providing a robust, scalable foundation for historical data analytics.  The entire solution is implemented in Java, overcoming limitations in PyFlink, which currently lacks a Python-based data generator source. This design ensures a powerful, flexible data pipeline, ideal for both real-time and batch use cases. 
 `FlightImporterApp`|Imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and standardizes them into a unified `airline.all` Kafka topic. Implemented in both Java and Python.
 `FlyerStatsApp`|Processes data from the `airline.all` Kafka topic to aggregate flyer statistics into the `airline.user_statistics` Kafka topic. Implemented in both Java and Python.
 
@@ -11,7 +11,7 @@ Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Soft
 
 Beyond simply transforming and enriching data, we stream it into Kafka topics and _**Apache Iceberg tables**_, designed for high-performance, large-scale analytics with support for ACID transactions, offering highly scalable, real-time data processing and durable storage.
 
-Our journey with Flink doesn’t end with Java; Python-based Flink applications also shine in this repository, leveraging Flink SQL, Table API, and DataFrame API, each offering unique advantages: Flink SQL for declarative queries, Table API for a mix of SQL-like syntax and programmatic control, and DataFrame API for efficient data manipulation similar to pandas or R. This provides a seamless, flexible approach to solving complex streaming challenges, ultimately unlocking an efficient and scalable architecture for modern data needs.
+Our journey with Flink doesn’t end with Java; Python-based Flink applications also shine in this project, leveraging Flink SQL, Table API, and DataFrame API, each offering unique advantages: Flink SQL for declarative queries, Table API for a mix of SQL-like syntax and programmatic control, and DataFrame API for efficient data manipulation similar to pandas or R. This provides a seamless, flexible approach to solving complex streaming challenges, ultimately unlocking an efficient and scalable architecture for modern data needs.
 
 Explore the repo, run the Docker containers (compatible with both Mac M chips and non-Mac M chips), and see how Apache Flink can be utilized to build robust, enterprise-grade streaming applications.
 
@@ -29,7 +29,7 @@ Explore the repo, run the Docker containers (compatible with both Mac M chips an
     - [3.1 Java-based Flink Apps](#31-java-based-flink-apps)
     - [3.2 Python-based Flink Apps](#32-python-based-flink-apps)
 + [4.0 Resources](#40-resources)
-+ [5.0 Special Notes](#50-special-notes)
++ [5.0 Important Note(s)](#50-important-notes)
 <!-- tocstop -->
 
 ## 1.0 Are these examples better described as Flink Jobs or Flink Applications-—and why does the distinction matter?
@@ -84,7 +84,7 @@ To help you start quickly, the repo comes with **_Docker containers_** for Mac M
 
     - An AWS S3 bucket with a dedicated `warehouse` folder, serving as the landing zone for Apache Iceberg tables populated by two Python-based Flink apps, bringing your data streaming architecture to life.
 
-4. Run Apache Flink locally on your Mac, or use the provided Docker containers from the repository to launch Apache Flink and Apache Iceberg seamlessly on your machine.
+4. Run Apache Flink locally on your Mac, or use the provided Docker containers from the project to launch Apache Flink and Apache Iceberg seamlessly on your machine.
 
 With these steps, you'll have everything set up to run enterprise-grade data streaming applications in no time!
 
@@ -201,5 +201,5 @@ To learn more about this script, click [here](.blog/run-flink-locally-script-exp
 
 [J3's techStack Lexicon](https://github.com/j3-signalroom/j3-techstack-lexicon/blob/main/README.md)
 
-## 5.0 Special Notes
-[Known Issues](KNOWNISSUES.md)
+## 5.0 Important Note(s)
+[Known Issue(s)](KNOWNISSUES.md)
