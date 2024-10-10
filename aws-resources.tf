@@ -133,6 +133,12 @@ resource "aws_s3_object" "warehouse" {
   key    = "warehouse/"
 }
 
+resource "aws_s3_object" "warehouse_airlines" {
+  bucket = aws_s3_bucket.iceberg_bucket.bucket
+  key    = "warehouse/airlines"
+  depends_on = [ aws_s3_object.warehouse ]
+}
+
 data "aws_secretsmanager_secret" "admin_public_keys" {
   name = "/snowflake_admin_credentials"
 }
