@@ -64,36 +64,28 @@ public class DataGenerator {
                 .plusMinutes(random.nextInt(60));
     }
 
-    public static SkyOneAirlinesFlightData generateSkyOneAirlinesFlightData() {
-        SkyOneAirlinesFlightData flightData = new SkyOneAirlinesFlightData();
+    /**
+     * Generate an AirlineFlightData object.
+     * 
+     * @param airlinePrefix The prefix for the airline.
+     * @return An AirlineFlightData object.
+     */
+    public static DetailFlightData generateAirlineFlightData(final String airlinePrefix) {
+        DetailFlightData flightData = new DetailFlightData();
+        ZonedDateTime departureTime = generateDepartureTime();
+        ZonedDateTime arrivalTime = generateArrivalTime(departureTime);
 
         flightData.setEmailAddress(generateEmail());
-        flightData.setDepartureTime(generateDepartureTime());
+        flightData.setDepartureTime(departureTime.toString());
         flightData.setDepartureAirportCode(generateAirportCode());
-        flightData.setArrivalTime(generateArrivalTime(flightData.getDepartureTime()));
+        flightData.setArrivalTime(generateArrivalTime(departureTime).toString());
         flightData.setArrivalAirportCode(generateAirportCode());
-        flightData.setFlightNumber("SKY1"+random.nextInt(1000));
-        flightData.setConfirmationCode("SKY1"+generateString(6));
-        flightData.setTicketPrice(BigDecimal.valueOf(500L + (long)random.nextInt(1000)));
+        //flightData.setFlightDuration(Duration.between(departureTime, arrivalTime).toMillis());
+        flightData.setFlightNumber(airlinePrefix + random.nextInt(1000));
+        flightData.setConfirmationCode(airlinePrefix + generateString(6));
+        //flightData.setTicketPrice(BigDecimal.valueOf(500L + (long)random.nextInt(1000)));
         flightData.setAircraft("Aircraft"+generateString(3));
         flightData.setBookingAgencyEmail(generateEmail());
-
-        return flightData;
-    }
-
-    public static SunsetAirFlightData generateSunsetAirFlightData() {
-        SunsetAirFlightData flightData = new SunsetAirFlightData();
-
-        flightData.setEmailAddress(generateEmail());
-        flightData.setDepartureTime(generateDepartureTime());
-        flightData.setDepartureAirportCode(generateAirportCode());
-        flightData.setArrivalTime(generateArrivalTime(flightData.getDepartureTime()));
-        flightData.setArrivalAirportCode(generateAirportCode());
-        flightData.setFlightDuration(Duration.between(flightData.getDepartureTime(), flightData.getArrivalTime()));
-        flightData.setFlightNumber("SUN"+random.nextInt(1000));
-        flightData.setConfirmationCode("SUN"+generateString(8));
-        flightData.setTicketPrice(new BigDecimal(300+random.nextInt(1500)));
-        flightData.setAircraft("Aircraft"+generateString(4));
 
         return flightData;
     }

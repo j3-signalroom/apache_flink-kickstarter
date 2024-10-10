@@ -20,6 +20,7 @@ import org.apache.flink.table.api.*;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.CatalogDatabaseImpl;
 import org.apache.iceberg.flink.FlinkCatalog;
+import static org.apache.flink.table.api.Expressions.$;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
@@ -46,6 +47,21 @@ public class DataGeneratorApp {
 	public static void main(String[] args) throws Exception {
 		// --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+        // --- Enable checkpointing every 5000 milliseconds (5 seconds)
+        env.enableCheckpointing(5000);
+
+        /*
+         * Set timeout to 60 seconds
+         * The maximum amount of time a checkpoint attempt can take before being discarded.
+         */
+        env.getCheckpointConfig().setCheckpointTimeout(60000);
+
+        /*
+         * Set the maximum number of concurrent checkpoints to 1 (i.e., only one checkpoint
+         * is created at a time)
+         */
+        env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
 
 		/*
 		 * --- Kafka Producer Config
@@ -79,26 +95,26 @@ public class DataGeneratorApp {
         /*
          * Create a data generator source
          */
-        DataGeneratorSource<SkyOneAirlinesFlightData> skyOneSource =
+        DataGeneratorSource<DetailFlightData> skyOneSource =
             new DataGeneratorSource<>(
-                index -> DataGenerator.generateSkyOneAirlinesFlightData(),
+                index -> DataGenerator.generateAirlineFlightData("SKY1"),
                 Long.MAX_VALUE,
                 RateLimiterStrategy.perSecond(1),
-                Types.POJO(SkyOneAirlinesFlightData.class)
+                Types.POJO(DetailFlightData.class)
             );
 
         /*
          * Sets up a Flink POJO source to consume data
          */
-        DataStream<SkyOneAirlinesFlightData> skyOneStream = 
+        DataStream<DetailFlightData> skyOneStream = 
             env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
         /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone` with the
          * specified serializer
          */
-        KafkaRecordSerializationSchema<SkyOneAirlinesFlightData> skyOneSerializer = 
-            KafkaRecordSerializationSchema.<SkyOneAirlinesFlightData>builder()
+        KafkaRecordSerializationSchema<DetailFlightData> skyOneSerializer = 
+            KafkaRecordSerializationSchema.<DetailFlightData>builder()
                 .setTopic("airline.skyone")
                 .setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
                 .build();
@@ -107,8 +123,8 @@ public class DataGeneratorApp {
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
-        KafkaSink<SkyOneAirlinesFlightData> skyOneSink = 
-            KafkaSink.<SkyOneAirlinesFlightData>builder()
+        KafkaSink<DetailFlightData> skyOneSink = 
+            KafkaSink.<DetailFlightData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(skyOneSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
@@ -123,23 +139,23 @@ public class DataGeneratorApp {
         /*
          * Sets up a Flink POJO source to consume data
          */
-        DataGeneratorSource<SunsetAirFlightData> sunsetSource =
+        DataGeneratorSource<DetailFlightData> sunsetSource =
             new DataGeneratorSource<>(
-                index -> DataGenerator.generateSunsetAirFlightData(),
+                index -> DataGenerator.generateAirlineFlightData("SUN"),
                 Long.MAX_VALUE,
                 RateLimiterStrategy.perSecond(1),
-                Types.POJO(SunsetAirFlightData.class)
+                Types.POJO(DetailFlightData.class)
             );
 
-        DataStream<SunsetAirFlightData> sunsetStream = 
+        DataStream<DetailFlightData> sunsetStream = 
             env.fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
         /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset` with the
          * specified serializer
          */
-        KafkaRecordSerializationSchema<SunsetAirFlightData> sunsetSerializer = 
-            KafkaRecordSerializationSchema.<SunsetAirFlightData>builder()
+        KafkaRecordSerializationSchema<DetailFlightData> sunsetSerializer = 
+            KafkaRecordSerializationSchema.<DetailFlightData>builder()
                 .setTopic("airline.sunset")
                 .setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
                 .build();
@@ -148,8 +164,8 @@ public class DataGeneratorApp {
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
-        KafkaSink<SunsetAirFlightData> sunsetSink = 
-            KafkaSink.<SunsetAirFlightData>builder()
+        KafkaSink<DetailFlightData> sunsetSink = 
+            KafkaSink.<DetailFlightData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(sunsetSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
@@ -249,9 +265,10 @@ public class DataGeneratorApp {
                             + "departure_airport_code STRING, "
                             + "arrival_time STRING, "
                             + "arrival_airport_code STRING, "
+                            //+ "flight_duration BIGINT,"
                             + "flight_number STRING, "
                             + "confirmation_code STRING, "
-                            + "ticket_price DECIMAL(10,2), "
+                            //+ "ticket_price DECIMAL(10,2), "
                             + "aircraft STRING, "
                             + "booking_agency_email STRING) "
                             + "WITH ("
@@ -269,33 +286,44 @@ public class DataGeneratorApp {
                 System.exit(1);
             }
 
-            // --- Define the sink schema
-            Schema schema = 
-                Schema
-                    .newBuilder()
-                    .column("email_address", DataTypes.STRING())
-                    .column("departure_time", DataTypes.STRING())
-                    .column("departure_airport_code", DataTypes.STRING())
-                    .column("arrival_time", DataTypes.STRING())
-                    .column("arrival_airport_code", DataTypes.STRING())
-                    .column("flight_number", DataTypes.STRING())
-                    .column("confirmation_code", DataTypes.STRING())
-                    .column("ticket_price", DataTypes.DECIMAL(10, 2))
-                    .column("aircraft", DataTypes.STRING())
-                    .column("booking_agency_email", DataTypes.STRING())
-                    .build();
-
             /*
              * Converts the datastream into a table, and insert's the converted table's
-             * data into the destinated table
+             * data into the sink table
              */
+            Table dataTable;
             if(tableName.equals(tableNames[0])) {
-                tblEnv.fromDataStream(skyOneStream, schema).executeInsert(tableName);
+                dataTable = tblEnv.fromDataStream(skyOneStream)
+                    .select(
+                        $("email_address"),
+                        $("departure_time").cast(DataTypes.STRING()).as("departure_time"),
+                        $("departure_airport_code"),
+                        $("arrival_time").cast(DataTypes.STRING()).as("arrival_time"),
+                        $("arrival_airport_code"),
+                        //$("flight_duration").cast(DataTypes.BIGINT()).as("flight_duration"),
+                        $("flight_number"),
+                        $("confirmation_code"),
+                        //$("ticket_price").cast(DataTypes.DECIMAL(10, 2)).as("ticket_price"),
+                        $("aircraft"),
+                        $("booking_agency_email")
+                    );
             } else {
-                tblEnv.fromDataStream(sunsetStream, schema).executeInsert(tableName);
+                dataTable = tblEnv.fromDataStream(sunsetStream)
+                    .select(
+                        $("email_address"),
+                        $("departure_time").cast(DataTypes.STRING()).as("departure_time"),
+                        $("departure_airport_code"),
+                        $("arrival_time").cast(DataTypes.STRING()).as("arrival_time"),
+                        $("arrival_airport_code"),
+                        //$("flight_duration").cast(DataTypes.BIGINT()).as("flight_duration"),
+                        $("flight_number"),
+                        $("confirmation_code"),
+                        //$("ticket_price").cast(DataTypes.DECIMAL(10, 2)).as("ticket_price"),
+                        $("aircraft"),
+                        $("booking_agency_email")
+                    );
             }
+            dataTable.executeInsert(tableName);
         }
-
         try {
             // --- Execute the Flink job graph (DAG)
             env.execute("DataGeneratorApp");
