@@ -117,10 +117,10 @@ public class DataGeneratorApp {
                    .column("departure_airport_code", DataTypes.STRING())
                    .column("arrival_time", DataTypes.STRING())
                    .column("arrival_airport_code", DataTypes.STRING())
-                   //.column("flight_duration", DataTypes.BIGINT())
+                   .column("flight_duration", DataTypes.BIGINT())
                    .column("flight_number", DataTypes.STRING())
                    .column("confirmation_code", DataTypes.STRING())
-                   //.column("ticket_price", DataTypes.DECIMAL(10, 2))
+                   .column("ticket_price", DataTypes.DECIMAL(10, 2))
                    .column("aircraft", DataTypes.STRING())
                    .column("booking_agency_email", DataTypes.STRING())
                    .build();
