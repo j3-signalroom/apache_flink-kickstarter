@@ -76,15 +76,15 @@ class FlightData():
         )
 
     @staticmethod
-    def to_user_statistics_data(row: Row):
+    def to_flyer_stats_data(row: Row):
         data = FlightData.from_row(row)
-        return UserStatisticsData(
+        return FlyerStatsData(
             data.email_address, 
             data.get_duration(), 
             1)
     
 @dataclass
-class UserStatisticsData:
+class FlyerStatsData:
     email_address: str
     total_flight_duration: int
     number_of_flights: int
@@ -101,9 +101,9 @@ class UserStatisticsData:
     
     def merge(self, that):
         if self.email_address != that.email_address:
-            raise ValueError("Cannot merge UserStatisticsData for different email addresses")
+            raise ValueError("Cannot merge FlyerStatsData for different email addresses")
 
-        merged = UserStatisticsData()
+        merged = FlyerStatsData()
         merged.email_address = self.email_address
         merged.total_flight_duration = self.total_flight_duration + that.total_flight_duration
         merged.number_of_flights = self.number_of_flights + that.number_of_flights

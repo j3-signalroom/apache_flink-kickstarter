@@ -47,7 +47,7 @@ class FlyerStatsDataTest {
     }
 
     @Test
-    void equals_shouldReturnTrue_forTwoEquivalentUserStatistics() {
+    void equals_shouldReturnTrue_forTwoEquivalentFlyerStats() {
         FlyerStatsData stats1 = new TestHelpers.FlyerStatsDataBuilder().build();
         FlyerStatsData stats2 = new FlyerStatsData();
         stats2.setEmailAddress(stats1.getEmailAddress());
@@ -60,7 +60,7 @@ class FlyerStatsDataTest {
     }
 
     @Test
-    void equals_shouldReturnFalse_forTwoDifferentUserStatistics() {
+    void equals_shouldReturnFalse_forTwoDifferentFlyerStats() {
         FlyerStatsData stats1 = new TestHelpers.FlyerStatsDataBuilder().build();
         FlyerStatsData stats2 = new TestHelpers.FlyerStatsDataBuilder().build();
 
@@ -70,7 +70,7 @@ class FlyerStatsDataTest {
     }
 
     @Test
-    void merge_shouldMergeTheUserStatistics() {
+    void merge_shouldMergeTheFlyerStats() {
         FlyerStatsData stats1 = new TestHelpers.FlyerStatsDataBuilder().build();
         FlyerStatsData stats2 = new TestHelpers.FlyerStatsDataBuilder()
             .setEmailAddress(stats1.getEmailAddress())

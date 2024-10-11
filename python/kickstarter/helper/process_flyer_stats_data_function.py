@@ -2,7 +2,7 @@ from pyflink.datastream.state import ValueStateDescriptor
 from pyflink.datastream.functions import ProcessWindowFunction, RuntimeContext
 from typing import Iterable
 
-from model.flight_data import UserStatisticsData
+from model.flight_data import FlyerStatsData
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -12,7 +12,7 @@ __email__      = "j3@thej3.com"
 __status__     = "dev"
 
 
-class ProcessUserStatisticsDataFunction(ProcessWindowFunction):
+class ProcessFlyerStatsDataFunction(ProcessWindowFunction):
     """This class is a custom implementation of a ProcessWindowFunction in Apache Flink.
     This class is designed to process elements within a window, manage state, and yield
     accumulated statistics for user data.
@@ -35,9 +35,9 @@ class ProcessUserStatisticsDataFunction(ProcessWindowFunction):
             context can be used to access various runtime features, such as state, metrics, and
             configuration.
         """
-        self.state_descriptor = ValueStateDescriptor("User Statistics Data", UserStatisticsData.get_value_type_info())
+        self.state_descriptor = ValueStateDescriptor("User Statistics Data", FlyerStatsData.get_value_type_info())
 
-    def process(self, key: str, context: "ProcessWindowFunction.Context", elements: Iterable[UserStatisticsData]) -> Iterable:
+    def process(self, key: str, context: "ProcessWindowFunction.Context", elements: Iterable[FlyerStatsData]) -> Iterable:
         """This method processes elements within a window, updates the state, and yields
         the accumulated statistics.
 
@@ -46,12 +46,12 @@ class ProcessUserStatisticsDataFunction(ProcessWindowFunction):
             for operations that need to be performed on a per-key basis.
             context (ProcessWindowFunction.Context): Provides access to the window's metadata,
             state, and timers.
-            elements (Iterable[UserStatisticsData]): An iterable collection of `UserStatisticsData`
+            elements (Iterable[FlyerStatsData]): An iterable collection of `FlyerStatsData`
             objects that belong to the current window and key.  The method processes these elements
             to compute the result.
 
         Yields:
-            Iterable: yeilds the accumulated statistics as a `UserStatisticsData` object.
+            Iterable: yeilds the accumulated statistics as a `FlyerStatsData` object.
         """
         # Retrieves the state associated with the current window
         state = context.global_state().get_state(self.state_descriptor)
@@ -67,10 +67,10 @@ class ProcessUserStatisticsDataFunction(ProcessWindowFunction):
             else:
                 # Merges the current `accumulated_stats` with the new element's statistics
                 # and updates the state
-                accumulated_stats = UserStatisticsData.merge(UserStatisticsData.from_row(accumulated_stats), new_stats).to_row()
+                accumulated_stats = FlyerStatsData.merge(FlyerStatsData.from_row(accumulated_stats), new_stats).to_row()
 
         # Updates the state with the new accumulated statistics
         state.update(accumulated_stats)
 
-        # Yields the accumulated statistics as a `UserStatisticsData` object
-        yield UserStatisticsData.from_row(accumulated_stats)
+        # Yields the accumulated statistics as a `FlyerStatsData` object
+        yield FlyerStatsData.from_row(accumulated_stats)
