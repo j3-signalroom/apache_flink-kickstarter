@@ -189,12 +189,12 @@ resource "confluent_kafka_topic" "airline_all" {
   ]
 }
 
-# Create the `airline.user_statistics` Kafka topic
-resource "confluent_kafka_topic" "airline_user_statistics" {
+# Create the `airline.flyer_stats` Kafka topic
+resource "confluent_kafka_topic" "airline_flyer_stats" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
-  topic_name         = "airline.user_statistics"
+  topic_name         = "airline.flyer_stats"
   partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
 
