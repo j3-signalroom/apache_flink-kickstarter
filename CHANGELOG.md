@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.40.00.000] - 2024-10-11
+### Changed
+- Issue #325.
+
+### Fixed
+- Resolved issue #315 in issue #325 resolution.
+
 ## [0.35.01.000] - 2024-10-10
 ### Changed
 - Tweaked main `README.md`.
