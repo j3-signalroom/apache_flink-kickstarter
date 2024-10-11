@@ -90,7 +90,7 @@ def main(args):
         if key != 'bootstrap.servers':  # Skip the bootstrap.servers as it is already set
             kafka_sink_builder.set_property(key, value)
 
-    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.user_statistics`
+    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
     flight_sink = (kafka_sink_builder                            
                    .set_record_serializer(KafkaRecordSerializationSchema
                                           .builder()

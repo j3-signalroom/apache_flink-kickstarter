@@ -5,7 +5,7 @@
  * 
  * 
  * This class processes data from the `airline.all` Kafka topic to aggregate user
- * statistics in the `airline.user_statistics` Kafka topic.
+ * statistics in the `airline.flyer_stats` Kafka topic.
  */
 package kickstarter;
 
@@ -129,13 +129,13 @@ public class FlyerStatsApp {
             env.fromSource(flightDataSource, WatermarkStrategy.forMonotonousTimestamps(), "flightdata_source");
 
         /*
-         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.user_statistics` with the
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats` with the
          * specified serializer
          */
         KafkaRecordSerializationSchema<FlyerStatsData> statisticsSerializer = 
             KafkaRecordSerializationSchema
                 .<FlyerStatsData>builder()
-                .setTopic("airline.user_statistics")
+                .setTopic("airline.flyer_stats")
                 .setValueSerializationSchema(new JsonSerializationSchema<>(() -> new ObjectMapper().registerModule(new JavaTimeModule())))
                 .build();
 
@@ -169,10 +169,10 @@ public class FlyerStatsApp {
 
     /**
      * This method defines the workflow for the Flink application.  It maps the data from the
-     * `airline.all` Kafka topic to the `airline.user_statistics` Kafka topic.
+     * `airline.all` Kafka topic to the `airline.flyer_stats` Kafka topic.
      * 
      * @param flightDataSource the data stream from the `airline.all` Kafka topic.
-     * @return the data stream to the `airline.user_statistics` Kafka topic.
+     * @return the data stream to the `airline.flyer_stats` Kafka topic.
      */
     public static DataStream<FlyerStatsData> defineWorkflow(DataStream<FlightData> flightDataSource) {
         return flightDataSource

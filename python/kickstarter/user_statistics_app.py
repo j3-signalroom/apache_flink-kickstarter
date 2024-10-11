@@ -67,11 +67,11 @@ def main(args):
         if key != 'bootstrap.servers':  # Skip the bootstrap.servers as it is already set
             kafka_sink_builder.set_property(key, value)
 
-    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.user_statistics`
+    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
     stats_sink = (kafka_sink_builder
                   .set_record_serializer(KafkaRecordSerializationSchema
                                          .builder()
-                                         .set_topic("airline.user_statistics")
+                                         .set_topic("airline.flyer_stats")
                                          .set_value_serialization_schema(JsonRowSerializationSchema
                                                                          .builder()
                                                                          .with_type_info(UserStatisticsData.get_value_type_info())
@@ -130,7 +130,7 @@ def main(args):
     # An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
     # catalog object, such as a table, view, or function.  It uniquely identifies an object
     # within a catalog by encapsulating both the database name and the object name.  For 
-    # instance, this case we using it to get the fully qualified path of the `user_statistics`
+    # instance, this case we using it to get the fully qualified path of the `flyer_stats`
     # table
     stats_table_path = ObjectPath(database_name, "stats")
 
