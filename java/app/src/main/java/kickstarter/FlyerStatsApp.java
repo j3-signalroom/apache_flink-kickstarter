@@ -132,7 +132,7 @@ public class FlyerStatsApp {
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats` with the
          * specified serializer
          */
-        KafkaRecordSerializationSchema<FlyerStatsData> statisticsSerializer = 
+        KafkaRecordSerializationSchema<FlyerStatsData> flyerStatsSerializer = 
             KafkaRecordSerializationSchema
                 .<FlyerStatsData>builder()
                 .setTopic("airline.flyer_stats")
@@ -143,10 +143,10 @@ public class FlyerStatsApp {
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
-        KafkaSink<FlyerStatsData> statsSink = 
+        KafkaSink<FlyerStatsData> flyerStatsSink = 
             KafkaSink.<FlyerStatsData>builder()
                 .setKafkaProducerConfig(producerProperties)
-                .setRecordSerializer(statisticsSerializer)
+                .setRecordSerializer(flyerStatsSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
                 .build();
 
@@ -155,9 +155,9 @@ public class FlyerStatsApp {
          * applying transformations to the data streams
          */
         defineWorkflow(flightDataStream)
-                        .sinkTo(statsSink)
-                        .name("userstatistics_sink")
-                        .uid("userstatistics_sink");
+                        .sinkTo(flyerStatsSink)
+                        .name("flyer_stats_sink")
+                        .uid("flyer_stats_sink");
 
         try {
             // --- Execute the Flink job graph (DAG)
@@ -179,6 +179,6 @@ public class FlyerStatsApp {
             .map(FlyerStatsData::new)
             .keyBy(FlyerStatsData::getEmailAddress)
             .window(TumblingEventTimeWindows.of(Duration.ofMinutes(1)))
-            .reduce(FlyerStatsData::merge, new ProcessUserStatisticsDataFunction());
+            .reduce(FlyerStatsData::merge, new ProcessFlyerStatsDataFunction());
     }
 }

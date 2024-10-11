@@ -23,7 +23,7 @@ Finally, to launch one of the Flink applications, choose your app and use the co
 Flink App|Flink Run Command
 -|-
 **`FlightImporterApp`**|`flink run --pyFiles kickstarter/python_files.zip --python kickstarter/flight_importer_app.py --aws_s3_bucket <AWS_S3_BUCKET>`
-**`UserStatisticsApp`**|`flink run --pyFiles kickstarter/python_files.zip --python kickstarter/user_statistics_app.py --aws_s3_bucket <AWS_S3_BUCKET>`
+**`FlyerStatsApp`**|`flink run --pyFiles kickstarter/python_files.zip --python kickstarter/flyer_stats_app.py --aws_s3_bucket <AWS_S3_BUCKET>`
 
 > Argument placeholder|Replace with
 > -|-

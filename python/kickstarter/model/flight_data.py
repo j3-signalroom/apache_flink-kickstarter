@@ -2,7 +2,7 @@ from pyflink.common import Row, Types
 from datetime import datetime
 from dataclasses import dataclass
 
-from helper.utilities import serialize_date
+from helper.utilities import serialize_date, parse_isoformat
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -25,7 +25,7 @@ class FlightData():
 
 
     def get_duration(self):
-        return int((datetime.fromisoformat(self.arrival_time) - datetime.fromisoformat(self.departure_time)).seconds / 60)
+        return int((parse_isoformat(self.arrival_time) - parse_isoformat(self.departure_time)).seconds / 60)
     
     def to_row(self):
         return Row(email_address=self.email_address,
@@ -76,15 +76,15 @@ class FlightData():
         )
 
     @staticmethod
-    def to_user_statistics_data(row: Row):
+    def to_flyer_stats_data(row: Row):
         data = FlightData.from_row(row)
-        return UserStatisticsData(
+        return FlyerStatsData(
             data.email_address, 
             data.get_duration(), 
             1)
     
 @dataclass
-class UserStatisticsData:
+class FlyerStatsData:
     email_address: str
     total_flight_duration: int
     number_of_flights: int
@@ -92,7 +92,7 @@ class UserStatisticsData:
     def __init__(self, email_address=None, total_flight_duration=0, number_of_flights=0, flight_data=None):
         if flight_data:
             self.email_address = flight_data.email_address
-            self.total_flight_duration = flight_data.arrival_time - flight_data.departure_time
+            self.total_flight_duration = self.get_duration()
             self.number_of_flights = 1
         else:
             self.email_address = email_address
@@ -101,9 +101,9 @@ class UserStatisticsData:
     
     def merge(self, that):
         if self.email_address != that.email_address:
-            raise ValueError("Cannot merge UserStatisticsData for different email addresses")
+            raise ValueError("Cannot merge FlyerStatsData for different email addresses")
 
-        merged = UserStatisticsData()
+        merged = FlyerStatsData()
         merged.email_address = self.email_address
         merged.total_flight_duration = self.total_flight_duration + that.total_flight_duration
         merged.number_of_flights = self.number_of_flights + that.number_of_flights

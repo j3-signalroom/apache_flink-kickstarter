@@ -8,9 +8,9 @@ from pyflink.table.catalog import ObjectPath
 import logging
 import argparse
 
-from model.flight_data import FlightData, UserStatisticsData
+from model.flight_data import FlightData, FlyerStatsData
 from helper.kafka_properties import execute_kafka_properties_udtf
-from helper.process_user_statistics_data_function import ProcessUserStatisticsDataFunction
+from helper.process_flyer_stats_data_function import ProcessFlyerStatsDataFunction
 from helper.utilities import catalog_exist
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
@@ -22,7 +22,7 @@ __status__     = "dev"
 
 
 # Setup the logger
-logger = logging.getLogger('UserStatisticsApp')
+logger = logging.getLogger('FlyerStatsApp')
 
 def main(args):
     # Create a blank Flink execution environment
@@ -74,7 +74,7 @@ def main(args):
                                          .set_topic("airline.flyer_stats")
                                          .set_value_serialization_schema(JsonRowSerializationSchema
                                                                          .builder()
-                                                                         .with_type_info(UserStatisticsData.get_value_type_info())
+                                                                         .with_type_info(FlyerStatsData.get_value_type_info())
                                                                          .build())
                                          .build())
                   .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
@@ -155,7 +155,7 @@ def main(args):
         exit(1)
 
     # Define the workflow for the Flink job graph (DAG)
-    stats_datastream = define_workflow(flight_data_stream).map(lambda d: d.to_row(), output_type=UserStatisticsData.get_value_type_info())
+    stats_datastream = define_workflow(flight_data_stream).map(lambda d: d.to_row(), output_type=FlyerStatsData.get_value_type_info())
 
     # Populate the table with the data from the data stream
     (tbl_env.from_data_stream(stats_datastream)
@@ -168,7 +168,7 @@ def main(args):
 
     # Execute the Flink job graph (DAG)
     try:
-        env.execute("UserStatisticsApp")
+        env.execute("FlyerStatsApp")
     except Exception as e:
         logger.error("The App stopped early due to the following: %s", e)
 
@@ -185,10 +185,10 @@ def define_workflow(flight_data_stream: DataStream) -> DataStream:
         DataStream: The defined workflow of the inputted datastream.
     """
     return (flight_data_stream
-            .map(FlightData.to_user_statistics_data)    # Transforms each element in the datastream to a UserStatisticsData object
+            .map(FlightData.to_flyer_stats_data)    # Transforms each element in the datastream to a FlyerStatsData object
             .key_by(lambda s: s.email_address)          # Groups the data by email address
             .window(TumblingEventTimeWindows.of(Time.minutes(1)))   # Each window will contain all events that occur within that 1-minute period
-            .reduce(UserStatisticsData.merge, window_function=ProcessUserStatisticsDataFunction())) # Applies a reduce function to each window
+            .reduce(FlyerStatsData.merge, window_function=ProcessFlyerStatsDataFunction())) # Applies a reduce function to each window
 
 
 if __name__ == "__main__":

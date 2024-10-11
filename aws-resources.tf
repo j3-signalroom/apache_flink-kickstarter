@@ -135,7 +135,7 @@ resource "aws_s3_object" "warehouse" {
 
 resource "aws_s3_object" "warehouse_airlines" {
   bucket = aws_s3_bucket.iceberg_bucket.bucket
-  key    = "warehouse/airlines"
+  key    = "warehouse/airlines/"
   depends_on = [ aws_s3_object.warehouse ]
 }
 

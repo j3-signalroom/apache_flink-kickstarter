@@ -16,7 +16,7 @@ import org.apache.flink.util.*;
 import kickstarter.model.*;
 
 
-class ProcessUserStatisticsDataFunction extends ProcessWindowFunction<FlyerStatsData, FlyerStatsData, String, TimeWindow> {
+class ProcessFlyerStatsDataFunction extends ProcessWindowFunction<FlyerStatsData, FlyerStatsData, String, TimeWindow> {
     private ValueStateDescriptor<FlyerStatsData> stateDescriptor;
 
     /**

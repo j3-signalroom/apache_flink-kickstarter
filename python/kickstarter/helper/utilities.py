@@ -1,4 +1,5 @@
 from pyflink.datastream import StreamExecutionEnvironment
+from datetime import datetime, timezone
 
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
@@ -25,7 +26,21 @@ def serialize_date(obj):
         return obj
     return obj.isoformat(timespec="milliseconds")
 
+def parse_isoformat(date_string: str) -> datetime:
+    """This method parses a string representing a date and time in ISO 8601 format.
 
+    Args:
+        date_string (str): The string representing a date and time in ISO 8601 format.
+
+    Returns:
+        datetime: The datetime object representing the date and time in ISO 8601 format.
+    """
+    try:
+        return datetime.fromisoformat(date_string.replace('Z[UTC]', '+00:00'))
+    except ValueError:
+        print(f"Invalid isoformat string: '{date_string}'")
+        return None
+    
 def catalog_exist(tbl_env: StreamExecutionEnvironment, catalog_to_check: str) -> bool:
     """This method checks if the catalog exist in the environment.
 
