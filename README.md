@@ -24,7 +24,6 @@ Explore the repo, run the Docker containers (compatible with both Mac M chips an
         + [2.1.1 Run locally](#211-run-locally)
     - [2.2 DevOps in Action: Running Terraform in the cloud](#22-devops-in-action-running-terraform-in-the-cloud)
         + [2.2.1 Run from the cloud](#221-run-from-the-cloud)
-    - [2.3 Power up the Apache Flink Docker containers](#23-power-up-the-apache-flink-docker-containers)
 + [3.0 Kickstart examples!](#30-kickstart-examples)
     - [3.1 Java-based Flink Apps](#31-java-based-flink-apps)
     - [3.2 Python-based Flink Apps](#32-python-based-flink-apps)
@@ -148,38 +147,6 @@ d. **Select and Run the Deploy Workflow**:
     ![github-run-deploy-workflow-screenshot](.blog/images/github-run-deploy-workflow-screenshot.png)
 
 By following these steps, you will run the Terraform configuration directly from GitHub, leveraging GitHub Actions for automation and deployment.
-
-### 2.3 Power up the Apache Flink Docker containers
-
-> **Prerequisite**
-> 
-> Before you can run `scripts/run-flink-locally.sh` Bash script, you need to install the [`aws2-wrap`](https://pypi.org/project/aws2-wrap/#description) utility.  If you have a Mac machine, run this command from your Terminal:
-> ````bash
-> brew install aws2-wrap
-> ````
->
-> If you do not, make sure you have Python3.x installed on your machine, and run this command from your Terminal:
-> ```bash
-> pip install aws2-wrap
-> ```
-
-This section guides you through the local setup (on one machine but in separate containers) of the Apache Flink cluster in Session mode using Docker containers with support for Apache Iceberg.  Run the `bash` script below to start the Apache Flink cluster in Session Mode on your machine:
-
-```bash
-scripts/run-flink-locally.sh <on | down> --profile=<AWS_SSO_PROFILE_NAME>
-                                         --chip=<amd64 | arm64>
-                                         --flink_language=<python | java>
-                                         [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
-```
-> Argument placeholder|Replace with
-> -|-
-> `<ACTIVATE_DOCKER_CONTAINER>`|use `on` to turn on Flink locally, otherwise `off` to turn Flink off.
-> `<AWS_SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
-> `<CHIP>`|if you are running on a Mac with M1, M2, or M3 chip, use `arm64`.  Otherwise, use `amd64`.
-> `<FLINK_LANGUAGE>`|specify the language base of the Flink Apps you plan on running.
-> `<AWS_S3_BUCKET_NAME>`|**[Optional]** can specify the name of the AWS S3 bucket used to store Apache Iceberg files.
-
-To learn more about this script, click [here](.blog/run-flink-locally-script-explanation.md).
 
 ## 3.0 Kickstart examples!
 

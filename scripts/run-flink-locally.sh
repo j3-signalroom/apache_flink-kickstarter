@@ -2,10 +2,10 @@
 
 #
 # *** Script Syntax ***
-# scripts/run-flink-locally.sh <on | down> --profile=<AWS_SSO_PROFILE_NAME>
-#                                          --chip=<amd64 | arm64>
-#                                          --flink_language=<python | java>
-#                                          [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
+# scripts/run-flink-locally.sh <on | off> --profile=<AWS_SSO_PROFILE_NAME>
+#                                         --chip=<amd64 | arm64>
+#                                         --flink_language=<python | java>
+#                                         [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
 #
 #
 
@@ -17,9 +17,9 @@ case $1 in
     is_on=false;;
   *)
     echo
-    echo "(Error Message 001)  You did not specify one of the commands: <on | down>."
+    echo "(Error Message 001)  You did not specify one of the commands: <on | off>."
     echo
-    echo "Usage:  Require ---> `basename $0` <on | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
+    echo "Usage:  Require ---> `basename $0` <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
     ;;
@@ -63,7 +63,7 @@ then
         echo
         echo "(Error Message 002)  You did not include the proper use of the --profile=<AWS_SSO_PROFILE_NAME> argument in the call."
         echo
-        echo "Usage:  Require ---> `basename $0` <on | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
+        echo "Usage:  Require ---> `basename $0` <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
         echo
         exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
     fi
@@ -74,7 +74,7 @@ then
         echo
         echo "(Error Message 003)  You did not include the proper use of the --chip=<amd64 | arm64> argument in the call."
         echo
-        echo "Usage:  Require ---> `basename $0` <on | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
+        echo "Usage:  Require ---> `basename $0` <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
         echo
         exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
     fi
@@ -85,7 +85,7 @@ then
         echo
         echo "(Error Message 004)  You did not include the proper use of the --flink_language=<python | java> argument in the call."
         echo
-        echo "Usage:  Require ---> `basename $0` <on | down> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
+        echo "Usage:  Require ---> `basename $0` <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
         echo
         exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
     fi
