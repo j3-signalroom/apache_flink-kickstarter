@@ -36,7 +36,10 @@ def parse_isoformat(date_string: str) -> datetime:
         datetime: The datetime object representing the date and time in ISO 8601 format.
     """
     try:
-        return datetime.fromisoformat(date_string.replace('Z[UTC]', '+00:00'))
+        #return datetime.fromisoformat(date_string.replace('Z[UTC]', '+00:00')).astimezone(timezone.utc)
+        date_time_obj = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+        dt_utc = date_time_obj.replace(tzinfo=timezone.utc).astimezone(timezone.utc)
+        return dt_utc
     except ValueError:
         print(f"Invalid isoformat string: '{date_string}'")
         return None

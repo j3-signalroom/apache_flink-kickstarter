@@ -30,6 +30,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import java.util.*;
 import java.time.*;
+import java.time.format.*;
 import org.slf4j.*;
 
 import kickstarter.model.*;
@@ -193,13 +194,15 @@ public class FlightImporterApp {
      * @return The data stream that is the result of the transformations
      */
 	public static DataStream<FlightData> defineWorkflow(DataStream<AirlineData> skyOneSource, DataStream<AirlineData> sunsetSource) {
-        DataStream<FlightData> skyOneFlightStream =  skyOneSource
-			.filter(flight -> ZonedDateTime.parse(flight.getArrivalTime()).isAfter(ZonedDateTime.now()))
-			.map(AirlineData::toFlightData);
+        DataStream<FlightData> skyOneFlightStream = 
+            skyOneSource
+                .filter(flight -> LocalDateTime.parse(flight.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).isAfter(LocalDateTime.now()))
+                .map(AirlineData::toFlightData);
 
-		DataStream<FlightData> sunsetFlightStream = sunsetSource
-            .filter(flight -> ZonedDateTime.parse(flight.getArrivalTime()).isAfter(ZonedDateTime.now()))
-            .map(flight -> flight.toFlightData());
+		DataStream<FlightData> sunsetFlightStream = 
+            sunsetSource
+            .filter(flight -> LocalDateTime.parse(flight.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).isAfter(LocalDateTime.now()))
+                .map(AirlineData::toFlightData);
 
 		return skyOneFlightStream.union(sunsetFlightStream);
     }

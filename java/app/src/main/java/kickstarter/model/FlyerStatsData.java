@@ -9,6 +9,7 @@ package kickstarter.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.*;
 import java.time.*;
+import java.time.format.*;
 import java.util.*;
 
 
@@ -17,7 +18,7 @@ public class FlyerStatsData {
     private String email_address;
 
     @JsonProperty("total_flight_duration")
-    private Duration total_flight_duration;
+    private long total_flight_duration;
 
     @JsonProperty("number_of_flights")
     private long number_of_flights;
@@ -27,7 +28,8 @@ public class FlyerStatsData {
 
     public FlyerStatsData(FlightData flightData) {
         this.email_address = flightData.getEmailAddress();
-        this.total_flight_duration = Duration.between(ZonedDateTime.parse(flightData.getDepartureTime()), ZonedDateTime.parse(flightData.getArrivalTime()));
+        this.total_flight_duration = Duration.between(LocalDateTime.parse(flightData.getDepartureTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), 
+                                                      LocalDateTime.parse(flightData.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).toMinutes();
         this.number_of_flights = 1;
     }
 
@@ -39,11 +41,11 @@ public class FlyerStatsData {
         this.email_address = emailAddress;
     }
 
-    public Duration getTotalFlightDuration() {
+    public long getTotalFlightDuration() {
         return this.total_flight_duration;
     }
 
-    public void setTotalFlightDuration(Duration totalFlightDuration) {
+    public void setTotalFlightDuration(long totalFlightDuration) {
         this.total_flight_duration = totalFlightDuration;
     }
 
@@ -84,7 +86,7 @@ public class FlyerStatsData {
             FlyerStatsData merged = new FlyerStatsData();
 
             merged.setEmailAddress(this.email_address);
-            merged.setTotalFlightDuration(this.total_flight_duration.plus(that.getTotalFlightDuration()));
+            merged.setTotalFlightDuration(this.total_flight_duration + that.getTotalFlightDuration());
             merged.setNumberOfFlights(this.number_of_flights + that.getNumberOfFlights());
 
             return merged;

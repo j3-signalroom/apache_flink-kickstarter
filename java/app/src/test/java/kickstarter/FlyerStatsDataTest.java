@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import static org.apache.flink.types.PojoTestUtils.assertSerializedAsPojo;
 import static org.junit.jupiter.api.Assertions.*;
 import java.time.*;
+import java.time.format.*;
 
 import kickstarter.model.*;
 
@@ -26,7 +27,9 @@ class FlyerStatsDataTest {
         FlightData flightData = new TestHelpers.FlightDataBuilder().build();
         FlyerStatsData stats = new FlyerStatsData(flightData);
 
-        Duration expectedDuration = Duration.between(ZonedDateTime.parse(flightData.getDepartureTime()), ZonedDateTime.parse(flightData.getArrivalTime()));
+        long expectedDuration = Duration.between(LocalDateTime.parse(flightData.getDepartureTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), 
+                                                 LocalDateTime.parse(flightData.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).toMinutes();
+
 
         assertEquals(flightData.getEmailAddress(), stats.getEmailAddress());
         assertEquals(expectedDuration, stats.getTotalFlightDuration());
@@ -72,14 +75,12 @@ class FlyerStatsDataTest {
     @Test
     void merge_shouldMergeTheFlyerStats() {
         FlyerStatsData stats1 = new TestHelpers.FlyerStatsDataBuilder().build();
-        FlyerStatsData stats2 = new TestHelpers.FlyerStatsDataBuilder()
-            .setEmailAddress(stats1.getEmailAddress())
-            .build();
+        FlyerStatsData stats2 = new TestHelpers.FlyerStatsDataBuilder().setEmailAddress(stats1.getEmailAddress()).build();
 
         FlyerStatsData merged = stats1.merge(stats2);
 
         assertEquals(stats1.getEmailAddress(), merged.getEmailAddress());
-        assertEquals(stats1.getTotalFlightDuration().plus(stats2.getTotalFlightDuration()), merged.getTotalFlightDuration());
+        assertEquals(stats1.getTotalFlightDuration() + stats2.getTotalFlightDuration(), merged.getTotalFlightDuration());
         assertEquals(stats1.getNumberOfFlights() + stats2.getNumberOfFlights(), merged.getNumberOfFlights());
     }
 
