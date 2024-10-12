@@ -15,7 +15,7 @@ __status__     = "dev"
 
 
 @dataclass
-class SkyOneAirlinesFlightData():
+class AirlineFlightData():
     email_address: str
     departure_time: str
     departure_airport_code: str
@@ -30,7 +30,7 @@ class SkyOneAirlinesFlightData():
     
     @staticmethod
     def to_flight_data(row: Row):
-        data = SkyOneAirlinesFlightData.from_row(row)
+        data = AirlineFlightData.from_row(row)
         return FlightData(
             data.email_address,
             data.departure_time,
