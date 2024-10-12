@@ -226,7 +226,7 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--aws_s3_bucket',
+    parser.add_argument('--aws-s3-bucket',
                         dest='s3_bucket_name',
                         required=True,
                         help='The AWS S3 bucket name.')

@@ -15,11 +15,11 @@ This script is used to manage a local Apache Flink environment using Docker Comp
    - Parses optional arguments such as:
      - `--profile`: AWS SSO profile name.
      - `--chip`: Specifies the target architecture (amd64 or arm64).
-     - `--flink_language`: Specifies the language to be used (Python or Java).
-     - `--aws_s3_bucket`: Optionally specifies the AWS S3 bucket name.
+     - `--flink-language`: Specifies the language to be used (Python or Java).
+     - `--aws-s3-bucket`: Optionally specifies the AWS S3 bucket name.
 
 3. **Validation Checks**:
-   - Checks if required arguments (`--profile`, `--chip`, `--flink_language`) are provided.
+   - Checks if required arguments (`--profile`, `--chip`, `--flink-language`) are provided.
    - If any of these required arguments are missing, it displays an appropriate error message and terminates.
 
 4. **AWS SSO Login**:
@@ -41,15 +41,15 @@ This script is used to manage a local Apache Flink environment using Docker Comp
 The script should be run with the following syntax:
 
 ```bash
-scripts/run-flink-locally.sh <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
+scripts/run-flink-locally.sh <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink-language=<python | java> [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]
 ```
 
 - **on**: Start the environment.
 - **down**: Stop the environment.
 - `--profile=<AWS_SSO_PROFILE_NAME>`: The AWS SSO profile to use.
 - `--chip=<amd64 | arm64>`: Specify the chip architecture.
-- `--flink_language=<python | java>`: Specify the language to use for Flink applications.
-- `[--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]`: Optionally specify an S3 bucket name.
+- `--flink-language=<python | java>`: Specify the language to use for Flink applications.
+- `[--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]`: Optionally specify an S3 bucket name.
 
 ### Summary
 - The script helps to manage a local Apache Flink environment via Docker, tailored for different architectures and Flink languages.

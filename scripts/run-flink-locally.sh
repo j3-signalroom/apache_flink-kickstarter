@@ -4,8 +4,8 @@
 # *** Script Syntax ***
 # scripts/run-flink-locally.sh <on | off> --profile=<AWS_SSO_PROFILE_NAME>
 #                                         --chip=<amd64 | arm64>
-#                                         --flink_language=<python | java>
-#                                         [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
+#                                         --flink-language=<python | java>
+#                                         [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]
 #
 #
 
@@ -19,7 +19,7 @@ case $1 in
     echo
     echo "(Error Message 001)  You did not specify one of the commands: <on | off>."
     echo
-    echo "Usage:  Require ---> `basename $0` <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
+    echo "Usage:  Require ---> `basename $0` <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink-language=<python | java> [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]"
     echo
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
     ;;
@@ -37,7 +37,7 @@ do
     case $arg in
         *"--profile="*)
             AWS_PROFILE=$arg;;
-        *"--aws_s3_bucket="*)
+        *"--aws-s3-bucket="*)
             arg_length=16
             AWS_S3_BUCKET=${arg:$arg_length:$(expr ${#arg} - $arg_length)};;
         --chip=amd64)
@@ -46,10 +46,10 @@ do
         --chip=arm64)
             chip_arg_provider=true
             use_non_mac=false;;
-        --flink_language=python)
+        --flink-language=python)
             language_arg_provider=true
             FLINK_LANGUAGE="python";;
-        --flink_language=java)
+        --flink-language=java)
             language_arg_provider=true
             FLINK_LANGUAGE="java";;
     esac
@@ -63,7 +63,7 @@ then
         echo
         echo "(Error Message 002)  You did not include the proper use of the --profile=<AWS_SSO_PROFILE_NAME> argument in the call."
         echo
-        echo "Usage:  Require ---> `basename $0` <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
+        echo "Usage:  Require ---> `basename $0` <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink-language=<python | java> [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]"
         echo
         exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
     fi
@@ -74,18 +74,18 @@ then
         echo
         echo "(Error Message 003)  You did not include the proper use of the --chip=<amd64 | arm64> argument in the call."
         echo
-        echo "Usage:  Require ---> `basename $0` <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
+        echo "Usage:  Require ---> `basename $0` <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink-language=<python | java> [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]"
         echo
         exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
     fi
 
-    # Check required --flink_language argument was supplied
+    # Check required --flink-language argument was supplied
     if [ $language_arg_provider = false ]
     then
         echo
-        echo "(Error Message 004)  You did not include the proper use of the --flink_language=<python | java> argument in the call."
+        echo "(Error Message 004)  You did not include the proper use of the --flink-language=<python | java> argument in the call."
         echo
-        echo "Usage:  Require ---> `basename $0` <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink_language=<python | java> [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]"
+        echo "Usage:  Require ---> `basename $0` <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink-language=<python | java> [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]"
         echo
         exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
     fi
