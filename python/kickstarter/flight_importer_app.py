@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 import argparse
 
 from model.flight_data import FlightData
-from python.kickstarter.model.airline_flight_data import AirlineFlightData
+from model.airline_flight_data import AirlineFlightData
 from helper.kafka_properties import execute_kafka_properties_udtf
 from helper.utilities import catalog_exist, parse_isoformat 
 
