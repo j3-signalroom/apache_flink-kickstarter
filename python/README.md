@@ -34,8 +34,8 @@ This section guides you through the local setup (on one machine but in separate 
 ```bash
 scripts/run-flink-locally.sh on --profile=<AWS_SSO_PROFILE_NAME>
                                 --chip=<amd64 | arm64>
-                                --flink_language=python
-                                [--aws_s3_bucket=<AWS_S3_BUCKET_NAME>]
+                                --flink-language=python
+                                [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]
 ```
 > Argument placeholder|Replace with
 > -|-
@@ -59,8 +59,8 @@ Finally, to launch one of the Flink applications, choose your app and use the co
 
 Flink App|Flink Run Command
 -|-
-**`FlightImporterApp`**|`flink run --pyFiles kickstarter/python_files.zip --python kickstarter/flight_importer_app.py --aws_s3_bucket <AWS_S3_BUCKET>`
-**`FlyerStatsApp`**|`flink run --pyFiles kickstarter/python_files.zip --python kickstarter/flyer_stats_app.py --aws_s3_bucket <AWS_S3_BUCKET>`
+**`FlightImporterApp`**|`flink run --pyFiles kickstarter/python_files.zip --python kickstarter/flight_importer_app.py --aws-s3-bucket <AWS_S3_BUCKET>`
+**`FlyerStatsApp`**|`flink run --pyFiles kickstarter/python_files.zip --python kickstarter/flyer_stats_app.py --aws-s3-bucket <AWS_S3_BUCKET>`
 
 > Argument placeholder|Replace with
 > -|-
