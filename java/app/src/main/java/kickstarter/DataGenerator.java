@@ -9,6 +9,7 @@ package kickstarter;
 
 import java.math.*;
 import java.time.*;
+import java.time.format.*;
 import java.util.*;
 import java.util.stream.*;
 
@@ -51,14 +52,14 @@ public class DataGenerator {
         return users.get(random.nextInt(users.size()));
     }
 
-    private static ZonedDateTime generateDepartureTime() {
-        return LocalDate.now()
+    public static LocalDateTime generateDepartureTime() {
+        return LocalDateTime.now()
                 .plusDays(random.nextInt(365))
-                .atTime(random.nextInt(24), random.nextInt(60))
-                .atZone(ZoneId.of("UTC"));
+                .withHour(random.nextInt(24))
+                .withMinute(random.nextInt(60));
     }
 
-    private static ZonedDateTime generateArrivalTime(ZonedDateTime departure) {
+    public static LocalDateTime generateArrivalTime(LocalDateTime departure) {
         return departure
                 .plusHours(random.nextInt(15))
                 .plusMinutes(random.nextInt(60));
@@ -72,19 +73,19 @@ public class DataGenerator {
      */
     public static AirlineData generateAirlineFlightData(final String airlinePrefix) {
         AirlineData airlineData = new AirlineData();
-        ZonedDateTime departureTime = generateDepartureTime();
-        ZonedDateTime arrivalTime = generateArrivalTime(departureTime);
+        final LocalDateTime localDepartureTime = generateDepartureTime();
+        final LocalDateTime localArrivalTime = generateArrivalTime(localDepartureTime);
 
         airlineData.setEmailAddress(generateEmail());
-        airlineData.setDepartureTime(departureTime.toString());
+        airlineData.setDepartureTime(localDepartureTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         airlineData.setDepartureAirportCode(generateAirportCode());
-        airlineData.setArrivalTime(generateArrivalTime(departureTime).toString());
+        airlineData.setArrivalTime(localArrivalTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         airlineData.setArrivalAirportCode(generateAirportCode());
-        airlineData.setFlightDuration(Duration.between(departureTime, arrivalTime).toMillis());
+        airlineData.setFlightDuration(Duration.between(localDepartureTime, localArrivalTime).toMinutes());
         airlineData.setFlightNumber(airlinePrefix + random.nextInt(1000));
         airlineData.setConfirmationCode(airlinePrefix + generateString(6));
         airlineData.setTicketPrice(BigDecimal.valueOf(500L + (long)random.nextInt(1000)));
-        airlineData.setAircraft("Aircraft"+generateString(3));
+        airlineData.setAircraft("Aircraft" + generateString(3));
         airlineData.setBookingAgencyEmail(generateEmail());
 
         return airlineData;

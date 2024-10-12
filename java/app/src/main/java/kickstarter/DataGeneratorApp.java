@@ -113,9 +113,9 @@ public class DataGeneratorApp {
         Schema schema = 
             Schema.newBuilder()
                    .column("email_address", DataTypes.STRING())
-                   .column("departure_time", DataTypes.STRING())
+                   .column("departure_time", DataTypes.TIMESTAMP(0))
                    .column("departure_airport_code", DataTypes.STRING())
-                   .column("arrival_time", DataTypes.STRING())
+                   .column("arrival_time", DataTypes.TIMESTAMP(0))
                    .column("arrival_airport_code", DataTypes.STRING())
                    .column("flight_duration", DataTypes.BIGINT())
                    .column("flight_number", DataTypes.STRING())
@@ -292,9 +292,9 @@ public class DataGeneratorApp {
                     tblEnv.executeSql(
                         "CREATE TABLE " + tablePath + " ("
                             + "email_address STRING, "
-                            + "departure_time STRING, "
+                            + "departure_time TIMESTAMP(0), "
                             + "departure_airport_code STRING, "
-                            + "arrival_time STRING, "
+                            + "arrival_time TIMESTAMP(0), "
                             + "arrival_airport_code STRING, "
                             + "flight_duration BIGINT,"
                             + "flight_number STRING, "

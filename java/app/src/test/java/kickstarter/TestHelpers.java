@@ -8,7 +8,8 @@
 package kickstarter;
 
 import java.time.*;
-import java.util.Random;
+import java.time.format.*;
+import java.util.*;
 
 import kickstarter.model.*;
 
@@ -31,7 +32,7 @@ public class TestHelpers {
 
         StringBuilder sb = new StringBuilder(size);
 
-        for(int i = 0; i < size; i++) {
+        for(int charCount = 0; charCount < size; charCount++) {
             final int index = random.nextInt(alphaString.length());
             sb.append(alphaString.charAt(index));
         }
@@ -43,42 +44,39 @@ public class TestHelpers {
         return generateString(10)+"@email.com";
     }
 
-    public static ZonedDateTime generateDepartureTime() {
-        return LocalDate.now()
+    public static LocalDateTime generateDepartureTime() {
+        return LocalDateTime.now()
                 .plusDays(random.nextInt(365))
-                .atTime(random.nextInt(24), random.nextInt(60))
-                .atZone(ZoneId.of("UTC"));
+                .withHour(random.nextInt(24))
+                .withMinute(random.nextInt(60));
     }
 
-    public static ZonedDateTime generateArrivalTime(ZonedDateTime departure) {
+    public static LocalDateTime generateArrivalTime(LocalDateTime departure) {
         return departure
                 .plusHours(random.nextInt(15))
                 .plusMinutes(random.nextInt(60));
     }
 
-    public static Duration generateDuration() {
-        return Duration.ofMinutes(random.nextInt(300));
-    }
-
     public static class AirlineDataBuilder {
         private String emailAddress;
-        private String flightDepartureTime;
-        private String iataDepartureCode;
-        private String flightArrivalTime;
-        private String iataArrivalCode;
+        private String departureTime;
+        private String airportDepartureCode;
+        private String arrivalTime;
+        private String airportArrivalCode;
         private String flightNumber;
         private String confirmation;
 
         public AirlineDataBuilder() {
-            ZonedDateTime departure = generateDepartureTime();
+            LocalDateTime localDepartureTime = generateDepartureTime();
+            LocalDateTime localArrivalTime = generateArrivalTime(localDepartureTime);
 
             this.emailAddress = generateEmail();
-            this.flightDepartureTime = departure.toString();
-            this.iataDepartureCode = generateAirportCode();
-            this.flightArrivalTime = generateArrivalTime(departure).toString();
-            this.iataArrivalCode = generateAirportCode();
-            this.flightNumber = "SKY1"+random.nextInt(1000);
-            this.confirmation = "SKY1"+generateString(6);
+            this.departureTime = localDepartureTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            this.airportDepartureCode = generateAirportCode();
+            this.arrivalTime = localArrivalTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            this.airportArrivalCode = generateAirportCode();
+            this.flightNumber = "SKY1" + random.nextInt(1000);
+            this.confirmation = "SKY1" + generateString(6);
         }
 
         public AirlineDataBuilder setEmailAddress(String emailAddress) {
@@ -86,23 +84,23 @@ public class TestHelpers {
             return this;
         }
 
-        public AirlineDataBuilder setDepartureTime(String flightDepartureTime) {
-            this.flightDepartureTime = flightDepartureTime;
+        public AirlineDataBuilder setDepartureTime(String departureTime) {
+            this.departureTime = departureTime;
             return this;
         }
 
-        public AirlineDataBuilder setDepartureAirportCode(String iataDepartureCode) {
-            this.iataDepartureCode = iataDepartureCode;
+        public AirlineDataBuilder setDepartureAirportCode(String airportDepartureCode) {
+            this.airportDepartureCode = airportDepartureCode;
             return this;
         }
 
-        public AirlineDataBuilder setArrivalTime(String flightArrivalTime) {
-            this.flightArrivalTime = flightArrivalTime;
+        public AirlineDataBuilder setArrivalTime(String arrivalTime) {
+            this.arrivalTime = arrivalTime;
             return this;
         }
 
-        public AirlineDataBuilder setArrivalAirportCode(String iataArrivalCode) {
-            this.iataArrivalCode = iataArrivalCode;
+        public AirlineDataBuilder setArrivalAirportCode(String airportArrivalCode) {
+            this.airportArrivalCode = airportArrivalCode;
             return this;
         }
 
@@ -119,13 +117,13 @@ public class TestHelpers {
         public AirlineData build() {
             AirlineData airlineData = new AirlineData();
 
-            airlineData.setEmailAddress(emailAddress);
-            airlineData.setDepartureTime(flightDepartureTime);
-            airlineData.setDepartureAirportCode(iataDepartureCode);
-            airlineData.setArrivalTime(flightArrivalTime);
-            airlineData.setArrivalAirportCode(iataArrivalCode);
-            airlineData.setFlightNumber(flightNumber);
-            airlineData.setConfirmationCode(confirmation);
+            airlineData.setEmailAddress(this.emailAddress);
+            airlineData.setDepartureTime(this.departureTime);
+            airlineData.setDepartureAirportCode(this.airportDepartureCode);
+            airlineData.setArrivalTime(this.arrivalTime);
+            airlineData.setArrivalAirportCode(this.airportArrivalCode);
+            airlineData.setFlightNumber(this.flightNumber);
+            airlineData.setConfirmationCode(this.confirmation);
 
             return airlineData;
         }
@@ -141,15 +139,16 @@ public class TestHelpers {
         private String confirmationCode;
 
         public FlightDataBuilder() {
-            ZonedDateTime departure = generateDepartureTime();
+            LocalDateTime localDepartureTime = generateDepartureTime();
+            LocalDateTime localArrivalTime = generateArrivalTime(localDepartureTime);
 
-            emailAddress = generateEmail();
-            departureTime = departure.toString();
-            departureAirportCode = generateAirportCode();
-            arrivalTime = generateArrivalTime(departure).toString();
-            arrivalAirportCode = generateAirportCode();
-            flightNumber = "Flight"+random.nextInt(1000);
-            confirmationCode = "Confirmation"+generateString(5);
+            this.emailAddress = generateEmail();
+            this.departureTime = localDepartureTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            this.departureAirportCode = generateAirportCode();
+            this.arrivalTime = localArrivalTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            this.arrivalAirportCode = generateAirportCode();
+            this.flightNumber = "Flight" + random.nextInt(1000);
+            this.confirmationCode = "Confirmation" + generateString(5);
         }
 
         public FlightDataBuilder setEmailAddress(String emailAddress) {
@@ -157,8 +156,8 @@ public class TestHelpers {
             return this;
         }
 
-        public FlightDataBuilder setDepartureTime(String departureTime) {
-            this.departureTime = departureTime;
+        public FlightDataBuilder setDepartureTime(LocalDateTime departureTime) {
+            this.departureTime = departureTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             return this;
         }
 
@@ -167,8 +166,8 @@ public class TestHelpers {
             return this;
         }
 
-        public FlightDataBuilder setArrivalTime(String arrivalTime) {
-            this.arrivalTime = arrivalTime;
+        public FlightDataBuilder setArrivalTime(LocalDateTime arrivalTime) {
+            this.arrivalTime = arrivalTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             return this;
         }
 
@@ -204,14 +203,15 @@ public class TestHelpers {
 
     public static class FlyerStatsDataBuilder {
         private String emailAddress;
-        private Duration totalFlightDuration;
+        private long totalFlightDuration;
         private long numberOfFlights;
 
         public FlyerStatsDataBuilder() {
+            final LocalDateTime localDepartureTime = generateDepartureTime();
+            final LocalDateTime localArrivalTime = generateArrivalTime(localDepartureTime);
+
             this.emailAddress = generateEmail();
-            ZonedDateTime departure = generateDepartureTime();
-            ZonedDateTime arrival = generateArrivalTime(departure);
-            this.totalFlightDuration = Duration.between(departure, arrival);
+            this.totalFlightDuration = Duration.between(localDepartureTime, localArrivalTime).toMinutes();
             this.numberOfFlights = random.nextInt(5);
         }
 
@@ -220,7 +220,7 @@ public class TestHelpers {
             return this;
         }
 
-        public FlyerStatsDataBuilder setTotalFlightDuration(Duration totalFlightDuration) {
+        public FlyerStatsDataBuilder setTotalFlightDuration(long totalFlightDuration) {
             this.totalFlightDuration = totalFlightDuration;
             return this;
         }
@@ -231,13 +231,13 @@ public class TestHelpers {
         }
 
         public FlyerStatsData build() {
-            FlyerStatsData stats = new FlyerStatsData();
+            FlyerStatsData flyerStatsData = new FlyerStatsData();
 
-            stats.setEmailAddress(emailAddress);
-            stats.setTotalFlightDuration(totalFlightDuration);
-            stats.setNumberOfFlights(numberOfFlights);
+            flyerStatsData.setEmailAddress(this.emailAddress);
+            flyerStatsData.setTotalFlightDuration(this.totalFlightDuration);
+            flyerStatsData.setNumberOfFlights(this.numberOfFlights);
 
-            return stats;
+            return flyerStatsData;
         }
     }
 }

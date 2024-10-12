@@ -13,7 +13,8 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.junit5.MiniClusterExtension;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import java.time.ZonedDateTime;
+import java.time.*;
+import java.time.format.*;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -56,37 +57,25 @@ class FlightImporterAppTest {
         DataStreamSource<AirlineData> skyOneStream = env.fromData(skyOneFlight);
         DataStreamSource<AirlineData> sunsetStream = env.fromData(sunsetFlight);
 
-        FlightImporterApp
-                .defineWorkflow(skyOneStream, sunsetStream)
-                .collectAsync(collector);
-
+        FlightImporterApp.defineWorkflow(skyOneStream, sunsetStream).collectAsync(collector);
         env.executeAsync();
-
         assertContains(collector, Arrays.asList(skyOneFlight.toFlightData(), sunsetFlight.toFlightData()));
     }
 
     @Test
     void defineWorkflow_shouldFilterOutFlightsInThePast() throws Exception {
-        AirlineData newSkyOneFlight = new TestHelpers.AirlineDataBuilder()
-                .setArrivalTime((ZonedDateTime.now().plusMinutes(1)).toString())
-                .build();
-        AirlineData oldSkyOneFlight = new TestHelpers.AirlineDataBuilder()
-                .setArrivalTime((ZonedDateTime.now().minusSeconds(1)).toString())
-                .build();
+        final String addMinuteToNow = LocalDateTime.now().plusMinutes(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        final String subtractSecondToNow = LocalDateTime.now().minusSeconds(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-        AirlineData newSunsetFlight = new TestHelpers.AirlineDataBuilder()
-                .setArrivalTime((ZonedDateTime.now().plusMinutes(1)).toString())
-                .build();
-        AirlineData oldSunsetFlight = new TestHelpers.AirlineDataBuilder()
-                .setArrivalTime((ZonedDateTime.now().minusSeconds(1)).toString())
-                .build();
+        AirlineData newSkyOneFlight = new TestHelpers.AirlineDataBuilder().setArrivalTime(addMinuteToNow).build();
+        AirlineData oldSkyOneFlight = new TestHelpers.AirlineDataBuilder().setArrivalTime(subtractSecondToNow).build();
+        AirlineData newSunsetFlight = new TestHelpers.AirlineDataBuilder().setArrivalTime(addMinuteToNow).build();
+        AirlineData oldSunsetFlight = new TestHelpers.AirlineDataBuilder().setArrivalTime(subtractSecondToNow).build();
 
         DataStreamSource<AirlineData> skyOneStream = env.fromData(newSkyOneFlight, oldSkyOneFlight);
         DataStreamSource<AirlineData> sunsetStream = env.fromData(newSunsetFlight, oldSunsetFlight);
 
-        FlightImporterApp
-                .defineWorkflow(skyOneStream, sunsetStream)
-                .collectAsync(collector);
+        FlightImporterApp.defineWorkflow(skyOneStream, sunsetStream).collectAsync(collector);
 
         env.executeAsync();
 
