@@ -8,8 +8,7 @@ from datetime import datetime, timezone
 import argparse
 
 from model.flight_data import FlightData
-from model.skyone_airline_flight_data import SkyOneAirlinesFlightData
-from model.sunset_airline_flight_data import SunsetAirFlightData
+from python.kickstarter.model.airline_flight_data import AirlineFlightData
 from helper.kafka_properties import execute_kafka_properties_udtf
 from helper.utilities import catalog_exist, parse_isoformat 
 
@@ -49,7 +48,7 @@ def main(args):
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
                                 .set_value_only_deserializer(JsonRowDeserializationSchema
                                                              .builder()
-                                                             .type_info(SkyOneAirlinesFlightData.get_value_type_info())
+                                                             .type_info(AirlineFlightData.get_value_type_info())
                                                              .build())
                                 .build())
 
@@ -65,7 +64,7 @@ def main(args):
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
                                 .set_value_only_deserializer(JsonRowDeserializationSchema
                                                              .builder()
-                                                             .type_info(SunsetAirFlightData.get_value_type_info())
+                                                             .type_info(AirlineFlightData.get_value_type_info())
                                                              .build())
                                 .build())
 
@@ -213,12 +212,12 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
     """
     # Map the data streams to the FlightData model and filter out Skyone flights that have already arrived
     skyone_flight_stream = (skyone_stream
-                            .map(SkyOneAirlinesFlightData.to_flight_data)
+                            .map(AirlineFlightData.to_flight_data)
                             .filter(lambda flight: parse_isoformat(flight.arrival_time) > datetime.now(timezone.utc)))
 
     # Map the data streams to the FlightData model and filter out Sunset flights that have already arrived
     sunset_flight_stream = (sunset_stream
-                            .map(SunsetAirFlightData.to_flight_data)
+                            .map(AirlineFlightData.to_flight_data)
                             .filter(lambda flight: parse_isoformat(flight.arrival_time) > datetime.now(timezone.utc)))
     
     # Return the union of the two data streams
