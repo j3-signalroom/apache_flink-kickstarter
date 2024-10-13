@@ -1,13 +1,13 @@
-# ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png) Apache Flink Kickstarter using ![apache-kafka-logo](.blog/images/apache-kafka-logo.png) & ![apache-iceberg-logo](.blog/images/apache-iceberg-logo.png)
+# ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png) Apache Flink Kickstarter
 This project showcases the exceptional capabilities of Apache Flink, known for its high performance, scalability, and advanced stream processing features, which is a core component of the signalRoom technology stack. Staying true to our mission of empowering developers by sharing practical knowledge, we demonstrate the use of Flink through real-world examples based on the blog series ["Building Apache Flink Applications in Java."](https://developer.confluent.io/courses/flink-java/overview/)
 
 ![java-python-flink-kickstarter-apps](.blog/images/java-python-flink-kickstarter-apps.png)
 
 Flink App|Description
 -|-
-`DataGeneratorApp`|This Flink App generates realistic flight data for the fictional airlines Sunset Air and Sky One Airlines, seamlessly integrating modern data streaming technologies. Flight events are published to dedicated Kafka topics (`airline.sunset` and `airline.skyone`), enabling real-time processing and analysis. Simultaneously, the synthetic data flows into Apache Iceberg tables , stored in an AWS S3 bucket, providing a robust, scalable foundation for historical data analytics.  The entire solution is implemented in Java, overcoming limitations in PyFlink, which currently lacks a Python-based data generator source. This design ensures a powerful, flexible data pipeline, ideal for both real-time and batch use cases. 
-`FlightImporterApp`|Imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and standardizes them into a unified `airline.all` Kafka topic. Implemented in both Java and Python.
-`FlyerStatsApp`|Processes data from the `airline.all` Kafka topic to aggregate flyer statistics into the `airline.flyer_stats` Kafka topic. Implemented in both Java and Python.
+`DataGeneratorApp`|This Flink App generates realistic flight data for the fictional airlines Sunset Air and Sky One Airlines, seamlessly integrating modern data streaming technologies. Flight events are published to dedicated Kafka topics (`airline.sunset` and `airline.skyone`), enabling real-time processing and analysis. Simultaneously, the synthetic data flows into the `apache_kickstarter.airlines.skyone_airline` and `apache_kickstarter.airlines.sunset_airline` Apache Iceberg tables, respectively, stored in an AWS S3 bucket, providing a robust, scalable foundation for historical data analytics.  The entire solution is implemented in Java, overcoming limitations in PyFlink, which currently lacks a Python-based data generator source. This design ensures a powerful, flexible data pipeline, ideal for both real-time and batch use cases. 
+`FlightImporterApp`|Imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and standardizes them into a unified `airline.flight` Kafka topic, and , and the `apache_kickstarter.airlines.flight`  Apache Iceberg table.  Implemented in both Java and Python.
+`FlyerStatsApp`|Processes data from the `airline.flight` Kafka topic to aggregate flyer statistics into the `airline.flyer_stats` Kafka topic, and the `apache_kickstarter.airlines.flyer_stats` Apache Iceberg table. Implemented in both Java and Python.
 
 Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/), these applications are designed to handle enterprise-scale use cases to demonstrate Flink's potential for real-world applications. This will start with securely fetching Kafka Cluster API keys via _**AWS Secrets Manager**_ and retrieving essential Kafka client configuration properties through the _**AWS Systems Manager Parameter**_.
 
@@ -26,9 +26,9 @@ Explore the repo, run the Docker containers (compatible with both Mac M chips an
         + [2.1.1 Run locally](#211-run-locally)
     - [2.2 DevOps in Action: Running Terraform in the cloud](#22-devops-in-action-running-terraform-in-the-cloud)
         + [2.2.1 Run from the cloud](#221-run-from-the-cloud)
-+ [3.0 Kickstart examples!](#30-kickstart-examples)
-    - [3.1 Java-based Flink Apps](#31-java-based-flink-apps)
-    - [3.2 Python-based Flink Apps](#32-python-based-flink-apps)
++ [3.0 Hands-On Kickoff: Practical Examples for Rapid Learning](#30-hands-on-kickoff-practical-examples-for-rapid-learning)
+    - [3.1 Flink Apps in Java](#31-flink-apps-in-java)
+    - [3.2 Flink Apps in Python](#32-flink-apps-in-python)
 + [4.0 Resources](#40-resources)
 + [5.0 Important Note(s)](#50-important-notes)
 <!-- tocstop -->
@@ -150,12 +150,12 @@ d. **Select and Run the Deploy Workflow**:
 
 By following these steps, you will run the Terraform configuration directly from GitHub, leveraging GitHub Actions for automation and deployment.
 
-## 3.0 Kickstart examples!
+## 3.0 Hands-On Kickoff: Practical Examples for Rapid Learning
 
-### 3.1 Java-based Flink Apps
+### 3.1 Flink Apps in Java
 [Let's get started!](java/README.md)
 
-### 3.2 Python-based Flink Apps
+### 3.2 Flink Apps in Python
 [Let's get started!](python/README.md)
 
 ## 4.0 Resources

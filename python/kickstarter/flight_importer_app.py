@@ -72,7 +72,7 @@ def main(args):
     sunset_stream = (env.from_source(sunset_source, WatermarkStrategy.no_watermarks(), "sunset_source")
                         .uid("sunset_source"))
 
-    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.all`
+    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
     # Get the Kafka Cluster properties for the producer
     producer_properties = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
     producer_properties.update({
@@ -93,7 +93,7 @@ def main(args):
     flight_sink = (kafka_sink_builder                            
                    .set_record_serializer(KafkaRecordSerializationSchema
                                           .builder()
-                                          .set_topic("airline.all")
+                                          .set_topic("airline.flight")
                                           .set_value_serialization_schema(JsonRowSerializationSchema
                                                                           .builder()
                                                                           .with_type_info(FlightData.get_value_type_info())

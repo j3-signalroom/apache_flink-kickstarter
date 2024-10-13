@@ -5,7 +5,7 @@
  * 
  * 
  * This class imports flight data from `airline.sunset` and `airline.skyone` Kafka topics
- * and converts it to a unified format for the `airline.all` Kafka topic.
+ * and converts it to a unified format for the `airline.flight` Kafka topic.
  * 
  * ------------------------------------------------------------------------------------------
  * I had a question, can you combine the Flink DataStream API and Table API in the same DAG?
@@ -152,11 +152,11 @@ public class FlightImporterApp {
             .fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
         /*
-         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.all` with the
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight` with the
          * specified serializer
          */
 		KafkaRecordSerializationSchema<FlightData> flightSerializer = KafkaRecordSerializationSchema.<FlightData>builder()
-            .setTopic("airline.all")
+            .setTopic("airline.flight")
 			.setValueSerializationSchema(new JsonSerializationSchema<FlightData>(Common::getMapper))
             .build();
 

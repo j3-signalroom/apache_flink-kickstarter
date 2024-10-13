@@ -166,7 +166,7 @@ resource "confluent_kafka_topic" "airline_sunset" {
   ]
 }
 
-# Create the `airline.all` Kafka topic
+# Create the `airline.flight` Kafka topic
 resource "confluent_kafka_topic" "airline_flight" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id

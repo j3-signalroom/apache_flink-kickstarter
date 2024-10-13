@@ -36,10 +36,10 @@ def main(args):
     # Get the Kafka Cluster properties for the consumer
     consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
-    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.all`
+    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
     flight_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
-                                .set_topics("airline.all")
+                                .set_topics("airline.flight")
                                 .set_group_id("flight_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
                                 .set_value_only_deserializer(JsonRowDeserializationSchema
