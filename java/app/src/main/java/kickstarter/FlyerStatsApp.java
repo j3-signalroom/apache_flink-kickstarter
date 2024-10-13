@@ -4,7 +4,7 @@
  * @author Jeffrey Jonathan Jennings (J3)
  * 
  * 
- * This class processes data from the `airline.all` Kafka topic to aggregate user
+ * This class processes data from the `airline.flight` Kafka topic to aggregate user
  * statistics in the `airline.flyer_stats` Kafka topic.
  */
 package kickstarter;
@@ -109,13 +109,13 @@ public class FlyerStatsApp {
 		}
 
         /*
-         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.all` with the
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight` with the
          * specified deserializer
          */
         KafkaSource<FlightData> flightDataSource = 
             KafkaSource.<FlightData>builder()
                 .setProperties(consumerProperties)
-                .setTopics("airline.all")
+                .setTopics("airline.flight")
                 .setGroupId("flight_group")
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new JsonDeserializationSchema<>(FlightData.class))
@@ -169,9 +169,9 @@ public class FlyerStatsApp {
 
     /**
      * This method defines the workflow for the Flink application.  It maps the data from the
-     * `airline.all` Kafka topic to the `airline.flyer_stats` Kafka topic.
+     * `airline.flight` Kafka topic to the `airline.flyer_stats` Kafka topic.
      * 
-     * @param flightDataSource the data stream from the `airline.all` Kafka topic.
+     * @param flightDataSource the data stream from the `airline.flight` Kafka topic.
      * @return the data stream to the `airline.flyer_stats` Kafka topic.
      */
     public static DataStream<FlyerStatsData> defineWorkflow(DataStream<FlightData> flightDataSource) {
