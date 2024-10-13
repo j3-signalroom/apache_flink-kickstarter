@@ -132,7 +132,7 @@ def main(args):
     # within a catalog by encapsulating both the database name and the object name.  For 
     # instance, this case we using it to get the fully qualified path of the `flyer_stats`
     # table
-    stats_table_path = ObjectPath(database_name, "stats")
+    stats_table_path = ObjectPath(database_name, "flyer_stats")
 
     # Check if the table exists.  If not, create it
     try:
