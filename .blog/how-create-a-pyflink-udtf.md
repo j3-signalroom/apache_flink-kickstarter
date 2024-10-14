@@ -13,7 +13,7 @@ But then, Martijn Visser—shoutout to the Group Product Manager at Confluent—
 
 What followed was a classic journey of web searches, chatting with LLMs, scouring Apache Flink documentation, and assembling a puzzle with a million nearly identical pieces. 🧭
 
-And guess what? After much trial and error, I cracked the code! You can check it out in my GitHub, click [here]( https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/kickstarter/helper/kafka_properties.py)!
+And guess what? After much trial and error, I cracked the code! You can check it out in my GitHub repo [here]( https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/kickstarter/helper/kafka_properties.py)!
 
 ![matrix-brilliant](images/matrix-brilliant.gif)
 
@@ -32,7 +32,7 @@ class KafkaProperties(TableFunction):
     """
     ...
 ```
-The `KafkaProperties` class, which is the User-Defined Table Function (UDTF), retrieves the Kafka Cluster properties from the AWS Secrets Manager and Parameter Store.  Which inherits from the PyFlink [TableFunction](https://nightlies.apache.org/flink/flink-docs-release-1.20/api/python/reference/pyflink.table/api/pyflink.table.udf.TableFunction.html?highlight=tablefunction), a base interface for a user-defined table function that creates zero or more row values.
+The `KafkaProperties` class, which is the User-Defined Table Function (UDTF), retrieves the Kafka Cluster properties from the AWS Secrets Manager and Parameter Store, which inherits from the PyFlink [TableFunction](https://nightlies.apache.org/flink/flink-docs-release-1.20/api/python/reference/pyflink.table/api/pyflink.table.udf.TableFunction.html?highlight=tablefunction), a base interface for a user-defined table function that creates zero or more row values.
 
 ### Step 2 of 4 --- Constructor(`__init__()`)
 ```python
@@ -370,9 +370,10 @@ return result_dict
 The result dictionary (`result_dict`) containing Kafka properties is returned by the function.
 
 ## Summary
-The `KafkaProperties` class and `execute_kafka_properties_udtf()` function form a practical solution for dynamically retrieving Kafka configuration properties in a PyFlink streaming environment.  By integrating AWS Secrets Manager and AWS Systems Manager Parameter Store, this architecture ensures that Kafka client configurations are managed with both scalability and security in mind—enabling seamless, real-time adjustments while safeguarding sensitive information.  This approach exemplifies a modern, cloud-native way of handling configuration management, perfectly tailored for robust and adaptive data streaming workflows.
+The `KafkaProperties` class and `execute_kafka_properties_udtf()` method form a practical solution for dynamically retrieving Kafka configuration properties in a PyFlink streaming environment.  By integrating AWS Secrets Manager and AWS Systems Manager Parameter Store, this architecture ensures that Kafka client configurations are managed with both scalability and security in mind—enabling seamless, real-time adjustments while safeguarding sensitive information.  This approach exemplifies a modern, cloud-native way of handling configuration management, perfectly tailored for robust and adaptive data streaming workflows.
 
-Thank you for reading :-)
+Thank you for reading,
+---J3
 
 
 
