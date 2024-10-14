@@ -19,7 +19,7 @@ def serialize_date(obj):
 
     Returns:
         str:  If the obj is of type datetime or date, the object is formatted 
-        according to ISO 8601 (i.e., 'YYYY-MM-DD HH:MM:SS.mmmmmm').  Otherwise, 
+        according to ISO 8601 (i.e., 'YYYY-MM-DD HH:MM:SS').  Otherwise, 
         the obj is returned as is.
     """
     if isinstance(obj, str):
