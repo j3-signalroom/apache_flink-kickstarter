@@ -1,8 +1,7 @@
 from pyflink.common import Row
-from pyflink.table import DataTypes
+from pyflink.table import DataTypes, StreamTableEnvironment
 from pyflink.table.expressions import col
 from pyflink.table.udf import udtf, TableFunction
-from pyflink.table import StreamTableEnvironment
 from typing import Iterator
 import boto3
 from botocore.exceptions import ClientError
