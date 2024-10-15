@@ -371,12 +371,3 @@ The result dictionary (`result_dict`) containing Kafka properties is returned by
 
 ## Summary
 The `KafkaProperties` class and `execute_kafka_properties_udtf()` method forms a practical solution for dynamically retrieving Kafka configuration properties in a PyFlink streaming environment.  By integrating AWS Secrets Manager and AWS Systems Manager Parameter Store, this architecture ensures that Kafka client configurations are managed with both scalability and security in mind—enabling seamless, real-time adjustments while safeguarding sensitive information.  This approach exemplifies a modern, cloud-native way of handling configuration management, perfectly tailored for robust and adaptive data streaming workflows.
-
-Thank you for reading,
----J3
-
-
-
-
-
-If you liked the post, please clap and follow me on [Medium](https://medium.com/@jeffrey.j.jennings) and [LinkedIn](https://www.linkedin.com/in/jeffreyjonathanjennings)!
