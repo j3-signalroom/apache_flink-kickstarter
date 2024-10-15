@@ -28,9 +28,11 @@ def main(args):
     )
 
     # Load the catalog
-    catalog = load_catalog('apache_kickstarter', {
+    catalog_name = "apache_kickstarter"
+    bucket_name = args.s3_bucket_name.replace("_", "-") # To follow S3 bucket naming convention, replace underscores with hyphens if exist
+    catalog = load_catalog(catalog_name, {
         'type': 'hadoop',
-        'warehouse': 's3a://{bucket_name}/warehouse',
+        'warehouse': f"'s3a://{bucket_name}/warehouse'",
         'fs': s3  # Pass the S3 filesystem
     })
 
