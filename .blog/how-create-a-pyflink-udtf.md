@@ -369,5 +369,42 @@ return result_dict
 
 The result dictionary (`result_dict`) containing Kafka properties is returned by the function.
 
+## Watch the UDTF in Action: Streamlining Kafka Integration!
+```python
+def main(args):
+    """The entry point to the Flight Importer Flink App (a.k.a., Flink job graph --- DAG).
+        
+    Args:
+        args (str): is the arguments passed to the script.
+    """
+    # Create a blank Flink execution environment
+    env = StreamExecutionEnvironment.get_execution_environment()
+
+    # Create a Table Environment
+    tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
+
+    # Adjust resource configuration
+    env.set_parallelism(1)  # Set parallelism to 1 for simplicity
+
+    # Get the Kafka Cluster properties for the Kafka consumer client
+    consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+
+    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
+    skyone_source = (KafkaSource.builder()
+                                .set_properties(consumer_properties)
+                                .set_topics("airline.skyone")
+                                .set_group_id("skyone_group")
+                                .set_starting_offsets(KafkaOffsetsInitializer.earliest())
+                                .set_value_only_deserializer(JsonRowDeserializationSchema
+                                                                .builder()
+                                                                .type_info(AirlineFlightData.get_value_type_info())
+                                                                .build())
+                                .build())
+    
+    ...
+
+```
+In the snippet above, the `execute_kafka_properties_udtf()` method plays a pivotal role in your Flink application.  It seamlessly retrieves Kafka Consumer Client properties and channels them into the `KafkaSource` operator.  This approach ensures that properties are handled securely, paving the way for effortless scalability while maintaining data integrity.  By streamlining the integration of Kafka client configuration with Flink, you're building a robust, scalable, and future-proof data pipeline that empowers real-time processing.
+
 ## Summary
 The `KafkaProperties` class and `execute_kafka_properties_udtf()` method forms a practical solution for dynamically retrieving Kafka configuration properties in a PyFlink streaming environment.  By integrating AWS Secrets Manager and AWS Systems Manager Parameter Store, this architecture ensures that Kafka client configurations are managed with both scalability and security in mind—enabling seamless, real-time adjustments while safeguarding sensitive information.  This approach exemplifies a modern, cloud-native way of handling configuration management, perfectly tailored for robust and adaptive data streaming workflows.
