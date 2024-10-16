@@ -1,10 +1,18 @@
 import streamlit as st
-from pyiceberg.catalog import load_catalog
-from pyiceberg.io.pyarrow import project_table
-import s3fs
-import pandas as pd
-import os
+from pyflink.common import WatermarkStrategy
+from pyflink.datastream import StreamExecutionEnvironment, DataStream
+from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
+from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
+from pyflink.table import TableEnvironment, EnvironmentSettings, StreamTableEnvironment
+from pyflink.table.table_schema import TableSchema
+from pyflink.table.catalog import ObjectPath
+from pyflink.table.expressions import *
+from datetime import datetime, timezone
 import argparse
+import pandas as pd
+
+from model.flight_data import FlightData
+from helper.utilities import catalog_exist
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -20,40 +28,63 @@ def main(args):
     Args:
         args (str): is the arguments passed to the script.
     """
+    env = StreamExecutionEnvironment.get_execution_environment()
+    env.enable_checkpointing(5000)
+    env.get_checkpoint_config().set_checkpoint_timeout(60000)
+    env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
-    s3 = s3fs.S3FileSystem(
-        key=os.environ['AWS_ACCESS_KEY_ID'],
-        secret=os.environ['AWS_SECRET_ACCESS_KEY'],
-        client_kwargs={'region_name': os.environ['AWS_REGION']}
-    )
+    tbl_env = StreamTableEnvironment.create(env, environment_settings=EnvironmentSettings.new_instance().in_streaming_mode().build())
 
-    # Load the catalog
+
+    # Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
+    # using the HadoopCatalog to store metadata in AWS S3 (i.e., s3a://), a Hadoop- 
+    # compatible filesystem.  Then execute the Flink SQL statement to register the
+    # Iceberg catalog
     catalog_name = "apache_kickstarter"
     bucket_name = args.s3_bucket_name.replace("_", "-") # To follow S3 bucket naming convention, replace underscores with hyphens if exist
-    catalog = load_catalog(catalog_name, {
-        'type': 'hadoop',
-        'warehouse': f"'s3a://{bucket_name}/warehouse'",
-        'fs': s3  # Pass the S3 filesystem
-    })
+    try:
+        if not catalog_exist(tbl_env, catalog_name):
+            tbl_env.execute_sql(f"""
+                CREATE CATALOG {catalog_name} WITH (
+                    'type' = 'iceberg',
+                    'catalog-type' = 'in-memory',            
+                    'warehouse' = 's3a://{bucket_name}/warehouse'
+                    );
+            """)
+        else:
+            print(f"The {catalog_name} catalog already exists.")
+    except Exception as e:
+        print(f"A critical error occurred to during the processing of the catalog because {e}")
+        exit(1)
 
-    # Load the table
-    table = catalog.load_table('apache_kickstarter.flight')
+    # Use the Iceberg catalog
+    tbl_env.use_catalog(catalog_name)
 
-    # Initialize a list to collect DataFrames
-    dataframes = []
+    # Access the Iceberg catalog to create the airlines database and the Iceberg tables
+    catalog = tbl_env.get_catalog(catalog_name)
 
-    # Scan and read data
-    scan = table.scan()
-    for task in scan.plan_files():
-        # Project the table and convert to a Pandas DataFrame
-        projected = project_table(task, table.schema)
-        dataframes.append(projected.to_pandas())
+    # Print the current catalog name
+    print(f"Current catalog: {tbl_env.get_current_catalog()}")
+    print(tbl_env.list_catalogs())
 
-    # Combine all DataFrames into one
-    df = pd.concat(dataframes, ignore_index=True)
+    # Check if the database exists.  If not, create it
+    database_name = "airlines"
+    tbl_env.use_database(database_name)
+    
 
-    # Display the DataFrame in Streamlit
-    st.dataframe(df)
+    # Print the current database name
+    print(f"Current database: {tbl_env.get_current_database()}")
+    print(tbl_env.list_databases())
+
+    flight_table_path = ObjectPath(database_name, "skyone_airline")
+
+    print(f"Flight table path: {flight_table_path}")
+    print(tbl_env.list_tables())
+
+    print(catalog.get_table(flight_table_path).get_detailed_description())
+    print(catalog.get_table_statistics(flight_table_path).get_row_count())
+    print(catalog.get_table_statistics(flight_table_path).get_field_count())
+
 
 
 if __name__ == "__main__":

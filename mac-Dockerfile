@@ -7,6 +7,7 @@ ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
 ARG AWS_REGION
 ARG AWS_S3_BUCKET
+ARG AWS_SESSION_TOKEN
 
 # Map build argument(s) to container environment variable(s)
 ENV FLINK_LANGUAGE=${FLINK_LANGUAGE}
@@ -14,6 +15,7 @@ ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 ENV AWS_REGION=${AWS_REGION}
 ENV AWS_S3_BUCKET=${AWS_S3_BUCKET}
+ENV AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
 
 # Create/set version number container environment variable(s)
 ENV APACHE_FLINK_VERSION=1.19
@@ -108,12 +110,16 @@ RUN pipenv --python ${PYTHON_VERSION} install s3fs
 RUN pipenv --python ${PYTHON_VERSION} install google-api-python-client
 RUN pipenv --python ${PYTHON_VERSION} install pyflink
 RUN pipenv --python ${PYTHON_VERSION} install py4j==0.10.9.7
+RUN pipenv --python ${PYTHON_VERSION} install streamlit
 
 # This action forces the installation of the latest version of the AWS SDK and PyFlink
 RUN pip install boto3
 RUN pip install apache-flink==${APACHE_FLINK_VERSION_WITH_PATCH}
 RUN pip install pyflink
 RUN pip install google-api-python-client
+RUN pip install s3fs
+RUN pip install pyiceberg
+RUN pip install streamlit
 
 # Install AWS CLI to interact with AWS services for debugging services
 RUN pip --no-cache-dir install --upgrade awscli
@@ -209,6 +215,18 @@ RUN echo 'catalogs:' > $FLINK_CONF_DIR/sql-client-defaults.yaml && \
     echo "    fs.s3a.endpoint: s3.${AWS_REGION}.amazonaws.com" >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
     echo "    fs.s3a.access.key: ${AWS_ACCESS_KEY_ID}" >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
     echo "    fs.s3a.secret.key: ${AWS_SECRET_ACCESS_KEY}" >> $FLINK_CONF_DIR/sql-client-defaults.yaml
+
+# Create PyIceberg Catalog
+RUN echo 'catalog:' > $HOME/.pyiceberg.yaml && \
+echo '  apache_kickstarter:' >> $HOME/.pyiceberg.yaml && \
+echo '    type: S3' >> $HOME/.pyiceberg.yaml && \
+echo "    uri: https://${AWS_S3_BUCKET}/warehouse/airlines/flight/metadata" >> $HOME/.pyiceberg.yaml && \
+echo "    warehouse: s3a://${AWS_S3_BUCKET}/warehouse" >> $HOME/.pyiceberg.yaml && \
+echo "    s3.endpoint: s3.${AWS_REGION}.amazonaws.com" >> $HOME/.pyiceberg.yaml && \
+echo "    s3.region: ${AWS_REGION}" >> $HOME/.pyiceberg.yaml && \
+echo "    s3.access-key-id: ${AWS_ACCESS_KEY_ID}" >> $HOME/.pyiceberg.yaml && \
+echo "    s3.secret-access-key: ${AWS_SECRET_ACCESS_KEY}" >> $HOME/.pyiceberg.yaml && \
+echo "    s3.session-token: ${AWS_SESSION_TOKEN}" >> $HOME/.pyiceberg.yaml
 
 # Set the entrypoint to Flink's entrypoint script
 ENTRYPOINT ["/docker-entrypoint.sh"]
