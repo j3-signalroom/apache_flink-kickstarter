@@ -43,6 +43,11 @@ public class FlyerStatsApp {
 	 * decide whether to retry the task execution.
 	 */
     public static void main(String[] args) throws Exception {
+        /*
+         * Retrieve the value(s) from the command line argument(s)
+         */
+        String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
+
         // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
@@ -53,7 +58,7 @@ public class FlyerStatsApp {
 		 */
         DataStream<Properties> dataStreamConsumerProperties = 
 			env.fromData(new Properties())
-			   .map(new KafkaClientPropertiesLookup(true, Common.getAppOptions(args)))
+			   .map(new KafkaClientPropertiesLookup(true, serviceAccountUser))
 			   .name("kafka_consumer_properties");
 		Properties consumerProperties = new Properties();
 
@@ -86,7 +91,7 @@ public class FlyerStatsApp {
 		 */
         DataStream<Properties> dataStreamProducerProperties = 
 			env.fromData(new Properties())
-			   .map(new KafkaClientPropertiesLookup(false, Common.getAppOptions(args)))
+			   .map(new KafkaClientPropertiesLookup(false, serviceAccountUser))
 			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
 

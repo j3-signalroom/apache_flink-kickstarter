@@ -139,6 +139,54 @@ resource "aws_s3_object" "warehouse_airlines" {
   depends_on = [ aws_s3_object.warehouse ]
 }
 
+resource "aws_iam_role" "glue_role" {
+  name = "glue_service_role"
+
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "glue.amazonaws.com"
+        },
+        "Action": "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "glue_s3_access_policy" {
+  name = "GlueS3AccessPolicy"
+
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ],
+        "Resource": [
+          aws_s3_bucket.iceberg_bucket.arn,
+          "${aws_s3_bucket.iceberg_bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "glue_policy_attachment" {
+  role       = aws_iam_role.glue_role.name
+  policy_arn = aws_iam_policy.glue_s3_access_policy.arn
+}
+
+resource "aws_glue_catalog_database" "iceberg_db" {
+  name = "iceberg_database"
+}
+
 data "aws_secretsmanager_secret" "admin_public_keys" {
   name = "/snowflake_admin_credentials"
 }

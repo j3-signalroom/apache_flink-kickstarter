@@ -8,39 +8,17 @@
  */
 package kickstarter;
 
-import java.util.*;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
+import java.util.*;
 
 
 public class Common {
-    private static final String OPT_SERVICE_ACCOUNT_USER = "--service-account-user";
-
-
-    /**
-     * This method Loops through the `args` parameter and checks for the `OPT_SERVICE_ACCOUNT_USER`
-     * option.
-     * 
-     * @param args list of strings passed to the main method.
-     * @return true if the flag is found, false otherwise.
-     */
-    public static String getAppOptions(final String[] args) {
-        String serviceAccountUser = "";
-        
-        // --- Loop through the args parameter and check for the `OPT_SERVICE_ACCOUNT_USER` option
-        Iterator <String> iterator = List.of(args).iterator();
-        while (iterator.hasNext()) {
-            String arg = iterator.next();
-			if(arg.equalsIgnoreCase(OPT_SERVICE_ACCOUNT_USER)) {
-                if(iterator.hasNext()) {
-                    serviceAccountUser = iterator.next();
-                }
-            }
-		}
-        return serviceAccountUser;
-    }
+    public static final String ARG_SERVICE_ACCOUNT_USER = "--service-account-user";
+    public static final String ARG_AWS_REGION = "--aws-region";
+    
 
     /**
      * @return returns a new instance of the Jackson ObjectMapper with the JavaTimeModule
@@ -49,6 +27,29 @@ public class Common {
 	public static ObjectMapper getMapper() {
 		return new ObjectMapper().registerModule(new JavaTimeModule());
 	}
+
+    /**
+     * This method Loops through the `args` parameter and checks for the argument.
+     * 
+     * @param args list of strings passed to the main method.
+     * @param argument the argument to check for.
+     * @return true if the flag is found, false otherwise.
+     */
+    public static String getAppArgumentValue(final String[] args, final String argument) {
+        String serviceAccountUser = "";
+        
+        // --- Loop through the args parameter and check for the argument
+        Iterator <String> iterator = List.of(args).iterator();
+        while (iterator.hasNext()) {
+            String arg = iterator.next();
+			if(arg.equalsIgnoreCase(argument)) {
+                if(iterator.hasNext()) {
+                    serviceAccountUser = iterator.next();
+                }
+            }
+		}
+        return serviceAccountUser;
+    }
 
     /**
      * This method checks if a catalog exists in the TableEnvironment.

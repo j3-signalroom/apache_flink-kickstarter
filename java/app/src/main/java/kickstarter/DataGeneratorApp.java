@@ -8,6 +8,7 @@
 package kickstarter;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
 import org.apache.flink.connector.base.DeliveryGuarantee;
@@ -18,10 +19,15 @@ import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.*;
 import org.apache.flink.table.api.*;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.flink.table.catalog.CatalogDatabaseImpl;
-import org.apache.iceberg.flink.FlinkCatalog;
+import org.apache.flink.table.data.*;
+import org.apache.flink.table.types.logical.*;
+import org.apache.flink.types.*;
+import org.apache.flink.table.catalog.*;
+import org.apache.iceberg.catalog.*;
+import org.apache.iceberg.flink.*;
+import org.apache.iceberg.flink.sink.FlinkSink;
+import org.apache.hadoop.conf.Configuration;
 import java.util.*;
-import java.util.stream.StreamSupport;
 
 import kickstarter.model.*;
 
@@ -44,6 +50,12 @@ public class DataGeneratorApp {
 	 * decide whether to retry the task execution.
 	 */
 	public static void main(String[] args) throws Exception {
+        /*
+         * Retrieve the value(s) from the command line argument(s)
+         */
+        String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
+        String awsRegion = Common.getAppArgumentValue(args, Common.ARG_AWS_REGION);
+
 		// --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
@@ -76,7 +88,7 @@ public class DataGeneratorApp {
 		 */
         DataStream<Properties> dataStreamProducerProperties = 
 			env.fromData(new Properties())
-			   .map(new KafkaClientPropertiesLookup(false, Common.getAppOptions(args)))
+			   .map(new KafkaClientPropertiesLookup(false, serviceAccountUser))
 			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
 
@@ -109,31 +121,11 @@ public class DataGeneratorApp {
                 Types.POJO(AirlineData.class)
             );
 
-        // --- Define the schema for the in-memory table
-        Schema schema = 
-            Schema.newBuilder()
-                   .column("email_address", DataTypes.STRING())
-                   .column("departure_time", DataTypes.TIMESTAMP(0))
-                   .column("departure_airport_code", DataTypes.STRING())
-                   .column("arrival_time", DataTypes.TIMESTAMP(0))
-                   .column("arrival_airport_code", DataTypes.STRING())
-                   .column("flight_duration", DataTypes.BIGINT())
-                   .column("flight_number", DataTypes.STRING())
-                   .column("confirmation_code", DataTypes.STRING())
-                   .column("ticket_price", DataTypes.DECIMAL(10, 2))
-                   .column("aircraft", DataTypes.STRING())
-                   .column("booking_agency_email", DataTypes.STRING())
-                   .build();
-
         /*
          * Sets up a Flink POJO source to consume data
          */
         DataStream<AirlineData> skyOneStream = 
             env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
-
-        // --- Convert DataStream to Table
-        Table skyOneTable = tblEnv.fromDataStream(skyOneStream, schema);
-        tblEnv.createTemporaryView("SkyOneTable", skyOneTable);
 
         /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone` with the
@@ -176,11 +168,6 @@ public class DataGeneratorApp {
         DataStream<AirlineData> sunsetStream = 
             env.fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
-
-        // --- Convert DataStream to Table
-        Table sunsetTable = tblEnv.fromDataStream(sunsetStream, schema);
-        tblEnv.createTemporaryView("SunsetTable", sunsetTable);
-
         /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset` with the
          * specified serializer
@@ -208,54 +195,40 @@ public class DataGeneratorApp {
          */
         sunsetStream.sinkTo(sunsetSink).name("sunset_sink");
 
-        /*
-         * Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
-         * using the HadoopCatalog to store metadata in AWS S3 (i.e., s3a://), a Hadoop- 
-         * compatible filesystem.  Then execute the Flink SQL statement to register the
-         * Iceberg catalog 
-         */
         String catalogName = "apache_kickstarter";
-        String bucketName = Common.getAppOptions(args).replace("_", "-");  // --- To follow S3 bucket naming convention, replace underscores with hyphens if exist
-        try {
-            if(!Common.isCatalogExist(tblEnv, catalogName)) {
-                /*
-                 * Execute the CREATE CATALOG Flink SQL statement to register the Iceberg catalog.
-                 */
-                tblEnv.executeSql(
-                    "CREATE CATALOG " + catalogName + " WITH (" 
-                        + "'type' = 'iceberg',"
-                        + "'catalog-type' = 'hadoop',"
-                        + "'warehouse' = 's3a://" + bucketName + "/warehouse',"
-                        + "'property-version' = '1',"
-                        + "'io-impl' = 'org.apache.iceberg.hadoop.HadoopFileIO'"
-                        + ");"
-                );
-            } else {
-                System.out.println("The " + catalogName + " catalog already exists.");
-            }
-        } catch(final Exception e) {
-            System.out.println("A critical error occurred to during the processing of the catalog because " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-        }
+        String bucketName = serviceAccountUser.replace("_", "-");  // --- To follow S3 bucket naming convention, replace underscores with hyphens if exist
+        String warehousePath = "s3://" + bucketName + "/warehouse";
+        String catalogImpl = "org.apache.iceberg.aws.glue.GlueCatalog";
+        String ioImpl = "org.apache.iceberg.aws.s3.S3FileIO";
+        String databaseName = "airlines";
 
-        // --- Use the Iceberg catalog
+        // --- Configure the AWS Glue Catalog Properties
+        Map<String, String> catalogProperties = new HashMap<>();
+        catalogProperties.put("type", "iceberg");
+        catalogProperties.put("warehouse", warehousePath);
+        catalogProperties.put("catalog-impl", catalogImpl);
+        catalogProperties.put("io-impl", ioImpl);
+        catalogProperties.put("glue.skip-archive", "true");
+        catalogProperties.put("glue.region", awsRegion);
+        
+        // --- Use the CatalogLoader since an external metastore is used (AWS Glue Catalog)
+        CatalogLoader catalogLoader = CatalogLoader.custom(catalogName, catalogProperties,  new Configuration(false), catalogImpl);
+
+        // --- Describes and configures the catalog for the Table API and SQL
+        CatalogDescriptor catalogDescriptor = CatalogDescriptor.of(catalogName, org.apache.flink.configuration.Configuration.fromMap(catalogProperties));
+
+        // --- Create the catalog, use it, and get the instantiated catalog
+        tblEnv.createCatalog(catalogName, catalogDescriptor);
         tblEnv.useCatalog(catalogName);
+        org.apache.flink.table.catalog.Catalog catalog = tblEnv.getCatalog("apache_kickstarter").orElseThrow(() -> new RuntimeException("Catalog not found"));
 
         // --- Print the current catalog name
         System.out.println("Current catalog: " + tblEnv.getCurrentCatalog());
 
         // --- Check if the database exists.  If not, create it
-        String databaseName = "airlines";
-
-        // Check if the namespace exists, if not, create it
         try {
-            org.apache.flink.table.catalog.Catalog catalog = tblEnv.getCatalog("apache_kickstarter").orElseThrow(() -> new RuntimeException("Catalog not found"));
-            if (catalog instanceof FlinkCatalog) {
-                FlinkCatalog flinkCatalog = (FlinkCatalog) catalog;
-                if (!flinkCatalog.databaseExists(databaseName)) {
-                    flinkCatalog.createDatabase(databaseName, new CatalogDatabaseImpl(new HashMap<>(), "The Airlines flight data database."), false);
-                }
+            if (!catalog.databaseExists(databaseName)) {
+                catalog.createDatabase(databaseName, new CatalogDatabaseImpl(new HashMap<>(), "The Airlines flight data database."), false);
             }
             tblEnv.useDatabase(databaseName);
         } catch (Exception e) {
@@ -267,34 +240,90 @@ public class DataGeneratorApp {
         // --- Print the current database name
         System.out.println("Current database: " + tblEnv.getCurrentDatabase());
 
-        // --- Set up the arrays for the table names and tables
-        String tableNames[] = {"skyone_airline", "sunset_airline"};
-        Table tables[] = {skyOneTable, sunsetTable};
-        int tableIndex = -1;
+        // --- Define the RowType for the RowData
+        RowType rowType = RowType.of(
+            new LogicalType[] {
+                DataTypes.STRING().getLogicalType(),
+                DataTypes.STRING().getLogicalType(),
+                DataTypes.STRING().getLogicalType(),
+                DataTypes.STRING().getLogicalType(),
+                DataTypes.STRING().getLogicalType(),
+                DataTypes.BIGINT().getLogicalType(),
+                DataTypes.STRING().getLogicalType(),
+                DataTypes.STRING().getLogicalType(),
+                DataTypes.DECIMAL(10, 2).getLogicalType(),
+                DataTypes.STRING().getLogicalType(),
+                DataTypes.STRING().getLogicalType()
+            },
+            new String[] {
+                "email_address",
+                "departure_time",
+                "departure_airport_code",
+                "arrival_time",
+                "arrival_airport_code",
+                "flight_duration",
+                "flight_number",
+                "confirmation_code",
+                "ticket_price",
+                "aircraft",
+                "booking_agency_email"
+            }
+        );
+        
+        SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "skyone_airline", skyOneStream);
+        SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "sunset_airline", sunsetStream);
 
-        /*
-         * Check if the table exists.  If not, create it.  Then insert the data into
-         * the table(s).
-         */
-        for (String tableName : tableNames) {
-            tableIndex++;
+        try {
+            // --- Execute the Flink job graph (DAG)
+            env.execute("DataGeneratorApp");
+        } catch (Exception e) {
+            System.out.println("The Flink App stopped early due to the following: " + e.getMessage());
+            e.printStackTrace();
+        }
+	}
 
-            // --- Create the table path
-            String tablePath = databaseName + "." + tableName;
+    /**
+     * This method is used to sink the data from the input data stream into the iceberg table.
+     * 
+     * @param tblEnv The StreamTableEnvironment.
+     * @param catalog The Catalog. 
+     * @param catalogLoader The CatalogLoader.
+     * @param databaseName  The name of the database.
+     * @param fieldCount The number of fields in the input data stream.
+     * @param tableName The name of the table. 
+     * @param airlineDataStream The input data stream.
+     */
+    private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineData> airlineDataStream) {
+        // --- Convert DataStream<AirlineData> to DataStream<RowData>
+        DataStream<RowData> skyOneRowData = airlineDataStream.map(new MapFunction<AirlineData, RowData>() {
+            @Override
+            public RowData map(AirlineData airlineData) throws Exception {
+                GenericRowData rowData = new GenericRowData(RowKind.INSERT, fieldCount);
+                rowData.setField(0, StringData.fromString(airlineData.getEmailAddress()));
+                rowData.setField(1, StringData.fromString(airlineData.getDepartureTime()));
+                rowData.setField(2, StringData.fromString(airlineData.getDepartureAirportCode()));
+                rowData.setField(3, StringData.fromString(airlineData.getArrivalTime()));
+                rowData.setField(4, StringData.fromString(airlineData.getArrivalAirportCode()));
+                rowData.setField(5, airlineData.getFlightDuration());
+                rowData.setField(6, StringData.fromString(airlineData.getFlightNumber()));
+                rowData.setField(7, StringData.fromString(airlineData.getConfirmationCode()));
+                rowData.setField(8, DecimalData.fromBigDecimal(airlineData.getTicketPrice(), 10, 2));
+                rowData.setField(9, StringData.fromString(airlineData.getAircraft()));
+                rowData.setField(10, StringData.fromString(airlineData.getBookingAgencyEmail()));
+                return rowData;
+            }
+        });
+        
+        TableIdentifier tableIdentifier = TableIdentifier.of(databaseName, tableName);
 
-            try {
-                TableResult result = tblEnv.executeSql("SHOW TABLES IN " + databaseName);
-                @SuppressWarnings("null")
-                boolean tableExists = StreamSupport.stream(Spliterators
-                                                           .spliteratorUnknownSize(result.collect(), Spliterator.ORDERED), false)
-                                                           .anyMatch(row -> row.getField(0).equals(tableName));
-                if(!tableExists) {
-                    tblEnv.executeSql(
-                        "CREATE TABLE " + tablePath + " ("
+        // Create the table if it does not exist
+        if (!catalog.tableExists(ObjectPath.fromString(databaseName + "." + tableName))) {
+            tblEnv.executeSql(
+                        "CREATE TABLE " + databaseName + "." + tableName + " ("
                             + "email_address STRING, "
-                            + "departure_time TIMESTAMP(0), "
+                            + "departure_time STRING, "
                             + "departure_airport_code STRING, "
-                            + "arrival_time TIMESTAMP(0), "
+                            + "arrival_time STRING, "
                             + "arrival_airport_code STRING, "
                             + "flight_duration BIGINT,"
                             + "flight_number STRING, "
@@ -308,27 +337,16 @@ public class DataGeneratorApp {
                                 + "'partitioning' = 'arrival_airport_code',"
                                 + "'format-version' = '2');"
                     );
-                } else {
-                    System.out.println("The " + tablePath + " table already exists.");
-                }
-            } catch(final Exception e) {
-                System.out.println("A critical error occurred to during the processing of the table because " + e.getMessage());
-                e.printStackTrace();
-                System.exit(1);
-            }
-
-            /*
-             * Convert datastream into table and then insert data into physical table
-             */
-            tables[tableIndex].executeInsert(tablePath);
         }
 
-        try {
-            // --- Execute the Flink job graph (DAG)
-            env.execute("DataGeneratorApp");
-        } catch (Exception e) {
-            System.out.println("The Flink App stopped early due to the following: " + e.getMessage());
-            e.printStackTrace();
-        }
-	}
+        // ---
+        TableLoader tableLoaderSkyOne = TableLoader.fromCatalog(catalogLoader, tableIdentifier);
+
+        FlinkSink
+            .forRowData(skyOneRowData)
+            .tableLoader(tableLoaderSkyOne)
+            .upsert(true)
+            .equalityFieldColumns(Arrays.asList("email_address", "departure_airport_code", "arrival_airport_code"))
+            .append();
+    }
 }

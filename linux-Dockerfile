@@ -7,6 +7,7 @@ ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
 ARG AWS_REGION
 ARG AWS_S3_BUCKET
+ARG AWS_SESSION_TOKEN
 
 # Map build argument(s) to container environment variable(s)
 ENV FLINK_LANGUAGE=${FLINK_LANGUAGE}
@@ -14,6 +15,7 @@ ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 ENV AWS_REGION=${AWS_REGION}
 ENV AWS_S3_BUCKET=${AWS_S3_BUCKET}
+ENV AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
 
 # Create/set version number container environment variable(s)
 ENV APACHE_FLINK_VERSION=1.19
@@ -108,12 +110,16 @@ RUN pipenv --python ${PYTHON_VERSION} install s3fs
 RUN pipenv --python ${PYTHON_VERSION} install google-api-python-client
 RUN pipenv --python ${PYTHON_VERSION} install pyflink
 RUN pipenv --python ${PYTHON_VERSION} install py4j==0.10.9.7
+RUN pipenv --python ${PYTHON_VERSION} install streamlit
 
 # This action forces the installation of the latest version of the AWS SDK and PyFlink
 RUN pip install boto3
 RUN pip install apache-flink==${APACHE_FLINK_VERSION_WITH_PATCH}
 RUN pip install pyflink
 RUN pip install google-api-python-client
+RUN pip install s3fs
+RUN pip install pyiceberg
+RUN pip install streamlit
 
 # Install AWS CLI to interact with AWS services for debugging services
 RUN pip --no-cache-dir install --upgrade awscli
@@ -123,7 +129,6 @@ RUN apt update && apt install -y nano
 
 # Download and install the Flink libraries and plugins for use when writing Java-based Flink Apps
 RUN if [ "$FLINK_LANGUAGE" = "java" ]; then \
-    curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-flink-runtime-${APACHE_FLINK_VERSION}/${ICEBERG_VERSION}/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}flink/flink-sql-connector-hive-3.1.3_2.12/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-sql-connector-hive-3.1.3_2.12-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-sql-connector-hive-3.1.3_2.12-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
     curl -L "${MAVEN_ROOT_URL}flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
     curl -L "${MAVEN_ROOT_URL}hadoop/hadoop-common/${HADOOP_VERSION}/hadoop-common-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-common-${HADOOP_VERSION}.jar" && \
@@ -136,79 +141,6 @@ ENV CLASSPATH="${FLINK_LIB_DIR}*"
 
 # Set JAVA_HOME
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
-
-# Create core-site.xml
-RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $FLINK_CONF_DIR/core-site.xml && \
-    echo '<configuration>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    <!-- S3A Filesystem Implementation -->' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.impl</name>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    <!-- AWS Credentials (using environment variables) -->' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.access.key</name>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo "        <value>${AWS_ACCESS_KEY_ID}</value>" >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.secret.key</name>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo "        <value>${AWS_SECRET_ACCESS_KEY}</value>" >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    <!-- S3 Endpoint (optional) -->' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.endpoint</name>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo "        <value>s3.${AWS_REGION}.amazonaws.com</value>" >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    <!-- Path Style Access -->' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.path.style.access</name>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '        <value>false</value>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    <!-- Enable SSL (HTTPS) -->' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.connection.ssl.enabled</name>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '        <value>true</value>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.aws.credentials.provider</name>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '        <value>org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider</value>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    <property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '        <name>fs.s3a.connection.maximum</name>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '        <value>200</value>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '    </property>' >> $FLINK_CONF_DIR/core-site.xml && \
-    echo '</configuration>' >> $FLINK_CONF_DIR/core-site.xml
-
-# Create hdfs-site.xml
-RUN echo '<?xml version="1.0" encoding="UTF-8"?>' > $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '<configuration>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '    <!-- Replication factor for HDFS files -->' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '    <property>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '        <name>dfs.replication</name>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '        <value>1</value>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '    </property>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '    <!-- Block size for HDFS files -->' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '    <property>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '        <name>dfs.blocksize</name>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '        <value>134217728</value>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '    </property>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '    <!-- Permissions for HDFS files -->' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '    <property>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '        <name>dfs.permissions</name>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '        <value>false</value>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '    </property>' >> $FLINK_CONF_DIR/hdfs-site.xml && \
-    echo '</configuration>' >> $FLINK_CONF_DIR/hdfs-site.xml
-
-# Create SQL Client Defaults
-RUN echo 'catalogs:' > $FLINK_CONF_DIR/sql-client-defaults.yaml && \
-    echo '  apache_kickstarter:' >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
-    echo '    type: iceberg' >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
-    echo '    property-version: 1' >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
-    echo '    catalog-type: hadoop' >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
-    echo "    warehouse: s3a://${AWS_S3_BUCKET}/warehouse" >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
-    echo "    fs.s3a.endpoint: s3.${AWS_REGION}.amazonaws.com" >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
-    echo "    fs.s3a.access.key: ${AWS_ACCESS_KEY_ID}" >> $FLINK_CONF_DIR/sql-client-defaults.yaml && \
-    echo "    fs.s3a.secret.key: ${AWS_SECRET_ACCESS_KEY}" >> $FLINK_CONF_DIR/sql-client-defaults.yaml
 
 # Set the entrypoint to Flink's entrypoint script
 CMD ["./bin/start-cluster.sh"]
