@@ -269,11 +269,35 @@ public class DataGeneratorApp {
             }
         );
         
+        SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "skyone_airline", skyOneStream);
+        SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "sunset_airline", sunsetStream);
+
+        try {
+            // --- Execute the Flink job graph (DAG)
+            env.execute("DataGeneratorApp");
+        } catch (Exception e) {
+            System.out.println("The Flink App stopped early due to the following: " + e.getMessage());
+            e.printStackTrace();
+        }
+	}
+
+    /**
+     * This method is used to sink the data from the input data stream into the iceberg table.
+     * 
+     * @param tblEnv The StreamTableEnvironment.
+     * @param catalog The Catalog. 
+     * @param catalogLoader The CatalogLoader.
+     * @param databaseName  The name of the database.
+     * @param fieldCount The number of fields in the input data stream.
+     * @param tableName The name of the table. 
+     * @param airlineDataStream The input data stream.
+     */
+    private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineData> airlineDataStream) {
         // --- Convert DataStream<AirlineData> to DataStream<RowData>
-        DataStream<RowData> skyOneRowData = skyOneStream.map(new MapFunction<AirlineData, RowData>() {
+        DataStream<RowData> skyOneRowData = airlineDataStream.map(new MapFunction<AirlineData, RowData>() {
             @Override
             public RowData map(AirlineData airlineData) throws Exception {
-                GenericRowData rowData = new GenericRowData(RowKind.INSERT, rowType.getFieldCount());
+                GenericRowData rowData = new GenericRowData(RowKind.INSERT, fieldCount);
                 rowData.setField(0, StringData.fromString(airlineData.getEmailAddress()));
                 rowData.setField(1, StringData.fromString(airlineData.getDepartureTime()));
                 rowData.setField(2, StringData.fromString(airlineData.getDepartureAirportCode()));
@@ -289,12 +313,12 @@ public class DataGeneratorApp {
             }
         });
         
-        TableIdentifier tableIdentifier = TableIdentifier.of(databaseName, "skyone_airline");
+        TableIdentifier tableIdentifier = TableIdentifier.of(databaseName, tableName);
 
         // Create the table if it does not exist
-        if (!catalog.tableExists(ObjectPath.fromString(databaseName + "." + "skyone_airline"))) {
+        if (!catalog.tableExists(ObjectPath.fromString(databaseName + "." + tableName))) {
             tblEnv.executeSql(
-                        "CREATE TABLE " + databaseName + "." + "skyone_airline" + " ("
+                        "CREATE TABLE " + databaseName + "." + tableName + " ("
                             + "email_address STRING, "
                             + "departure_time STRING, "
                             + "departure_airport_code STRING, "
@@ -323,67 +347,5 @@ public class DataGeneratorApp {
             .upsert(true)
             .equalityFieldColumns(Arrays.asList("email_address", "departure_airport_code", "arrival_airport_code"))
             .append();
-
-        // Create the table if it does not exist
-        if (!catalog.tableExists(ObjectPath.fromString(databaseName + "." + "sunset_airline"))) {
-            tblEnv.executeSql(
-                        "CREATE TABLE " + databaseName + "." + "sunset_airline" + " ("
-                            + "email_address STRING, "
-                            + "departure_time STRING, "
-                            + "departure_airport_code STRING, "
-                            + "arrival_time STRING, "
-                            + "arrival_airport_code STRING, "
-                            + "flight_duration BIGINT,"
-                            + "flight_number STRING, "
-                            + "confirmation_code STRING, "
-                            + "ticket_price DECIMAL(10,2), "
-                            + "aircraft STRING, "
-                            + "booking_agency_email STRING) "
-                            + "WITH ("
-                                + "'write.format.default' = 'parquet',"
-                                + "'write.target-file-size-bytes' = '134217728',"
-                                + "'partitioning' = 'arrival_airport_code',"
-                                + "'format-version' = '2');"
-                    );
-        }
-
-        // --- Convert DataStream<AirlineData> to DataStream<RowData>
-        DataStream<RowData> sunsetRowData = sunsetStream.map(new MapFunction<AirlineData, RowData>() {
-            @Override
-            public RowData map(AirlineData airlineData) throws Exception {
-                GenericRowData rowData = new GenericRowData(RowKind.INSERT, rowType.getFieldCount());
-                rowData.setField(0, StringData.fromString(airlineData.getEmailAddress()));
-                rowData.setField(1, StringData.fromString(airlineData.getDepartureTime()));
-                rowData.setField(2, StringData.fromString(airlineData.getDepartureAirportCode()));
-                rowData.setField(3, StringData.fromString(airlineData.getArrivalTime()));
-                rowData.setField(4, StringData.fromString(airlineData.getArrivalAirportCode()));
-                rowData.setField(5, airlineData.getFlightDuration());
-                rowData.setField(6, StringData.fromString(airlineData.getFlightNumber()));
-                rowData.setField(7, StringData.fromString(airlineData.getConfirmationCode()));
-                rowData.setField(8, DecimalData.fromBigDecimal(airlineData.getTicketPrice(), 10, 2));
-                rowData.setField(9, StringData.fromString(airlineData.getAircraft()));
-                rowData.setField(10, StringData.fromString(airlineData.getBookingAgencyEmail()));
-                return rowData;
-            }
-        });
-        
-        // ---
-        TableLoader tableLoaderSunset = TableLoader.fromCatalog(catalogLoader, TableIdentifier.of(databaseName, "sunset_airline"));
-
-        // --- Initialize a FlinkSink.Builder to export the data from input data stream with RowDatas into iceberg table
-        FlinkSink
-            .forRowData(sunsetRowData)
-            .tableLoader(tableLoaderSunset)
-            .upsert(true)
-            .equalityFieldColumns(Arrays.asList("email_address", "departure_airport_code", "arrival_airport_code"))
-            .append();
-
-        try {
-            // --- Execute the Flink job graph (DAG)
-            env.execute("DataGeneratorApp");
-        } catch (Exception e) {
-            System.out.println("The Flink App stopped early due to the following: " + e.getMessage());
-            e.printStackTrace();
-        }
-	}
+    }
 }

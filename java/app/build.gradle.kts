@@ -48,7 +48,9 @@ dependencies {
     runtimeOnly("org.apache.iceberg:iceberg-core:${icebergVersion}")
     runtimeOnly("org.apache.iceberg:iceberg-aws:${icebergVersion}")
     implementation("org.apache.iceberg:iceberg-snowflake:${icebergVersion}")
-    implementation("org.apache.iceberg:iceberg-flink-runtime-1.19:${icebergVersion}")
+    implementation("org.apache.iceberg:iceberg-flink-runtime-1.19:$icebergVersion") {
+        exclude(group = "io.dropwizard.metrics", module = "metrics-core")
+    }
     implementation("net.snowflake:snowflake-jdbc:3.19.0")
     
     testImplementation("org.apache.flink:flink-test-utils:${flinkVersion}")
