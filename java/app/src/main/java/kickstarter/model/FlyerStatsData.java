@@ -8,12 +8,14 @@
 package kickstarter.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.*;
+
+import java.io.*;
 import java.time.*;
 import java.time.format.*;
 import java.util.*;
 
 
-public class FlyerStatsData {
+public class FlyerStatsData implements Serializable {
     @JsonProperty("email_address")
     private String email_address;
 

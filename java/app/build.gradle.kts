@@ -15,13 +15,14 @@ repositories {
 }
 
 // --- Dependency version numbers
-val flinkVersion: String = "1.20.0"
+val flinkVersion: String = "1.19.1"
 val kafkaVersion: String = "3.7.0"
 val junitVersion: String = "5.10.0"
-val awssdkVersion: String = "2.26.29"
+val awssdkVersion: String = "2.27.14"
 var icebergVersion: String = "1.6.1"
 
 dependencies {
+    implementation("org.apache.hadoop:hadoop-common:3.3.6")
     implementation("org.apache.kafka:kafka-clients:${kafkaVersion}")
     implementation("org.apache.flink:flink-java:${flinkVersion}")
     compileOnly("org.apache.flink:flink-streaming-java:${flinkVersion}")
@@ -33,14 +34,19 @@ dependencies {
     implementation("org.apache.flink:flink-connector-kafka:3.2.0-1.19")
     implementation("org.apache.flink:flink-connector-datagen:${flinkVersion}")
     implementation("org.apache.flink:flink-json:${flinkVersion}")
+    compileOnly("org.apache.flink:flink-s3-fs-hadoop:${flinkVersion}")
     implementation("org.slf4j:slf4j-log4j12:2.0.7")
     implementation("software.amazon.awssdk:secretsmanager:${awssdkVersion}")
     implementation("software.amazon.awssdk:ssm:${awssdkVersion}")
+    implementation("software.amazon.awssdk:glue:${awssdkVersion}")
+    implementation("software.amazon.awssdk:s3:${awssdkVersion}")
     implementation("org.json:json:20240303")
     runtimeOnly("org.apache.iceberg:iceberg-core:${icebergVersion}")
+    runtimeOnly("org.apache.iceberg:iceberg-aws:${icebergVersion}")
     implementation("org.apache.iceberg:iceberg-snowflake:${icebergVersion}")
-    implementation("net.snowflake:snowflake-jdbc:3.19.0")
     implementation("org.apache.iceberg:iceberg-flink-runtime-1.19:${icebergVersion}")
+    implementation("net.snowflake:snowflake-jdbc:3.19.0")
+    
     testImplementation("org.apache.flink:flink-test-utils:${flinkVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")

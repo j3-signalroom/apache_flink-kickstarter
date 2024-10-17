@@ -22,6 +22,7 @@
 package kickstarter;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.java.utils.MultipleParameterTool;
 import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
@@ -38,7 +39,7 @@ import kickstarter.model.*;
 
 public class FlightImporterApp {
     private static final Logger logger = LoggerFactory.getLogger(FlightImporterApp.class);
-
+    
 
 	/**
 	 * The main method in a Flink application serves as the entry point of the program, where
@@ -53,6 +54,12 @@ public class FlightImporterApp {
 	 */
     @SuppressWarnings("rawtypes")
     public static void main(String[] args) throws Exception {
+        /*
+         * Retrieve the arguments from the command line arguments
+         */
+        MultipleParameterTool params = MultipleParameterTool.fromArgs(args);
+        String serviceAccountUser = params.get(Common.ARG_SERVICE_ACCOUNT_USER);
+
         // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         
@@ -63,7 +70,7 @@ public class FlightImporterApp {
 		 */
         DataStream<Properties> dataStreamConsumerProperties = 
 			env.fromData(new Properties())
-			   .map(new KafkaClientPropertiesLookup(true, Common.getAppOptions(args)))
+			   .map(new KafkaClientPropertiesLookup(true, serviceAccountUser))
 			   .name("kafka_consumer_properties");
 		Properties consumerProperties = new Properties();
 
@@ -92,7 +99,7 @@ public class FlightImporterApp {
 		 */
         DataStream<Properties> dataStreamProducerProperties = 
 			env.fromData(new Properties())
-			   .map(new KafkaClientPropertiesLookup(false, Common.getAppOptions(args)))
+			   .map(new KafkaClientPropertiesLookup(false, serviceAccountUser))
 			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
 

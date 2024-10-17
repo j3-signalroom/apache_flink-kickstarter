@@ -1,11 +1,13 @@
 package kickstarter.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.*;
+
+import java.io.*;
 import java.math.*;
 import java.util.*;
 
 
-public class AirlineData {
+public class AirlineData implements Serializable {
     @JsonProperty("email_address")
     private String email_address;
 
