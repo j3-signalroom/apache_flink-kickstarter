@@ -274,17 +274,17 @@ public class DataGeneratorApp {
             @Override
             public RowData map(AirlineData airlineData) throws Exception {
                 GenericRowData rowData = new GenericRowData(RowKind.INSERT, rowType.getFieldCount());
-                rowData.setField(0, airlineData.getEmailAddress());
-                rowData.setField(1, airlineData.getDepartureTime());
-                rowData.setField(2, airlineData.getDepartureAirportCode());
-                rowData.setField(3, airlineData.getArrivalTime());
-                rowData.setField(4, airlineData.getArrivalAirportCode());
+                rowData.setField(0, StringData.fromString(airlineData.getEmailAddress()));
+                rowData.setField(1, StringData.fromString(airlineData.getDepartureTime()));
+                rowData.setField(2, StringData.fromString(airlineData.getDepartureAirportCode()));
+                rowData.setField(3, StringData.fromString(airlineData.getArrivalTime()));
+                rowData.setField(4, StringData.fromString(airlineData.getArrivalAirportCode()));
                 rowData.setField(5, airlineData.getFlightDuration());
-                rowData.setField(6, airlineData.getFlightNumber());
-                rowData.setField(7, airlineData.getConfirmationCode());
-                rowData.setField(8, airlineData.getTicketPrice());
-                rowData.setField(9, airlineData.getAircraft());
-                rowData.setField(10, airlineData.getBookingAgencyEmail());
+                rowData.setField(6, StringData.fromString(airlineData.getFlightNumber()));
+                rowData.setField(7, StringData.fromString(airlineData.getConfirmationCode()));
+                rowData.setField(8, DecimalData.fromBigDecimal(airlineData.getTicketPrice(), 10, 2));
+                rowData.setField(9, StringData.fromString(airlineData.getAircraft()));
+                rowData.setField(10, StringData.fromString(airlineData.getBookingAgencyEmail()));
                 return rowData;
             }
         });
@@ -352,17 +352,17 @@ public class DataGeneratorApp {
             @Override
             public RowData map(AirlineData airlineData) throws Exception {
                 GenericRowData rowData = new GenericRowData(RowKind.INSERT, rowType.getFieldCount());
-                rowData.setField(0, airlineData.getEmailAddress());
-                rowData.setField(1, airlineData.getDepartureTime());
-                rowData.setField(2, airlineData.getDepartureAirportCode());
-                rowData.setField(3, airlineData.getArrivalTime());
-                rowData.setField(4, airlineData.getArrivalAirportCode());
+                rowData.setField(0, StringData.fromString(airlineData.getEmailAddress()));
+                rowData.setField(1, StringData.fromString(airlineData.getDepartureTime()));
+                rowData.setField(2, StringData.fromString(airlineData.getDepartureAirportCode()));
+                rowData.setField(3, StringData.fromString(airlineData.getArrivalTime()));
+                rowData.setField(4, StringData.fromString(airlineData.getArrivalAirportCode()));
                 rowData.setField(5, airlineData.getFlightDuration());
-                rowData.setField(6, airlineData.getFlightNumber());
-                rowData.setField(7, airlineData.getConfirmationCode());
-                rowData.setField(8, airlineData.getTicketPrice());
-                rowData.setField(9, airlineData.getAircraft());
-                rowData.setField(10, airlineData.getBookingAgencyEmail());
+                rowData.setField(6, StringData.fromString(airlineData.getFlightNumber()));
+                rowData.setField(7, StringData.fromString(airlineData.getConfirmationCode()));
+                rowData.setField(8, DecimalData.fromBigDecimal(airlineData.getTicketPrice(), 10, 2));
+                rowData.setField(9, StringData.fromString(airlineData.getAircraft()));
+                rowData.setField(10, StringData.fromString(airlineData.getBookingAgencyEmail()));
                 return rowData;
             }
         });
