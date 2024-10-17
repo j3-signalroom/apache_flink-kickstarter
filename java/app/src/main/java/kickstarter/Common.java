@@ -12,6 +12,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMap
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
+import java.util.*;
 
 
 public class Common {
@@ -25,6 +26,29 @@ public class Common {
 	public static ObjectMapper getMapper() {
 		return new ObjectMapper().registerModule(new JavaTimeModule());
 	}
+
+    /**
+     * This method Loops through the `args` parameter and checks for the argument.
+     * 
+     * @param args list of strings passed to the main method.
+     * @param argument the argument to check for.
+     * @return true if the flag is found, false otherwise.
+     */
+    public static String getAppArgumentValue(final String[] args, final String argument) {
+        String serviceAccountUser = "";
+        
+        // --- Loop through the args parameter and check for the argument
+        Iterator <String> iterator = List.of(args).iterator();
+        while (iterator.hasNext()) {
+            String arg = iterator.next();
+			if(arg.equalsIgnoreCase(argument)) {
+                if(iterator.hasNext()) {
+                    serviceAccountUser = iterator.next();
+                }
+            }
+		}
+        return serviceAccountUser;
+    }
 
     /**
      * This method checks if a catalog exists in the TableEnvironment.

@@ -7,7 +7,6 @@
  */
 package kickstarter;
 
-import org.apache.flink.api.java.utils.MultipleParameterTool;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -24,13 +23,9 @@ import org.apache.flink.table.data.*;
 import org.apache.flink.table.types.logical.*;
 import org.apache.flink.types.*;
 import org.apache.flink.table.catalog.*;
-import org.apache.flink.table.catalog.Catalog;
 import org.apache.iceberg.catalog.*;
 import org.apache.iceberg.flink.*;
 import org.apache.iceberg.flink.sink.FlinkSink;
-import org.apache.iceberg.Schema;
-import org.apache.iceberg.types.Types.*;
-// import org.apache.iceberg.aws.glue.GlueCatalog;
 import org.apache.hadoop.conf.Configuration;
 import java.util.*;
 
@@ -56,15 +51,9 @@ public class DataGeneratorApp {
 	 */
 	public static void main(String[] args) throws Exception {
         /*
-         * Retrieve the arguments from the command line arguments
+         * Retrieve the value(s) from the command line argument(s)
          */
-        MultipleParameterTool params = MultipleParameterTool.fromArgs(args);
-        String serviceAccountUser = params.get(Common.ARG_SERVICE_ACCOUNT_USER);
-
-        System.out.println(args);   
-        System.out.println(serviceAccountUser);
-
-        serviceAccountUser = "flink_kickstarter";
+        String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
 
 		// --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -207,25 +196,27 @@ public class DataGeneratorApp {
 
         String catalogName = "apache_kickstarter";
         String bucketName = serviceAccountUser.replace("_", "-");  // --- To follow S3 bucket naming convention, replace underscores with hyphens if exist
-        String warehousePath = "s3a://" + bucketName + "/warehouse";
+        String warehousePath = "s3://" + bucketName + "/warehouse";
         String catalogImpl = "org.apache.iceberg.aws.glue.GlueCatalog";
         String ioImpl = "org.apache.iceberg.aws.s3.S3FileIO";
         String databaseName = "airlines";
 
         // --- Configure the AWS Glue Catalog Properties
         Map<String, String> catalogProperties = new HashMap<>();
+        catalogProperties.put("type", "iceberg");
         catalogProperties.put("warehouse", warehousePath);
         catalogProperties.put("catalog-impl", catalogImpl);
         catalogProperties.put("io-impl", ioImpl);
-        catalogProperties.put("catalog-type", "glue");
+        catalogProperties.put("glue.skip-archive", "true");
+        catalogProperties.put("glue.region", "us-east-1");
         
-        /*
-         * 
-         */
+        // --- Use the CatalogLoader since an external metastore is used (AWS Glue Catalog)
         CatalogLoader catalogLoader = CatalogLoader.custom(catalogName, catalogProperties,  new Configuration(false), catalogImpl);
 
-
+        // --- Describes and configures the catalog for the Table API and SQL
         CatalogDescriptor catalogDescriptor = CatalogDescriptor.of(catalogName, org.apache.flink.configuration.Configuration.fromMap(catalogProperties));
+
+        // --- Create the catalog, use it, and get the instantiated catalog
         tblEnv.createCatalog(catalogName, catalogDescriptor);
         tblEnv.useCatalog(catalogName);
         org.apache.flink.table.catalog.Catalog catalog = tblEnv.getCatalog("apache_kickstarter").orElseThrow(() -> new RuntimeException("Catalog not found"));
@@ -248,20 +239,6 @@ public class DataGeneratorApp {
         // --- Print the current database name
         System.out.println("Current database: " + tblEnv.getCurrentDatabase());
 
-        // --- Define the schema for the AirlineData
-        Schema schema = 
-            new Schema(NestedField.required(1, "email_address", org.apache.iceberg.types.Types.StringType.get()),
-                       NestedField.required(2, "departure_time", org.apache.iceberg.types.Types.StringType.get()),
-                       NestedField.required(3, "departure_airport_code", org.apache.iceberg.types.Types.StringType.get()),
-                       NestedField.required(4, "arrival_time", org.apache.iceberg.types.Types.StringType.get()),
-                       NestedField.required(5, "arrival_airport_code", org.apache.iceberg.types.Types.StringType.get()),
-                       NestedField.required(6, "flight_duration", org.apache.iceberg.types.Types.LongType.get()),
-                       NestedField.required(7, "flight_number", org.apache.iceberg.types.Types.StringType.get()),
-                       NestedField.required(8, "confirmation_code", org.apache.iceberg.types.Types.StringType.get()),
-                       NestedField.required(9, "ticket_price", org.apache.iceberg.types.Types.DecimalType.of(10, 2)),
-                       NestedField.required(10, "aircraft", org.apache.iceberg.types.Types.StringType.get()),
-                       NestedField.required(11, "booking_agency_email", org.apache.iceberg.types.Types.StringType.get()));
-                        
         // --- Define the RowType for the RowData
         RowType rowType = RowType.of(
             new LogicalType[] {
@@ -330,7 +307,6 @@ public class DataGeneratorApp {
                             + "aircraft STRING, "
                             + "booking_agency_email STRING) "
                             + "WITH ("
-                                + "'connector' = 'iceberg',"
                                 + "'write.format.default' = 'parquet',"
                                 + "'write.target-file-size-bytes' = '134217728',"
                                 + "'partitioning' = 'arrival_airport_code',"
@@ -341,7 +317,35 @@ public class DataGeneratorApp {
         // ---
         TableLoader tableLoaderSkyOne = TableLoader.fromCatalog(catalogLoader, tableIdentifier);
 
-        FlinkSink.forRowData(skyOneRowData).tableLoader(tableLoaderSkyOne).upsert(true).append();
+        FlinkSink
+            .forRowData(skyOneRowData)
+            .tableLoader(tableLoaderSkyOne)
+            .upsert(true)
+            .equalityFieldColumns(Arrays.asList("email_address", "departure_airport_code", "arrival_airport_code"))
+            .append();
+
+        // Create the table if it does not exist
+        if (!catalog.tableExists(ObjectPath.fromString(databaseName + "." + "sunset_airline"))) {
+            tblEnv.executeSql(
+                        "CREATE TABLE " + databaseName + "." + "sunset_airline" + " ("
+                            + "email_address STRING, "
+                            + "departure_time STRING, "
+                            + "departure_airport_code STRING, "
+                            + "arrival_time STRING, "
+                            + "arrival_airport_code STRING, "
+                            + "flight_duration BIGINT,"
+                            + "flight_number STRING, "
+                            + "confirmation_code STRING, "
+                            + "ticket_price DECIMAL(10,2), "
+                            + "aircraft STRING, "
+                            + "booking_agency_email STRING) "
+                            + "WITH ("
+                                + "'write.format.default' = 'parquet',"
+                                + "'write.target-file-size-bytes' = '134217728',"
+                                + "'partitioning' = 'arrival_airport_code',"
+                                + "'format-version' = '2');"
+                    );
+        }
 
         // --- Convert DataStream<AirlineData> to DataStream<RowData>
         DataStream<RowData> sunsetRowData = sunsetStream.map(new MapFunction<AirlineData, RowData>() {
@@ -371,6 +375,7 @@ public class DataGeneratorApp {
             .forRowData(sunsetRowData)
             .tableLoader(tableLoaderSunset)
             .upsert(true)
+            .equalityFieldColumns(Arrays.asList("email_address", "departure_airport_code", "arrival_airport_code"))
             .append();
 
         try {

@@ -22,7 +22,6 @@
 package kickstarter;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.java.utils.MultipleParameterTool;
 import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
@@ -55,10 +54,9 @@ public class FlightImporterApp {
     @SuppressWarnings("rawtypes")
     public static void main(String[] args) throws Exception {
         /*
-         * Retrieve the arguments from the command line arguments
+         * Retrieve the value(s) from the command line argument(s)
          */
-        MultipleParameterTool params = MultipleParameterTool.fromArgs(args);
-        String serviceAccountUser = params.get(Common.ARG_SERVICE_ACCOUNT_USER);
+        String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
 
         // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();

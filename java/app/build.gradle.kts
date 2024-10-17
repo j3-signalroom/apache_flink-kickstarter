@@ -1,5 +1,6 @@
 plugins {
     application
+    id("org.kordamp.gradle.project-enforcer") version "0.14.0"
 }
 
 // --- Read the Gradle properties file
@@ -18,7 +19,7 @@ repositories {
 val flinkVersion: String = "1.19.1"
 val kafkaVersion: String = "3.7.0"
 val junitVersion: String = "5.10.0"
-val awssdkVersion: String = "2.27.14"
+val awssdkVersion: String = "2.26.29"
 var icebergVersion: String = "1.6.1"
 
 dependencies {
@@ -34,12 +35,15 @@ dependencies {
     implementation("org.apache.flink:flink-connector-kafka:3.2.0-1.19")
     implementation("org.apache.flink:flink-connector-datagen:${flinkVersion}")
     implementation("org.apache.flink:flink-json:${flinkVersion}")
-    compileOnly("org.apache.flink:flink-s3-fs-hadoop:${flinkVersion}")
     implementation("org.slf4j:slf4j-log4j12:2.0.7")
+    implementation("software.amazon.awssdk:sdk-core:${awssdkVersion}")
     implementation("software.amazon.awssdk:secretsmanager:${awssdkVersion}")
     implementation("software.amazon.awssdk:ssm:${awssdkVersion}")
     implementation("software.amazon.awssdk:glue:${awssdkVersion}")
+    implementation("software.amazon.awssdk:kms:${awssdkVersion}")
     implementation("software.amazon.awssdk:s3:${awssdkVersion}")
+    implementation("software.amazon.awssdk:sts:${awssdkVersion}")
+    implementation("software.amazon.awssdk:dynamodb:${awssdkVersion}")
     implementation("org.json:json:20240303")
     runtimeOnly("org.apache.iceberg:iceberg-core:${icebergVersion}")
     runtimeOnly("org.apache.iceberg:iceberg-aws:${icebergVersion}")
