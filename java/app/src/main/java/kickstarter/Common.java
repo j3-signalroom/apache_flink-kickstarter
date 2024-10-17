@@ -17,7 +17,8 @@ import java.util.*;
 
 public class Common {
     public static final String ARG_SERVICE_ACCOUNT_USER = "--service-account-user";
-
+    public static final String ARG_AWS_REGION = "--aws-region";
+    
 
     /**
      * @return returns a new instance of the Jackson ObjectMapper with the JavaTimeModule

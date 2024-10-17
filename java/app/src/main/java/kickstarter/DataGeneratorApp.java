@@ -54,6 +54,7 @@ public class DataGeneratorApp {
          * Retrieve the value(s) from the command line argument(s)
          */
         String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
+        String awsRegion = Common.getAppArgumentValue(args, Common.ARG_AWS_REGION);
 
 		// --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -208,7 +209,7 @@ public class DataGeneratorApp {
         catalogProperties.put("catalog-impl", catalogImpl);
         catalogProperties.put("io-impl", ioImpl);
         catalogProperties.put("glue.skip-archive", "true");
-        catalogProperties.put("glue.region", "us-east-1");
+        catalogProperties.put("glue.region", awsRegion);
         
         // --- Use the CatalogLoader since an external metastore is used (AWS Glue Catalog)
         CatalogLoader catalogLoader = CatalogLoader.custom(catalogName, catalogProperties,  new Configuration(false), catalogImpl);
