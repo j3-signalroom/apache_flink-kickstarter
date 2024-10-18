@@ -105,10 +105,11 @@ def main(args):
             tbl_env.execute_sql(f"""
                 CREATE CATALOG {catalog_name} WITH (
                     'type' = 'iceberg',
-                    'catalog-type' = 'hadoop',            
-                    'warehouse' = 's3a://{bucket_name}/warehouse',
-                    'property-version' = '1',
-                    'io-impl' = 'org.apache.iceberg.hadoop.HadoopFileIO'
+                    'warehouse' = 's3://{bucket_name}/warehouse',
+                    'catalog-impl' = 'org.apache.iceberg.aws.glue.GlueCatalog',
+                    'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
+                    'glue.skip-archive' = 'True',
+                    'glue.region' = '{args.aws_region}'
                     );
             """)
         else:
@@ -211,5 +212,9 @@ if __name__ == "__main__":
                         dest='s3_bucket_name',
                         required=True,
                         help='The AWS S3 bucket name.')
+    parser.add_argument('--aws-region',
+                        dest='aws_region',
+                        required=True,
+                        help='The AWS Rgion name.')
     known_args, _ = parser.parse_known_args()
     main(known_args)

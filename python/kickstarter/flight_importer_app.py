@@ -120,7 +120,6 @@ def main(args):
     # Iceberg catalog
     catalog_name = "apache_kickstarter"
     bucket_name = args.s3_bucket_name.replace("_", "-") # To follow S3 bucket naming convention, replace underscores with hyphens if exist
-    database_name = "airlines"
     try:
         if not catalog_exist(tbl_env, catalog_name):
             tbl_env.execute_sql(f"""
@@ -149,6 +148,7 @@ def main(args):
     print(f"Current catalog: {tbl_env.get_current_catalog()}")
 
     # Check if the database exists.  If not, create it
+    database_name = "airlines"
     try:
         if not catalog.database_exists(database_name):
             tbl_env.execute_sql(f"CREATE DATABASE IF NOT EXISTS {database_name};")
