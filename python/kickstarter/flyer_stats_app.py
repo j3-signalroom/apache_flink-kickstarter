@@ -28,7 +28,21 @@ def main(args):
     # Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
     env.set_stream_time_characteristic(TimeCharacteristic.EventTime)
-    env.set_parallelism(1)  # Set parallelism to 1 for simplicity
+    
+    # --- Enable checkpointing every 5000 milliseconds (5 seconds)
+    env.enable_checkpointing(5000)
+
+    #
+    # Set timeout to 60 seconds
+    # The maximum amount of time a checkpoint attempt can take before being discarded.
+    #
+    env.get_checkpoint_config().set_checkpoint_timeout(60000)
+
+    #
+    # Set the maximum number of concurrent checkpoints to 1 (i.e., only one checkpoint
+    # is created at a time)
+    #
+    env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
@@ -91,10 +105,11 @@ def main(args):
             tbl_env.execute_sql(f"""
                 CREATE CATALOG {catalog_name} WITH (
                     'type' = 'iceberg',
-                    'catalog-type' = 'hadoop',            
-                    'warehouse' = 's3a://{bucket_name}/warehouse',
-                    'property-version' = '1',
-                    'io-impl' = 'org.apache.iceberg.hadoop.HadoopFileIO'
+                    'warehouse' = 's3://{bucket_name}/warehouse',
+                    'catalog-impl' = 'org.apache.iceberg.aws.glue.GlueCatalog',
+                    'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
+                    'glue.skip-archive' = 'True',
+                    'glue.region' = '{args.aws_region}'
                     );
             """)
         else:
@@ -197,5 +212,9 @@ if __name__ == "__main__":
                         dest='s3_bucket_name',
                         required=True,
                         help='The AWS S3 bucket name.')
+    parser.add_argument('--aws-region',
+                        dest='aws_region',
+                        required=True,
+                        help='The AWS Rgion name.')
     known_args, _ = parser.parse_known_args()
     main(known_args)
