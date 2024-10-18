@@ -114,10 +114,7 @@ def main(args):
                     .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
                     .build())
     
-    # Define the CREATE CATALOG Flink SQL statement to register the Iceberg catalog
-    # using the HadoopCatalog to store metadata in AWS S3 (i.e., s3a://), a Hadoop- 
-    # compatible filesystem.  Then execute the Flink SQL statement to register the
-    # Iceberg catalog
+    # Create the Apache Iceberg catalog with integration with AWS Glue back by AWS S3
     catalog_name = "apache_kickstarter"
     bucket_name = args.s3_bucket_name.replace("_", "-") # To follow S3 bucket naming convention, replace underscores with hyphens if exist
     try:
