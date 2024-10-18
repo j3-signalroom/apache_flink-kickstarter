@@ -8,6 +8,9 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 - Issue [#31](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/31).
 - Issue [#362](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/362).
 
+### Changed
+- Issue [#368](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/368).
+
 ## [0.42.00.000] - 2024-10-15
 ### Added
 - `How to create a User-Defined Table Function (UDTF) in PyFlink to fetch data from an external source for your Flink App?` markdown.
