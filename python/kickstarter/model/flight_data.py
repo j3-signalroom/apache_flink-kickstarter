@@ -21,7 +21,7 @@ class FlightData():
     arrival_airport_code: str | None
     flight_number: str | None
     confirmation_code: str | None
-    source: str | None
+    airline: str | None
 
 
     def get_duration(self):
@@ -35,7 +35,7 @@ class FlightData():
                    arrival_airport_code=self.arrival_airport_code,
                    flight_number=self.flight_number,
                    confirmation_code=self.confirmation_code,
-                   source=self.source)
+                   airline=self.airline)
     
     @classmethod
     def from_row(cls, row: Row):
@@ -47,7 +47,7 @@ class FlightData():
             arrival_airport_code=row.arrival_airport_code,
             flight_number=row.flight_number,
             confirmation_code=row.confirmation_code,
-            source=row.source,
+            airline=row.airline,
         )
 
     @staticmethod
@@ -61,7 +61,7 @@ class FlightData():
                 "arrival_airport_code",
                 "flight_number",
                 "confirmation_code",
-                "source",
+                "airline",
             ],
             field_types=[
                 Types.STRING(),

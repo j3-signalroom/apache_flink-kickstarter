@@ -32,6 +32,7 @@ class FlightDataTest {
         actual.setArrivalAirportCode(expected.getArrivalAirportCode());
         actual.setFlightNumber(expected.getFlightNumber());
         actual.setConfirmationCode(expected.getConfirmationCode());
+        actual.setAirline(expected.getAirline());
 
         assertEquals(expected.getEmailAddress(), actual.getEmailAddress());
         assertEquals(expected.getDepartureTime(), actual.getDepartureTime());
@@ -40,6 +41,7 @@ class FlightDataTest {
         assertEquals(expected.getArrivalAirportCode(), actual.getArrivalAirportCode());
         assertEquals(expected.getFlightNumber(), actual.getFlightNumber());
         assertEquals(expected.getConfirmationCode(), actual.getConfirmationCode());
+        assertEquals(expected.getAirline(), actual.getAirline());
     }
 
     @Test
@@ -53,6 +55,7 @@ class FlightDataTest {
         flight2.setArrivalAirportCode(flight1.getArrivalAirportCode());
         flight2.setFlightNumber(flight1.getFlightNumber());
         flight2.setConfirmationCode(flight1.getConfirmationCode());
+        flight2.setAirline(flight1.getAirline());
 
         assertNotSame(flight1, flight2);
         assertEquals(flight1, flight2);
@@ -81,6 +84,7 @@ class FlightDataTest {
                 ", arrival_airport_code='" + flightData.getArrivalAirportCode() + '\'' +
                 ", flight_number='" + flightData.getFlightNumber() + '\'' +
                 ", confirmation_code='" + flightData.getConfirmationCode() + '\'' +
+                ", airline='" + flightData.getAirline() + '\'' +
                 '}';
 
         System.out.println(flightData.toString());

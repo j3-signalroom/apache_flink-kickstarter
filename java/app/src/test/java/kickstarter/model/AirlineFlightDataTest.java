@@ -97,8 +97,10 @@ class AirlineFlightDataTest {
         expected.setArrivalAirportCode(skyOne.getArrivalAirportCode());
         expected.setFlightNumber(skyOne.getFlightNumber());
         expected.setConfirmationCode(skyOne.getConfirmationCode());
+        expected.setAirline("SkyOne");
 
-        FlightData actual = skyOne.toFlightData();
+
+        FlightData actual = skyOne.toFlightData("SkyOne");
 
         assertEquals(expected, actual);
     }
