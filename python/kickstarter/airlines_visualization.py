@@ -2,7 +2,6 @@ import streamlit as st
 from pyflink.datastream import StreamExecutionEnvironment
 from pyflink.table import TableEnvironment, EnvironmentSettings, StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
-from pyflink.table.expressions import *
 import argparse
 import pandas as pd
 
@@ -88,12 +87,9 @@ def main(args):
     # Print the current database name
     print(f"Current database: {tbl_env.get_current_database()}")
 
-    table_name = "flight"
-    flight_table_path = ObjectPath(database_name, table_name)
-
     # Read data from the Iceberg table
     result_table = tbl_env.sql_query(f"""
-        SELECT * FROM {database_name}.{table_name}
+        SELECT * FROM {database_name}.flight
     """)
 
     df = result_table.to_pandas()
