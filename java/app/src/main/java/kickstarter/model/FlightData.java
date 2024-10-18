@@ -32,8 +32,11 @@ public class FlightData implements Serializable {
     @JsonProperty("flight_number")
     private String flight_number;
 
-    @JsonProperty("confirmation_code")
+    @JsonProperty("confirmation_code") 
     private String confirmation_code;
+
+    @JsonProperty("airline") 
+    private String airline;
 
     
     public FlightData() {
@@ -92,8 +95,16 @@ public class FlightData implements Serializable {
         return this.confirmation_code;
     }
 
-    public void setConfirmationCode(String referenceNumber) {
-        this.confirmation_code = referenceNumber;
+    public void setConfirmationCode(String confirmationCode) {
+        this.confirmation_code = confirmationCode;
+    }
+
+    public String getAirline() {
+        return this.airline;
+    }
+
+    public void setAirline(String airline) {
+        this.airline = airline;
     }
 
     @Override
@@ -107,7 +118,8 @@ public class FlightData implements Serializable {
                 Objects.equals(this.arrival_time, that.arrival_time) && 
                 Objects.equals(this.arrival_airport_code, that.arrival_airport_code) && 
                 Objects.equals(this.flight_number, that.flight_number) && 
-                Objects.equals(this.confirmation_code, that.confirmation_code);
+                Objects.equals(this.confirmation_code, that.confirmation_code) &&
+                Objects.equals(this.airline, that.airline);
     }
 
     @Override
@@ -118,7 +130,8 @@ public class FlightData implements Serializable {
                             this.arrival_time, 
                             this.arrival_airport_code, 
                             this.flight_number, 
-                            this.confirmation_code);
+                            this.confirmation_code,
+                            this.airline);
     }
 
     @Override
@@ -131,6 +144,7 @@ public class FlightData implements Serializable {
                 ", arrival_airport_code='" + this.arrival_airport_code + '\'' +
                 ", flight_number='" + this.flight_number + '\'' +
                 ", confirmation_code='" + this.confirmation_code + '\'' +
+                ", airline='" + this.airline + '\'' +
                 '}';
     }
 }

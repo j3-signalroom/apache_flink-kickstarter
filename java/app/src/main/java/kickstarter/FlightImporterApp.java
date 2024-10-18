@@ -202,12 +202,12 @@ public class FlightImporterApp {
         DataStream<FlightData> skyOneFlightStream = 
             skyOneSource
                 .filter(flight -> LocalDateTime.parse(flight.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).isAfter(LocalDateTime.now()))
-                .map(AirlineData::toFlightData);
+                .map(flight -> flight.toFlightData("SkyOne"));
 
 		DataStream<FlightData> sunsetFlightStream = 
             sunsetSource
             .filter(flight -> LocalDateTime.parse(flight.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).isAfter(LocalDateTime.now()))
-                .map(AirlineData::toFlightData);
+                .map(flight -> flight.toFlightData("Sunset"));
 
 		return skyOneFlightStream.union(sunsetFlightStream);
     }

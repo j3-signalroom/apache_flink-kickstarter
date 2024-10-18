@@ -59,7 +59,7 @@ class FlightImporterAppTest {
 
         FlightImporterApp.defineWorkflow(skyOneStream, sunsetStream).collectAsync(collector);
         env.executeAsync();
-        assertContains(collector, Arrays.asList(skyOneFlight.toFlightData(), sunsetFlight.toFlightData()));
+        assertContains(collector, Arrays.asList(skyOneFlight.toFlightData("SkyOne"), sunsetFlight.toFlightData("Sunset")));
     }
 
     @Test
@@ -79,6 +79,6 @@ class FlightImporterAppTest {
 
         env.executeAsync();
 
-        assertContains(collector, Arrays.asList(newSkyOneFlight.toFlightData(), newSunsetFlight.toFlightData()));
+        assertContains(collector, Arrays.asList(newSkyOneFlight.toFlightData("SkyOne"), newSunsetFlight.toFlightData("Sunset")));
     }
 }

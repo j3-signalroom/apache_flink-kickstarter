@@ -182,7 +182,7 @@ def main(args):
                     arrival_airport_code STRING,
                     flight_number STRING,
                     confirmation STRING,
-                    source STRING
+                    airline STRING
                 ) WITH (
                     'write.format.default' = 'parquet',
                     'write.target-file-size-bytes' = '134217728',

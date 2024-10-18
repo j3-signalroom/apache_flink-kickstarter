@@ -179,7 +179,7 @@ public class AirlineData implements Serializable {
             ", booking_agency_email='" + booking_agency_email + '\'' +
             '}';
     }
-    public FlightData toFlightData() {
+    public FlightData toFlightData(final String airline) {
         FlightData flightData = new FlightData();
 
         flightData.setEmailAddress(getEmailAddress());
@@ -189,6 +189,7 @@ public class AirlineData implements Serializable {
         flightData.setArrivalAirportCode(getArrivalAirportCode());
         flightData.setFlightNumber(getFlightNumber());
         flightData.setConfirmationCode(getConfirmationCode());
+        flightData.setAirline(airline);
 
         return flightData;
     }

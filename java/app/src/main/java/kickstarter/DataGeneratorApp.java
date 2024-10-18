@@ -28,6 +28,7 @@ import org.apache.iceberg.flink.*;
 import org.apache.iceberg.flink.sink.FlinkSink;
 import org.apache.hadoop.conf.Configuration;
 import java.util.*;
+import org.slf4j.*;
 
 import kickstarter.model.*;
 
@@ -38,6 +39,9 @@ import kickstarter.model.*;
  * respectively.
  */
 public class DataGeneratorApp {
+    private static final Logger logger = LoggerFactory.getLogger(DataGeneratorApp.class);
+
+
 	/**
 	 * The main method in a Flink application serves as the entry point of the program, where
 	 * the Flink DAG is defined.  That is, the execution environment, the creation of the data
@@ -277,8 +281,7 @@ public class DataGeneratorApp {
             // --- Execute the Flink job graph (DAG)
             env.execute("DataGeneratorApp");
         } catch (Exception e) {
-            System.out.println("The Flink App stopped early due to the following: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("The App stopped early due to the following: {}", e.getMessage());
         }
 	}
 

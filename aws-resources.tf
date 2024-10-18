@@ -133,12 +133,6 @@ resource "aws_s3_object" "warehouse" {
   key    = "warehouse/"
 }
 
-resource "aws_s3_object" "warehouse_airlines" {
-  bucket = aws_s3_bucket.iceberg_bucket.bucket
-  key    = "warehouse/airlines/"
-  depends_on = [ aws_s3_object.warehouse ]
-}
-
 resource "aws_iam_role" "glue_role" {
   name = "glue_service_role"
 

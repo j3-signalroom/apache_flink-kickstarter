@@ -15,11 +15,13 @@ import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.formats.json.*;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.DeserializationFeature;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import java.time.*;
 import java.util.*;
 import org.slf4j.*;
@@ -113,6 +115,13 @@ public class FlyerStatsApp {
             System.exit(1);
 		}
 
+        producerProperties.setProperty(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, "60000");
+
+        // ---Configure ObjectMapper to ignore unknown properties
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
         /*
          * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight` with the
          * specified deserializer
@@ -152,7 +161,7 @@ public class FlyerStatsApp {
             KafkaSink.<FlyerStatsData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(flyerStatsSerializer)
-                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
                 .build();
 
         /*
@@ -160,9 +169,9 @@ public class FlyerStatsApp {
          * applying transformations to the data streams
          */
         defineWorkflow(flightDataStream)
-                        .sinkTo(flyerStatsSink)
-                        .name("flyer_stats_sink")
-                        .uid("flyer_stats_sink");
+            .sinkTo(flyerStatsSink)
+            .name("flyer_stats_sink")
+            .uid("flyer_stats_sink");
 
         try {
             // --- Execute the Flink job graph (DAG)
