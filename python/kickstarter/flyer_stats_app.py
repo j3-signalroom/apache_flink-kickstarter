@@ -28,7 +28,21 @@ def main(args):
     # Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
     env.set_stream_time_characteristic(TimeCharacteristic.EventTime)
-    env.set_parallelism(1)  # Set parallelism to 1 for simplicity
+    
+    # --- Enable checkpointing every 5000 milliseconds (5 seconds)
+    env.enable_checkpointing(5000)
+
+    #
+    # Set timeout to 60 seconds
+    # The maximum amount of time a checkpoint attempt can take before being discarded.
+    #
+    env.get_checkpoint_config().set_checkpoint_timeout(60000)
+
+    #
+    # Set the maximum number of concurrent checkpoints to 1 (i.e., only one checkpoint
+    # is created at a time)
+    #
+    env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
