@@ -4,6 +4,7 @@ from pyflink.table import TableEnvironment, EnvironmentSettings, StreamTableEnvi
 from pyflink.table.catalog import ObjectPath
 import argparse
 import pandas as pd
+from st_aggrid import AgGrid, GridOptionsBuilder
 
 from helper.utilities import catalog_exist
 
@@ -87,16 +88,42 @@ def main(args):
     # Print the current database name
     print(f"Current database: {tbl_env.get_current_database()}")
 
-    # Read data from the Iceberg table
-    result_table = tbl_env.sql_query(f"""
-        SELECT * FROM {database_name}.flight
-    """)
-
-    df = result_table.to_pandas()
+    # Read `flight`data from the Iceberg table
+    flight_table = tbl_env.sql_query(f"SELECT * FROM {database_name}.flight")
+    df_flight_table = flight_table.to_pandas()
     
-    st.dataframe(df)
+    # Create grid options with only specific columns
+    gb = GridOptionsBuilder.from_dataframe(df_flight_table)
+    gb.configure_columns(["email_address", "departure_time", "departure_airport_code", "arrival_time", "arrival_airport_code", "flight_number", "confirmation_code", "airline"]) 
+    gridOptions = gb.build()
+    AgGrid(
+        df_flight_table,
+        gridOptions=gridOptions,
+        height=300, 
+        width='100%'
+    )
 
+    # # Read `flight` data from the Iceberg table and aggregate the data
+    # flight_aggregration_table = tbl_env.sql_query(f"""
+    #                                               SELECT 
+    #                                                 CONCAT(departure_airport_code, '-', arrival_airport_code), 
+    #                                                 COUNT(*) AS total 
+    #                                               FROM {database_name}.flight 
+    #                                               WHERE departure_airport_code = 'ATL' 
+    #                                               GROUP BY CONCAT(departure_airport_code, '-', arrival_airport_code)
+    #                                               """)  
+    # df_flight_aggregration_table = flight_aggregration_table.to_pandas()
+    # df_flight_aggregration_table = df_flight_aggregration_table.sort_values(by=["total"], ascending=False)
 
+    # # Create grid options with only specific columns
+    # gb = GridOptionsBuilder.from_dataframe(df_flight_aggregration_table)
+    # gridOptions = gb.build()
+    # AgGrid(
+    #     df_flight_aggregration_table,
+    #     gridOptions=gridOptions,
+    #     height=300, 
+    #     width='100%'
+    # )
 
 
 if __name__ == "__main__":

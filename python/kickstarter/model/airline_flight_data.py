@@ -29,17 +29,16 @@ class AirlineFlightData():
 
     
     @staticmethod
-    def to_flight_data(row: Row):
-        data = AirlineFlightData.from_row(row)
+    def to_flight_data(airline_name: str, flight_data):
         return FlightData(
-            data.email_address,
-            data.departure_time,
-            data.departure_airport_code,
-            data.arrival_time,
-            data.arrival_airport_code,
-            data.flight_number,
-            data.confirmation_code,
-            "skyone",
+            airline=airline_name,
+            email_address=flight_data.email_address,
+            departure_time=flight_data.departure_time,
+            departure_airport_code=flight_data.departure_airport_code,
+            arrival_time=flight_data.arrival_time,
+            arrival_airport_code=flight_data.arrival_airport_code,
+            flight_number=flight_data.flight_number,
+            confirmation_code=flight_data.confirmation_code
         )
     
     @classmethod

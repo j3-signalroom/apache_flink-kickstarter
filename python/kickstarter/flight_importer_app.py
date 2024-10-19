@@ -222,12 +222,12 @@ def define_workflow(skyone_stream: DataStream, sunset_stream: DataStream) -> Dat
     """
     # Map the data streams to the FlightData model and filter out Skyone flights that have already arrived
     skyone_flight_stream = (skyone_stream
-                            .map(AirlineFlightData.to_flight_data)
+                            .map(lambda flight: AirlineFlightData.to_flight_data("SkyOne", flight))
                             .filter(lambda flight: parse_isoformat(flight.arrival_time) > datetime.now(timezone.utc)))
 
     # Map the data streams to the FlightData model and filter out Sunset flights that have already arrived
     sunset_flight_stream = (sunset_stream
-                            .map(AirlineFlightData.to_flight_data)
+                            .map(lambda flight: AirlineFlightData.to_flight_data("Sunset", flight))
                             .filter(lambda flight: parse_isoformat(flight.arrival_time) > datetime.now(timezone.utc)))
     
     # Return the union of the two data streams
