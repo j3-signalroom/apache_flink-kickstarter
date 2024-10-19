@@ -73,14 +73,24 @@ The exciting part is that after running all your Flink applications, the data no
 
 ![iceberg-flink-streamlit-drawing](../.blog/images/iceberg-flink-streamlit-drawing.png)
 
-To illustrate, I created another Flink app that queries the `apache_kickstarter.airlines.flight` and `apache_kickstarter.airlines.flyer_stats` Apache Iceberg Tables, respectively, harnessing Flink SQL to extract valuable insights. These insights are then brought to life through a Streamlit dashboard, transforming raw data into an accessible, visual experience.
+To illustrate, I created a Streamlit script that queries the `apache_kickstarter.airlines.flight` and `apache_kickstarter.airlines.flyer_stats` Apache Iceberg Tables, respectively, harnessing Flink SQL to extract valuable insights. These insights are then brought to life through a Streamlit dashboard, transforming raw data into an accessible, visual experience.
 
 Here you go, run this in the docker container terminal command line:
 
 ```bash
 streamlit run kickstarter/flink_kickstarter_visualization.py -- --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>
 ```
-> _Notice the extra `--` between streamlit run `kickstarter/flink_kickstarter_visualization.py` and the actual Flink App script arguments.  This is necessary to pass arguments to the Streamlit script without causing conflicts with Streamlit's own CLI options._
+> _Notice the extra `--` between streamlit run `kickstarter/flink_kickstarter_visualization.py` and the actual script arguments.  This is necessary to pass arguments to the Streamlit script without causing conflicts with Streamlit's own CLI options._
+
+When you run the script, for instance, it produces the following output:
+
+
+Open your host web browser, enter in this web address, `localhost:8501`, and in a few moments you will see this:
+
+
+> _**"After 30+ years in this industry, I’m still amazed by what we can achieve today!  The possibilities are endless—enjoy the ride!"**_
+> 
+> _**---J3**_
 
 ## 5.0 Resources
 
