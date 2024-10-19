@@ -5,13 +5,13 @@ This project showcases the exceptional capabilities of Apache Flink, known for i
 
 Flink App|Description
 -|-
-`DataGeneratorApp`|This Flink App generates realistic flight data for the fictional airlines Sunset Air and Sky One Airlines, seamlessly integrating modern data streaming technologies. Flight events are published to dedicated Kafka topics (`airline.sunset` and `airline.skyone`), enabling real-time processing and analysis. Simultaneously, the synthetic data flows into the `apache_kickstarter.airlines.skyone_airline` and `apache_kickstarter.airlines.sunset_airline` Apache Iceberg tables, respectively, stored in an AWS S3 bucket, providing a robust, scalable foundation for historical data analytics.  The entire solution is implemented in Java, overcoming limitations in PyFlink, which currently lacks a Python-based data generator source. This design ensures a powerful, flexible data pipeline, ideal for both real-time and batch use cases. 
-`FlightImporterApp`|Imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and standardizes them into a unified `airline.flight` Kafka topic, and , and the `apache_kickstarter.airlines.flight`  Apache Iceberg table.  Implemented in both Java and Python.
-`FlyerStatsApp`|Processes data from the `airline.flight` Kafka topic to aggregate flyer statistics into the `airline.flyer_stats` Kafka topic, and the `apache_kickstarter.airlines.flyer_stats` Apache Iceberg table. Implemented in both Java and Python.
+`DataGeneratorApp`|This Flink App generates realistic flight data for the fictional airlines Sunset Air and Sky One Airlines, seamlessly integrating modern data streaming technologies. Flight events are published to dedicated Kafka topics (`airline.sunset` and `airline.skyone`), enabling real-time processing and analysis. Simultaneously, the synthetic data flows into the `apache_kickstarter.airlines.skyone_airline` and `apache_kickstarter.airlines.sunset_airline` Apache Iceberg Tables, respectively, stored in an AWS S3 bucket, providing a robust, scalable foundation for historical data analytics.  The entire solution is implemented in Java, overcoming limitations in PyFlink, which currently lacks a Python-based data generator source. This design ensures a powerful, flexible data pipeline, ideal for both real-time and batch use cases. 
+`FlightImporterApp`|Imports flight data from `airline.sunset` and `airline.skyone` Kafka topics and standardizes them into a unified `airline.flight` Kafka topic, and , and the `apache_kickstarter.airlines.flight`  Apache Iceberg Table.  Implemented in both Java and Python.
+`FlyerStatsApp`|Processes data from the `airline.flight` Kafka topic to aggregate flyer statistics into the `airline.flyer_stats` Kafka topic, and the `apache_kickstarter.airlines.flyer_stats` Apache Iceberg Table. Implemented in both Java and Python.
 
 Created by [Wade Waldron](https://www.linkedin.com/in/wade-waldron/), Staff Software Practice Lead at [Confluent Inc.](https://www.confluent.io/), these applications are designed to handle enterprise-scale use cases to demonstrate Flink's potential for real-world applications. This will start with securely fetching Kafka Cluster API keys via _**AWS Secrets Manager**_ and retrieving essential Kafka client configuration properties through the _**AWS Systems Manager Parameter**_.
 
-Beyond simply transforming and enriching data, we stream it into Kafka topics and _**Apache Iceberg tables**_, designed for high-performance, large-scale analytics with support for ACID transactions, offering highly scalable, real-time data processing and durable storage.
+Beyond simply transforming and enriching data, we stream it into Kafka topics and _**Apache Iceberg Tables**_, designed for high-performance, large-scale analytics with support for ACID transactions, offering highly scalable, real-time data processing and durable storage.
 
 Our journey with Flink doesn’t end with Java; Python-based Flink applications also shine in this project, leveraging Flink SQL, Table API, and DataFrame API, each offering unique advantages: Flink SQL for declarative queries, Table API for a mix of SQL-like syntax and programmatic control, and DataFrame API for efficient data manipulation similar to pandas or R. This provides a seamless, flexible approach to solving complex streaming challenges, ultimately unlocking an efficient and scalable architecture for modern data needs.
 
@@ -27,8 +27,8 @@ Explore the repo, run the Docker containers (compatible with both Mac M chips an
     - [2.2 DevOps in Action: Running Terraform in the cloud](#22-devops-in-action-running-terraform-in-the-cloud)
         + [2.2.1 Run from the cloud](#221-run-from-the-cloud)
 + [3.0 Hands-On Kickoff: Practical Examples for Rapid Learning](#30-hands-on-kickoff-practical-examples-for-rapid-learning)
-    - [3.1 Flink Apps in Java](#31-flink-apps-in-java)
-    - [3.2 Flink Apps in Python](#32-flink-apps-in-python)
+    - [3.1 Flink Applications Powered by Java](#31-flink-applications-powered-by-java)
+    - [3.2 Flink Applications Powered by Python](#32-flink-applications-powered-by-python)
 + [4.0 Resources](#40-resources)
 + [5.0 Important Note(s)](#50-important-notes)
 <!-- tocstop -->
@@ -83,7 +83,7 @@ To help you start quickly, the repo comes with **_Docker containers_** for Mac M
 
     - AWS Secrets Manager securely storing API Key Secrets for the Kafka Cluster, along with AWS Systems Manager Parameter Store containing Kafka Consumer and Producer properties for easy integration.
 
-    - An AWS S3 bucket with a dedicated `warehouse` folder, serving as the landing zone for Apache Iceberg tables populated by two Python-based Flink apps, bringing your data streaming architecture to life.
+    - An AWS S3 bucket with a dedicated `warehouse` folder, serving as the landing zone for Apache Iceberg Tables populated by two Python-based Flink apps, bringing your data streaming architecture to life.
 
 4. Run Apache Flink locally on your Mac, or use the provided Docker containers from the project to launch Apache Flink and Apache Iceberg seamlessly on your machine.
 
@@ -152,11 +152,11 @@ By following these steps, you will run the Terraform configuration directly from
 
 ## 3.0 Hands-On Kickoff: Practical Examples for Rapid Learning
 
-### 3.1 Flink Apps in Java
-[Let's get started!](java/README.md)
+### 3.1 Flink Applications Powered by Java
+[Let's go!](java/README.md)
 
-### 3.2 Flink Apps in Python
-[Let's get started!](python/README.md)
+### 3.2 Flink Applications Powered by Python
+[Let's go!](python/README.md)
 
 ## 4.0 Resources
 

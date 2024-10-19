@@ -1,4 +1,4 @@
-# Python-based Flink Apps
+# Flink Applications Powered by Python
 Discover how Apache Flink® can transform your data pipelines! Explore hands-on examples of Flink applications using the [DataStream API](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/dev/python/datastream/intro_to_datastream_api/), [Table API](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/dev/python/table/intro_to_table_api/), and [Flink SQL](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/dev/table/sql/overview/#sql)—all built in Python with PyFlink, which compiles these apps to Java. You'll see how these technologies integrate seamlessly with AWS, GitHub, Terraform, and Apache Iceberg.
 
 Curious about the differences between the DataStream API and Table API? Click [here](../.blog/datastream-vs-table-api.md) to learn more and find the best fit for your next project.
@@ -8,8 +8,9 @@ Curious about the differences between the DataStream API and Table API? Click [h
 <!-- toc -->
 + [1.0 Important Note(s)](#10-important-notes)
 + [2.0 Power up the Apache Flink Docker containers](#20-power-up-the-apache-flink-docker-containers)
-+ [3.0 Try out these Flink Apps](#30-try-out-these-flink-apps)
-+ [4.0 Resources](#40-resources)
++ [3.0 Discover What You Can Do with These Flink Apps](#30-discover-what-you-can-do-with-these-flink-apps)
++ [4.0 Unleash Flink for Data Visualization](#40-unleash-flink-for-data-visualization)
++ [5.0 Resources](#50-resources)
 <!-- tocstop -->
 
 ## 1.0 Important Note(s)
@@ -47,15 +48,15 @@ scripts/run-flink-locally.sh on --profile=<AWS_SSO_PROFILE_NAME>
 
 To learn more about this script, click [here](../.blog/run-flink-locally-script-explanation.md).
 
-## 3.0 Try out these Flink Apps
+## 3.0 Discover What You Can Do with These Flink Apps
 To access the JobManager (`apache_flink-kickstarter-jobmanager-1`) container, open the interactive shell by running:
 ```bash
 docker exec -it -w /opt/flink/python_apps apache_flink-kickstarter-jobmanager-1 /bin/bash
 ```
 
-This command drops you right into the container, giving you full control to execute commands, explore the file system, or handle any tasks directly.
+Jump right into the container and take charge! You’ll have full control to run commands, explore the file system, and tackle any tasks you need. You’ll land directly in the `/opt/flink/python_apps` directory—this is the headquarters for all the Python scripts in the repo.
 
-Finally, to launch one of the Flink applications, choose your app and use the corresponding Flink Run command listed below. Let’s have some fun with Flink!
+Ready to launch one of those cool Java-to-Python Flink apps? Just use the [`flink run`](https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/cli/) command with the correct options, and kick off the Python Flink app script with its corresponding parameters below. Adventure awaits!
 
 Flink App|Flink Run Command
 -|-
@@ -67,7 +68,33 @@ Flink App|Flink Run Command
 > `<AWS_S3_BUCKET>`|specify name of the AWS S3 bucket you chosen during the Terraform creation or created yourself separately.  The AWS S3 bucket is used to store the Apache Iceberg files (i.e., data files, manifest files, manifest list file, and metadata files).
 > `<AWS_REGION_NAME>`|specify the AWS Region your AWS Glue infrastructure resides.
 
-## 4.0 Resources
+## 4.0 Unleash Flink for Data Visualization
+The exciting part is that after running all your Flink applications, the data now flows seamlessly into your Kafka Topics and Apache Iceberg Tables. But data alone doesn’t tell the story—it’s time to share those insights with the world! One fantastic way to do that is with Streamlit, which allows you to easily create interactive visualizations. Streamlit is intuitive, powerful, and designed with Python developers in mind, making it a breeze to turn raw data into captivating dashboards. 😉
+
+![iceberg-flink-streamlit-drawing](../.blog/images/iceberg-flink-streamlit-drawing.png)
+
+To illustrate, I created a Streamlit script that queries the `apache_kickstarter.airlines.flight` and `apache_kickstarter.airlines.flyer_stats` Apache Iceberg Tables, respectively, harnessing Flink SQL to extract valuable insights. These insights are then brought to life through a Streamlit dashboard, transforming raw data into an accessible, visual experience.
+
+Here you go, run this in the docker container terminal command line:
+
+```bash
+streamlit run kickstarter/flink_kickstarter_visualization.py -- --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>
+```
+> _Notice the extra `--` between streamlit run `kickstarter/flink_kickstarter_visualization.py` and the actual script arguments.  This is necessary to pass arguments to the Streamlit script without causing conflicts with Streamlit's own CLI options._
+
+When you run the script, for instance, it produces the following output:
+
+![streamlit-run-from-terminal-screenshot](../.blog/images/streamlit-run-from-terminal-screenshot.png)
+
+Open your host web browser, enter the local URL, `localhost:8501`, and in a few moments this web page will be displayed:
+
+![streamlit-screenshot](../.blog/images/streamlit-screenshot.png)
+
+> _**"After 30+ years in this industry, I’m still amazed by what we can achieve today!  The possibilities are endless—enjoy the ride!"**_
+> 
+> _**---J3**_
+
+## 5.0 Resources
 
 [Flink Python Docs](https://nightlies.apache.org/flink/flink-docs-master/api/python/)
 

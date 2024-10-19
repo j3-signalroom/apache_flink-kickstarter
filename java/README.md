@@ -1,4 +1,4 @@
-# Java-based Flink Apps
+# Flink Applications Powered by Java
 Discover how Apache Flink® can transform your data pipelines! Explore hands-on examples of Flink applications using the [DataStream API](https://nightlies.apache.org/flink/flink-docs-master/docs/learn-flink/datastream_api/) and [Table API](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/overview/) in Java. You'll see how these technologies integrate seamlessly with AWS, GitHub, Terraform, and Apache Iceberg.
 
 Curious about the differences between the DataStream API and Table API? Click [here](../.blog/datastream-vs-table-api.md) to learn more and find the best fit for your next project.
@@ -7,7 +7,7 @@ Curious about the differences between the DataStream API and Table API? Click [h
 
 <!-- toc -->
 + [1.0 Power up the Apache Flink Docker containers](#10-power-up-the-apache-flink-docker-containers)
-+ [2.0 Try out these Flink Apps](#20-try-out-these-flink-apps)
++ [2.0 Discover What You Can Do with These Flink Apps](#20-discover-what-you-can-do-with-these-flink-apps)
 <!-- tocstop -->
 
 ## 1.0 Power up the Apache Flink Docker containers
@@ -42,7 +42,7 @@ scripts/run-flink-locally.sh on --profile=<AWS_SSO_PROFILE_NAME>
 
 To learn more about this script, click [here](../.blog/run-flink-locally-script-explanation.md).
 
-## 2.0 Try out these Flink Apps
+## 2.0 Discover What You Can Do with These Flink Apps
 Before diving in, I want to point out a choice I made for the project: I used Gradle instead of Maven for build automation. Why ![gradle](../.blog/images/gradle-logo.png)[Gradle](https://gradle.com/)? Well, it's not just more straightforward—it's also more flexible and powerful. I opted for the Kotlin-supported version of Gradle, which brings some major perks: type safety, seamless IDE support, and the benefits of a modern programming language, unlike Maven's XML-heavy approach. Plus, Kotlin's features help speed up our builds, which is always a nice bonus.
 
 Alright, let’s get hands-on! First, navigate to the project located in the Java subfolder, and let’s start with a clean slate. Run:
