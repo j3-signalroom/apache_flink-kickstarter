@@ -27,8 +27,8 @@ Explore the repo, run the Docker containers (compatible with both Mac M chips an
     - [2.2 DevOps in Action: Running Terraform in the cloud](#22-devops-in-action-running-terraform-in-the-cloud)
         + [2.2.1 Run from the cloud](#221-run-from-the-cloud)
 + [3.0 Hands-On Kickoff: Practical Examples for Rapid Learning](#30-hands-on-kickoff-practical-examples-for-rapid-learning)
-    - [3.1 Flink Apps in Java](#31-flink-apps-in-java)
-    - [3.2 Flink Apps in Python](#32-flink-apps-in-python)
+    - [3.1 Flink Applications Powered by Java](#31-flink-applications-powered-by-java)
+    - [3.2 Flink Applications Powered by Python](#32-flink-applications-powered-by-python)
 + [4.0 Resources](#40-resources)
 + [5.0 Important Note(s)](#50-important-notes)
 <!-- tocstop -->
@@ -152,11 +152,11 @@ By following these steps, you will run the Terraform configuration directly from
 
 ## 3.0 Hands-On Kickoff: Practical Examples for Rapid Learning
 
-### 3.1 Flink Apps in Java
-[Let's get started!](java/README.md)
+### 3.1 Flink Applications Powered by Java
+[Let's go!](java/README.md)
 
-### 3.2 Flink Apps in Python
-[Let's get started!](python/README.md)
+### 3.2 Flink Applications Powered by Python
+[Let's go!](python/README.md)
 
 ## 4.0 Resources
 
