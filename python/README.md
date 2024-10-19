@@ -9,7 +9,7 @@ Curious about the differences between the DataStream API and Table API? Click [h
 + [1.0 Important Note(s)](#10-important-notes)
 + [2.0 Power up the Apache Flink Docker containers](#20-power-up-the-apache-flink-docker-containers)
 + [3.0 Discover What You Can Do with These Flink Apps](#30-discover-what-you-can-do-with-these-flink-apps)
-+ [4.0 Unleash Flink for Data Visualization](#40-unleash-flink-for-data-visualization)
++ [4.0 Unleash the Full Power of Flink to Bring Your Data Visualizations to Life!](#40-unleash-the-full-power-of-flink-to-bring-your-data-visualizations-to-life)
 + [5.0 Resources](#50-resources)
 <!-- tocstop -->
 
@@ -68,7 +68,7 @@ Flink App|Flink Run Command
 > `<AWS_S3_BUCKET>`|specify name of the AWS S3 bucket you chosen during the Terraform creation or created yourself separately.  The AWS S3 bucket is used to store the Apache Iceberg files (i.e., data files, manifest files, manifest list file, and metadata files).
 > `<AWS_REGION_NAME>`|specify the AWS Region your AWS Glue infrastructure resides.
 
-## 4.0 Unleash Flink for Data Visualization
+## 4.0 Unleash the Full Power of Flink to Bring Your Data Visualizations to Life!
 The exciting part is that after running all your Flink applications, the data now flows seamlessly into your Kafka Topics and Apache Iceberg Tables. But data alone doesn’t tell the story—it’s time to share those insights with the world! One fantastic way to do that is with Streamlit, which allows you to easily create interactive visualizations. Streamlit is intuitive, powerful, and designed with Python developers in mind, making it a breeze to turn raw data into captivating dashboards. 😉
 
 ![iceberg-flink-streamlit-drawing](../.blog/images/iceberg-flink-streamlit-drawing.png)
