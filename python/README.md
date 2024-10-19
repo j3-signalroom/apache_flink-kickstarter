@@ -84,9 +84,11 @@ streamlit run kickstarter/flink_kickstarter_visualization.py -- --aws-s3-bucket 
 
 When you run the script, for instance, it produces the following output:
 
+![streamlit-run-from-terminal-screenshot](../.blog/images/streamlit-run-from-terminal-screenshot.png)
 
-Open your host web browser, enter in this web address, `localhost:8501`, and in a few moments you will see this:
+Open your host web browser, enter the local URL, `localhost:8501`, and in a few moments this web page will be displayed:
 
+![streamlit-screenshot](../.blog/images/streamlit-screenshot.png)
 
 > _**"After 30+ years in this industry, I’m still amazed by what we can achieve today!  The possibilities are endless—enjoy the ride!"**_
 > 
