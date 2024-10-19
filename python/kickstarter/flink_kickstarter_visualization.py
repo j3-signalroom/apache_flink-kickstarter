@@ -1,9 +1,9 @@
-import streamlit as st
 from pyflink.datastream import StreamExecutionEnvironment
 from pyflink.table import TableEnvironment, EnvironmentSettings, StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 import argparse
 import pandas as pd
+import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder
 
 from helper.utilities import catalog_exist
@@ -91,6 +91,8 @@ def main(args):
     # Read `flight`data from the Iceberg table
     flight_table = tbl_env.sql_query(f"SELECT * FROM {database_name}.flight")
     df_flight_table = flight_table.to_pandas()
+
+
     
     # Create grid options with only specific columns
     gb = GridOptionsBuilder.from_dataframe(df_flight_table)
