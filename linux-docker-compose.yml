@@ -15,6 +15,7 @@ services:
       - 8081:8081
       - 9092:9092
       - 8443:443
+      - 8501:8501
     command: jobmanager
     volumes:
       - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/libs:/opt/flink/java_apps
