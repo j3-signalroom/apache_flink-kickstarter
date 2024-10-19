@@ -5,6 +5,7 @@ import argparse
 import pandas as pd
 import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder
+import matplotlib.pyplot as plt
 
 from helper.utilities import catalog_exist
 
@@ -41,7 +42,7 @@ def main(args):
     env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
     # Create a Table Environment
-    tbl_env = StreamTableEnvironment.create(stream_execution_environment=env, environment_settings=EnvironmentSettings.new_instance().in_streaming_mode().build())
+    tbl_env = StreamTableEnvironment.create(stream_execution_environment=env, environment_settings=EnvironmentSettings.new_instance().in_batch_mode().build())
 
     # Create the Apache Iceberg catalog with integration with AWS Glue back by AWS S3
     catalog_name = "apache_kickstarter"
@@ -92,8 +93,6 @@ def main(args):
     flight_table = tbl_env.sql_query(f"SELECT * FROM {database_name}.flight")
     df_flight_table = flight_table.to_pandas()
 
-
-    
     # Create grid options with only specific columns
     gb = GridOptionsBuilder.from_dataframe(df_flight_table)
     gb.configure_columns(["email_address", "departure_time", "departure_airport_code", "arrival_time", "arrival_airport_code", "flight_number", "confirmation_code", "airline"]) 
@@ -105,27 +104,70 @@ def main(args):
         width='100%'
     )
 
-    # # Read `flight` data from the Iceberg table and aggregate the data
-    # flight_aggregration_table = tbl_env.sql_query(f"""
-    #                                               SELECT 
-    #                                                 CONCAT(departure_airport_code, '-', arrival_airport_code), 
-    #                                                 COUNT(*) AS total 
-    #                                               FROM {database_name}.flight 
-    #                                               WHERE departure_airport_code = 'ATL' 
-    #                                               GROUP BY CONCAT(departure_airport_code, '-', arrival_airport_code)
-    #                                               """)  
-    # df_flight_aggregration_table = flight_aggregration_table.to_pandas()
-    # df_flight_aggregration_table = df_flight_aggregration_table.sort_values(by=["total"], ascending=False)
+    # 
+    ranked_airports_table = tbl_env.sql_query(f"""
+                                                with cte_ranked as (
+                                                    select
+                                                        airline,
+                                                        departure_airport_code,
+                                                        flight_count,
+                                                        ROW_NUMBER() OVER (PARTITION BY airline ORDER BY flight_count DESC) AS row_num
+                                                    from (
+                                                        select
+                                                            airline,
+                                                            departure_airport_code,
+                                                            count(*) as flight_count
+                                                        from
+                                                            airlines.flight
+                                                        group by
+                                                            airline,
+                                                            departure_airport_code
+                                                    ) tbl
+                                                )
+                                                select 
+                                                    departure_airport_code, 
+                                                    flight_count
+                                                from 
+                                                    cte_ranked
+                                                where 
+                                                    airline = 'SkyOne' and 
+                                                    row_num <= 5;
+                                            """)
+    df_ranked_airports_table = ranked_airports_table.to_pandas()
+    
+    fig, ax = plt.subplots()
+    ax.set_title('Top 5 Airports with the Most Departures for SkyOne')
+    ax.pie(df_ranked_airports_table['flight_count'], labels=df_ranked_airports_table['departure_airport_code'], autopct='%1.1f%%', startangle=90)
+    ax.axis('equal')  # Equal aspect ratio ensures that the pie is drawn as a circle.
 
-    # # Create grid options with only specific columns
-    # gb = GridOptionsBuilder.from_dataframe(df_flight_aggregration_table)
-    # gridOptions = gb.build()
-    # AgGrid(
-    #     df_flight_aggregration_table,
-    #     gridOptions=gridOptions,
-    #     height=300, 
-    #     width='100%'
-    # )
+    # Display the pie chart in Streamlit
+    st.pyplot(fig)
+
+    # 
+    airline_monthly_flights_table = tbl_env.sql_query(f"""
+                                                        select 
+                                                            extract(month from to_timestamp(departure_time)) as departure_month, 
+                                                            count(*) as flight_count
+                                                        from
+                                                            airlines.flight
+                                                        where
+                                                            airline = 'SkyOne' and 
+                                                            extract(year from to_timestamp(departure_time)) = 2025 
+                                                        group by 
+                                                            extract(month from to_timestamp(departure_time))
+                                                        order by
+                                                            departure_month asc;
+                                                    """)
+    df_airline_monthly_flights_table = airline_monthly_flights_table.to_pandas()
+    
+    fig, ax = plt.subplots()
+    ax.bar(df_airline_monthly_flights_table['departure_month'], df_airline_monthly_flights_table['flight_count'])
+    ax.set_xlabel('departure_month')
+    ax.set_ylabel('flight_count')
+    ax.set_title('SkyOne Monthly Flights in 2025')
+
+    # Display the bar chart in Streamlit
+    st.pyplot(fig)
 
 
 if __name__ == "__main__":
