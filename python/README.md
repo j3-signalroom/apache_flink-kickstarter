@@ -69,7 +69,18 @@ Flink App|Flink Run Command
 > `<AWS_REGION_NAME>`|specify the AWS Region your AWS Glue infrastructure resides.
 
 ## 4.0 Unleash Flink for Data Visualization
+The exciting part is that after running all your Flink applications, the data now flows seamlessly into your Kafka Topics and Apache Iceberg Tables. But data alone doesn’t tell the story—it’s time to share those insights with the world! One fantastic way to do that is with Streamlit, which allows you to easily create interactive visualizations. Streamlit is intuitive, powerful, and designed with Python developers in mind, making it a breeze to turn raw data into captivating dashboards. 😉
 
+![iceberg-flink-streamlit-drawing](../.blog/images/iceberg-flink-streamlit-drawing.png)
+
+To illustrate, I created another Flink app that queries the `apache_kickstarter.airlines.flight` and `apache_kickstarter.airlines.flyer_stats` Apache Iceberg Tables, respectively, harnessing Flink SQL to extract valuable insights. These insights are then brought to life through a Streamlit dashboard, transforming raw data into an accessible, visual experience.
+
+Here you go, run this in the docker container terminal command line:
+
+```bash
+streamlit run kickstarter/flink_kickstarter_visualization.py -- --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>
+```
+> _Notice the extra `--` between streamlit run `kickstarter/flink_kickstarter_visualization.py` and the actual Flink App script arguments.  This is necessary to pass arguments to the Streamlit script without causing conflicts with Streamlit's own CLI options._
 
 ## 5.0 Resources
 

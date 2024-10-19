@@ -59,7 +59,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 
 ## [0.30.10.000] - 2024-10-08
 ### Added
-- Sink the data in DataGeneratorApp datastreams to Apache Iceberg tables.
+- Sink the data in DataGeneratorApp datastreams to Apache Iceberg Tables.
 
 ### Changed
 - No longer makes a distinction between languages when creating the Docker containers.
@@ -83,7 +83,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 ### Added
 - Converted FlightImporterApp.java to flight_importer_app.py.
 - Converted UserStatisticsApp.java to user_statistics_app.py.
-- Sink FlightImporterApp and UserStatisticsApp Apache Iceberg tables.
+- Sink FlightImporterApp and UserStatisticsApp Apache Iceberg Tables.
 - Use User-Defined Table Function in Python to call AWS Services.
 
 ### Changed
