@@ -112,7 +112,7 @@ RUN pip install pyflink
 RUN pip install py4j==0.10.9.7
 RUN pip install google-api-python-client
 RUN pip install "pyiceberg[s3fs,glue]"
-RUN pip install streamlit
+RUN pip install streamlit pandas matplotlib plotly
 RUN pip install streamlit-aggrid
 
 # Install AWS CLI to interact with AWS services for debugging services
