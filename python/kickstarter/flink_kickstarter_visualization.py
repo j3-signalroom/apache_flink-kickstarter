@@ -89,6 +89,9 @@ def main(args):
     # Print the current database name
     print(f"Current database: {tbl_env.get_current_database()}")
 
+    # Set the page configuration to wide mode
+    st.set_page_config(layout="wide")
+
     st.title("Flink Kickstarter Visualization")
     st.write("This Streamlit application displays data from the Apache Iceberg table created by the Flink Kickstarter job.")
 
@@ -125,9 +128,7 @@ def main(args):
             st.pyplot(fig)
 
             # Display the description of the bar chart
-            st.write("This bar chart displays the number of SkyOne monthly flights in 2025.")
-            st.write("The x-axis represents the month and the y-axis represents the number of flights.")
-            st.write("The chart shows the number of flights for each month in 2025.")
+            st.write("This bar chart displays the number of SkyOne monthly flights in 2025.  The x-axis represents the month and the y-axis represents the number of flights.")
 
         with col2:
             st.header("Airport Ranking")
@@ -171,8 +172,7 @@ def main(args):
             st.pyplot(fig)
 
             # Display the description of the pie chart
-            st.write("This pie chart displays the top 5 airports with the most departures for SkyOne.")
-            st.write("The chart shows the percentage of flights departing from each of the top 5 airports.")
+            st.write("This pie chart displays the top 5 airports with the most departures for SkyOne.  The chart shows the percentage of flights departing from each of the top 5 airports.")
 
     with st.container(border=True):
         st.header("Flight Data")
@@ -193,8 +193,7 @@ def main(args):
         )
 
         # Display the description of the table
-        st.write("This table displays the flight data from the Apache Iceberg table.")
-        st.write("The table shows the email address, departure time, departure airport code, arrival time, arrival airport code, flight number, confirmation code, and airline for each flight.")
+        st.write("This table displays the flight data from the Apache Iceberg table.  The table shows the email address, departure time, departure airport code, arrival time, arrival airport code, flight number, confirmation code, and airline for each flight.")
 
 
 if __name__ == "__main__":
