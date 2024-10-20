@@ -90,7 +90,7 @@ Open your host web browser, enter the local URL, `localhost:8501`, and in a few 
 
 ![streamlit-screenshot](../.blog/images/streamlit-screenshot.png)
 
-> _**"After 30+ years in this industry, I’m still amazed by what we can achieve today!  The possibilities are endless—enjoy the ride!"**_
+> _**"After many years in this industry, I’m still amazed by what we can achieve today!  The possibilities are endless—enjoy the ride!"**_
 > 
 > _**---J3**_
 
