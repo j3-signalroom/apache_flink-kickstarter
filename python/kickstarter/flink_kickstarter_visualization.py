@@ -37,7 +37,7 @@ def load_data(_tbl_env: StreamTableEnvironment, database_name: str) -> Tuple[pd.
                                                             airline,
                                                             extract(year from to_timestamp(departure_time)) as departure_year,
                                                             extract(month from to_timestamp(departure_time)) as departure_month, 
-                                                            date_format(to_timestamp(departure_time), 'MMM') as departure_month_abbr,
+                                                            concat(date_format(to_timestamp(departure_time), 'MM'), '-', date_format(to_timestamp(departure_time), 'MMM')) as departure_month_abbr,
                                                             count(*) as flight_count
                                                         from
                                                             airlines.flight
@@ -45,7 +45,7 @@ def load_data(_tbl_env: StreamTableEnvironment, database_name: str) -> Tuple[pd.
                                                             airline,
                                                             extract(year from to_timestamp(departure_time)),
                                                             extract(month from to_timestamp(departure_time)),
-                                                            date_format(to_timestamp(departure_time), 'MMM')
+                                                            concat(date_format(to_timestamp(departure_time), 'MM'), '-', date_format(to_timestamp(departure_time), 'MMM'))
                                                         order by
                                                             departure_year asc,
                                                             departure_month asc;
