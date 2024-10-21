@@ -153,6 +153,6 @@ My goal was to run Flink apps using the latest compatible versions of Apache Fli
 > So, it is missing, and therefore, I made the call to use the prior release of `Apache Flink 1.19.1`.
 
 ## I'll stop here for now
-It took some effort to figure out the right combination of JARs and dependencies, so I'll let this sit for a bit—especially for those of you needing the specific JAR setup. In Part II, I'll show you how, with these JARs in place, you can build some powerful Flink apps using Java.
+It took some effort to figure out the right combination of JARs and dependencies, so I'll let this sit for a bit - especially for those needing the specific JAR setup. In Part II, I'll show you how, with these JARs in place, you can build some powerful Flink apps using Java.
 
 But for those who can't wait—I've got some hands-on code for you!  Click [here](https://github.com/j3-signalroom/apache_flink-kickstarter/tree/main/java).  I'll explain how everything works in Part II. Stay tuned!
