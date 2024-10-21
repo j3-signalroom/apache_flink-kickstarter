@@ -8,6 +8,7 @@ Curious about the differences between the DataStream API and Table API? Click [h
 <!-- toc -->
 + [1.0 Power up the Apache Flink Docker containers](#10-power-up-the-apache-flink-docker-containers)
 + [2.0 Discover What You Can Do with These Flink Apps](#20-discover-what-you-can-do-with-these-flink-apps)
++ [3.0 Resources](#30-resources)
 <!-- tocstop -->
 
 ## 1.0 Power up the Apache Flink Docker containers
@@ -78,3 +79,6 @@ Flink App|Flink Run Command
 > -|-
 > `<SERVICE_ACCOUNT_USER>`|specify the name of the service account user, used in the the AWS Secrets and Parameter Store Path name.
 > `<AWS_REGION_NAME>`|specify the AWS Region your AWS Glue infrastructure resides.
+
+## 3.0 Resources
+[Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!](../.blog/get-your-jar-versions-right.md)
