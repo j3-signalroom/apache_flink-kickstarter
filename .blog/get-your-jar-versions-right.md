@@ -3,7 +3,7 @@ If you're like me and want to work with the latest versions of Apache Flink, Apa
 
 ![funny-dogs-cute](images/funny-dogs-cute.gif)
 
-Before a single line of code can run, with Java-based tools like Flink and Iceberg, you need the right JARs in your build—and they must be compatible with each other. Let me tell you, that’s quite an undertaking! It takes a lot of time, especially with the trial and error involved in integrating multiple technologies. Seriously, if anyone has the secret list of which JARs go with which versions, please share! I'm getting old, and I’d love to make up for lost time. 😉
+Before running any code with Java-based tools like Flink and Iceberg, it's essential to ensure you have the correct JAR files in your build, and that they are compatible with each other. This process can be quite challenging and time-consuming, especially when integrating multiple technologies and going through trial and error. If anyone has a comprehensive list of which JAR files correspond to which versions, I would greatly appreciate it! Time is precious, and I'm tired of waiting for the right answer. I'd love to make the most of it. 😉
 
 ![old-man](images/old-man.gif)
 
@@ -146,7 +146,7 @@ curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-shaded-hadoop-2-u
 
 My goal was to run Flink apps using the latest compatible versions of Apache Flink and Apache Iceberg, with AWS Glue serving as the Iceberg metastore. To achieve this, I need the latest version of AWS Glue that seamlessly integrates with both Flink and Iceberg, ensuring maximum compatibility and performance. I accomplished this using the Gradle script along with installing the necessary JARs in the Flink home library directory!
 
-> Now their might be some of you who say wait one minute, it's `October 20, 2024`,  `Apache Flink 1.20` has been released, so what gives?  Well it turns out that when I went to the Apache Iceberg Releases page, when down the list and click on the [1.6.1 Flink 1.20 runtime Jar](https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.20/1.6.1/iceberg-flink-runtime-1.20-1.6.1.jar) and I get this:
+> Now there might be some of you who say wait one minute, it's October 21, 2024, Apache Flink 1.20 has been released, so what gives? Well it turns out that when I went to the Apache Iceberg Releases page, went down the list, and clicked on the [1.6.1 Flink 1.20 runtime Jar](https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.20/1.6.1/iceberg-flink-runtime-1.20-1.6.1.jar) I got this:
 > 
 > ![iceberg-runtime-is-missing](images/iceberg-runtime-is-missing.png)
 >
@@ -155,4 +155,4 @@ My goal was to run Flink apps using the latest compatible versions of Apache Fli
 ## I'll stop here for now
 It took some effort to figure out the right combination of JARs and dependencies, so I'll let this sit for a bit—especially for those of you needing the specific JAR setup. In Part II, I'll show you how, with these JARs in place, you can build some powerful Flink apps using Java.
 
-But for those who can't wait—I've got some hands-on code for you!  Click [here](https://github.com/j3-signalroom/apache_flink-kickstarter/tree/main/java).  I'll explain how everything works in Part II. Stay tuned!"
+But for those who can't wait—I've got some hands-on code for you!  Click [here](https://github.com/j3-signalroom/apache_flink-kickstarter/tree/main/java).  I'll explain how everything works in Part II. Stay tuned!
