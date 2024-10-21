@@ -3,17 +3,17 @@ If you're like me and want to work with the latest versions of Apache Flink, Apa
 
 ![funny-dogs-cute](images/funny-dogs-cute.gif)
 
-Before running any code with Java-based tools like Flink and Iceberg, it's essential to ensure you have the correct JAR files in your build, and that they are compatible with each other. This process can be quite challenging and time-consuming, especially when integrating multiple technologies and going through trial and error. If anyone has a comprehensive list of which JAR files correspond to which versions, I would greatly appreciate it! Time is precious, and I'm tired of waiting for the right answer. I'd love to make the most of it. 😉
+Before running any code with Java-based tools like Flink and Iceberg, you must ensure you have the correct JAR files in your build and that they are compatible. This process can be challenging and time-consuming, especially when integrating multiple technologies and going through trial and error. If anyone has a comprehensive list of which JAR files correspond to which versions, I would greatly appreciate it! Time is precious, and I'm tired of waiting for the right answer. I'd love to make the most of it. 😉
 
 ![old-man](images/old-man.gif)
 
-But hey, I cracked the code for getting my [Apache Flink Kickstarter public project](https://github.com/j3-signalroom/apache_flink-kickstarter) off the ground.
+I cracked the code to get my [Apache Flink Kickstarter public project](https://github.com/j3-signalroom/apache_flink-kickstarter).
 
 ![code-breaker-puzzle](images/code-breaker-puzzle.gif)
 
 ## Take a look
 
-For those who are old too, or just want me to cut to the chase—here's my entire Gradle build script:
+For those who are old too or want me to cut to the chase - here's my entire Gradle build script:
 
 ```kotlin
 plugins {
@@ -133,7 +133,7 @@ tasks.named<Test>("test") {
 }
 ```
 
- Then make sure these JARs are installed in your Apache Flink's installation `<FLINK_HOME>/lib/` folder:
+ Then make sure these JARs are installed in your Apache Flink's installation `<FLINK_HOME>/lib/` Folder:
 
  > Replace `<FLINK_HOME>` with your Apache Flink installation home directory, e.g., `/opt/flink`.
 
@@ -146,11 +146,11 @@ curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-shaded-hadoop-2-u
 
 My goal was to run Flink apps using the latest compatible versions of Apache Flink and Apache Iceberg, with AWS Glue serving as the Iceberg metastore. To achieve this, I need the latest version of AWS Glue that seamlessly integrates with both Flink and Iceberg, ensuring maximum compatibility and performance. I accomplished this using the Gradle script along with installing the necessary JARs in the Flink home library directory!
 
-> Now there might be some of you who say wait one minute, it's October 21, 2024, Apache Flink 1.20 has been released, so what gives? Well it turns out that when I went to the Apache Iceberg Releases page, went down the list, and clicked on the [1.6.1 Flink 1.20 runtime Jar](https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.20/1.6.1/iceberg-flink-runtime-1.20-1.6.1.jar) I got this:
+> Some of you might be wondering, "Wait a minute, as of October 21, 2024 Apache Flink 1.20 it's already been released, so what's going on?" Well, it turns out that when I visited the Apache Iceberg Releases page and checked the list, I clicked on the [1.6.1 Flink 1.20 runtime Jar](https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.20/1.6.1/iceberg-flink-runtime-1.20-1.6.1.jar) and came across this:
 > 
 > ![iceberg-runtime-is-missing](images/iceberg-runtime-is-missing.png)
 >
-> So, it is missing, and therefore, I made the call to use the prior release of `Apache Flink 1.19.1`.
+> So, it is missing, and therefore, I made the call to use the prior release, `Apache Flink 1.19.1`.
 
 ## I'll stop here for now
 It took some effort to figure out the right combination of JARs and dependencies, so I'll let this sit for a bit - especially for those needing the specific JAR setup. In Part II, I'll show you how, with these JARs in place, you can build some powerful Flink apps using Java.
