@@ -1,8 +1,19 @@
 # Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!
-If you're like me and want to work with the latest versions of Apache Flink, Apache Iceberg, and AWS Glue as your metastore, I've got some key insights to share. Before diving in, I want to acknowledge Zhe Wang’s post, Catalog Iceberg Data with AWS Glue Catalog from Flink Job, and Matt Slalom’s response on GitHub for Apache Iceberg Issue #3044 for pointing me in the right direction.
+If you're like me and want to work with the latest versions of Apache Flink, Apache Iceberg, and AWS Glue as your metastore, I've got some key insights to share. Before diving in, I want to acknowledge [Zhe Wang’s post, Catalog Iceberg Data with AWS Glue Catalog from Flink Job](https://medium.com/@zh3w4ng/catalog-iceberg-data-with-aws-glue-catalog-from-flink-job-aecffdc7bdd1), and [Matt Slalom’s response on GitHub for Apache Iceberg Issue #3044](https://github.com/apache/iceberg/issues/3044#issuecomment-1273900117) for pointing me in the right direction.
 
+![funny-dogs-cute](images/funny-dogs-cute.gif)
 
-Working with Java-based tools like Flink and Iceberg is about getting the correct JARs and ensuring compatibility between versions. Finding the right combination of JARs, especially when integrating multiple technologies, involved a lot of trial and error—but I’ve cracked the code. Let me guide you through the essentials to get everything working smoothly.  Below is the entire Gradle build script:
+Before a single line of code can run, with Java-based tools like Flink and Iceberg, you need the right JARs in your build—and they must be compatible with each other. Let me tell you, that’s quite an undertaking! It takes a lot of time, especially with the trial and error involved in integrating multiple technologies. Seriously, if anyone has the secret list of which JARs go with which versions, please share! I'm getting old, and I’d love to make up for lost time. 😉
+
+![old-man](images/old-man.gif)
+
+But hey, I cracked the code for getting my [Apache Flink Kickstarter public project](https://github.com/j3-signalroom/apache_flink-kickstarter) off the ground.
+
+![code-breaker-puzzle](images/code-breaker-puzzle.gif)
+
+## TL;DR
+
+For those who are old too, or just want me to cut to the chase—here's my entire Gradle build script:
 
 ```kotlin
 plugins {
@@ -121,3 +132,16 @@ tasks.named<Test>("test") {
     )
 }
 ```
+
+ Then make sure these JARs are installed in your Apache Flink's installation `<FLINK_HOME>/lib/` folder:
+
+ > Replace `<FLINK_HOME>` with your Apache Flink installation home directory, e.g., `/opt/flink`.
+
+ ```bash
+curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.19.1/flink-s3-fs-hadoop-1.19.1.jar" -o "<FLINK_HOME>/lib/flink-s3-fs-hadoop-1.19.1.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/1.19.1/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar" -o "<FLINK_HOME>/lib/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.4.0/hadoop-common-3.4.0.jar" -o "<FLINK_HOME>/lib/hadoop-common-3.4.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-shaded-hadoop-2-uber/2.8.3-10.0/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" -o "<FLINK_HOME>/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar"
+```
+
+My goal was to run Flink apps using the latest compatible versions of Apache Flink and Apache Iceberg, with AWS Glue serving as the Iceberg metastore. To achieve this, I need the latest version of AWS Glue that seamlessly integrates with both Flink and Iceberg, ensuring maximum compatibility and performance. I accomplished this using the Gradle script along with installing the necessary JARs in the Flink home library directory!
