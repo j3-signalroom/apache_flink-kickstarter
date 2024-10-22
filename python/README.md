@@ -10,6 +10,7 @@ Curious about the differences between the DataStream API and Table API? Click [h
 + [2.0 Power up the Apache Flink Docker containers](#20-power-up-the-apache-flink-docker-containers)
 + [3.0 Discover What You Can Do with These Flink Apps](#30-discover-what-you-can-do-with-these-flink-apps)
 + [4.0 Unleash the Full Power of Flink to Bring Your Data Visualizations to Life!](#40-unleash-the-full-power-of-flink-to-bring-your-data-visualizations-to-life)
+    - [4.1 Have you noticed something curious about this example?](#41-have-you-noticed-something-curious-about-this-example)
 + [5.0 Resources](#50-resources)
 <!-- tocstop -->
 
@@ -93,6 +94,9 @@ Open your host web browser, enter the local URL, `localhost:8501`, and in a few 
 > _**"After many years in this industry, I’m still amazed by what we can achieve today!  The possibilities are endless—enjoy the ride!"**_
 > 
 > _**---J3**_
+
+### 4.1 Have you noticed something curious about this example?
+When running Streamlit in this example with Apache Flink, Streamlit runs the Python script that uses PyFlink instead of submitting the Python script to the Flink cluster using the `flink run` CLI command.  The difference between the two approaches lies in the execution environment, resource utilization, and integration with the Flink cluster.   _**Stay tuned for the write-up on the different approaches and the code example that handles the approach of what to do if Flink is not localized.**_	
 
 ## 5.0 Resources
 
