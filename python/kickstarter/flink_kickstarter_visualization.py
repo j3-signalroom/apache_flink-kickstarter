@@ -9,8 +9,7 @@ from st_aggrid import AgGrid, GridOptionsBuilder
 import plotly.express as px
 import altair as alt
 
-
-from helper.utilities import catalog_exist
+from helper.utilities import *
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -22,7 +21,9 @@ __status__     = "dev"
 
 @st.cache_data
 def load_data(_tbl_env: StreamTableEnvironment, database_name: str) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """This function loads data from an Apache Iceberg table and returns it as a Pandas DataFrame.
+    """This function creates and loads from multiple query data results
+    from the `airlines.flight` Apache Iceberg Table into cache and then
+    returns the query results as Pandas DataFrames from the cache.
     
     Args:
         _tbl_env (StreamTableEnvironment): is the Table Environment.
@@ -99,7 +100,7 @@ def main(args):
     Args:
         args (str): is the arguments passed to the script.
     """
-    # Set the page configuration to wide mode
+    # --- Set the page configuration to wide mode
     st.set_page_config(layout="wide")
 
     # --- Create a blank Flink execution environment
@@ -120,56 +121,26 @@ def main(args):
     #
     env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
-    # Create a Table Environment
+    # --- Add the Python dependency script files to the environment
+    env.add_python_archive("/opt/flink/python_apps/kickstarter/python_files.zip")
+
+    # --- Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env, environment_settings=EnvironmentSettings.new_instance().in_batch_mode().build())
 
-    # Create the Apache Iceberg catalog with integration with AWS Glue back by AWS S3
-    catalog_name = "apache_kickstarter"
-    bucket_name = args.s3_bucket_name.replace("_", "-") # To follow S3 bucket naming convention, replace underscores with hyphens if exist
-    try:
-        if not catalog_exist(tbl_env, catalog_name):
-            tbl_env.execute_sql(f"""
-                CREATE CATALOG {catalog_name} WITH (
-                    'type' = 'iceberg',
-                    'warehouse' = 's3://{bucket_name}/warehouse',
-                    'catalog-impl' = 'org.apache.iceberg.aws.glue.GlueCatalog',
-                    'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
-                    'glue.skip-archive' = 'True',
-                    'glue.region' = '{args.aws_region}'
-                    );
-            """)
-        else:
-            print(f"The {catalog_name} catalog already exists.")
-    except Exception as e:
-        print(f"A critical error occurred to during the processing of the catalog because {e}")
-        exit(1)
+    # --- Load Apache Iceberg catalog
+    catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
 
-    # Use the Iceberg catalog
-    tbl_env.use_catalog(catalog_name)
-
-    # Access the Iceberg catalog to query the airlines database
-    catalog = tbl_env.get_catalog(catalog_name)
-
-    # Print the current catalog name
+    # --- Print the current catalog name
     print(f"Current catalog: {tbl_env.get_current_catalog()}")
 
-    # Check if the database exists.  If not, create it
-    database_name = "airlines"
-    try:
-        if not catalog.database_exists(database_name):
-            tbl_env.execute_sql(f"CREATE DATABASE IF NOT EXISTS {database_name};")
-        else:
-            print(f"The {database_name} database already exists.")
-        tbl_env.use_database(database_name)
-    except Exception as e:
-        print(f"A critical error occurred to during the processing of the database because {e}")
-        exit(1)
+    # --- Load database
+    load_database(tbl_env, catalog, "airlines")
 
     # Print the current database name
     print(f"Current database: {tbl_env.get_current_database()}")
 
     # Load the data
-    df_airline_monthly_flights_table, df_ranked_airports_table, df_flight_table = load_data(tbl_env, database_name)
+    df_airline_monthly_flights_table, df_ranked_airports_table, df_flight_table = load_data(tbl_env, tbl_env.get_current_database())
 
     st.title("Apache Flink Kickstarter Dashboard")
     st.write("This Streamlit application displays data from the Apache Iceberg table created by the DataGenerator and FlightImporter Flink Apps.")

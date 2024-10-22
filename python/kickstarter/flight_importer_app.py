@@ -10,7 +10,7 @@ import argparse
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
 from helper.kafka_properties import execute_kafka_properties_udtf
-from helper.utilities import catalog_exist, parse_isoformat 
+from helper.utilities import * 
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -114,47 +114,14 @@ def main(args):
                     .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
                     .build())
     
-    # Create the Apache Iceberg catalog with integration with AWS Glue back by AWS S3
-    catalog_name = "apache_kickstarter"
-    bucket_name = args.s3_bucket_name.replace("_", "-") # To follow S3 bucket naming convention, replace underscores with hyphens if exist
-    try:
-        if not catalog_exist(tbl_env, catalog_name):
-            tbl_env.execute_sql(f"""
-                CREATE CATALOG {catalog_name} WITH (
-                    'type' = 'iceberg',
-                    'warehouse' = 's3://{bucket_name}/warehouse',
-                    'catalog-impl' = 'org.apache.iceberg.aws.glue.GlueCatalog',
-                    'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
-                    'glue.skip-archive' = 'True',
-                    'glue.region' = '{args.aws_region}'
-                    );
-            """)
-        else:
-            print(f"The {catalog_name} catalog already exists.")
-    except Exception as e:
-        print(f"A critical error occurred to during the processing of the catalog because {e}")
-        exit(1)
+    # --- Load Apache Iceberg catalog
+    catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
 
-    # Use the Iceberg catalog
-    tbl_env.use_catalog(catalog_name)
-
-    # Access the Iceberg catalog to create the airlines database and the Iceberg tables
-    catalog = tbl_env.get_catalog(catalog_name)
-
-    # Print the current catalog name
+    # --- Print the current catalog name
     print(f"Current catalog: {tbl_env.get_current_catalog()}")
 
-    # Check if the database exists.  If not, create it
-    database_name = "airlines"
-    try:
-        if not catalog.database_exists(database_name):
-            tbl_env.execute_sql(f"CREATE DATABASE IF NOT EXISTS {database_name};")
-        else:
-            print(f"The {database_name} database already exists.")
-        tbl_env.use_database(database_name)
-    except Exception as e:
-        print(f"A critical error occurred to during the processing of the database because {e}")
-        exit(1)
+    # --- Load database
+    load_database(tbl_env, catalog, "airlines")
 
     # Print the current database name
     print(f"Current database: {tbl_env.get_current_database()}")
@@ -164,7 +131,7 @@ def main(args):
     # within a catalog by encapsulating both the database name and the object name.  For 
     # instance, this case we using it to get the fully qualified path of the `flight`
     # table
-    flight_table_path = ObjectPath(database_name, "flight")
+    flight_table_path = ObjectPath(tbl_env.get_current_database(), "flight")
 
     # Check if the table exists.  If not, create it
     try:
