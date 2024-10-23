@@ -1,0 +1,20 @@
+[project]
+name = "kickstarter"
+version = "0.52.00.000"
+description = "Apache Flink Kickstarter"
+readme = "README.md"
+requires-python = "~=3.11.9"
+dependencies = [
+    "apache-flink==1.19.1",
+    "boto3>=1.35.36",
+    "botocore>=1.35.36",
+    "confluent-kafka==2.5.3",
+    "grpcio-tools>=1.29.0,<=1.50.0",
+    "plotly>=5.24.1",
+    "py4j==0.10.9.7",
+    "pyflink>=1.0",
+    "pyiceberg[glue,s3fs]>=0.7.1",
+    "setuptools>=37.0.0",
+    "streamlit-aggrid>=1.0.5",
+    "streamlit>=1.39.0",
+]

@@ -52,7 +52,7 @@ To learn more about this script, click [here](../.blog/run-flink-locally-script-
 ## 3.0 Discover What You Can Do with These Flink Apps
 To access the JobManager (`apache_flink-kickstarter-jobmanager-1`) container, open the interactive shell by running:
 ```bash
-docker exec -it -w /opt/flink/python_apps apache_flink-kickstarter-jobmanager-1 /bin/bash
+docker exec -it -u root -w /opt/flink/python_apps/src apache_flink-kickstarter-jobmanager-1 /bin/bash
 ```
 
 Jump right into the container and take charge! You’ll have full control to run commands, explore the file system, and tackle any tasks you need. You’ll land directly in the `/opt/flink/python_apps` directory—this is the headquarters for all the Python scripts in the repo.
@@ -61,8 +61,8 @@ Ready to launch one of those cool Java-to-Python Flink apps? Just use the [`flin
 
 Flink App|Flink Run Command
 -|-
-**`FlightImporterApp`**|`flink run --pyFiles kickstarter/python_files.zip --python kickstarter/flight_importer_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>`
-**`FlyerStatsApp`**|`flink run --pyFiles kickstarter/python_files.zip --python kickstarter/flyer_stats_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>`
+**`FlightImporterApp`**|`uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/flight_importer_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>`
+**`FlyerStatsApp`**|`uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/flyer_stats_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>`
 
 > Argument placeholder|Replace with
 > -|-
@@ -79,7 +79,7 @@ To illustrate, I created a Streamlit script that queries the `apache_kickstarter
 Here you go, run this in the docker container terminal command line:
 
 ```bash
-streamlit run kickstarter/flink_kickstarter_visualization.py -- --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>
+uv run streamlit run kickstarter/flink_kickstarter_visualization.py -- --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>
 ```
 > _Notice the extra `--` between streamlit run `kickstarter/flink_kickstarter_visualization.py` and the actual script arguments.  This is necessary to pass arguments to the Streamlit script without causing conflicts with Streamlit's own CLI options._
 
