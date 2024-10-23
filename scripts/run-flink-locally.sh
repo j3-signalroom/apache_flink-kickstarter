@@ -122,12 +122,6 @@ then
     else
         docker-compose -f mac-docker-compose.yml up -d
     fi
-
-    # Zip the Python files when building the docker containers for Python use
-    if [ $FLINK_LANGUAGE = "python" ]
-    then
-        docker exec -it -w /opt/flink/python_apps/kickstarter apache_flink-kickstarter-jobmanager-1 /bin/bash -c "zip -r python_files.zip * -x '__pycache__/*' -x 'helper/__pycache__/*' -x 'model/__pycache__/*'"
-    fi
 else
     if [ $use_non_mac = true ]
     then

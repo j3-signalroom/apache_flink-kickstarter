@@ -19,7 +19,6 @@ services:
     command: jobmanager
     volumes:
       - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/libs:/opt/flink/java_apps
-      - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/python:/opt/flink/python_apps
     environment:
       - |
         FLINK_PROPERTIES=
@@ -27,6 +26,7 @@ services:
         rest.flamegraph.enabled: true
         web.backpressure.refresh-interval: 10000
         classloader.check-leaked-classloader: false
+        python.executable: /opt/flink/python_apps/.venv/bin/python
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
@@ -51,7 +51,6 @@ services:
     scale: 3
     volumes:
       - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/libs:/opt/flink/java_apps
-      - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/python:/opt/flink/python_apps
     environment:
       - |
         FLINK_PROPERTIES=
@@ -62,6 +61,7 @@ services:
         taskmanager.memory.network.fraction: 0.2
         python.fn-execution.memory.limit: 512mb
         classloader.check-leaked-classloader: false
+        python.executable: /opt/flink/python_apps/.venv/bin/python
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN

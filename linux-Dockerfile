@@ -99,21 +99,8 @@ ENV PATH="/usr/local/Python-${PYTHON_VERSION_WITH_PATCH}:${PATH}"
 # Set JAVA_HOME
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
 
-# Install PyFlink, PyIceberg, AWS SDK, and other Python dependencies
+# Upgrade pip
 RUN python${PYTHON_VERSION} -m pip install --upgrade pip
-RUN python${PYTHON_VERSION} -m pip install pipenv
-RUN python${PYTHON_VERSION} -m venv .venv
-RUN . .venv/bin/activate
-RUN pip install "grpcio-tools>=1.29.0,<=1.50.0"
-RUN pip install setuptools>=37.0.0
-RUN pip install boto3
-RUN pip install apache-flink==${APACHE_FLINK_VERSION_WITH_PATCH}
-RUN pip install pyflink
-RUN pip install py4j==0.10.9.7
-RUN pip install google-api-python-client
-RUN pip install "pyiceberg[s3fs,glue]"
-RUN pip install streamlit pandas plotly
-RUN pip install streamlit-aggrid
 
 # Install AWS CLI to interact with AWS services for debugging services
 RUN pip --no-cache-dir install --upgrade awscli
@@ -126,6 +113,24 @@ ENV CLASSPATH="${FLINK_LIB_DIR}*"
 
 # Set JAVA_HOME
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
+
+# Download UV
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Copy Python files to container
+COPY python /opt/flink/python_apps/
+
+# Set the working directory to the Python files
+WORKDIR /opt/flink/python_apps
+
+# Install Python dependencies
+RUN uv sync --frozen
+
+# Activate the virtual environment for the Python Flink Apps
+RUN /bin/bash -c "source /opt/flink/python_apps/.venv/bin/activate"
+
+# Zip Python files
+RUN zip -r python_files.zip /opt/flink/python_apps/src/kickstarter/* -x '__pycache__/*' -x 'helper/__pycache__/*' -x 'model/__pycache__/*'
 
 # Set the entrypoint to Flink's entrypoint script
 CMD ["./bin/start-cluster.sh"]

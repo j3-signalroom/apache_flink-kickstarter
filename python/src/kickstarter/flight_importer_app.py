@@ -10,7 +10,7 @@ import argparse
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
 from helper.kafka_properties import execute_kafka_properties_udtf
-from helper.utilities import * 
+from helper.utilities import parse_isoformat, load_catalog, load_database
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]

@@ -9,7 +9,7 @@ from st_aggrid import AgGrid, GridOptionsBuilder
 import plotly.express as px
 import altair as alt
 
-from helper.utilities import *
+from helper.utilities import load_catalog, load_database
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
