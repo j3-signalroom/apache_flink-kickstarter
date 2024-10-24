@@ -9,7 +9,9 @@ Curious about the differences between the DataStream API and Table API? Click [h
 + [1.0 Important Note(s)](#10-important-notes)
 + [2.0 Power up the Apache Flink Docker containers](#20-power-up-the-apache-flink-docker-containers)
 + [3.0 Discover What You Can Do with These Flink Apps](#30-discover-what-you-can-do-with-these-flink-apps)
-+ [4.0 Unleash the Full Power of Flink to Bring Your Data Visualizations to Life!](#40-unleash-the-full-power-of-flink-to-bring-your-data-visualizations-to-life)
+    - [3.1 Special Mention](#31-special-mention)
++ [4.0 Unleash the Full Power of Flink to Bring Your Data Visualizations to Life!]
+(#40-unleash-the-full-power-of-flink-to-bring-your-data-visualizations-to-life)
     - [4.1 Have you noticed something curious about this example?](#41-have-you-noticed-something-curious-about-this-example)
 + [5.0 Resources](#50-resources)
 <!-- tocstop -->
@@ -68,6 +70,20 @@ Flink App|Flink Run Command
 > -|-
 > `<AWS_S3_BUCKET>`|specify name of the AWS S3 bucket you chosen during the Terraform creation or created yourself separately.  The AWS S3 bucket is used to store the Apache Iceberg files (i.e., data files, manifest files, manifest list file, and metadata files).
 > `<AWS_REGION_NAME>`|specify the AWS Region your AWS Glue infrastructure resides.
+
+### 3.1 Special Mention
+Before we move on, take a moment to notice something new right before the `flink run` command—the `uv` run comes right before it! What is `uv`, you ask? Well, it's an incredibly fast Python package installer and dependency resolver, written in Rust, and designed to seamlessly replace `pip` and pip-tools in your workflows. By prefixing uv run to a command, you're ensuring that the command runs in an optimal Python environment.
+
+Now, let's break down the magic behind uv run:
+- When you use it with a file ending in `.py` or an HTTP(S) URL, uv treats it as a script and runs it with a Python interpreter. In other words, `uv run` `file.py` is equivalent to `uv` run python file.py. If you're working with a URL, `uv` even downloads it temporarily to execute it. Any inline dependency metadata is installed into an isolated, temporary environment—meaning zero leftover mess! When used with `-`, the input will be read from `stdin`, and treated as a Python script.
+- If used in a project directory, uv will automatically create or update the project environment before running the command.
+- Outside of a project, if there's a virtual environment present in your current directory (or any parent directory), uv runs the command in that environment. If no environment is found, it uses the interpreter's environment.
+
+So what does this mean when we put `uv` run before `flink run`? It means uv takes care of all the setup—fast and seamless—right on the Flink cluster. If you think AI/ML is magic, the work the folks at Astral have done with uv is pure wizardry!
+
+Curious to learn more about Astral's `uv`? Check these out:
+- Documentation: Learn about [uv](https://docs.astral.sh/uv/).
+- Video: [uv IS the Future of Python Packing!](https://www.youtube.com/watch?v=8UuW8o4bHbw).
 
 ## 4.0 Unleash the Full Power of Flink to Bring Your Data Visualizations to Life!
 The exciting part is that after running all your Flink applications, the data now flows seamlessly into your Kafka Topics and Apache Iceberg Tables. But data alone doesn’t tell the story—it’s time to share those insights with the world! One fantastic way to do that is with Streamlit, which allows you to easily create interactive visualizations. Streamlit is intuitive, powerful, and designed with Python developers in mind, making it a breeze to turn raw data into captivating dashboards. 😉
