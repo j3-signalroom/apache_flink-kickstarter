@@ -10,8 +10,7 @@ Curious about the differences between the DataStream API and Table API? Click [h
 + [2.0 Power up the Apache Flink Docker containers](#20-power-up-the-apache-flink-docker-containers)
 + [3.0 Discover What You Can Do with These Flink Apps](#30-discover-what-you-can-do-with-these-flink-apps)
     - [3.1 Special Mention](#31-special-mention)
-+ [4.0 Unleash the Full Power of Flink to Bring Your Data Visualizations to Life!]
-(#40-unleash-the-full-power-of-flink-to-bring-your-data-visualizations-to-life)
++ [4.0  Unleash the Full Power of Flink to Bring Your Data Visualizations to Life!](#40-unleash-the-full-power-of-flink-to-bring-your-data-visualizations-to-life)
     - [4.1 Have you noticed something curious about this example?](#41-have-you-noticed-something-curious-about-this-example)
 + [5.0 Resources](#50-resources)
 <!-- tocstop -->
