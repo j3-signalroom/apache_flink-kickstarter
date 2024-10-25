@@ -44,14 +44,14 @@ scripts/run-flink-locally.sh on --profile=<AWS_SSO_PROFILE_NAME>
 To learn more about this script, click [here](../.blog/run-flink-locally-script-explanation.md).
 
 ## 2.0 Discover What You Can Do with These Flink Apps
-To access the JobManager (`apache_flink-kickstarter-jobmanager-1`) container, open the interactive shell by running:
+To access the Flink JobManager (`apache_flink-kickstarter-jobmanager-1`) container, open the interactive shell by running:
 ```bash
 docker exec -it -w /opt/flink/java_apps/app/build/libs apache_flink-kickstarter-jobmanager-1 /bin/bash
 ```
 
 This command drops you right into the container, giving you full control to execute commands, explore the file system, or handle any tasks directly.
 
-Finally, to launch one of the Flink applications, choose your app and use the corresponding Flink Run command listed below. Let’s have some fun with Flink!
+Finally, to launch one of the **pre-complied** Flink applications, choose your app and use the corresponding [`flink run`](https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/cli/) command listed below. Let’s have some fun with Flink!
 
 Flink App|Flink Run Command
 -|-
