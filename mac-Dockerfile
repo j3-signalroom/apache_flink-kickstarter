@@ -62,7 +62,9 @@ RUN apt-get update && apt-get install -y \
     git \
     python3-pip \
     python3-venv \
-    zip
+    zip \
+    gradle \
+    nano
 
 # Download JAR files for Java and Python
 RUN curl -L "${MAVEN_ROOT_URL}flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
@@ -99,14 +101,21 @@ ENV PATH="/usr/local/Python-${PYTHON_VERSION_WITH_PATCH}:${PATH}"
 # Set JAVA_HOME
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
 
+# Copy Java files to the container
+COPY java /opt/flink/java_apps/
+
+# Set the working directory to the Java files
+WORKDIR /opt/flink/java_apps
+
+# Build Java files
+RUN ./gradlew app:clean
+RUN ./gradlew app:build
+
 # Upgrade pip
 RUN python${PYTHON_VERSION} -m pip install --upgrade pip
 
 # Install AWS CLI to interact with AWS services for debugging services
 RUN pip --no-cache-dir install --upgrade awscli
-
-# Install Nano to edit files
-RUN apt update && apt install -y nano
 
 # Set CLASSPATH environment variable
 ENV CLASSPATH="${FLINK_LIB_DIR}*"
@@ -117,17 +126,14 @@ ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
 # Download UV
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# Copy Python files to container
+# Copy Python files to the container
 COPY python /opt/flink/python_apps/
 
 # Set the working directory to the Python files
 WORKDIR /opt/flink/python_apps
 
-# Install Python dependencies
+# Install Python dependencies based on the `uv.lock` file
 RUN uv sync --frozen
-
-# Activate the virtual environment for the Python Flink Apps
-RUN /bin/bash -c "source /opt/flink/python_apps/.venv/bin/activate"
 
 # Zip Python files
 RUN zip -r python_files.zip /opt/flink/python_apps/src/kickstarter/* -x '__pycache__/*' -x 'helper/__pycache__/*' -x 'model/__pycache__/*'

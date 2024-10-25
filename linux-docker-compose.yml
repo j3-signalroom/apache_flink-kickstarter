@@ -17,8 +17,6 @@ services:
       - 8443:443
       - 8501:8501
     command: jobmanager
-    volumes:
-      - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/libs:/opt/flink/java_apps
     environment:
       - |
         FLINK_PROPERTIES=
@@ -49,8 +47,6 @@ services:
       - jobmanager
     command: taskmanager
     scale: 3
-    volumes:
-      - /Users/jeffreyjonathanjennings/j3/code_spaces/apache_flink-kickstarter/java/app/build/libs:/opt/flink/java_apps
     environment:
       - |
         FLINK_PROPERTIES=

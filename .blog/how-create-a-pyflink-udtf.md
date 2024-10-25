@@ -383,9 +383,6 @@ def main(args):
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
-    # Adjust resource configuration
-    env.set_parallelism(1)  # Set parallelism to 1 for simplicity
-
     # Get the Kafka Cluster properties for the Kafka consumer client
     consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
