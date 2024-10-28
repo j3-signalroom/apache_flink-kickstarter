@@ -32,7 +32,7 @@ def load_data(_tbl_env: StreamTableEnvironment, database_name: str) -> Tuple[pd.
             Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]: is a tuple of Pandas DataFrames.
     """
     # Get the number of flights per month by airline, year, and month
-    airline_monthly_flights_table = _tbl_env.sql_query("""
+    airline_monthly_flights_table = _tbl_env.sql_query(f"""
                                                         select 
                                                             airline,
                                                             extract(year from to_timestamp(departure_time)) as departure_year,
@@ -40,7 +40,7 @@ def load_data(_tbl_env: StreamTableEnvironment, database_name: str) -> Tuple[pd.
                                                             concat(date_format(to_timestamp(departure_time), 'MM'), '-', date_format(to_timestamp(departure_time), 'MMM')) as departure_month_abbr,
                                                             count(*) as flight_count
                                                         from
-                                                            airlines.flight
+                                                            {database_name}.flight
                                                         group by 
                                                             airline,
                                                             extract(year from to_timestamp(departure_time)),
@@ -53,7 +53,7 @@ def load_data(_tbl_env: StreamTableEnvironment, database_name: str) -> Tuple[pd.
     df_airline_monthly_flights_table = airline_monthly_flights_table.to_pandas()
 
     # Get the top airports with the most departures by airport, airline, year, and rank
-    ranked_airports_table = _tbl_env.sql_query("""
+    ranked_airports_table = _tbl_env.sql_query(f"""
                                                 with cte_ranked as (
                                                     select
                                                         airline,
@@ -68,7 +68,7 @@ def load_data(_tbl_env: StreamTableEnvironment, database_name: str) -> Tuple[pd.
                                                             departure_airport_code,
                                                             count(*) as flight_count
                                                         from
-                                                            airlines.flight
+                                                            {database_name}.flight
                                                         group by
                                                             airline,
                                                             extract(year from to_timestamp(departure_time)),
