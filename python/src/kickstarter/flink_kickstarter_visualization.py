@@ -1,6 +1,5 @@
 from pyflink.datastream import StreamExecutionEnvironment
-from pyflink.table import TableEnvironment, EnvironmentSettings, StreamTableEnvironment
-from pyflink.table.catalog import ObjectPath
+from pyflink.table import EnvironmentSettings, StreamTableEnvironment
 import argparse
 from typing import Tuple
 import pandas as pd
@@ -33,7 +32,7 @@ def load_data(_tbl_env: StreamTableEnvironment, database_name: str) -> Tuple[pd.
             Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]: is a tuple of Pandas DataFrames.
     """
     # Get the number of flights per month by airline, year, and month
-    airline_monthly_flights_table = _tbl_env.sql_query(f"""
+    airline_monthly_flights_table = _tbl_env.sql_query("""
                                                         select 
                                                             airline,
                                                             extract(year from to_timestamp(departure_time)) as departure_year,
@@ -54,7 +53,7 @@ def load_data(_tbl_env: StreamTableEnvironment, database_name: str) -> Tuple[pd.
     df_airline_monthly_flights_table = airline_monthly_flights_table.to_pandas()
 
     # Get the top airports with the most departures by airport, airline, year, and rank
-    ranked_airports_table = _tbl_env.sql_query(f"""
+    ranked_airports_table = _tbl_env.sql_query("""
                                                 with cte_ranked as (
                                                     select
                                                         airline,
@@ -88,7 +87,13 @@ def load_data(_tbl_env: StreamTableEnvironment, database_name: str) -> Tuple[pd.
     df_ranked_airports_table = ranked_airports_table.to_pandas()
 
     # Get the flight data by airline and year
-    flight_table = _tbl_env.sql_query(f"SELECT *, extract(year from to_timestamp(departure_time)) as departure_year FROM {database_name}.flight")
+    flight_table = _tbl_env.sql_query(f"""
+                                      select 
+                                        *, 
+                                        extract(year from to_timestamp(departure_time)) as departure_year 
+                                      from 
+                                        {database_name}.flight
+                                    """)
     df_flight_table = flight_table.to_pandas()
 
     return df_airline_monthly_flights_table, df_ranked_airports_table, df_flight_table
@@ -122,7 +127,7 @@ def main(args):
     env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
     # --- Add the Python dependency script files to the environment
-    env.add_python_archive("/opt/flink/python_apps/kickstarter/python_files.zip")
+    env.add_python_archive("/opt/flink/python_apps/src/kickstarter/python_files.zip")
 
     # --- Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env, environment_settings=EnvironmentSettings.new_instance().in_batch_mode().build())

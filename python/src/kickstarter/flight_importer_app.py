@@ -3,7 +3,7 @@ from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
-from pyflink.table.catalog import ObjectPath, HiveCatalog, Catalog
+from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
 import argparse
 
