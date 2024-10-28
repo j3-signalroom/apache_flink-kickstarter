@@ -136,7 +136,8 @@ WORKDIR /opt/flink/python_apps
 RUN uv sync --frozen
 
 # Zip Python files
-RUN zip -r python_files.zip /opt/flink/python_apps/src/kickstarter/* -x '__pycache__/*' -x 'helper/__pycache__/*' -x 'model/__pycache__/*'
+WORKDIR /opt/flink/python_apps/src/kickstarter
+RUN zip -r python_files.zip * -x '__pycache__/*' -x 'helper/__pycache__/*' -x 'model/__pycache__/*'
 
 # Set the entrypoint to Flink's entrypoint script
 ENTRYPOINT ["/docker-entrypoint.sh"]
