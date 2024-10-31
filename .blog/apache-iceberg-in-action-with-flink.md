@@ -48,14 +48,35 @@ support for atomic operations is required so that all readers and writers see th
 
 ![apache-iceberg-table-structure](images/apache-iceberg-table-structure.png)
 
-#### The True Power of Apache Iceberg
+#### The True Power of Apache Iceberg is its Catalog
 The true power of Apache Iceberg is that it allows for the true separation of storage from compute.  What this means is we are **NO LONGER LOCKED IN** to a single data vendor's compute engine!  We store the data independently of the compute engine in our distributed storage system (e.g., Amazon S3, Google Cloud Storage, and Azure Blob Storage), and then we connect to the compute engine that best fits our use case for whatever situation we are using our data in!
 
-## The Apache Iceberg Catalog
+### In this demo we AWS Glue as our catalog for Apache Iceberg
+**AWS Glue** is a fully managed extract, transform, and load (**ETL**) service offered by Amazon Web Services (**AWS**). It simplifies the process of preparing and loading data for analytics by automating data discovery, schema inference, and job scheduling. AWS Glue provides a comprehensive platform that includes:
 
-### What is AWS Glue?
+- **AWS Glue Data Catalog**: A centralized metadata repository that stores information about data sources, schemas, and transformations.
 
-### Using Terraform to set up AWS Glue
+**Apache Iceberg** is an open-source table format designed for large, complex analytic datasets in distributed data lakes. It provides capabilities like schema evolution, hidden partitioning, ACID transactions, and time travel queries. Iceberg simplifies data management and improves performance for big data analytics.
+
+**Amazon S3** (Simple Storage Service) is AWS's scalable, high-speed, web-based cloud storage service designed for online backup and archiving of data and applications.
+
+### **Integration of AWS Glue with Apache Iceberg and Amazon S3**
+
+The integration of AWS Glue with Apache Iceberg and Amazon S3 enables you to build a robust, scalable, and efficient data lake solution. Here's how they work together:
+
+#### **1. Data Storage on Amazon S3**
+
+- **Data Files**: Apache Iceberg stores the actual dataset as data files (e.g., Parquet, ORC, or Avro) in Amazon S3 buckets. S3 provides durable and highly available storage for these files.
+- **Metadata Files**: Iceberg maintains metadata files in S3 as well. These files include table snapshots, manifest lists, and manifest files that track the state and structure of the table over time.
+
+#### **2. AWS Glue Data Catalog as the Metastore**
+
+- **Centralized Metadata Management**: The AWS Glue Data Catalog serves as the metastore for Apache Iceberg tables. It holds metadata such as table schemas, partitioning information, and pointers to data locations in S3.
+- **Schema Evolution Support**: Iceberg's ability to handle schema changes without rewriting data is supported through the Data Catalog, allowing seamless schema evolution.
+
+#### CI/CD [using Terraform] to set up the AWS Glue infrastructure
+Before we dive into the code, let's set up the AWS Glue infrastructure using Terraform.  This will allow us to have a repeatable process to set up the AWS Glue infrastructure.  Here is the Terraform code to set up the AWS Glue infrastructure:
+
 ```hcl
 resource "aws_s3_bucket" "iceberg_bucket" {
   # Ensure the bucket name adheres to the S3 bucket naming conventions
@@ -116,6 +137,89 @@ resource "aws_glue_catalog_database" "iceberg_db" {
 }
 ```
 
+This class, `DataGeneratorApp`, is a comprehensive example of a Flink application that generates synthetic flight data, streams it into both Apache Kafka and Apache Iceberg, and provides both real-time and historical analytics capabilities. Let me summarize its main functionalities and key features:
+
+### Overview
+- **Purpose**: 
+  - To generate fake flight data for two fictional airlines (`Sunset Air` and `Sky One`) and stream this data into Kafka topics and Apache Iceberg tables.
+  - Use Apache Flink to build a streaming pipeline with **Flink DataStream API** and **Apache Iceberg** integration using **AWS Glue**.
+
+- **Technology Stack**:
+  - **Apache Flink**: Used to define the data stream processing pipeline.
+  - **Apache Kafka**: Acts as the messaging platform to publish streaming data.
+  - **Apache Iceberg**: Stores data in a table format, providing efficient data access with features like partitioning and snapshotting.
+  - **AWS Glue**: Used as the metadata catalog for Iceberg tables.
+
+### Key Functionalities
+
+1. **Main Method - Entry Point**
+   - The `main()` method sets up the Flink environment, creates data generators, defines data sinks, and eventually executes the streaming job.
+   - The method outlines the following steps:
+     1. **Setup Execution Environment**: Configure Flink for streaming jobs, including checkpointing to ensure fault tolerance.
+     2. **Configure Kafka Producer**: Retrieve Kafka producer properties from AWS Secrets Manager and set up Kafka sinks for data streams.
+     3. **Generate and Stream Flight Data**: Use a `DataGeneratorSource` to generate flight data for `Sky One` and `Sunset Air`.
+     4. **Sink Data to Kafka**: Serialize the data in JSON format and publish it to Kafka topics.
+     5. **Iceberg Catalog Configuration**: Set up the Apache Iceberg catalog using AWS Glue for metadata management.
+     6. **Sink Data to Iceberg Table**: Convert the data stream to `RowData` format and write it to Iceberg tables.
+
+2. **Flink Configuration and Checkpointing**
+   - **Checkpointing**: Enabled every 5000 milliseconds (5 seconds) to ensure that the data stream processing can recover in case of failures.
+   - **Checkpoint Timeout**: Set to 60 seconds, limiting the duration for completing a checkpoint.
+   - **Max Concurrent Checkpoints**: Limited to 1 to prevent multiple checkpoints from overwhelming resources.
+
+3. **Data Generation Sources**
+   - **DataGeneratorSource**: A Flink connector used to generate fake flight data (`AirlineData`) for both airlines.
+   - The generated data streams (`skyOneStream` and `sunsetStream`) are processed using Flink's streaming API.
+
+4. **Kafka Sink Configuration**
+   - **Kafka Serialization Schema**: Uses `JsonSerializationSchema` to serialize `AirlineData` objects into JSON before publishing them.
+   - **Kafka Sink Setup**: Publishes the generated data to Kafka topics (`airline.skyone` and `airline.sunset`), with a delivery guarantee of `AT_LEAST_ONCE`.
+
+5. **Apache Iceberg Integration**
+   - **Catalog Setup**:
+     - Iceberg is configured to use `AWS Glue` as the catalog and `Amazon S3` as the data warehouse location.
+     - Properties like `catalog-impl` and `io-impl` are set to ensure that Glue is used for metadata and S3 is used for I/O.
+   - **Database Creation**: The `airlines` database is created if it doesn’t exist.
+   - **Table Creation and Data Sink**:
+     - Defines the table schema (`RowType`) that includes fields like `email_address`, `departure_time`, `ticket_price`, etc.
+     - Converts `DataStream<AirlineData>` to `DataStream<RowData>`, and writes the resulting stream to Iceberg tables (`skyone_airline` and `sunset_airline`) using the `FlinkSink`.
+
+6. **SinkToIcebergTable Method**
+   - A utility method that takes the input data stream, transforms it to `RowData`, and writes it to the appropriate Iceberg table.
+   - If the Iceberg table does not exist, it creates the table and sets properties like `partitioning`, `format-version`, and `target-file-size`.
+   - The method uses `FlinkSink.forRowData()` to write the data stream to Iceberg tables in `UPSERT` mode, ensuring that updates are handled properly.
+
+### Key Features and Highlights
+
+1. **Data Streaming to Kafka and Iceberg**
+   - **Dual Sink Strategy**: The application sinks data into Kafka (for streaming use cases) and Apache Iceberg (for analytical and historical use cases).
+   - **Integration with AWS Glue**: The AWS Glue catalog is used to manage metadata for Iceberg, allowing for tight integration with AWS services.
+
+2. **Scalable Data Generation and Streaming**
+   - The `DataGeneratorSource` with rate limiting (`RateLimiterStrategy.perSecond(1)`) is used to generate realistic streaming data.
+   - **Fault Tolerance**: Checkpointing, along with Iceberg’s snapshot-based architecture, ensures that the data pipeline can recover and provide consistency in case of a failure.
+
+3. **Efficient Data Management with Iceberg**
+   - **Catalog and Metadata**: By utilizing AWS Glue, the application benefits from Iceberg's capabilities for managing schemas, partitioning, and metadata centrally.
+   - **Table Partitioning**: Data in Iceberg is partitioned by `arrival_airport_code` to improve query performance, especially for analytics queries on specific routes.
+   - **Upserts and Time Travel**: The use of Iceberg's upsert feature (`upsert(true)`) allows seamless updates, and Iceberg’s time-travel functionality is implicitly available, enabling historical queries and analysis.
+
+4. **Seamless Integration of Technologies**
+   - The combination of **Apache Flink** (for real-time data processing), **Apache Kafka** (for real-time messaging), and **Apache Iceberg** (for long-term storage and historical analysis) creates a modern **data pipeline** that supports both streaming and batch workloads.
+   - **AWS Services Integration**: With Glue and S3, the solution leverages AWS for both metadata management and scalable storage, creating a cost-effective cloud-native architecture.
+
+5. **Code Reusability and Modularity**
+   - The `SinkToIcebergTable` method is designed to be generic, allowing different data streams to be easily written to different Iceberg tables.
+   - **MapFunction for Data Transformation**: The transformation from `AirlineData` to `RowData` is implemented using a reusable `MapFunction`, which makes the solution extendable to other data structures.
+
+### Summary
+The `DataGeneratorApp` class is a well-rounded Flink application that demonstrates:
+- **Data Stream Generation**: Using `DataGeneratorSource` to create realistic flight data.
+- **Integration with Kafka and Iceberg**: Publishing the data to Kafka for real-time analytics and to Iceberg for historical analysis.
+- **AWS Glue for Metadata Management**: Integrating AWS Glue with Iceberg to manage metadata in a centralized, consistent manner.
+- **Resiliency and Fault Tolerance**: Implementing checkpointing and delivery guarantees to ensure the stability and reliability of the data pipeline.
+
+This setup aligns well with modern data architectures like **data lakehouses**, combining the best features of data lakes and data warehouses. It allows data to be processed in real-time, stored efficiently, and analyzed historically, all while maintaining flexibility, scalability, and cost-effectiveness.
 
 ## Resources
 Tomer Shiran, Jason Hughes & Alex Merced. [Apache Iceberg -- The Definitive Guide](https://www.dremio.com/wp-content/uploads/2023/02/apache-iceberg-TDG_ER1.pdf).  O'Reilly, 2024.
