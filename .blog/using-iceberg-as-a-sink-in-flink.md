@@ -51,6 +51,12 @@ Apache Iceberg is built on a modular architecture that provides a framework for 
 
 Apache Iceberg’s layered design, with manifest and snapshot files and support for partition and schema evolution, makes it highly adaptable for use cases involving large, evolving datasets where efficient access and consistency are essential.
 
+### Why is it so groundbreadking?
+
+## The Apache Iceberg Catalog
+
+### What is AWS Glue?
+
 ### Using Terraform to set up AWS Glue
 ```hcl
 resource "aws_s3_bucket" "iceberg_bucket" {
