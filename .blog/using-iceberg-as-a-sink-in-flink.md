@@ -1,16 +1,18 @@
 # Using Apache Iceberg as a Sink in Apache Flink using Java
-Data engineering is all about transforming raw data into useful, accessible data products. At the heart of the signalRoom GenAI Data Mesh platform, we do this by producing data products packaged in Apache Iceberg tables.  In this article, I'll take you through the process of using Apache Iceberg as a sink in your Apache Flink application using Java. This is a natural follow-up to my previous piece, [Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!](https://thej3.com/apache-flink-apache-iceberg-aws-glue-get-your-jar-versions-right-805041abef11) where I tackled getting the right combination of JARs in place.
+Data engineering is all about transforming raw data into useful, accessible data products in the era Data Mesh platform building. At the heart of the signalRoom GenAI Data Mesh platform, we do this by producing data products packaged in Apache Iceberg tables.  In this article, I'll take you through the process of using Apache Iceberg as a sink for your Apache Flink application using Java. This is a natural follow-up to my previous short piece, [Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!](https://thej3.com/apache-flink-apache-iceberg-aws-glue-get-your-jar-versions-right-805041abef11) where I tackled getting the right combination of JARs in place.
 
-Today, I'll walk you through step by step how you can seamlessly write data from a Flink application into Apache Iceberg tables, ensuring reliability, performance, and future-proof data storage. We will do this using the [Apache Flink Kickstarter Data Generator Flink app](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/DataGeneratorApp.java) I published to my public GitHub.
+Today, I'll walk you through step by step how you can seamlessly write data from a Flink application into Apache Iceberg tables, ensuring reliability, performance, and future-proof data storage. We will do this using the [Apache Flink Kickstarter Data Generator Flink app](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/DataGeneratorApp.java) I built awhile ago.
 
 ![screenshot-datageneratorapp](images/screenshot-datageneratorapp.png)
 
-## What is Apache Iceberg?
-But, before I dive into the code, you might me asking yourself what is Apache Iceberg and why use it?  (For those who already know please move on to What is AWS Glue section.)  Well these are all good questions!  Let's first start with what is Apache Iceberg.  
+## What is Apache Iceberg?  Why is it so groundbreadking?
+But, before I dive into the code, you might me asking yourself what is Apache Iceberg and why it has gotten so popular over the yearst?  (For those who already know the answers to these questions please move on to What is AWS Glue section.)  Well these are all good questions!  Let's first start with what is Apache Iceberg.  
 
-Apache Iceberg is an open table format for analytic datasets that addresses many of the challenges in working with data lakes, especially those on distributed storage like Amazon S3, Google Cloud Storage, and Azure Blob Storage. Apache Iceberg was created in 2017 by Netflix's Ryan Blue and Daniel Weeks.  Iceberg helps manage data over time by offering key features that improve performance, consistency, and manageability in high-volume data environments.
+### What is Apache Iceberg?
+Apache Iceberg is an open table format (method of structuring dataset files in a way to present them as a unified "table") for analytic datasets that addresses many of the challenges in working with data lakes, especially those on distributed storage like Amazon S3, Google Cloud Storage, and Azure Blob Storage. 
 
-A table format is a method of structuring a dataset’s files to present them as a unified “table.”
+> _A little history:  Apache Iceberg was created in 2017 by Netflix's Ryan Blue and Daniel Weeks.  Iceberg helps manage data over time by offering key features that improve performance, consistency, and manageability in high-volume data environments._
+
 
 Apache Iceberg Table is broken into three layers:
 1. Catalog layer
