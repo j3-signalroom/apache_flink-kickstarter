@@ -34,9 +34,9 @@ import kickstarter.model.*;
 
 
 /**
- * This class creates fake flight data for fictional airlines <b>Sunset Air</b> and 
- * <b>Sky One</b> Airlines," and sends it to the Kafka topics `airline.sunset` and `airline.skyone`,
- * respectively.
+ * This class creates fake flight data for two fictional airlines <b>Sunset Air</b> and 
+ * <b>Sky One</b> Airlines</b>.  Then sinks the data to Kafka Topics and Apache Iceberg
+ * Tables, respectively.
  */
 public class DataGeneratorApp {
     private static final Logger logger = LoggerFactory.getLogger(DataGeneratorApp.class);
@@ -55,15 +55,15 @@ public class DataGeneratorApp {
 	 */
 	public static void main(String[] args) throws Exception {
         /*
-         * Retrieve the value(s) from the command line argument(s)
+         * Retrieve the value(s) from the command line argument(s).
          */
         String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
         String awsRegion = Common.getAppArgumentValue(args, Common.ARG_AWS_REGION);
 
-		// --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
+		// --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG).
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        // --- Enable checkpointing every 5000 milliseconds (5 seconds)
+        // --- Enable checkpointing every 5000 milliseconds (5 seconds).
         env.enableCheckpointing(5000);
 
         /*
@@ -74,11 +74,11 @@ public class DataGeneratorApp {
 
         /*
          * Set the maximum number of concurrent checkpoints to 1 (i.e., only one checkpoint
-         * is created at a time)
+         * is created at a time).
          */
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
 
-        // --- Create a TableEnvironment
+        // --- Create a StreamTableEnvironment
         EnvironmentSettings settings = 
             EnvironmentSettings.newInstance()
                                .inStreamingMode()
@@ -88,7 +88,7 @@ public class DataGeneratorApp {
 		/*
 		 * --- Kafka Producer Config
 		 * Retrieve the properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
-		 * Then ingest properties into the Flink app
+		 * Then ingest properties into the Flink app's data stream.
 		 */
         DataStream<Properties> dataStreamProducerProperties = 
 			env.fromData(new Properties())
@@ -115,7 +115,7 @@ public class DataGeneratorApp {
 		}
 
         /*
-         * Create a data generator source
+         * Create a data generator source.
          */
         DataGeneratorSource<AirlineData> skyOneSource =
             new DataGeneratorSource<>(
@@ -126,14 +126,14 @@ public class DataGeneratorApp {
             );
 
         /*
-         * Sets up a Flink POJO source to consume data
+         * Sets up a Flink POJO source to consume data.
          */
         DataStream<AirlineData> skyOneStream = 
             env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
         /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone` with the
-         * specified serializer
+         * specified serializer.
          */
         KafkaRecordSerializationSchema<AirlineData> skyOneSerializer = 
             KafkaRecordSerializationSchema.<AirlineData>builder()
@@ -143,7 +143,7 @@ public class DataGeneratorApp {
 
         /*
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
-         * environment (a.k.a. the Flink job graph -- the DAG)
+         * environment (a.k.a. the Flink job graph -- the DAG).
          */
         KafkaSink<AirlineData> skyOneSink = 
             KafkaSink.<AirlineData>builder()
@@ -154,12 +154,12 @@ public class DataGeneratorApp {
 
         /*
          * Adds the given Sink to the DAG. Note only streams with sinks added will be executed
-         * once the StreamExecutionEnvironment.execute() method is called
+         * once the StreamExecutionEnvironment.execute() method is called.
          */
         skyOneStream.sinkTo(skyOneSink).name("skyone_sink");
 
         /*
-         * Sets up a Flink POJO source to consume data
+         * Sets up a Flink POJO source to consume data.
          */
         DataGeneratorSource<AirlineData> sunsetSource =
             new DataGeneratorSource<>(
@@ -174,7 +174,7 @@ public class DataGeneratorApp {
 
         /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset` with the
-         * specified serializer
+         * specified serializer.
          */
         KafkaRecordSerializationSchema<AirlineData> sunsetSerializer = 
             KafkaRecordSerializationSchema.<AirlineData>builder()
@@ -184,7 +184,7 @@ public class DataGeneratorApp {
 
         /*
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
-         * environment (a.k.a. the Flink job graph -- the DAG)
+         * environment (a.k.a. the Flink job graph -- the DAG).
          */
         KafkaSink<AirlineData> sunsetSink = 
             KafkaSink.<AirlineData>builder()
@@ -195,41 +195,40 @@ public class DataGeneratorApp {
 
         /*
          * Adds the given Sink to the DAG. Note only streams with sinks added will be executed
-         * once the StreamExecutionEnvironment.execute() method is called
+         * once the StreamExecutionEnvironment.execute() method is called.
          */
         sunsetStream.sinkTo(sunsetSink).name("sunset_sink");
 
+        /*
+         * --- Apache Iceberg Catalog Configuration.
+         */
         String catalogName = "apache_kickstarter";
-        String bucketName = serviceAccountUser.replace("_", "-");  // --- To follow S3 bucket naming convention, replace underscores with hyphens if exist
-        String warehousePath = "s3://" + bucketName + "/warehouse";
+        String bucketName = serviceAccountUser.replace("_", "-");  // --- To follow S3 bucket naming convention, replace underscores with hyphens if exist in string.
         String catalogImpl = "org.apache.iceberg.aws.glue.GlueCatalog";
-        String ioImpl = "org.apache.iceberg.aws.s3.S3FileIO";
         String databaseName = "airlines";
-
-        // --- Configure the AWS Glue Catalog Properties
         Map<String, String> catalogProperties = new HashMap<>();
         catalogProperties.put("type", "iceberg");
-        catalogProperties.put("warehouse", warehousePath);
+        catalogProperties.put("warehouse", "s3://" + bucketName + "/warehouse");
         catalogProperties.put("catalog-impl", catalogImpl);
-        catalogProperties.put("io-impl", ioImpl);
+        catalogProperties.put("io-impl", "org.apache.iceberg.aws.s3.S3FileIO");
         catalogProperties.put("glue.skip-archive", "true");
         catalogProperties.put("glue.region", awsRegion);
         
-        // --- Use the CatalogLoader since an external metastore is used (AWS Glue Catalog)
+        // --- Use the CatalogLoader since an external metastore is used (AWS Glue Catalog).
         CatalogLoader catalogLoader = CatalogLoader.custom(catalogName, catalogProperties,  new Configuration(false), catalogImpl);
 
-        // --- Describes and configures the catalog for the Table API and SQL
+        // --- Describes and configures the catalog for the Table API and SQL.
         CatalogDescriptor catalogDescriptor = CatalogDescriptor.of(catalogName, org.apache.flink.configuration.Configuration.fromMap(catalogProperties));
 
-        // --- Create the catalog, use it, and get the instantiated catalog
+        // --- Create the catalog, use it, and get the instantiated catalog.
         tblEnv.createCatalog(catalogName, catalogDescriptor);
         tblEnv.useCatalog(catalogName);
         org.apache.flink.table.catalog.Catalog catalog = tblEnv.getCatalog("apache_kickstarter").orElseThrow(() -> new RuntimeException("Catalog not found"));
 
-        // --- Print the current catalog name
+        // --- Print the current catalog name.
         System.out.println("Current catalog: " + tblEnv.getCurrentCatalog());
 
-        // --- Check if the database exists.  If not, create it
+        // --- Check if the database exists.  If not, create it.
         try {
             if (!catalog.databaseExists(databaseName)) {
                 catalog.createDatabase(databaseName, new CatalogDatabaseImpl(new HashMap<>(), "The Airlines flight data database."), false);
@@ -241,10 +240,10 @@ public class DataGeneratorApp {
             System.exit(1);
         }
 
-        // --- Print the current database name
+        // --- Print the current database name.
         System.out.println("Current database: " + tblEnv.getCurrentDatabase());
 
-        // --- Define the RowType for the RowData
+        // --- Define the RowType for the RowData.
         RowType rowType = RowType.of(
             new LogicalType[] {
                 DataTypes.STRING().getLogicalType(),
