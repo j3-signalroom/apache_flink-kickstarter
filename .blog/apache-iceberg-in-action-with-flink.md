@@ -184,6 +184,140 @@ This class, `DataGeneratorApp`, is a comprehensive example of a Flink applicatio
      - Defines the table schema (`RowType`) that includes fields like `email_address`, `departure_time`, `ticket_price`, etc.
      - Converts `DataStream<AirlineData>` to `DataStream<RowData>`, and writes the resulting stream to Iceberg tables (`skyone_airline` and `sunset_airline`) using the `FlinkSink`.
 
+    #### 1. Setting Up Iceberg Catalog Configuration
+    ```java
+    String catalogName = "apache_kickstarter";
+    String bucketName = serviceAccountUser.replace("_", "-");  // --- To follow S3 bucket naming convention, replace underscores with hyphens if exist in string.
+    String catalogImpl = "org.apache.iceberg.aws.glue.GlueCatalog";
+    String databaseName = "airlines";
+    Map<String, String> catalogProperties = new HashMap<>();
+    ```
+    - **`catalogName`**: The name of the Iceberg catalog (`apache_kickstarter`), which will be used to reference this catalog in the Flink environment.
+    - **`bucketName`**: The S3 bucket where the data will be stored. The code ensures the bucket name follows S3 naming conventions by replacing underscores (`_`) with hyphens (`-`).
+    - **`catalogImpl`**: The implementation class for the Iceberg catalog (`org.apache.iceberg.aws.glue.GlueCatalog`). This means that AWS Glue will be used for metadata management.
+    - **`databaseName`**: The database within the catalog (`airlines`), which will store related tables.
+    - **`catalogProperties`**: A map that contains properties required for configuring the catalog.
+
+    #### 2. Catalog Properties
+    ```java
+    catalogProperties.put("type", "iceberg");
+    catalogProperties.put("warehouse", "s3://" + bucketName + "/warehouse");
+    catalogProperties.put("catalog-impl", catalogImpl);
+    catalogProperties.put("io-impl", "org.apache.iceberg.aws.s3.S3FileIO");
+    catalogProperties.put("glue.skip-archive", "true");
+    catalogProperties.put("glue.region", awsRegion);
+    ```
+    - **`type`**: Defines the catalog type as `iceberg`.
+    - **`warehouse`**: Specifies the warehouse location in Amazon S3 (`s3://<bucketName>/warehouse`). This is where Iceberg tables' data will be stored.
+    - **`catalog-impl`**: Specifies the implementation (`GlueCatalog`) to use for managing metadata.
+    - **`io-impl`**: Specifies the I/O implementation (`S3FileIO`) to read from and write to Amazon S3.
+    - **`glue.skip-archive`**: By setting `"true"`, Glue can skip archiving old table metadata, making operations faster.
+    - **`glue.region`**: Sets the AWS region for AWS Glue.
+
+    #### 3. Creating a CatalogLoader
+    ```java
+    CatalogLoader catalogLoader = CatalogLoader.custom(catalogName, catalogProperties, new Configuration(false), catalogImpl);
+    ```
+    - **`CatalogLoader`**: This class is used to load the Iceberg catalog. The custom catalog loader is created using the provided catalog properties.
+    - **Parameters**:
+      - **`catalogName`**: The name of the catalog.
+      - **`catalogProperties`**: Properties that define the configuration (e.g., type, warehouse location, etc.).
+      - **`new Configuration(false)`**: Represents the Hadoop configuration (used here with `false` indicating no default configuration is loaded).
+      - **`catalogImpl`**: The implementation to use, in this case, Glue.
+
+    #### 4. Registering and Using the Catalog in Flink
+    ```java
+    CatalogDescriptor catalogDescriptor = CatalogDescriptor.of(catalogName, org.apache.flink.configuration.Configuration.fromMap(catalogProperties));
+    tblEnv.createCatalog(catalogName, catalogDescriptor);
+    tblEnv.useCatalog(catalogName);
+    org.apache.flink.table.catalog.Catalog catalog = tblEnv.getCatalog("apache_kickstarter").orElseThrow(() -> new RuntimeException("Catalog not found"));
+    ```
+    - **`CatalogDescriptor`**: This class is used to describe and configure the Iceberg catalog for Flink’s Table API.
+      - **`of(catalogName, Configuration.fromMap(catalogProperties))`**: Creates a catalog descriptor using the provided name and configuration.
+      
+    - **Creating and Registering Catalog**:
+      - **`tblEnv.createCatalog(catalogName, catalogDescriptor)`**: Registers the catalog with the specified name (`catalogName`) in the `StreamTableEnvironment` (`tblEnv`). This makes the catalog available for use within the Flink environment.
+      - **`tblEnv.useCatalog(catalogName)`**: Sets the newly created catalog as the current catalog in use, meaning any subsequent table-related commands will reference this catalog.
+      
+    - **Retrieving the Catalog**:
+      - **`tblEnv.getCatalog("apache_kickstarter")`**: Retrieves the registered catalog from the environment.
+      - **`orElseThrow(() -> new RuntimeException("Catalog not found"))`**: Throws an exception if the catalog with the given name cannot be found, providing error handling.
+
+#### 1. Checking if the Database Exists and Creating It if Necessary
+```java
+try {
+    if (!catalog.databaseExists(databaseName)) {
+        catalog.createDatabase(databaseName, new CatalogDatabaseImpl(new HashMap<>(), "The Airlines flight data database."), false);
+    }
+    tblEnv.useDatabase(databaseName);
+} catch (Exception e) {
+    System.out.println("A critical error occurred during the processing of the database because " + e.getMessage());
+    e.printStackTrace();
+    System.exit(1);
+}
+```
+- **`catalog.databaseExists(databaseName)`**: Checks if the database (`databaseName`—in this case, `"airlines"`) already exists in the catalog.
+- **If the database does not exist**:
+  - **`catalog.createDatabase()`**: Creates a new database using the `createDatabase()` method.
+    - **Parameters**:
+      - **`databaseName`**: The name of the database to be created (`airlines`).
+      - **`new CatalogDatabaseImpl(new HashMap<>(), "The Airlines flight data database.")`**: 
+        - `CatalogDatabaseImpl` is used to represent the new database.
+        - **`new HashMap<>()`**: Provides properties for the database (an empty map here).
+        - **`"The Airlines flight data database."`**: Provides a description for the database.
+      - **`false`**: Indicates that the method should throw an error if the database already exists (though, in this case, it’s guarded by the `if` statement).
+- **`tblEnv.useDatabase(databaseName)`**: Sets the `airlines` database as the current database in the `StreamTableEnvironment` (`tblEnv`).
+- **Exception Handling**:
+  - If there’s an error during this process, it catches the exception, prints the error message, and calls `System.exit(1)` to terminate the program with an error status.
+
+#### 2. Print the Current Database Name
+```java
+System.out.println("Current database: " + tblEnv.getCurrentDatabase());
+```
+- **`tblEnv.getCurrentDatabase()`**: Retrieves the name of the current database that Flink is using.
+- This line prints the current database to confirm that the desired database (`airlines`) has been set successfully.
+
+#### 3. Define the RowType for the RowData
+```java
+RowType rowType = RowType.of(
+    new LogicalType[] {
+        DataTypes.STRING().getLogicalType(),
+        DataTypes.STRING().getLogicalType(),
+        DataTypes.STRING().getLogicalType(),
+        DataTypes.STRING().getLogicalType(),
+        DataTypes.STRING().getLogicalType(),
+        DataTypes.BIGINT().getLogicalType(),
+        DataTypes.STRING().getLogicalType(),
+        DataTypes.STRING().getLogicalType(),
+        DataTypes.DECIMAL(10, 2).getLogicalType(),
+        DataTypes.STRING().getLogicalType(),
+        DataTypes.STRING().getLogicalType()
+    },
+    new String[] {
+        "email_address",
+        "departure_time",
+        "departure_airport_code",
+        "arrival_time",
+        "arrival_airport_code",
+        "flight_duration",
+        "flight_number",
+        "confirmation_code",
+        "ticket_price",
+        "aircraft",
+        "booking_agency_email"
+    }
+);
+```
+- **`RowType`**: Defines the schema for the rows of data that will be used in the Flink data stream and written to Iceberg tables.
+- **`RowType.of(LogicalType[], String[])`**:
+  - **`LogicalType[]`**: Defines the data types for each field in the row. Here’s the breakdown:
+    - **`DataTypes.STRING().getLogicalType()`**: Represents fields such as `email_address`, `departure_time`, `flight_number`, etc., that are of type `STRING`.
+    - **`DataTypes.BIGINT().getLogicalType()`**: Represents the `flight_duration` field, which is of type `BIGINT`.
+    - **`DataTypes.DECIMAL(10, 2).getLogicalType()`**: Represents the `ticket_price` field, with a precision of 10 and scale of 2, making it suitable for storing currency values.
+  - **`String[]`**: Defines the names of the fields:
+    - `"email_address"`, `"departure_time"`, `"departure_airport_code"`, etc.
+    - The names correspond to columns that will be defined in the Iceberg table.
+
 6. **SinkToIcebergTable Method**
    - A utility method that takes the input data stream, transforms it to `RowData`, and writes it to the appropriate Iceberg table.
    - If the Iceberg table does not exist, it creates the table and sets properties like `partitioning`, `format-version`, and `target-file-size`.
@@ -211,6 +345,97 @@ This class, `DataGeneratorApp`, is a comprehensive example of a Flink applicatio
 5. **Code Reusability and Modularity**
    - The `SinkToIcebergTable` method is designed to be generic, allowing different data streams to be easily written to different Iceberg tables.
    - **MapFunction for Data Transformation**: The transformation from `AirlineData` to `RowData` is implemented using a reusable `MapFunction`, which makes the solution extendable to other data structures.
+
+   This function is part of the Apache Flink streaming pipeline, and it converts a data stream of type `AirlineData` into a data stream of type `RowData`. Specifically, it:
+
+    1. **DataStream Mapping**: Uses the `.map()` transformation to convert each element in the `DataStream<AirlineData>` to an element of type `RowData`. This is done by defining an anonymous implementation of the `MapFunction<AirlineData, RowData>` interface.
+
+    2. **Conversion Logic**:
+      - The input type is `AirlineData`, which is assumed to be a POJO (Plain Old Java Object) representing a flight, containing fields such as `emailAddress`, `departureTime`, etc.
+      - A new `GenericRowData` object (`rowData`) is created to represent the transformed data in a structured, table-like format (`RowData`).
+      - **RowKind**: The `GenericRowData` is instantiated with `RowKind.INSERT`, indicating that the operation is an **insertion** (this is relevant when dealing with upserts or changelogs in data streams).
+      - The fields of the `rowData` are then populated with values from the `AirlineData` object. Each field is set according to its position in the `GenericRowData`.
+        - The fields are set by extracting corresponding values from `AirlineData` and converting them to the appropriate data types (`StringData`, `DecimalData`, etc.).
+        - For example, the `emailAddress` field is converted to `StringData` and assigned to the first index (0) of the `GenericRowData`.
+
+    3. **Transformation Details**:
+      - **String Fields**: Fields like `emailAddress`, `departureTime`, and `flightNumber` are converted from Java `String` to `StringData` using `StringData.fromString()`. This ensures that Flink handles the data in a consistent format that can be efficiently used by other parts of the Flink system.
+      - **Numeric Fields**: The `flightDuration` is set as-is, while the `ticketPrice` is converted to a `DecimalData` type with a precision of `10, 2` to accurately represent currency values.
+      - The transformed `RowData` is then returned for each record in the `airlineDataStream`.
+
+    4. **Output**: The result is a `DataStream<RowData>` (`skyOneRowData`), where each record is a `RowData` instance representing a row in a tabular format, containing fields like `email_address`, `departure_time`, and `ticket_price`. This transformed stream (`skyOneRowData`) can then be used by other components in the Flink pipeline, such as a sink to write to Apache Iceberg.
+
+    This code snippet integrates Apache Flink with Apache Iceberg, performing the following operations:
+    
+    ### 1. Set Up a `TableIdentifier`
+    ```java
+    TableIdentifier tableIdentifier = TableIdentifier.of(databaseName, tableName);
+    ```
+    - **`TableIdentifier`**: Represents a unique identifier for the Iceberg table, which consists of the `databaseName` and `tableName`.
+    - This helps identify the specific Iceberg table that the data will be written to.
+
+    ### 2. Create the Table If It Does Not Exist
+    ```java
+    if (!catalog.tableExists(ObjectPath.fromString(databaseName + "." + tableName))) {
+        tblEnv.executeSql(
+                    "CREATE TABLE " + databaseName + "." + tableName + " ("
+                        + "email_address STRING, "
+                        + "departure_time STRING, "
+                        + "departure_airport_code STRING, "
+                        + "arrival_time STRING, "
+                        + "arrival_airport_code STRING, "
+                        + "flight_duration BIGINT,"
+                        + "flight_number STRING, "
+                        + "confirmation_code STRING, "
+                        + "ticket_price DECIMAL(10,2), "
+                        + "aircraft STRING, "
+                        + "booking_agency_email STRING) "
+                        + "WITH ("
+                            + "'write.format.default' = 'parquet',"
+                            + "'write.target-file-size-bytes' = '134217728',"
+                            + "'partitioning' = 'arrival_airport_code',"
+                            + "'format-version' = '2');"
+                );
+    }
+    ```
+    - **`catalog.tableExists()`**: Checks if the table already exists in the given Iceberg catalog using the `ObjectPath` formed from `databaseName` and `tableName`.
+    - If the table **does not exist**:
+      - **SQL Execution**: Uses `tblEnv.executeSql()` to run an SQL `CREATE TABLE` statement.
+      - **Table Schema**:
+        - Defines columns like `email_address`, `departure_time`, `flight_number`, etc.
+        - Specifies the data types (e.g., `STRING`, `BIGINT`, `DECIMAL`).
+      - **Table Properties**:
+        - **`write.format.default`**: Specifies the file format as `parquet` for writing data.
+        - **`write.target-file-size-bytes`**: Sets a target file size of 128 MB (`134217728` bytes) to optimize read and write performance.
+        - **`partitioning`**: Partitions the table by the column `arrival_airport_code`. Partitioning helps speed up queries by avoiding full table scans.
+        - **`format-version`**: Specifies Iceberg table format version (`version 2`), which includes additional features like row-level operations.
+
+    ### 3. Load the Iceberg Table
+    ```java
+    TableLoader tableLoaderSkyOne = TableLoader.fromCatalog(catalogLoader, tableIdentifier);
+    ```
+    - **`TableLoader`**: Used to load the specified Iceberg table from the catalog.
+      - **`fromCatalog(catalogLoader, tableIdentifier)`**: Loads the table using the previously defined `catalogLoader` and `tableIdentifier`. The `catalogLoader` knows how to connect to the metadata (managed by AWS Glue in this case).
+
+    ### 4. Sink Data to the Iceberg Table
+    ```java
+    FlinkSink
+        .forRowData(skyOneRowData)
+        .tableLoader(tableLoaderSkyOne)
+        .upsert(true)
+        .equalityFieldColumns(Arrays.asList("email_address", "departure_airport_code", "arrival_airport_code"))
+        .append();
+    ```
+    - **`FlinkSink.forRowData()`**: Configures a sink specifically for `RowData` that needs to be written to Iceberg.
+      - **`skyOneRowData`**: The input data stream, which is in `RowData` format, is generated from a stream of `AirlineData` using a `MapFunction` (not shown in this snippet, but described earlier).
+    - **`tableLoader()`**: Specifies the table that the data will be written to by using the `TableLoader`.
+    - **`upsert(true)`**: Enables **upsert** semantics, which means that rows will either be inserted or updated based on the key fields specified:
+      - **If the key already exists** in the Iceberg table, the row will be **updated**.
+      - **If the key does not exist**, the row will be **inserted**.
+    - **`equalityFieldColumns()`**: Specifies the columns used to determine uniqueness when upserting.
+      - Here, `email_address`, `departure_airport_code`, and `arrival_airport_code` are used as key fields for checking if a record already exists.
+    - **`append()`**: Triggers the data insertion into the table. Once the sink is attached to the `skyOneRowData` stream, it will be executed when the job is run.
+
 
 ### Summary
 The `DataGeneratorApp` class is a well-rounded Flink application that demonstrates:
