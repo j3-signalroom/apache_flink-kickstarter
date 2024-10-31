@@ -6,12 +6,21 @@ Today, I'll walk you through step by step how you can seamlessly write data from
 ![screenshot-datageneratorapp](images/screenshot-datageneratorapp.png)
 
 ## What is Apache Iceberg?  Why is it so groundbreadking?
-But, before I dive into the code, you might me asking yourself what is Apache Iceberg and why it has gotten so popular over the yearst?  (For those who already know the answers to these questions please move on to What is AWS Glue section.)  Well these are all good questions!  Let's first start with what is Apache Iceberg.  
+But, before I dive into the code, you might me asking yourself what is Apache Iceberg and why it has gotten so popular over the years?  (For those who already know the answers to these questions please move on to What is AWS Glue section.)
 
-### What is Apache Iceberg?
-Apache Iceberg is an open table format (method of structuring dataset files in a way to present them as a unified "table") for analytic datasets that addresses many of the challenges in working with data lakes, especially those on distributed storage like Amazon S3, Google Cloud Storage, and Azure Blob Storage. 
+Apache Iceberg was created in 2017 by Netflix's Ryan Blue and Daniel Weeks. It is an open table format created to resolve the deficiencies of working with data lakes, especially those on distributed storage systems like Amazon S3, Google Cloud Storage, and Azure Blob Storage. Here is a list of those deficiencies that the Apache Iceberg open table format addresses resolve:
 
-> _A little history:  Apache Iceberg was created in 2017 by Netflix's Ryan Blue and Daniel Weeks.  Iceberg helps manage data over time by offering key features that improve performance, consistency, and manageability in high-volume data environments._
+Problem|Challenge|Impact|Solution
+-|-|-|-
+**Lack of Consistency and ACID Guarantees**|Distributed storage systems are typically designed for object storage, not traditional database operations. This leads to issues with consistency, especially during concurrent read and write operations.|Without ACID (Atomicity, Consistency, Isolation, Durability) guarantees, operations like updates, deletes, and inserts can become error-prone, leading to inconsistent data views across different sessions or processes.|Apache Iceberg provides ACID compliance, ensuring reliable data consistency on distributed storage systems.
+**Bloated Metatdata Files and Slow Query Performance**|As datasets grow in size, so does the metadata (file paths, schema, partitions) associated with them. Efficiently querying large volumes of metadata can become slow and inefficient.|Simple operations like listing files in a directory can become time-consuming, affecting the performance of queries and applications.|Apache Iceberg organizes data into partitions and adds metadata layers, reducing the need to scan the entire dataset and optimizing query performance. This approach allows for filtering data at the metadata level, which avoids loading unnecessary files.
+**Lack of Schema Evolution and Data Mutability**|Analytic datasets often require schema changes (e.g., adding or renaming columns) as business requirements evolve. Distributed storage formats typically lack built-in support for handling schema changes efficiently.|Without schema evolution support, datasets require complex data transformations or complete rewrites, which can be slow and resource-intensive.|Apache Iceberg allows schema changes without reprocessing the entire dataset, making it easy to add new fields or alter existing ones over time.
+**Inefficient Partitioning and Data Skipping**|Distributed storage systems don't natively support data partitioning, which is crucial for optimizing queries on large datasets.|Lack of partitioning increases query latency because the system has to scan more data than necessary.|Apache Iceberg allows hidden partitioning and metadata-based pruning, ensuring queries only read the required partitions, reducing scan times and improving performance.
+**Lack of Data Versioning and Time Travel**|Many analytic workflows need to access previous data versions for tasks like auditing, debugging, or historical analysis. Distributed storage doesn’t offer built-in support for versioning.|Maintaining multiple versions of the same dataset becomes cumbersome, especially without efficient version control, and can lead to excessive storage costs.|Apache Iceberg offer time travel, allowing users to access snapshots of data at different points in time, providing easy access to historical data.
+**Can't Do Concurrent Read and Write Operations**|Large analytic workloads often involve multiple processes reading from and writing to the same data simultaneously. Distributed storage systems do not inherently support these concurrent operations smoothly.|Without proper handling, this can lead to data corruption or version conflicts, especially during high-throughput operations.|Apache Iceberg’s transactional model enables concurrent operations safely by managing snapshots and transactions, ensuring data integrity and consistency.
+**Too Many Small Files**|Distributed storage systems can accumulate many small files over time due to frequent appends or updates.|Small files lead to inefficient I/O operations and high metadata costs, degrading query performance and increasing storage costs.|Apache Iceberg handles file compaction as part of data maintenance routines, merging small files into larger ones to optimize storage and access efficiency.
+
+By addressing these challenges, Apache Iceberg table format enable scalable, high-performance, easy-to-use and lower cost data lakehouse solutions the succesor to data lakes, which combine the best of the data warehouses and data lakes that leverage distributed storage for both analytic and streaming workloads.
 
 
 Apache Iceberg Table is broken into three layers:
@@ -21,36 +30,6 @@ support for atomic operations is required so that all readers and writers see th
 3. Data layer - The data layer of an Apache Iceberg table is what stores the actual data of the table and is primarily made up of the datafiles themselves, although delete files are also included.
 
 ![apache-iceberg-table-structure](images/apache-iceberg-table-structure.png)
-
-Apache Iceberg is built on a modular architecture that provides a framework for managing datasets in a distributed environment. Its components work together to manage data storage, organization, and access efficiently, especially on cloud-based storage systems. Here’s a breakdown of its primary components:
-
-### 1. **Table Format**
-   - **Manifest Files**: Store information about each file in the table. This includes metadata like file paths, row counts, and column statistics, which helps optimize data pruning during queries.
-   - **Manifest Lists**: Aggregate manifests into a single place, representing a snapshot of the dataset. These lists make it easy to roll back to previous versions or view the history of changes.
-   - **Data Files**: The actual data files stored in formats like Parquet, Avro, or ORC. These are partitioned and organized based on the table’s partitioning strategy, with schema evolution features allowing changes without rewriting data.
-
-### 2. **Metadata Layer**
-   - **Snapshots**: Represent a point-in-time view of the data, allowing features like time travel, which enables users to query previous versions of the table.
-   - **Schema and Partition Evolution**: Enables adding, deleting, and updating columns and partition strategies without rewriting data. This layer simplifies schema updates and manages changes efficiently.
-   - **Table Properties and Configuration**: Stores configuration and properties at the table level, defining things like file formats, snapshot expiration, and more.
-
-### 3. **Transaction Management**
-   - **ACID Compliance**: Iceberg provides ACID transactions to handle data integrity and consistency. This is critical for handling updates, deletes, and upserts.
-   - **Locking and Concurrency Control**: Ensures consistent reads and writes, even in highly concurrent environments, through isolation mechanisms that prevent conflicts between operations.
-
-### 4. **Data Pruning and Filtering**
-   - **Predicate Pushdown**: Filters data at the metadata level to avoid unnecessary scanning, speeding up query execution by focusing only on relevant files.
-   - **Partitioning and Partition Pruning**: Iceberg supports dynamic partitioning, which allows efficient partition pruning based on queries. It supports hidden partitioning, so users don’t have to worry about specific partition columns.
-
-### 5. **Integration with Processing Engines**
-   - **APIs and Catalogs**: Iceberg provides a unified API layer and catalog services to integrate with popular data processing engines like Apache Flink, Snowflake, Apache Spark (AWS Glue), Trino, Hive, and Presto. These catalogs manage table metadata and facilitate operations across multiple processing engines.  _With catalogs, users don’t need separate metadata management for each engine; any supported engine can use the catalog to access the same table definitions and metadata, ensuring consistency across platforms._
-   - **Vectorized Read and Write**: Optimized I/O operations for compatible formats (like Parquet and ORC) enable faster processing and are especially useful for complex analytical queries.
-
-### 6. **Time Travel and Versioning**
-   - **Historical Data Access**: The snapshot-based versioning allows users to access previous data states, which is useful for debugging, auditing, or analyzing past trends.
-   - **Rollback and Data Auditing**: Users can roll back to previous snapshots, making it easy to undo changes or access historical data without additional data management overhead.
-
-Apache Iceberg’s layered design, with manifest and snapshot files and support for partition and schema evolution, makes it highly adaptable for use cases involving large, evolving datasets where efficient access and consistency are essential.
 
 ### Why is it so groundbreadking?
 
