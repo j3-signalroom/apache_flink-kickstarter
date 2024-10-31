@@ -111,7 +111,7 @@ Open your host web browser, enter the local URL, `localhost:8501`, and in a few 
 > _**---J3**_
 
 ### 4.1 Have you noticed something curious about this example?
-When running Streamlit in this example with Apache Flink, Streamlit runs the Python script that uses PyFlink instead of submitting the Python script to the Flink cluster using the `flink run` CLI command.  The difference between the two approaches lies in the execution environment, resource utilization, and integration with the Flink cluster.   _**Stay tuned for the write-up on the different approaches and the code example that handles the approach of what to do if Flink is not localized.**_	
+When running Streamlit in this example with Apache Flink, Streamlit runs the Python script that uses PyFlink instead of submitting the Python script to the Flink cluster using the `flink run` CLI command.  The difference between the two approaches lies in the execution environment, resource utilization, and integration with the Flink cluster.   _**Stay tuned for the write-up on the different approaches and the code example that handles the approach of what to do if Flink is remote.**_	
 
 ## 5.0 Resources
 

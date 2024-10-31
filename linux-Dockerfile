@@ -129,10 +129,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 # Copy Python files to the container
 COPY python /opt/flink/python_apps/
 
-# Set the working directory to the Python files
-WORKDIR /opt/flink/python_apps
-
 # Install Python dependencies based on the `uv.lock` file
+WORKDIR /opt/flink/python_apps
 RUN uv sync --frozen
 
 # Zip Python files
