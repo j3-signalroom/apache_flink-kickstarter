@@ -15,8 +15,9 @@ Apache Iceberg is an open table format (method of structuring dataset files in a
 
 
 Apache Iceberg Table is broken into three layers:
-1. Catalog layer
-2. Metadata layer
+1. Catalog layer - Anyone reading from a table (let alone tens, hundreds, or thousands of tables) needs to know where to go first; somewhere they can go to find out where to read/write data for a given table. The first step for anyone looking to interact with the table is to find the location of the metadata file that is the current metadata pointer.  This central place where you go to find the current location of the current metadata pointer is the Iceberg catalog. The primary requirement for an Iceberg catalog is that it must support atomic operations for updating the current metadata pointer. This
+support for atomic operations is required so that all readers and writers see the same state of the table at a given point in time.
+2. Metadata layer - The metadata layer is an integral part of an Iceberg table’s architecture and contains all the metadata files for an Iceberg table. It’s a tree structure that tracks the datafiles and metadata about them as well as the operations that resulted in their creation.
 3. Data layer - The data layer of an Apache Iceberg table is what stores the actual data of the table and is primarily made up of the datafiles themselves, although delete files are also included.
 
 ![apache-iceberg-table-structure](images/apache-iceberg-table-structure.png)
@@ -53,6 +54,8 @@ Apache Iceberg’s layered design, with manifest and snapshot files and support 
 
 ### Why is it so groundbreadking?
 
+When Snowflake came on the scene in the Cloud Data Warehouse space, is brought with it the idea of separating storage from compute.  This was groundbreaking because architecturally this enable the right sizing of compute resources.  Meaning for `SELECT` operations the requirements for compute resources was far less than for `INSERT`, `UPDATE` or `DELETE` operations.
+
 ## The Apache Iceberg Catalog
 
 ### What is AWS Glue?
@@ -61,7 +64,7 @@ Apache Iceberg’s layered design, with manifest and snapshot files and support 
 ```hcl
 resource "aws_s3_bucket" "iceberg_bucket" {
   # Ensure the bucket name adheres to the S3 bucket naming conventions
-  bucket = replace(local.secrets_insert, "_", "-")
+  bucket = <BUCKET-NAME>
 }
 
 resource "aws_s3_object" "warehouse" {
@@ -117,3 +120,7 @@ resource "aws_glue_catalog_database" "iceberg_db" {
   name = "iceberg_database"
 }
 ```
+
+
+## Resources
+Tomer Shiran, Jason Hughes & Alex Merced. [Apache Iceberg -- The Definitive Guide](https://www.dremio.com/wp-content/uploads/2023/02/apache-iceberg-TDG_ER1.pdf).  O'Reilly, 2024.
