@@ -1,7 +1,7 @@
 # Apache Iceberg in Action with Apache Flink using Java
-Data engineering is all about transforming raw data into useful, accessible data products in the era Data Mesh platform building. At the heart of the signalRoom GenAI Data Mesh platform, we do this by producing data products packaged in Apache Iceberg tables.  In this article, I'll take you through the process of using Apache Iceberg as a sink for your Apache Flink application using Java. This is a natural follow-up to my previous short piece, [Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!](https://thej3.com/apache-flink-apache-iceberg-aws-glue-get-your-jar-versions-right-805041abef11) where I tackled getting the right combination of JARs in place.
+Data engineering transforms raw data into useful, accessible data products in the Data Mesh platform-building era. Like the signalRoom GenAI Data Mesh platform, we package our data products in Apache Iceberg tables. In this article, I'll take you through sinking your Apache Flink data into Apache Iceberg tables using Java. This is a natural follow-up to my previous short piece, [Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!](https://thej3.com/apache-flink-apache-iceberg-aws-glue-get-your-jar-versions-right-805041abef11) where I listed out the right combination of JARs to use.
 
-Today, I'll walk you through step by step how you can seamlessly write data from a Flink application into Apache Iceberg tables, ensuring reliability, performance, and future-proof data storage. We will do this using the [Apache Flink Kickstarter Data Generator Flink app](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/DataGeneratorApp.java) I built awhile ago.
+In this article, I'll walk you through how to seamlessly sink data in your Flink application to Apache Iceberg tables, ensuring reliability, performance, and future-proof data storage. We will do this using the [Apache Flink Kickstarter Data Generator Flink app](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/DataGeneratorApp.java) I built. This app generates synthetic flight data for two fictional airlines (`Sunset Air` and `SkyOne`) and streams it into Apache Kafka and Apache Iceberg. The app provides real-time and historical analytics capabilities, demonstrating the power of Apache Iceberg as a table format for large, complex analytic datasets in distributed data lakehouses.  Moreover, how AWS Glue is used as the metadata catalog for the Apache Iceberg tables.
 
 ![screenshot-datageneratorapp](images/screenshot-datageneratorapp.png)
 
@@ -41,10 +41,9 @@ By integrating Iceberg into these systems, enterprises can leverage its transact
 
 #### Quick Peek into the Apache Iceberg Metadata Anatomy
 Apache Iceberg Table is broken into three layers:
-1. Catalog layer - Anyone reading from a table (let alone tens, hundreds, or thousands of tables) needs to know where to go first; somewhere they can go to find out where to read/write data for a given table. The first step for anyone looking to interact with the table is to find the location of the metadata file that is the current metadata pointer.  This central place where you go to find the current location of the current metadata pointer is the Iceberg catalog. The primary requirement for an Iceberg catalog is that it must support atomic operations for updating the current metadata pointer. This
-support for atomic operations is required so that all readers and writers see the same state of the table at a given point in time.
-2. Metadata layer - The metadata layer is an integral part of an Iceberg table’s architecture and contains all the metadata files for an Iceberg table. It’s a tree structure that tracks the datafiles and metadata about them as well as the operations that resulted in their creation.
-3. Data layer - The data layer of an Apache Iceberg table is what stores the actual data of the table and is primarily made up of the datafiles themselves, although delete files are also included.
+1. Catalog layer - Responsible for managing the high-level registration and discovery of tables, namespaces, and integration with metadata catalogs like AWS Glue, Hive Metastore, and others. It provides a registry for storing and locating Iceberg tables.
+2. Metadata layer - Manages all metadata, such as schema, partition information, snapshots, and file statistics. It’s crucial for tracking versions (snapshots), supporting schema evolution, time travel, and optimizing queries to read only relevant data files.
+3. Data layer - The physical layer that stores the actual dataset files in distributed and scalable storage systems. It ensures data is efficiently organized for analytics workloads, leveraging cloud or distributed storage (S3, HDFS) and file formats (Parquet, Avro, ORC). It also handles partitioning, compaction, and ACID transactions for reliable data operations.
 
 ![apache-iceberg-table-structure](images/apache-iceberg-table-structure.png)
 
@@ -136,6 +135,123 @@ resource "aws_glue_catalog_database" "iceberg_db" {
   name = "iceberg_database"
 }
 ```
+This Terraform code is designed to set up the necessary infrastructure for integrating **AWS Glue**, **Amazon S3**, and **Iceberg**, specifically to store Iceberg tables in S3, manage metadata through Glue, and ensure that the appropriate IAM roles and policies are in place for permissions.
+
+### Detailed Breakdown
+
+#### 1. **S3 Bucket for Iceberg Data**
+```hcl
+resource "aws_s3_bucket" "iceberg_bucket" {
+  # Ensure the bucket name adheres to the S3 bucket naming conventions
+  bucket = <BUCKET-NAME>
+}
+```
+- **`aws_s3_bucket "iceberg_bucket"`**: Creates an Amazon S3 bucket for storing the Iceberg data.
+- **`bucket = <BUCKET-NAME>`**: The bucket name should be unique and adhere to the S3 naming conventions. This bucket will act as the **warehouse** for Iceberg, where all the data files (e.g., Parquet files) are stored.
+
+#### 2. **S3 Object Placeholder for Warehouse**
+```hcl
+resource "aws_s3_object" "warehouse" {
+  bucket = aws_s3_bucket.iceberg_bucket.bucket
+  key    = "warehouse/"
+}
+```
+- **`aws_s3_object "warehouse"`**: Creates a placeholder object in the S3 bucket, representing the directory named `warehouse/`.
+- **`bucket = aws_s3_bucket.iceberg_bucket.bucket`**: Specifies that this object belongs to the previously created `iceberg_bucket`.
+- **`key = "warehouse/"`**: Sets the key to represent a directory structure for the Iceberg warehouse.
+
+#### 3. **IAM Role for AWS Glue**
+```hcl
+resource "aws_iam_role" "glue_role" {
+  name = "glue_service_role"
+
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "glue.amazonaws.com"
+        },
+        "Action": "sts:AssumeRole"
+      }
+    ]
+  })
+}
+```
+- **`aws_iam_role "glue_role"`**: Creates an IAM role for AWS Glue to allow it to interact with other AWS services.
+- **`assume_role_policy`**:
+  - Defines a **trust policy** that allows the Glue service to assume this role.
+  - The principal is set to `"glue.amazonaws.com"`, allowing **AWS Glue** to use the role.
+
+#### 4. **IAM Policy for S3 Access**
+```hcl
+resource "aws_iam_policy" "glue_s3_access_policy" {
+  name = "GlueS3AccessPolicy"
+
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ],
+        "Resource": [
+          aws_s3_bucket.iceberg_bucket.arn,
+          "${aws_s3_bucket.iceberg_bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+```
+- **`aws_iam_policy "glue_s3_access_policy"`**: Defines an IAM policy that allows **AWS Glue** to interact with the S3 bucket used for storing Iceberg data.
+- **`policy`**:
+  - Specifies the actions that Glue can perform on the S3 bucket.
+  - **Actions**:
+    - **`s3:GetObject`**: Allows Glue to read objects from the S3 bucket.
+    - **`s3:PutObject`**: Allows Glue to write objects to the S3 bucket.
+    - **`s3:ListBucket`**: Allows Glue to list the contents of the bucket.
+  - **Resources**:
+    - **`aws_s3_bucket.iceberg_bucket.arn`**: Grants permissions to the bucket itself.
+    - **`${aws_s3_bucket.iceberg_bucket.arn}/*`**: Grants permissions to all objects within the bucket.
+
+#### 5. **Attach IAM Policy to the Glue Role**
+```hcl
+resource "aws_iam_role_policy_attachment" "glue_policy_attachment" {
+  role       = aws_iam_role.glue_role.name
+  policy_arn = aws_iam_policy.glue_s3_access_policy.arn
+}
+```
+- **`aws_iam_role_policy_attachment "glue_policy_attachment"`**: Attaches the previously created S3 access policy (`glue_s3_access_policy`) to the Glue role (`glue_role`).
+- **`role`**: Specifies the name of the IAM role to which the policy will be attached.
+- **`policy_arn`**: Specifies the ARN of the policy being attached to the role.
+
+#### 6. **Glue Catalog Database for Iceberg Metadata**
+```hcl
+resource "aws_glue_catalog_database" "iceberg_db" {
+  name = "iceberg_database"
+}
+```
+- **`aws_glue_catalog_database "iceberg_db"`**: Creates a new **AWS Glue catalog database** named `"iceberg_database"`.
+- This database will be used to store the metadata for Iceberg tables, providing schema management, partitioning information, and other table-level metadata.
+
+### Summary
+- **S3 Bucket and Warehouse Directory**:
+  - Creates an S3 bucket (`iceberg_bucket`) to act as the data warehouse for Apache Iceberg.
+  - Creates a placeholder object (`warehouse`) to represent the warehouse directory in the bucket.
+- **Glue Role and Policy**:
+  - **`glue_role`**: Creates an IAM role that allows AWS Glue to interact with S3.
+  - **`glue_s3_access_policy`**: Defines the permissions needed for Glue to read/write to the S3 bucket (`GetObject`, `PutObject`, `ListBucket`).
+  - The role and policy are then attached to ensure Glue has the appropriate permissions to perform ETL jobs that involve reading from and writing to the Iceberg warehouse in S3.
+- **Glue Catalog Database**:
+  - Creates an AWS Glue database (`iceberg_db`) to manage the metadata of Iceberg tables.
+  - This database will be used by Apache Iceberg for managing the table schemas and providing easy integration with other AWS services for querying and managing datasets.
+
+This Terraform code is an integral part of setting up an **AWS Glue** and **Iceberg** infrastructure that can be used for managing metadata, storing data files in S3, and providing permissions for Glue to manage the lifecycle of Iceberg tables. The setup is ideal for implementing data lakehouse solutions that need efficient metadata handling and seamless integration with AWS services.
 
 This class, `DataGeneratorApp`, is a comprehensive example of a Flink application that generates synthetic flight data, streams it into both Apache Kafka and Apache Iceberg, and provides both real-time and historical analytics capabilities. Let me summarize its main functionalities and key features:
 
@@ -151,6 +267,144 @@ This class, `DataGeneratorApp`, is a comprehensive example of a Flink applicatio
   - **AWS Glue**: Used as the metadata catalog for Iceberg tables.
 
 ### Key Functionalities
+This code snippet is responsible for configuring and setting up a Flink streaming pipeline, where synthetic flight data is generated for two airlines, `Sky One` and `Sunset Air`. The data is then streamed into Kafka topics for downstream processing or consumption. Let's go through each part of the code in detail:
+
+
+
+#### 1. Retrieve Command Line Arguments
+```java
+String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
+String awsRegion = Common.getAppArgumentValue(args, Common.ARG_AWS_REGION);
+```
+- **Command Line Arguments**: Retrieves the `serviceAccountUser` and `awsRegion` values from the command line arguments.
+  - These values are used later for configuration, like accessing AWS services or following S3 naming conventions.
+
+#### 2. Set Up Flink Execution Environment
+```java
+StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+env.enableCheckpointing(5000);
+env.getCheckpointConfig().setCheckpointTimeout(60000);
+env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
+```
+- **Execution Environment**: Creates the Flink `StreamExecutionEnvironment`, which represents the Flink job's DAG (Directed Acyclic Graph).
+- **Checkpointing**:
+  - **`enableCheckpointing(5000)`**: Enables checkpointing every 5 seconds to ensure fault tolerance.
+  - **Checkpoint Timeout**: Sets a timeout of 60 seconds for each checkpoint (`setCheckpointTimeout(60000)`).
+  - **Max Concurrent Checkpoints**: Limits concurrent checkpoints to one (`setMaxConcurrentCheckpoints(1)`), ensuring that only one checkpoint is taken at a time.
+
+```java
+EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
+StreamTableEnvironment tblEnv = StreamTableEnvironment.create(env, settings);
+```
+- **Table Environment**: Creates a `StreamTableEnvironment` (`tblEnv`) to work with Flink's Table API, which allows for SQL-like operations and integration with other data processing systems.
+
+#### 3. Retrieve Kafka Properties
+```java
+DataStream<Properties> dataStreamProducerProperties = 
+    env.fromData(new Properties())
+       .map(new KafkaClientPropertiesLookup(false, serviceAccountUser))
+       .name("kafka_producer_properties");
+Properties producerProperties = new Properties();
+```
+- **Kafka Properties Lookup**: Uses `KafkaClientPropertiesLookup` to fetch the Kafka properties (e.g., broker addresses, security settings) from AWS services (like AWS Secrets Manager).
+- **Create Data Stream**: Creates a `DataStream<Properties>` that contains the Kafka producer properties.
+
+```java
+try {
+    dataStreamProducerProperties
+        .executeAndCollect()
+        .forEachRemaining(typeValue -> {
+            producerProperties.putAll(typeValue);
+        });
+} catch (final Exception e) {
+    System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
+    e.printStackTrace();
+    System.exit(1);
+}
+```
+- **Execute and Collect**: Executes the data stream and collects the Kafka properties. This step is required to ensure that the `producerProperties` are available for setting up the Kafka sinks.
+- **Error Handling**: If any exception occurs during this process, the application prints the error, logs it, and exits with a non-zero status.
+
+#### 4. Create Data Sources
+**Sky One Source**:
+```java
+DataGeneratorSource<AirlineData> skyOneSource =
+    new DataGeneratorSource<>(
+        index -> DataGenerator.generateAirlineFlightData("SKY1"),
+        Long.MAX_VALUE,
+        RateLimiterStrategy.perSecond(1),
+        Types.POJO(AirlineData.class)
+    );
+DataStream<AirlineData> skyOneStream = 
+    env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
+```
+- **Data Generator for Sky One**: Generates synthetic flight data (`AirlineData`) for `Sky One` airline using `DataGeneratorSource`. The generator runs indefinitely (`Long.MAX_VALUE`) and generates one record per second (`RateLimiterStrategy.perSecond(1)`).
+- **Create Data Stream**: Converts the data source into a `DataStream<AirlineData>` named `skyOneStream`.
+
+**Sunset Source**:
+```java
+DataGeneratorSource<AirlineData> sunsetSource =
+    new DataGeneratorSource<>(
+        index -> DataGenerator.generateAirlineFlightData("SUN"),
+        Long.MAX_VALUE,
+        RateLimiterStrategy.perSecond(1),
+        Types.POJO(AirlineData.class)
+    );
+DataStream<AirlineData> sunsetStream = 
+    env.fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
+```
+- **Data Generator for Sunset Air**: Similarly, creates a data generator for `Sunset Air` airline.
+- **Create Data Stream**: Converts the data source into a `DataStream<AirlineData>` named `sunsetStream`.
+
+#### 5. Create Kafka Sinks
+**Sky One Sink**:
+```java
+KafkaRecordSerializationSchema<AirlineData> skyOneSerializer = 
+    KafkaRecordSerializationSchema.<AirlineData>builder()
+        .setTopic("airline.skyone")
+        .setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
+        .build();
+
+KafkaSink<AirlineData> skyOneSink = 
+    KafkaSink.<AirlineData>builder()
+        .setKafkaProducerConfig(producerProperties)
+        .setRecordSerializer(skyOneSerializer)
+        .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+        .build();
+```
+- **Serialization Schema**: Creates a serialization schema for `Sky One` using `JsonSerializationSchema`, which converts `AirlineData` objects to JSON format.
+- **Kafka Sink**:
+  - Configures a Kafka sink (`KafkaSink<AirlineData>`) with the producer properties retrieved earlier.
+  - Uses **`AT_LEAST_ONCE`** delivery guarantee to ensure that messages are not lost, although duplicates may be possible.
+
+**Sunset Sink**:
+```java
+KafkaRecordSerializationSchema<AirlineData> sunsetSerializer = 
+    KafkaRecordSerializationSchema.<AirlineData>builder()
+        .setTopic("airline.sunset")
+        .setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
+        .build();
+
+KafkaSink<AirlineData> sunsetSink = 
+    KafkaSink.<AirlineData>builder()
+        .setKafkaProducerConfig(producerProperties)
+        .setRecordSerializer(sunsetSerializer)
+        .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+        .build();
+```
+- **Serialization Schema**: Similarly, creates a serializer for the `Sunset Air` data to be published to the `airline.sunset` topic.
+- **Kafka Sink**: Sets up the Kafka sink for `Sunset Air` with the same configurations as `Sky One`.
+
+#### 6. Attach Sources and Sinks to Flink's DAG
+```java
+skyOneStream.sinkTo(skyOneSink).name("skyone_sink");
+sunsetStream.sinkTo(sunsetSink).name("sunset_sink");
+```
+- **Attach Sinks**: Adds the `KafkaSink` for both `Sky One` and `Sunset Air` to the Flink data streams (`skyOneStream` and `sunsetStream`).
+  - Only streams with sinks attached will be executed when the `StreamExecutionEnvironment.execute()` method is called.
+
+
+This setup allows for generating real-time flight data and sending it to Kafka topics, which can be further used for downstream analytics, monitoring, or storage in a data lake (e.g., Iceberg). The application is highly fault-tolerant, supports scalability, and can work seamlessly with cloud-native environments by leveraging AWS services for metadata and property management.
 
 1. **Main Method - Entry Point**
    - The `main()` method sets up the Flink environment, creates data generators, defines data sinks, and eventually executes the streaming job.
