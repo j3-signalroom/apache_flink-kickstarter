@@ -1,19 +1,20 @@
 # Apache Iceberg in Action with Apache Flink using Java
 Data engineering transforms raw data into useful, accessible data products in the Data Mesh platform-building era. Like the signalRoom GenAI Data Mesh platform, we package our data products in Apache Iceberg tables. In this article, I'll take you through sinking your Apache Flink data into Apache Iceberg tables using Java. This is a natural follow-up to my previous short piece, [Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!](https://thej3.com/apache-flink-apache-iceberg-aws-glue-get-your-jar-versions-right-805041abef11) where I listed out the right combination of JARs to use.
 
-In this article, I'll walk you through how to seamlessly sink data in your Flink application to Apache Iceberg tables using AWS Glue as your Apache Iceberg catalog, ensuring reliability, performance, and future-proof data storage. We will do this using the [Apache Flink Kickstarter Data Generator Flink app](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/DataGeneratorApp.java). This app generates synthetic flight data for two fictional airlines (`Sunset Air` and `SkyOne`) and streams it into Apache Kafka and Apache Iceberg. The app provides real-time and historical analytics capabilities, demonstrating the power of Apache Iceberg as a table format for large, complex analytic datasets in distributed data lakehouses.  Moreover, how AWS Glue is used as the metadata catalog for the Apache Iceberg tables.
+In this article, I'll walk you through how to seamlessly sink data in your Flink application to Apache Iceberg tables using AWS Glue as your Apache Iceberg catalog, ensuring reliability, performance, and future-proof data storage. We will do this using the [Apache Flink Kickstarter Data Generator Flink app](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/DataGeneratorApp.java). This app generates synthetic flight data for two fictional airlines (`Sunset Air` and `SkyOne`) and streams it into Apache Kafka and Apache Iceberg. The app provides real-time and historical analytics capabilities, demonstrating the power of Apache Iceberg as a table format for large, complex analytic datasets in distributed data lakehouses.  Moreover, it illustrates how AWS Glue is used as the metadata catalog for the Apache Iceberg tables.
 
 ![screenshot-datageneratorapp](images/screenshot-datageneratorapp.png)
 
-So, the article is layed out as follows:
-- What is Apache Iceberg and why it is a gamechanger for data platform architecture.
+So, the article is laid out as follows:
+
+![explain-plan](images/explain-plan.gif)
+
+- What is Apache Iceberg, and why is it a game changer for data platform architecture?
 - How to set up AWS Glue to use it as your Apache Iceberg catalog.
 - Step-by-step walkthrough of Data Generator Flink App, that puts it all together.  
 
-[INSERT THE PLAN MEME]
-
 ## What is Apache Iceberg?
-Apache Iceberg was created in 2017 by Netflix's Ryan Blue and Daniel Weeks. It is an open table format created to resolve the deficiencies of working with data lakes, especially those on distributed storage systems like Amazon S3, Google Cloud Storage, and Azure Blob Storage.   A table format is a method of structuring a dataset’s files to present them as a unified “table.”  From the user’s perspective, it can be defined as the answer to the question “what data is in this table?”  However, to implement a table format on a distributed storage system, Apache Iceberg needed to overcome a number of challanges presented by distriburted storage systems (e.g., S3, Google Cloud Storage, and Azure Blob Storage):
+Apache Iceberg was created in 2017 by Netflix's Ryan Blue and Daniel Weeks. It is an open table format designed to resolve the deficiencies of working with data lakes, especially those on distributed storage systems like Amazon S3, Google Cloud Storage, and Azure Blob Storage. A table format is a method of structuring a dataset’s files to present them as a unified “table.” From the user’s perspective, it can be defined as the answer to the question, "What data is in this table?” However, to implement a table format on a distributed storage system, Apache Iceberg needed to overcome several challenges posed by distributed storage systems (e.g., S3, Google Cloud Storage, and Azure Blob Storage):
 
 Problem|Challenge|Impact|Solution
 -|-|-|-
@@ -40,7 +41,7 @@ This metadata tree breaks down the metadata of the table into four components:
 ### Why Apache Iceberg is a Gamechanger?
 The true power of Apache Iceberg is that it allows for the separation of storage from compute independent of a data vendor.  What this means is we are **NO LONGER LOCKED IN** to a single data vendor's compute engine (e.g., **Hive**, **Flink**, **Presto**, **Snowflake**, **Spark**, and **Trino**)!  We store the data independently of the compute engine in our distributed storage system (e.g., Amazon S3, Google Cloud Storage, and Azure Blob Storage), and then we connect to the compute engine that best fits our use case for whatever situation we are using our data in!  Moreover, we could have one copy of the data and use different engines on it for different use cases.  Now, let that sit with you!
 
-[INSERT MIND BLOWN MEME]
+![office-mind-blown](images/office-mind-blown.gif)
 
 ## AWS Glue for your Apache Iceberg catalog
 **AWS Glue** is a fully managed extract, transform, and load (**ETL**) service offered by Amazon Web Services (**AWS**). It simplifies the process of preparing and loading data for analytics by automating data discovery, schema inference, and job scheduling. AWS Glue provides a comprehensive platform that includes:
