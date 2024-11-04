@@ -330,12 +330,19 @@ public class DataGeneratorApp {
                     );
         }
 
-        // ---
-        TableLoader tableLoaderSkyOne = TableLoader.fromCatalog(catalogLoader, tableIdentifier);
+        /*
+         * Serializable loader to load an Apache Iceberg Table.  Apache Flink needs to get Table objects in the cluster,
+         * not just on the client side. So we need an Iceberg table loader to get the Table object.
+         */
+        TableLoader tableLoader = TableLoader.fromCatalog(catalogLoader, tableIdentifier);
 
+        /*
+         * Writes data from the Apache Flink datastream to an Apache Iceberg table using upsert logic, where updates or insertions 
+         * are decided based on the specified equality fields (i.e., "email_address", "departure_airport_code", "arrival_airport_code").
+         */
         FlinkSink
             .forRowData(skyOneRowData)
-            .tableLoader(tableLoaderSkyOne)
+            .tableLoader(tableLoader)
             .upsert(true)
             .equalityFieldColumns(Arrays.asList("email_address", "departure_airport_code", "arrival_airport_code"))
             .append();
