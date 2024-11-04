@@ -1,5 +1,4 @@
 from pyflink.common import Row, Types
-from datetime import datetime
 from dataclasses import dataclass
 
 from helper.utilities import serialize_date, parse_isoformat

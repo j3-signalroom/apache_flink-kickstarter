@@ -161,7 +161,7 @@ def main(args):
     # Define the workflow for the Flink job graph (DAG)
     flight_datastream = define_workflow(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
 
-    # Populate the table with the data from the data stream
+    # Populate the Apache Iceberg Table with the data from the data stream
     (tbl_env.from_data_stream(flight_datastream)
             .execute_insert(flight_table_path.get_full_name()))
 
