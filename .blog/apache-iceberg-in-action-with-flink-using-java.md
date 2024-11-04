@@ -9,7 +9,7 @@ So, the article is laid out as follows:
 
 ![explain-plan](images/explain-plan.gif)
 
-- What is Apache Iceberg, and why is it a game changer for data platform architecture?
+- What is Apache Iceberg, and why is it a gamechanger for data platform architecture?
 - How to set up AWS Glue to use it as your Apache Iceberg catalog.
 - Step-by-step walkthrough of Data Generator Flink App, that puts it all together.  
 
@@ -26,9 +26,9 @@ Problem|Challenge|Impact|Solution
 **Unable to do Concurrent Read and Write Operations**|Large analytic workloads often involve multiple processes reading from and writing to the same data simultaneously. Distributed storage systems do not inherently support these concurrent operations smoothly.|Without proper handling, this can lead to data corruption or version conflicts, especially during high-throughput operations.|Apache Iceberg’s transactional model enables concurrent operations safely by managing snapshots and transactions, ensuring data integrity and consistency.
 **Too Many Small Files**|Distributed storage systems can accumulate many small files over time due to frequent appends or updates.|Small files lead to inefficient I/O operations and high metadata costs, degrading query performance and increasing storage costs.|Apache Iceberg handles file compaction as part of data maintenance routines, merging small files into larger ones to optimize storage and access efficiency.
 
-By addressing these challenges, Apache Iceberg table format enable scalable, high-performance, easy-to-use and lower cost _data lakehouse_ solutions (the succesor to data lakes), which combine the best of the data warehouse and data lake design that leverage distributed storage for both analytic and streaming workloads.
+By addressing these challenges, the Apache Iceberg table format enables scalable, high-performance, easy-to-use, and lower-cost data lakehouse solutions (the successor to data lakes), which combine the best of data warehouse and data lake design that leverage distributed storage for both analytic and streaming workloads.
 
-With the challanges resolved by Apache Iceberg faced when working on a distributed storage system, the question comes how does it manage the megadata.  This is where Apache Iceberg utilizes an engine (i.e., catalog), such as **AWS Glue**, **Hive Megastore**, or **Hadopp** filesystem catalog to track a table’s partitioning, sorting, schema over time, and so much more using a tree of metadata that an engine can use to plan queries at a fraction of the time it would take with legacy data lake patterns.
+With the challenges resolved by Apache Iceberg when working on a distributed storage system, the question arises: how does it manage the metadata? This is where Apache Iceberg utilizes an engine (i.e., catalog), such as **AWS Glue**, **Hive Megastore**, or **Hadoop** filesystem catalog to track a table’s partitioning, sorting, and schema over time, and so much more using a tree of metadata that an engine can use to plan queries in a fraction of the time it would take with legacy data lake patterns.
 
 ![apache-iceberg-table-structure](images/apache-iceberg-table-structure.png)
 
@@ -44,11 +44,9 @@ The true power of Apache Iceberg is that it allows for the separation of storage
 ![office-mind-blown](images/office-mind-blown.gif)
 
 ## AWS Glue for your Apache Iceberg catalog
-**AWS Glue** is a fully managed extract, transform, and load (**ETL**) service offered by Amazon Web Services (**AWS**). It simplifies the process of preparing and loading data for analytics by automating data discovery, schema inference, and job scheduling. AWS Glue provides a comprehensive platform that includes:
+**AWS Glue** is a fully managed extract, transform, and load (ETL) service offered by Amazon Web Services (AWS). It simplifies the process of preparing and loading data for analytics by automating data discovery, schema inference, and job scheduling. In addition, the AWS Glue Data Catalog serves as a centralized metadata repository for Iceberg tables.
 
-
-
-The easy is way to set up AWS Glue in your environment (this article assumes AWS is your cloud provider) is to use Terraform.  I especially use Terraform because I believe it is paramount that CI/CD (Continuous Improvement/Continuous Development) be used in any environment to make infrastructure deployment repeatable and manageble.  What follows is the step-by-step Terraform code you would use to set up the necessary infrastructure for integrating **AWS Glue**, **Amazon S3**, and **Iceberg**, specifically to store Iceberg tables in S3, manage metadata through Glue, and ensure that the appropriate IAM roles and policies are in place for permissions:
+The easiest way to set up AWS Glue in your environment (this article assumes AWS is your cloud provider) is to use Terraform. I mainly use Terraform because it is paramount that CI/CD (Continuous Integration/Continuous Development) be used in any environment to make infrastructure deployment scalable, repeatable, and manageable. What follows is the step-by-step Terraform code you would use to set up the necessary infrastructure for integrating AWS Glue, Amazon S3, and Apache Iceberg, specifically to store Iceberg tables in S3, manage metadata through AWS Glue, and ensure that the appropriate IAM roles and policies are in place for permissions:
 
 ### Step 1 of 6.  **S3 Bucket for Iceberg Data**
 ```hcl
@@ -581,13 +579,13 @@ Explanation:
      6. **Sink Data to Iceberg Table**: Convert the data stream to `RowData` format and write it to Iceberg tables.
 
 
-The `DataGeneratorApp` class is a well-rounded Flink application that demonstrates:
-- **Data Stream Generation**: Using `DataGeneratorSource` to create realistic flight data.
+The [`DataGeneratorApp`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/DataGeneratorApp.java) class is a well-rounded Flink application that demonstrates:
+- **Data Stream Generation**: Using [`DataGenerator`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/github_issue-417/java/app/src/main/java/kickstarter/DataGenerator.java) class object to create realistic flight data.
 - **Integration with Kafka and Iceberg**: Publishing the data to Kafka for real-time analytics and to Iceberg for historical analysis.
 - **AWS Glue for Metadata Management**: Integrating AWS Glue with Iceberg to manage metadata in a centralized, consistent manner.
 - **Resiliency and Fault Tolerance**: Implementing checkpointing and delivery guarantees to ensure the stability and reliability of the data pipeline.
 
-This code example aligns well with modern data architectures like **data lakehouses**, combining the best features of data lakes and data warehouses. It allows data to be processed in real-time, stored efficiently, and analyzed historically, all while maintaining flexibility, scalability, and cost-effectiveness.
+This code example embodies the principles of modern data architectures, such as data lakehouses, by seamlessly integrating the strengths of data lakes and data warehouses. It empowers real-time data processing, efficient storage, and in-depth historical analysis—all while offering unmatched flexibility, scalability, and cost-efficiency.
 
 ## Resources
 Jeffrey Jonathan Jennings.  [Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!](https://thej3.com/apache-flink-apache-iceberg-aws-glue-get-your-jar-versions-right-805041abef11).  Medium, 2024.

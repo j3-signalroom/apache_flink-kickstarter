@@ -66,3 +66,5 @@ Flink App|Flink Run Command
 
 ## 3.0 Resources
 [Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!](../.blog/get-your-jar-versions-right.md)
+
+[Apache Iceberg in Action with Apache Flink using Java](../.blog/apache-iceberg-in-action-with-flink-using-java.md)
