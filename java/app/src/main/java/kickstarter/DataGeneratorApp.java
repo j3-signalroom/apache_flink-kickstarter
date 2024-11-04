@@ -54,9 +54,7 @@ public class DataGeneratorApp {
 	 * decide whether to retry the task execution.
 	 */
 	public static void main(String[] args) throws Exception {
-        /*
-         * Retrieve the value(s) from the command line argument(s).
-         */
+        // --- Retrieve the value(s) from the command line argument(s).
         String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
         String awsRegion = Common.getAppArgumentValue(args, Common.ARG_AWS_REGION);
 
@@ -114,9 +112,7 @@ public class DataGeneratorApp {
             System.exit(1);
 		}
 
-        /*
-         * Create a data generator source.
-         */
+        // --- Create a data generator source.
         DataGeneratorSource<AirlineData> skyOneSource =
             new DataGeneratorSource<>(
                 index -> DataGenerator.generateAirlineFlightData("SKY1"),
@@ -125,9 +121,7 @@ public class DataGeneratorApp {
                 Types.POJO(AirlineData.class)
             );
 
-        /*
-         * Sets up a Flink POJO source to consume data.
-         */
+        // --- Sets up a Flink POJO source to consume data.
         DataStream<AirlineData> skyOneStream = 
             env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
@@ -158,9 +152,7 @@ public class DataGeneratorApp {
          */
         skyOneStream.sinkTo(skyOneSink).name("skyone_sink");
 
-        /*
-         * Sets up a Flink POJO source to consume data.
-         */
+        // --- Sets up a Flink POJO source to consume data.
         DataGeneratorSource<AirlineData> sunsetSource =
             new DataGeneratorSource<>(
                 index -> DataGenerator.generateAirlineFlightData("SUN"),
@@ -199,9 +191,7 @@ public class DataGeneratorApp {
          */
         sunsetStream.sinkTo(sunsetSink).name("sunset_sink");
 
-        /*
-         * --- Apache Iceberg Catalog Configuration.
-         */
+        // --- Describes and configures the catalog for the Table API and SQL.
         String catalogName = "apache_kickstarter";
         String bucketName = serviceAccountUser.replace("_", "-");  // --- To follow S3 bucket naming convention, replace underscores with hyphens if exist in string.
         String catalogImpl = "org.apache.iceberg.aws.glue.GlueCatalog";
@@ -213,17 +203,12 @@ public class DataGeneratorApp {
         catalogProperties.put("io-impl", "org.apache.iceberg.aws.s3.S3FileIO");
         catalogProperties.put("glue.skip-archive", "true");
         catalogProperties.put("glue.region", awsRegion);
-        
-        // --- Use the CatalogLoader since an external metastore is used (AWS Glue Catalog).
-        CatalogLoader catalogLoader = CatalogLoader.custom(catalogName, catalogProperties,  new Configuration(false), catalogImpl);
-
-        // --- Describes and configures the catalog for the Table API and SQL.
         CatalogDescriptor catalogDescriptor = CatalogDescriptor.of(catalogName, org.apache.flink.configuration.Configuration.fromMap(catalogProperties));
 
         // --- Create the catalog, use it, and get the instantiated catalog.
         tblEnv.createCatalog(catalogName, catalogDescriptor);
         tblEnv.useCatalog(catalogName);
-        org.apache.flink.table.catalog.Catalog catalog = tblEnv.getCatalog("apache_kickstarter").orElseThrow(() -> new RuntimeException("Catalog not found"));
+        org.apache.flink.table.catalog.Catalog catalog = tblEnv.getCatalog(catalogName).orElseThrow(() -> new RuntimeException("Catalog not found"));
 
         // --- Print the current catalog name.
         System.out.println("Current catalog: " + tblEnv.getCurrentCatalog());
@@ -273,11 +258,15 @@ public class DataGeneratorApp {
             }
         );
         
+        // --- Use the CatalogLoader since AWS Glue Catalog is used as the external metastore.
+        CatalogLoader catalogLoader = CatalogLoader.custom(catalogName, catalogProperties,  new Configuration(false), catalogImpl);
+
+        // --- Sink the datastreams to their respective Apache Iceberg tables.
         SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "skyone_airline", skyOneStream);
         SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "sunset_airline", sunsetStream);
 
-        try {
-            // --- Execute the Flink job graph (DAG)
+        // --- Execute the Flink job graph (DAG)
+        try {            
             env.execute("DataGeneratorApp");
         } catch (Exception e) {
             logger.error("The App stopped early due to the following: {}", e.getMessage());

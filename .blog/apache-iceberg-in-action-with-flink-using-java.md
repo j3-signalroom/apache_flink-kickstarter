@@ -48,17 +48,17 @@ The true power of Apache Iceberg is that it allows for the separation of storage
 
 The easiest way to set up AWS Glue in your environment (this article assumes AWS is your cloud provider) is to use Terraform. I mainly use Terraform because it is paramount that CI/CD (Continuous Integration/Continuous Development) be used in any environment to make infrastructure deployment scalable, repeatable, and manageable. What follows is the step-by-step Terraform code you would use to set up the necessary infrastructure for integrating AWS Glue, Amazon S3, and Apache Iceberg, specifically to store Iceberg tables in S3, manage metadata through AWS Glue, and ensure that the appropriate IAM roles and policies are in place for permissions:
 
-### Step 1 of 6.  **S3 Bucket for Iceberg Data**
+### Step 1 of 6.  **Create an S3 Bucket for Apache Tables**
 ```hcl
 resource "aws_s3_bucket" "iceberg_bucket" {
   bucket = <YOUR-UNIQUE-BUCKET-NAME>
 }
 ```
 Explanation:
-- **`aws_s3_bucket "iceberg_bucket"`** resource: Creates an Amazon S3 bucket for storing the Iceberg data.
-- **`bucket = <BUCKET-NAME>`**: The bucket name should be unique and adhere to the S3 naming conventions. This bucket will act as the **warehouse** for Iceberg, where all the data files (e.g., Parquet files), and metadata are stored.
+- **`aws_s3_bucket "iceberg_bucket"`** resource: Creates an Amazon S3 bucket for storing the Apache Iceberg Tables.
+- **`bucket = <BUCKET-NAME>`**: The bucket name should be unique and adhere to the S3 naming conventions. This bucket will act as the **warehouse** for Apache Iceberg, where all the data/delete files (e.g., Parquet files), and metadata are stored.
 
-### Step 2 of 6.  **S3 Object Placeholder for Warehouse**
+### Step 2 of 6.  **Create a Folder within the S3 Bucket**
 ```hcl
 resource "aws_s3_object" "warehouse" {
   bucket = aws_s3_bucket.iceberg_bucket.bucket
@@ -66,9 +66,9 @@ resource "aws_s3_object" "warehouse" {
 }
 ```
 Explanation:
-- **`aws_s3_object "warehouse"`**: Creates a placeholder object in the S3 bucket, representing the directory named `warehouse/`.
-- **`bucket = aws_s3_bucket.iceberg_bucket.bucket`**: Specifies that this object belongs to the previously created `iceberg_bucket`.
-- **`key = "warehouse/"`**: Sets the key to represent a directory structure for the Iceberg warehouse.
+- **`aws_s3_object "warehouse"`**: Creates the S3 folder, which is a human-created concept that organizes objects in the S3 bucket. Note, S3 is an object storage system that stores objects in a flat structure, without a physical folder hierarchy. However, technology like Apache Iceberg requires folder concept, so that is why a folder needs to be create and why S3 provides such a solution.
+- **`bucket = aws_s3_bucket.iceberg_bucket.bucket`**: Specifies that this folder object belongs to the previously created `iceberg_bucket`.
+- **`key = "warehouse/"`**: Sets the key to represent a folder structure for the Apache Iceberg warehouse.
 
 ### Step 3 of 6.  **IAM Role for AWS Glue**
 ```hcl
@@ -312,7 +312,7 @@ Explanation:
 - **Attach Sinks**: Adds the `KafkaSink` for both `Sky One` and `Sunset Air` to the Flink data streams (`skyOneStream` and `sunsetStream`).
   - Only streams with sinks attached will be executed when the `StreamExecutionEnvironment.execute()` method is called.
 
-### Steo 7 of 15.  Setting Up Iceberg Catalog Configuration
+### Step 7 of 15.  Setting Up Iceberg Catalog Configuration
 ```java
 String catalogName = "apache_kickstarter";
 String bucketName = serviceAccountUser.replace("_", "-");  // --- To follow S3 bucket naming convention, replace underscores with hyphens if exist in string.
