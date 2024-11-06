@@ -177,10 +177,6 @@ resource "aws_iam_role_policy_attachment" "glue_policy_attachment" {
   policy_arn = aws_iam_policy.glue_s3_access_policy.arn
 }
 
-resource "aws_glue_catalog_database" "iceberg_db" {
-  name = "iceberg_database"
-}
-
 data "aws_secretsmanager_secret" "admin_public_keys" {
   name = "/snowflake_admin_credentials"
 }
