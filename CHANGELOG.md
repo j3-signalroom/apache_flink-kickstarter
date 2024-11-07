@@ -3,6 +3,32 @@ All notable changes to this project will be documented in this file.
 
 The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.52.00.000] - 2024-11-07
+### Added
+- Issue [#390](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/390).
+- Issue [#393](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/393).
+- Issue [#399](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/399).
+- Issue [#404](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/404).
+- Issue [#407](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/407).
+- Issue [#411](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/411).
+- Issue [#414](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/414).
+- Issue [#417](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/417).
+- Issue [#420](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/420).
+- Issue [#435](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/435).
+
+### Changed
+- Issue [#386](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/386).
+- Issue [#401](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/401).
+- Issue [#409](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/409).
+- Issue [#418](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/418).
+- Issue [#428](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/428).
+- Issue [#432](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/432).
+- Issue [#437](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/437).
+
+### Fixed
+- Issue [#388](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/388).
+- Issue [#396](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/396).
+
 ## [0.51.02.000] - 2024-10-20
 ### Changed
 - Issue [#384](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/384).
