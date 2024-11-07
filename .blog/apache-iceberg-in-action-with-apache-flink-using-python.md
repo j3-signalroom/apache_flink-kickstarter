@@ -125,7 +125,7 @@ This Terraform code is essential for setting up an **AWS S3 Bucket**, **AWS Glue
 ## Step-by-Step Walkthrough of the Flight Importer Flink App
 The [`flight_importer_app`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/flight_importer_app.py) showcases the power of Apache Flink in building a cutting-edge streaming analytics pipeline. This dynamic application ingests airline flight data from two Kafka topics, seamlessly merging the streams into a unified Kafka topic and an Apache Iceberg table. The result? Real-time analytics with historical depth give you unparalleled insights at every moment. With Flink's DataStream API and Iceberg's seamless integration via AWS Glue, this app exemplifies how to harness the full potential of modern data processing for high-impact analytics. Below, you'll find a step-by-step breakdown of how it all works:
 
-### Step 1 of 13. The required JARs for the Flink app
+### Step 1 of 14. The required JARs for the Flink app
 ```bash
 curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.19.1/flink-s3-fs-hadoop-1.19.1.jar" -o "/opt/flink/lib/flink-s3-fs-hadoop-1.19.1.jar"
 curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/1.19.1/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar" -o "/opt/flink/lib/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar"
@@ -169,7 +169,7 @@ dependencies = [
 
 > `pyproject.toml` is a configuration file used in Python projects to specify build system requirements and project metadata. It serves as a way to standardize and simplify the Python build process, especially when using modern build tools such as [uv](https://docs.astral.sh/uv/), [Poetry](https://python-poetry.org/), or [Setuptools](https://setuptools.pypa.io/en/latest/). This file is defined by [PEP 518](https://peps.python.org/pep-0518/) and is supported by most modern Python package managers.
 
-### Step 2 of 13.  Import the required Python libraries
+### Step 2 of 14.  Import the required Python libraries
 ```python
 from pyflink.common import WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
@@ -211,9 +211,9 @@ if __name__ == "__main__":
     known_args, _ = parser.parse_known_args()
     main(known_args)
 ```
-- Place the code in steps 3 through 11 in the `main()` method.
+- Place the code in steps 3 through 14 in the `main()` method.
 
-### Step 3 of 13. Set up the Flink environment
+### Step 3 of 14. Set up the Flink environment
 ```python
     # --- Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
@@ -243,14 +243,14 @@ if __name__ == "__main__":
 
 - **Table Environment:** Creates a `StreamTableEnvironment` to work with Flink's Table API, which allows for SQL-like operations and integration with other data processing systems.
 
-### Step 4 of 13.  Get Kafka Consumer Client Kafka Cluster properties
+### Step 4 of 14.  Get Kafka Consumer Client Kafka Cluster properties
 ```python
     # Get Kafka Consumer Client Kafka Cluster properties
     consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
 ```
 - The function `execute_kafka_properties_udtf()` is designed to retrieve Kafka cluster properties by triggering the KafkaProperties User-Defined Table Function (UDTF).
 
-### Step 5 of 13.  Consumer the `airline.skyone` and `airline.sunset` Kafka topics
+### Step 5 of 14.  Consumer the `airline.skyone` and `airline.sunset` Kafka topics
 ```python
 # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
 # Note: KafkaSource was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
@@ -287,7 +287,7 @@ sunset_stream = (env.from_source(sunset_source, WatermarkStrategy.no_watermarks(
                     .uid("sunset_source"))
 ```
 
-### Step 6 of 13.  Get Kafka Producer Client Kafka Cluster properties
+### Step 6 of 14.  Get Kafka Producer Client Kafka Cluster properties
 ```python
 # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
 # Get the Kafka Cluster properties for the producer
@@ -297,7 +297,7 @@ producer_properties.update({
 })
 ```
 
-### Step 7 of 13.  Create Kafka Sink
+### Step 7 of 14.  Create Kafka Sink
 ```python
 # Note: KafkaSink was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
 # you will need to use the FlinkKafkaProducer class.
@@ -323,7 +323,7 @@ flight_sink = (kafka_sink_builder
                 .build())
 ```
 
-### Step 8 of 13.  Configure, Register, and Set the Apache Iceberg Catalog
+### Step 8 of 14.  Configure, Register, and Set the Apache Iceberg Catalog
 ```python
 # --- Load Apache Iceberg catalog
 catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
@@ -395,7 +395,7 @@ def catalog_exist(tbl_env: StreamExecutionEnvironment, catalog_to_check: str) ->
         return False
 ```
 
-### Step 9 of 13.  Check if the Apache Flink Catalog Database Exists and Create It if it Does Not
+### Step 9 of 14.  Check if the Apache Flink Catalog Database Exists and Create It if it Does Not
 > _What is an Apache Flink Catalog Database?_
 > 
 > _The Apache Flink catalog database is a logical namespace that stores metadata about data sources, including databases, tables, and views. The catalog provides a unified API for managing metadata accessible from the Table API and SQL Queries._
@@ -430,7 +430,7 @@ def load_database(tbl_env: StreamExecutionEnvironment, catalog: Catalog, databas
         exit(1)
 ```
 
-### Step 10 of 13.  Create the `airlines.flight` Apache Iceberg Table
+### Step 10 of 14.  Create the `airlines.flight` Apache Iceberg Table
 ```python
 # An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
 # catalog object, such as a table, view, or function.  It uniquely identifies an object
@@ -465,7 +465,7 @@ except Exception as e:
     exit(1)
 ```
 
-### Step 11 of 13.  Combine the `skyone` and `sunset` Airline DataStreams into one DataStream
+### Step 11 of 14.  Combine the `skyone` and `sunset` Airline DataStreams into one DataStream
 ```python
 # Combine the Airline DataStreams into one DataStream
 flight_datastream = combine_datestreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
@@ -516,19 +516,23 @@ def parse_isoformat(date_string: str) -> datetime:
         return None
 ```
 
-### Step 12 of 13.  Sink the `flight_datastream` into the `airlines.flight` Apache Iceberg Table and the `airline.flight` Kafka Topic
+### Step 12 of 14.  Sink the `flight_datastream` into the `airlines.flight` Apache Iceberg Table
 ```python
 # Populate the Apache Iceberg Table with the data from the data stream
 (tbl_env.from_data_stream(flight_datastream)
         .execute_insert(flight_table_path.get_full_name()))
+```        
+> _**Upserts in PyFlink:** `PyFlink` itself does not directly expose methods like `.upsert(true)` or `equalityFieldColumns` as in Java's FlinkSink API.  Upserts can be simulated using primary keys or handling data deduplication within your source transformation logic (i.e., using the Table API `execute_insert()` method.)._
 
+### Step 13 of 14.  Sink the `flight_datastream` into the `airline.flight` Kafka Topic
+```python
 # Sinks the Flight DataStream into a single Kafka topic
 (flight_datastream.sink_to(flight_sink)
                     .name("flightdata_sink")
                     .uid("flightdata_sink"))
 ```
 
-### Step 13 of 13.  Execute the Flink Job Graph (a.k.a., DAG)
+### Step 14 of 14.  Execute the Flink Job Graph (a.k.a., DAG)
 ```python
 # Execute the Flink job graph (DAG)
 try: 
@@ -566,3 +570,18 @@ So what does this mean when we put `uv` run before `flink run`? It means uv take
 Curious to learn more about Astral's `uv`? Check these out:
 - Documentation: Learn about [uv](https://docs.astral.sh/uv/).
 - Video: [uv IS the Future of Python Packing!](https://www.youtube.com/watch?v=8UuW8o4bHbw).
+
+## Summary
+The flight_importer_app is a well-rounded Flink application that demonstrates the following:
+
+- **Integration with Kafka and Iceberg:** Consuming and Publishing data to/from Kafka for real-time analytics and to Iceberg for historical analysis.
+- **AWS Glue for Metadata Management:** Integrating AWS Glue with Iceberg to manage metadata in a centralized, consistent manner.
+- **Resiliency and Fault Tolerance:** Implementing checkpointing and delivery guarantees to ensure the stability and reliability of the data pipeline.
+
+This code example embodies the principles of modern data architectures, such as data lakehouses, by seamlessly integrating the strengths of data lakes and data warehouses. It empowers real-time data processing, efficient storage, and in-depth historical analysis — all while offering unmatched flexibility, scalability, and cost-efficiency.
+
+## Resources
+Jeffrey Jonathan Jennings.  [Apache Iceberg in Action with Apache Flink using Java](https://thej3.com/apache-iceberg-in-action-with-apache-flink-using-java-158500688ead).  Medium, 2024.
+Tomer Shiran, Jason Hughes & Alex Merced.  [Apache Iceberg — The Definitive Guide](https://www.dremio.com/wp-content/uploads/2023/02/apache-iceberg-TDG_ER1.pdf).  O’Reilly, 2024.
+Jeffrey Jonathan Jennings. [Apache Flink Kickstarter](https://github.com/j3-signalroom/apache_flink-kickstarter/tree/main).  GitHub, 2024.
+Apache Iceberg Community.  [Apache Iceberg v1.6.1 Documentation](https://iceberg.apache.org/docs/1.6.1/). The Apache Software Foundation, 2024.
