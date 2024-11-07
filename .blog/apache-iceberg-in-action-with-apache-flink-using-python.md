@@ -1,5 +1,5 @@
 # Apache Iceberg in Action with Apache Flink using Python
-Data engineering transforms raw data into useful, accessible data products in the Data Mesh platform-building era. Like the signalRoom GenAI Data Mesh platform, we package our data products in Apache Iceberg tables. In this article, I’ll take you through sinking your Apache Flink data into Apache Iceberg tables using Python.  (If you are interested in doing this using Java, click [here](apache-iceberg-in-action-with-apache-flink-using-java.md).)
+Data engineering transforms raw data into useful, accessible data products in the Data Mesh platform-building era. Like the signalRoom GenAI Data Mesh platform, we package our data products in Apache Iceberg tables. In this article, I’ll take you through sinking your Apache Flink data into Apache Iceberg tables using Python.  (If you want to do this using Java, click [here](apache-iceberg-in-action-with-apache-flink-using-java.md).)
 
 In this article, I’ll walk you through how to seamlessly sink data in your Flink application to Apache Iceberg tables using AWS Glue as your Apache Iceberg catalog, ensuring reliability, performance, and future-proof data storage. We will do this using the [Apache Flink Kickstarter Flight Importer app](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/flight_importer_app.py). This app combines synthetic flight data from two fictional airlines (`Sunset Air` and `SkyOne`) and streams the combined data into Apache Kafka and Apache Iceberg. The app provides real-time and historical analytics capabilities, demonstrating the power of Apache Iceberg as a table format for large, complex analytic datasets in distributed data lakehouses. Moreover, it illustrates how AWS Glue is used as the metadata catalog for the Apache Iceberg table.
 
@@ -140,7 +140,7 @@ curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-json/1.19.1/flink
 curl -L "https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.7.0/kafka-clients-3.7.0.jar" -o "/opt/flink/lib/kafka-clients-3.7.0.jar"
 ```
 
-- For this code example above is the list of JARs I used for the Flink app to run successfully. These JARs include the Flink S3 connector, Flink Hive connector, Hadoop, Iceberg, Kafka, and JSON connectors. These dependencies are essential for integrating Flink with Apache Iceberg, Kafka, and other services required for the streaming analytics pipeline.
+- The code example above is the list of JARs I used to run the Flink app successfully. These JARs include the Flink S3 connector, Flink Hive connector, Hadoop, Iceberg, Kafka, and JSON connectors. These dependencies are essential for integrating Flink with Apache Iceberg, Kafka, and other services required for the streaming analytics pipeline.
 
 ```yaml
 [project]
@@ -165,7 +165,7 @@ dependencies = [
 ]
 ```
 
-- For the code example above is the content of the `pyproject.toml`.  This configuration file is used in the Python project to build the required dependencies I used for the Flink app to run successfully. These dependencies include Apache Flink, Boto3, Confluent Kafka, Plotly, PyFlink, PyIceberg, Setuptools, Streamlit, and Streamlit AgGrid. These dependencies are essential for building the Flink app and integrating it with Apache Iceberg, Kafka, and other services required for the streaming analytics pipeline.
+- The code example above is the content of the `pyproject.toml`.  This configuration file is used in the Python project to build the required dependencies I used for the Flink app to run successfully. These dependencies include Apache Flink, Boto3, Confluent Kafka, Plotly, PyFlink, PyIceberg, Setuptools, Streamlit, and Streamlit AgGrid. These dependencies are essential for building and integrating the Flink app with Apache Iceberg, Kafka, and other services required for the streaming analytics pipeline.
 
 > `pyproject.toml` is a configuration file used in Python projects to specify build system requirements and project metadata. It serves as a way to standardize and simplify the Python build process, especially when using modern build tools such as [uv](https://docs.astral.sh/uv/), [Poetry](https://python-poetry.org/), or [Setuptools](https://setuptools.pypa.io/en/latest/). This file is defined by [PEP 518](https://peps.python.org/pep-0518/) and is supported by most modern Python package managers.
 
@@ -186,7 +186,7 @@ from helper.kafka_properties import execute_kafka_properties_udtf
 from helper.utilities import parse_isoformat, load_catalog, load_database
 ```
 
-- Since [`FlightData`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/model/flight_data.py) and [`AirlineFlightData`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/model/airline_flight_data.py) are custom classes, they must be imported into the Flink application. These classes define the flight and airline data schema, specifying the attributes and their types. The Kafka properties User-Defined Table Function (UDTF) and utility functions are also imported to efficiently manage Kafka properties and other helper functionalities. For more details on the Kafka properties, you can [click here](link_to_kafka_prhttps://thej3.com/how-to-create-a-user-defined-table-function-udtf-in-pyflink-to-fetch-data-from-an-external-source-799a93c90d2coperties_info), and to explore the helper utility methods, [click here](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/helper/utilities.py).
+- Since [`FlightData`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/model/flight_data.py) and [`AirlineFlightData`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/model/airline_flight_data.py) are custom classes, they must be imported into the Flink application. These classes define the flight and airline data schema, specifying the attributes and their types. The Kafka properties User-Defined Table Function (UDTF) and utility functions are also imported to manage Kafka properties and other helper functionalities efficiently. For more details on the Kafka properties, you can [click here](link_to_kafka_prhttps://thej3.com/how-to-create-a-user-defined-table-function-udtf-in-pyflink-to-fetch-data-from-an-external-source-799a93c90d2coperties_info), and to explore the helper utility methods, [click here](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/helper/utilities.py).
 
 ```python
 def main(args):
@@ -211,7 +211,7 @@ if __name__ == "__main__":
     known_args, _ = parser.parse_known_args()
     main(known_args)
 ```
-- Place the code in steps 3 through 14 in the `main()` method.
+- Place the code in _**steps 3 through 14**_ in the `main()` method.
 
 ### Step 3 of 14. Set up the Flink environment
 ```python
@@ -241,7 +241,7 @@ if __name__ == "__main__":
 
 > _[Apache Flink Checkpointing](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/datastream/fault-tolerance/checkpointing/#:~:text=Checkpoints%20allow%20Flink%20to%20recover,Flink's%20streaming%20fault%20tolerance%20mechanism.) is a fault-tolerance mechanism that enables stateful stream processing applications to recover from failures while maintaining exactly-once processing semantics._
 
-- **Table Environment:** Creates a `StreamTableEnvironment` to work with Flink's Table API, which allows for SQL-like operations and integration with other data processing systems.
+- **Table Environment:** Creates a `StreamTableEnvironment` to work with Flink's Table API allows for SQL-like operations and integration with other data processing systems.
 
 ### Step 4 of 14.  Get Kafka Consumer Client Kafka Cluster properties
 ```python
@@ -332,7 +332,7 @@ catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_"
 print(f"Current catalog: {tbl_env.get_current_catalog()}")
 ```
 
-- The `helper.utilities.load_catalog()` function is used to configure, register, and set the Apache Iceberg catalog in the Flink environment. This function is essential for managing metadata and storing data in Apache Iceberg tables.
+- The `helper.utilities.load_catalog()` function configures, registers, and sets the Apache Iceberg catalog in the Flink environment. This function is essential for managing metadata and storing data in Apache Iceberg tables.
 
 ```python
 def load_catalog(tbl_env: StreamExecutionEnvironment, region_name: str, bucket_name: str, catalog_name: str) -> Catalog:
@@ -522,7 +522,7 @@ def parse_isoformat(date_string: str) -> datetime:
 (tbl_env.from_data_stream(flight_datastream)
         .execute_insert(flight_table_path.get_full_name()))
 ```        
-> _**Upserts in PyFlink:** `PyFlink` itself does not directly expose methods like `.upsert(true)` or `equalityFieldColumns` as in Java's FlinkSink API.  Upserts can be simulated using primary keys or handling data deduplication within your source transformation logic (i.e., using the Table API `execute_insert()` method.)._
+> _**Upserts in PyFlink:** `PyFlink` itself does not directly expose methods like `.upsert(true)` or `equalityFieldColumns` as in Java's FlinkSink API.  Upserts can be simulated using primary keys or handling data deduplication within your source transformation logic (i.e., using the Table API `execute_insert()` method)._
 
 ### Step 13 of 14.  Sink the `flight_datastream` into the `airline.flight` Kafka Topic
 ```python
@@ -543,7 +543,7 @@ except Exception as e:
 - Triggers the Flink Application execution.
 
 ## Give it a spin!
-Now that you have a solid understanding of the Flight Importer Flink App, it's time to put it to the test! Run the Flink app in your environment and watch as it ingests airline flight data from Kafka topics, merges the streams, and populates an Apache Iceberg table and Kafka topic with real-time analytics. This cutting-edge streaming analytics pipeline showcases the power of Apache Flink and Apache Iceberg in action, providing you with unparalleled insights at every moment. So, what are you waiting for? Give it a spin and see the magic unfold!
+Now that you have a solid understanding of the Flight Importer Flink App, it's time to put it to the test! Run the Flink app in your environment and observe as it ingests airline flight data from Kafka topics, merges the streams, and populates an Apache Iceberg table and Kafka topic with real-time analytics. This advanced streaming analytics pipeline demonstrates the capabilities of Apache Flink and Apache Iceberg, providing valuable insights at every moment. So, what are you waiting for? Give it a try and witness the magic unfold!
 
 Run the following command in your Flink cluster environment from the terminal command line, as shown in the example below:
 ```bash
@@ -581,7 +581,7 @@ The flight_importer_app is a well-rounded Flink application that demonstrates th
 This code example embodies the principles of modern data architectures, such as data lakehouses, by seamlessly integrating the strengths of data lakes and data warehouses. It empowers real-time data processing, efficient storage, and in-depth historical analysis — all while offering unmatched flexibility, scalability, and cost-efficiency.
 
 ## Resources
-Jeffrey Jonathan Jennings.  [Apache Iceberg in Action with Apache Flink using Java](https://thej3.com/apache-iceberg-in-action-with-apache-flink-using-java-158500688ead).  Medium, 2024.
-Tomer Shiran, Jason Hughes & Alex Merced.  [Apache Iceberg — The Definitive Guide](https://www.dremio.com/wp-content/uploads/2023/02/apache-iceberg-TDG_ER1.pdf).  O’Reilly, 2024.
-Jeffrey Jonathan Jennings. [Apache Flink Kickstarter](https://github.com/j3-signalroom/apache_flink-kickstarter/tree/main).  GitHub, 2024.
-Apache Iceberg Community.  [Apache Iceberg v1.6.1 Documentation](https://iceberg.apache.org/docs/1.6.1/). The Apache Software Foundation, 2024.
+- Jeffrey Jonathan Jennings.  [Apache Iceberg in Action with Apache Flink using Java](https://thej3.com/apache-iceberg-in-action-with-apache-flink-using-java-158500688ead).  Medium, 2024.
+- Tomer Shiran, Jason Hughes & Alex Merced.  [Apache Iceberg — The Definitive Guide](https://www.dremio.com/wp-content/uploads/2023/02/apache-iceberg-TDG_ER1.pdf).  O’Reilly, 2024.
+- Jeffrey Jonathan Jennings. [Apache Flink Kickstarter](https://github.com/j3-signalroom/apache_flink-kickstarter/tree/main).  GitHub, 2024.
+- Apache Iceberg Community.  [Apache Iceberg v1.6.1 Documentation](https://iceberg.apache.org/docs/1.6.1/). The Apache Software Foundation, 2024.
