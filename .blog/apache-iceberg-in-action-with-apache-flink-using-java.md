@@ -122,5 +122,121 @@ resource "aws_iam_role_policy_attachment" "glue_policy_attachment" {
 
 This Terraform code is essential for setting up an **AWS S3 Bucket**, **AWS Glue**, and **Apache Iceberg** infrastructure. It is designed for managing metadata, storing data files in S3, and granting permissions for AWS Glue to handle the lifecycle of Apache Iceberg Tables. This setup is ideal for implementing data lakehouse solutions that require efficient metadata management and seamless integration with AWS services.
 
+## Putting it all together with the Data Generator Flink App
+This app, [DataGeneratorApp](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/DataGeneratorApp.java), is a comprehensive example of a Flink application that generates synthetic flight data for two fictional airlines (`Sunset Air` and `SkyOne`), and sinks the data to Kafka topics and Apache Iceberg Tables, providing real-time and historical analytics capabilities. It uses Apache Flink to build a streaming pipeline with the **Flink DataStream API** and **Apache Iceberg** integration using **AWS Glue**. Below is the step-by-step breakdown of the code:
 
+### Step 1 of 12. Import classes.
+```java
+package kickstarter;
+
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
+import org.apache.flink.connector.base.DeliveryGuarantee;
+import org.apache.flink.connector.datagen.source.DataGeneratorSource;
+import org.apache.flink.connector.kafka.sink.*;
+import org.apache.flink.formats.json.JsonSerializationSchema;
+import org.apache.flink.streaming.api.datastream.*;
+import org.apache.flink.streaming.api.environment.*;
+import org.apache.flink.table.api.*;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.table.data.*;
+import org.apache.flink.table.types.logical.*;
+import org.apache.flink.types.*;
+import org.apache.flink.table.catalog.*;
+import org.apache.iceberg.catalog.*;
+import org.apache.iceberg.flink.*;
+import org.apache.iceberg.flink.sink.FlinkSink;
+import org.apache.hadoop.conf.Configuration;
+import java.util.*;
+import org.slf4j.*;
+
+import kickstarter.model.*;
+```
+
+- Since [`AirlineData`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/model/AirlineData.java) Java POJO will be used in the code later, we **`import kickstarter.model.*`**
+
+```java
+public class DataGeneratorApp {
+    private static final Logger logger = LoggerFactory.getLogger(DataGeneratorApp.class);
+
+
+ /**
+  * The main method in a Flink application serves as the entry point of the program, where
+  * the Flink DAG is defined.  That is, the execution environment, the creation of the data
+  * streams or datasets, apply transformations, and trigger the execution of the application (by
+  * sending it to the Flink JobManager).
+  * 
+  * @param args list of strings passed to the main method from the command line.
+  * @throws Exception - The exceptions are forwarded, and are caught by the runtime.  
+  * When the runtime catches an exception, it aborts the task and lets the fail-over logic
+  * decide whether to retry the task execution.
+  */
+  public static void main(String[] args) throws Exception {
+    ...
+  }
+}
+```
+- Place the code in steps 2 through 11 in the **`main()`** method, except for the **`SinkToIcebergTable()`** which goes out of the main() method but stays with the **`DataGeneratorApp`** class.
+
+### Step 2 of 11. Retrieve Command-Line Arguments for the Application
+```java
+String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
+String awsRegion = Common.getAppArgumentValue(args, Common.ARG_AWS_REGION);
+```
+
+- Use [`Common.getAppArgumentValue()`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/Common.java) helper methods to retrieve the `serviceAccountUserwhich` contains the S3 bucket name and `awsRegion` which contains the AWS region name from the command-line of the app, respectively.
+
+### Step 3 of 11. Set Up Flink Execution Environment
+```java
+StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+env.enableCheckpointing(5000);  // Enables checkpointing every 5 seconds to ensure fault tolerance
+env.getCheckpointConfig().setCheckpointTimeout(60000);  // Sets a timeout of 60 seconds for each checkpoint
+env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);  // Ensuring that only one checkpoint is taken at a time
+EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
+StreamTableEnvironment tblEnv = StreamTableEnvironment.create(env, settings);
+```
+
+- **Stream Execution Environment:** Creates the Flink `StreamExecutionEnvironment`, which represents the Flink job's DAG (Directed Acyclic Graph) and enables typical Apache Flink checkpointing settings.
+
+> _[Apache Flink Checkpointing](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/datastream/fault-tolerance/checkpointing/#:~:text=Checkpoints%20allow%20Flink%20to%20recover,Flink's%20streaming%20fault%20tolerance%20mechanism.) is a fault-tolerance mechanism that enables stateful stream processing applications to recover from failures while maintaining exactly-once processing semantics._
+
+- **Table Environment:** Creates a `StreamTableEnvironment (tblEnv)` to work with Flink's Table API, which allows for SQL-like operations and integration with other data processing systems.
+
+### Step 4 of 11. Retrieve Producer Kafka Client Properties
+> _This article focuses on Apache Iceberg with AWS Glue Data Catalog and Apache Flink, so I did not cover Confluent Cloud, AWS Secrets, or AWS Systems Manager Parameter Store. For related code, see [`aws-resources.tf`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/aws-resources.tf)._
+
+```java
+DataStream<Properties> dataStreamProducerProperties = 
+    env.fromData(new Properties())
+       .map(new KafkaClientPropertiesLookup(false, serviceAccountUser))
+       .name("kafka_producer_properties");
+Properties producerProperties = new Properties();
+
+try {
+    dataStreamProducerProperties
+        .executeAndCollect()
+        .forEachRemaining(typeValue -> {
+            producerProperties.putAll(typeValue);
+        });
+} catch (final Exception e) {
+    System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
+    e.printStackTrace();
+    System.exit(1);
+}
+```
+
+- **Kafka Properties Lookup:** Uses [`KafkaClientPropertiesLookup`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/KafkaClientPropertiesLookup.java) to fetch the Producer Kafka Client properties (e.g., broker addresses, security settings) from AWS services (like AWS Secrets Manager). This is a custom source data stream I built, which I will explain in a later post!
+
+- **Create DataStream:** Creates a `DataStream<Properties>` that contains the Kafka producer properties.
+
+> _What is a [DataStream](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/datastream/overview/)?_
+> 
+> _The `DataStream API` gets its name from the special `DataStream` class that is used to represent a collection of data in a Flink program. You can think of them as immutable collections of data that can contain duplicates. This data can be finite or unbounded; the API you use to work on them is the same._
+>
+> _A `DataStream` is similar to a regular Java Collection in terms of usage but is quite different in some key ways. They are immutable, meaning that once they are created, you cannot add or remove elements. You can also not simply inspect the elements inside but only work on them using the `DataStream API` operations, which are also called transformations._
+
+- **Execute and Collect:** Adds newly created Producer Kafka Client Properties (`producerProperties`) to the DAG to ensure they can set up the Kafka sinks.
+- **Error Handling:** If any exception occurs during this process, the application prints the error, logs it, and exits a non-zero status.
 
