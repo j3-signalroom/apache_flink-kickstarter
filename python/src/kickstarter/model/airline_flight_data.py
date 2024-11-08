@@ -15,16 +15,16 @@ __status__     = "dev"
 
 @dataclass
 class AirlineFlightData():
-    email_address: str
-    departure_time: str
-    departure_airport_code: str
-    arrival_time: str
-    arrival_airport_code: str
-    flight_number: str
-    confirmation_code: str
-    ticket_price: Decimal
-    aircraft: str
-    booking_agency_email: str
+    email_address: str | None
+    departure_time: str | None
+    departure_airport_code: str | None
+    arrival_time: str | None
+    arrival_airport_code: str | None
+    flight_number: str | None
+    confirmation_code: str | None
+    ticket_price: Decimal | None
+    aircraft: str | None
+    booking_agency_email: str | None
 
     
     @staticmethod

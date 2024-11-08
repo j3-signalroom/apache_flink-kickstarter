@@ -24,7 +24,7 @@ class AirlineFlightDataTest {
 
     @Test
     void setters_shouldPopulateExpectedFields() {
-        AirlineData expected = new TestHelpers.AirlineDataBuilder().build();
+        AirlineData expected = new TestHelpers.AirlineFlightDataBuilder().build();
         AirlineData actual = new AirlineData();
         actual.setEmailAddress(expected.getEmailAddress());
         actual.setDepartureTime(expected.getDepartureTime());
@@ -45,7 +45,7 @@ class AirlineFlightDataTest {
 
     @Test
     void equals_shouldReturnTrue_forTwoEquivalentFlights() {
-        AirlineData flight1 = new TestHelpers.AirlineDataBuilder().build();
+        AirlineData flight1 = new TestHelpers.AirlineFlightDataBuilder().build();
         AirlineData flight2 = new AirlineData();
         flight2.setEmailAddress(flight1.getEmailAddress());
         flight2.setDepartureTime(flight1.getDepartureTime());
@@ -62,8 +62,8 @@ class AirlineFlightDataTest {
 
     @Test
     void equals_shouldReturnFalse_forTwoDifferentFlights() {
-        AirlineData flight1 = new TestHelpers.AirlineDataBuilder().build();
-        AirlineData flight2 = new TestHelpers.AirlineDataBuilder().build();
+        AirlineData flight1 = new TestHelpers.AirlineFlightDataBuilder().build();
+        AirlineData flight2 = new TestHelpers.AirlineFlightDataBuilder().build();
 
         assertNotSame(flight1, flight2);
         assertNotEquals(flight1, flight2);
@@ -72,7 +72,7 @@ class AirlineFlightDataTest {
 
     @Test
     void toString_shouldReturnTheExpectedResults() {
-        AirlineData flightData = new TestHelpers.AirlineDataBuilder().build();
+        AirlineData flightData = new TestHelpers.AirlineFlightDataBuilder().build();
 
         String expected = "AirlineData{" +
                 "email_address='" + flightData.getEmailAddress() + '\'' +
@@ -88,7 +88,7 @@ class AirlineFlightDataTest {
 
     @Test
     void toFlightData_shouldConvertToAFlightDataObject() {
-        AirlineData skyOne = new TestHelpers.AirlineDataBuilder().build();
+        AirlineData skyOne = new TestHelpers.AirlineFlightDataBuilder().build();
         FlightData expected = new FlightData();
         expected.setEmailAddress(skyOne.getEmailAddress());
         expected.setDepartureTime(skyOne.getDepartureTime());

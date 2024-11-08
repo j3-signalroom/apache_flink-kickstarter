@@ -51,8 +51,8 @@ class FlightImporterAppTest {
 
     @Test
     void defineWorkflow_shouldConvertDataFromTwoStreams() throws Exception {
-        AirlineData skyOneFlight = new TestHelpers.AirlineDataBuilder().build();
-        AirlineData sunsetFlight = new TestHelpers.AirlineDataBuilder().build();
+        AirlineData skyOneFlight = new TestHelpers.AirlineFlightDataBuilder().build();
+        AirlineData sunsetFlight = new TestHelpers.AirlineFlightDataBuilder().build();
 
         DataStreamSource<AirlineData> skyOneStream = env.fromData(skyOneFlight);
         DataStreamSource<AirlineData> sunsetStream = env.fromData(sunsetFlight);
@@ -67,10 +67,10 @@ class FlightImporterAppTest {
         final String addMinuteToNow = LocalDateTime.now().plusMinutes(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         final String subtractSecondToNow = LocalDateTime.now().minusSeconds(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-        AirlineData newSkyOneFlight = new TestHelpers.AirlineDataBuilder().setArrivalTime(addMinuteToNow).build();
-        AirlineData oldSkyOneFlight = new TestHelpers.AirlineDataBuilder().setArrivalTime(subtractSecondToNow).build();
-        AirlineData newSunsetFlight = new TestHelpers.AirlineDataBuilder().setArrivalTime(addMinuteToNow).build();
-        AirlineData oldSunsetFlight = new TestHelpers.AirlineDataBuilder().setArrivalTime(subtractSecondToNow).build();
+        AirlineData newSkyOneFlight = new TestHelpers.AirlineFlightDataBuilder().setArrivalTime(addMinuteToNow).build();
+        AirlineData oldSkyOneFlight = new TestHelpers.AirlineFlightDataBuilder().setArrivalTime(subtractSecondToNow).build();
+        AirlineData newSunsetFlight = new TestHelpers.AirlineFlightDataBuilder().setArrivalTime(addMinuteToNow).build();
+        AirlineData oldSunsetFlight = new TestHelpers.AirlineFlightDataBuilder().setArrivalTime(subtractSecondToNow).build();
 
         DataStreamSource<AirlineData> skyOneStream = env.fromData(newSkyOneFlight, oldSkyOneFlight);
         DataStreamSource<AirlineData> sunsetStream = env.fromData(newSunsetFlight, oldSunsetFlight);

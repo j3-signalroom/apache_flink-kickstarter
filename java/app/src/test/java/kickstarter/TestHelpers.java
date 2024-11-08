@@ -57,7 +57,7 @@ public class TestHelpers {
                 .plusMinutes(random.nextInt(60));
     }
 
-    public static class AirlineDataBuilder {
+    public static class AirlineFlightDataBuilder {
         private String emailAddress;
         private String departureTime;
         private String airportDepartureCode;
@@ -66,7 +66,7 @@ public class TestHelpers {
         private String flightNumber;
         private String confirmation;
 
-        public AirlineDataBuilder() {
+        public AirlineFlightDataBuilder() {
             LocalDateTime localDepartureTime = generateDepartureTime();
             LocalDateTime localArrivalTime = generateArrivalTime(localDepartureTime);
 
@@ -79,37 +79,37 @@ public class TestHelpers {
             this.confirmation = "SKY1" + generateString(6);
         }
 
-        public AirlineDataBuilder setEmailAddress(String emailAddress) {
+        public AirlineFlightDataBuilder setEmailAddress(String emailAddress) {
             this.emailAddress = emailAddress;
             return this;
         }
 
-        public AirlineDataBuilder setDepartureTime(String departureTime) {
+        public AirlineFlightDataBuilder setDepartureTime(String departureTime) {
             this.departureTime = departureTime;
             return this;
         }
 
-        public AirlineDataBuilder setDepartureAirportCode(String airportDepartureCode) {
+        public AirlineFlightDataBuilder setDepartureAirportCode(String airportDepartureCode) {
             this.airportDepartureCode = airportDepartureCode;
             return this;
         }
 
-        public AirlineDataBuilder setArrivalTime(String arrivalTime) {
+        public AirlineFlightDataBuilder setArrivalTime(String arrivalTime) {
             this.arrivalTime = arrivalTime;
             return this;
         }
 
-        public AirlineDataBuilder setArrivalAirportCode(String airportArrivalCode) {
+        public AirlineFlightDataBuilder setArrivalAirportCode(String airportArrivalCode) {
             this.airportArrivalCode = airportArrivalCode;
             return this;
         }
 
-        public AirlineDataBuilder setFlightNumber(String flightNumber) {
+        public AirlineFlightDataBuilder setFlightNumber(String flightNumber) {
             this.flightNumber = flightNumber;
             return this;
         }
 
-        public AirlineDataBuilder setConfirmation(String confirmation) {
+        public AirlineFlightDataBuilder setConfirmation(String confirmation) {
             this.confirmation = confirmation;
             return this;
         }
