@@ -9,7 +9,7 @@ import logging
 import argparse
 
 from model.flight_data import FlightData, FlyerStatsData
-from helper.kafka_properties import execute_kafka_properties_udtf
+from helper.kafka_properties_udtf import execute_kafka_properties_udtf
 from helper.process_flyer_stats_data_function import ProcessFlyerStatsDataFunction
 from helper.utilities import load_catalog, load_database
 

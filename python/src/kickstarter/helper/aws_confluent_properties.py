@@ -1,17 +1,9 @@
-import logging
-from confluent_kafka.schema_registry.avro import AvroSerializer
-from confluent_kafka import SerializingProducer
-from confluent_kafka.error import KeySerializationError
-from confluent_kafka.error import ValueSerializationError
-from confluent_kafka import KafkaException
 import boto3
 from botocore.exceptions import ClientError
 import json
-import sys
-import os
+import logging
 from re import sub
-
-from aws_confluent_properties import AwsConfluentProperties
+import os
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -21,103 +13,41 @@ __email__      = "j3@thej3.com"
 __status__     = "dev"
 
 
-class KafkaProducer:
-    """Kafka Producer class."""
+class AwsConfluentProperties:
+    """AWS Confluent Properties class, focused on the Secrets Manager and System Manager Parameter Store."""
     
-    def __init__(self, service_account_user: str):
+    def __init__(self):
         """
-        The initializor initializes all the class instance variable(s) with the argument(s) passed.
-        Then retrieves the Kafka cluster credentials from the AWS Secrets Manager, and stores the 
-        credentials in the class instance.
-        
-        Arg(s):
-            service_account_user (str): is the name of the service account user.  It is used in
-            the prefix to the path of the Kafka Cluster/Schema Registry Cluster secrets in the AWS Secrets Manager and
-            the Kafka Client parameters in the AWS Systems Manager Parameter Store.
+        The initializor reads the AWS Region from the AWS_REGION environment variable.
         """
         
-        self._service_account_user = service_account_user
-        
-        #
-        self.aws_service = AwsConfluentProperties()
+        self._aws_region_name = os.environ['AWS_REGION']
 
-        # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
-        secret_path_prefix = f"/confluent_cloud_resource/{self._service_account_user}"
+    def get_schema_registry_properties(self, secrets_name: str) -> dict:
+        """This method returns the Schema Registry properties from the AWS Secrets Manager.
 
-        self._kafka_properties = self.get_kafka_properties(
-            f"{secret_path_prefix}/kafka_cluster/python_client",
-            f"{secret_path_prefix}/producer_kafka_client"
-        )
-        if self._kafka_properties is None:
-            raise RuntimeError(f"Failed to retrieve the Kafka Client properties from '{secret_path_prefix}' secrets because {self._kafka_properties.get_error_message_code()}:{self._kafka_properties.get_error_message()}")
-                            
-    def load_topic(self, schema_registry_client: any, topic: str, avro_schema_key: any, avro_schema_value: any, dataframe: any) -> (bool):
+        Args:
+            secrets_name (str): the name of the Schema Registry secrets in the AWS Secrets Manager.
+
+        Returns:
+            properties (dict): the Schema Registry properties collection if successful, otherwise None.
         """
-        This method publishes the Pandas dataframe into a Kafka Topic.
-        
-        Arg(s):
-            `schema_registry_client` (any): Pass the Schema Registry Client object retrieving the Kafka Topics
-            schemas from. 
-            `topic` (string): Pass the name of the Kafka Topic you are publishing to.
-            `avro_schema_key` (any): Pass the Avro formatted key schema.
-            `avro_schema_value` (any): Pass the Avro formatted value schema.
-            `dataframe` (any):  Pass the data content of the schemas in a Pandas dataframe.
-            
-        Return(s):
-            If the method successfully produces events to the Kafka Topic, True is returned.  Otherwse, False
-            is returned.
-        """
-        
-        # Serializes the Avro key and value schemas taken from the Confluent Schema Registry
-        self._kafka_properties['key.serializer'] = AvroSerializer(schema_registry_client = schema_registry_client, schema_str = avro_schema_key)
-        self._kafka_properties['value.serializer'] = AvroSerializer(schema_registry_client = schema_registry_client, schema_str =  avro_schema_value)
-            
-        # Create Producer instance
-        producer = SerializingProducer(self._kafka_properties)
-        
-        # Convert the key schema into a JSON object
-        key_json_object = json.loads(avro_schema_key)
-        
-        # To sufficently increase the performance of the iteration.  The Pandas dataframe is 
-        # converted into a dictionary
-        dataframe_dict = dataframe.to_dict('records')
-        for row in dataframe_dict:                
-            # Fill-in the key
-            key = {}
-            for attribute in key_json_object['fields']:
-                key[attribute.get('name')] = row[attribute.get('name')]
-                
-            def _delivery_report(err, msg):                
-                """Delivery report callback for when a message is published succeeds or fails."""
-                
-                if err is not None:
-                    logging.error('Failed to deliver message to %s Kafka topic because %s.', topic, err)
-                    sys.exit(2)
-                else:
-                    logging.debug('Published message %s to %s Kafka topic at partition [%d] at offset %d.', key, msg.topic(), msg.partition(), msg.offset())
-            
-            # Publish messages to Kafka
+        properties = {}
+
+        # Retrieve the SECRET properties from the AWS Secrets Manager
+        secret = self.get_secrets(secrets_name)
+        if secret is not None:
             try:
-                producer.produce(topic=topic, key=key, value=row, on_delivery=_delivery_report) 
-            except BufferError as e:
-                logging.error("Buffer Error --- %s:  %d number of messages behind.", e, len(producer))
-                return False
-            except KeySerializationError as e:
-                logging.error("Key Serialization Error --- %s: key=%s", e, str(key))
-                return False
-            except ValueSerializationError as e:
-                logging.error("Value Serialization Error --- %s: value=%s", e, str(row))
-                return False
-            except KafkaException as e: 
-                logging.error('Kafka Publishing Error --- %s: key=%s value=%s.',  e, str(key), str(row))
-                return False
+                # Convert the JSON object to a dictionary
+                secret_data = secret
+                for key in secret_data:
+                    properties[key] = secret_data[key]
+                return properties
+            except json.JSONDecodeError:
+                return None
+        else:
+            return None
                 
-            # Makes all buffered messages immediately available to send and blocks on the completion of the
-            # requests associated with these records.
-            producer.flush()
-            
-        return True
-    
     def get_kafka_properties(self, cluster_secrets_path: str, client_parameters_path: str) -> tuple[str, str]:
         """This method returns the Kafka Cluster properties from the AWS Secrets Manager and Parameter Store.
 
@@ -245,4 +175,4 @@ class KafkaProducer:
                 parameters[key] = value
                 
             return parameters
-
+        
