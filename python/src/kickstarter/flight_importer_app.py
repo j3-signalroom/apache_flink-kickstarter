@@ -133,6 +133,9 @@ def main(args):
     # table
     flight_table_path = ObjectPath(tbl_env.get_current_database(), "flight")
 
+    # Print the current table name
+    print(f"Current table: {flight_table_path.get_full_name()}")
+
     # Check if the table exists.  If not, create it
     try:
         if not catalog.table_exists(flight_table_path):
