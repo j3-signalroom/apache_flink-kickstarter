@@ -11,6 +11,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 - Updated the AWS Terrafom Provider to `5.75.0`.
 - Updated the Confluent Terrafom Provider to `2.9.0`.
 - Updated the Snowflake Terrafom Provider to `0.97.0`.
+- Issue [#444](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/444).
 
 ## [0.52.00.000] - 2024-11-07
 ### Added
