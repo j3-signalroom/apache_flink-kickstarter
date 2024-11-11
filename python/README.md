@@ -10,9 +10,7 @@ Curious about the differences between the DataStream API and Table API? Click [h
 + [2.0 Power up the Apache Flink Docker containers](#20-power-up-the-apache-flink-docker-containers)
 + [3.0 Discover What You Can Do with These Flink Apps](#30-discover-what-you-can-do-with-these-flink-apps)
     - [3.1 Special Mention](#31-special-mention)
-+ [4.0  Unleash the Full Power of Flink to Bring Your Data Visualizations to Life!](#40-unleash-the-full-power-of-flink-to-bring-your-data-visualizations-to-life)
-    - [4.1 Have you noticed something curious about this example?](#41-have-you-noticed-something-curious-about-this-example)
-+ [5.0 Resources](#50-resources)
++ [4.0 Resources](#40-resources)
 <!-- tocstop -->
 
 ## 1.0 Important Note(s)
@@ -56,7 +54,7 @@ To access the Flink JobManager (`apache_flink-kickstarter-jobmanager-1`) contain
 docker exec -it -u root -w /opt/flink/python_apps/src apache_flink-kickstarter-jobmanager-1 /bin/bash
 ```
 
-Jump right into the container and take charge! You’ll have full control to run commands, explore the file system, and tackle any tasks you need. You’ll land directly in the `/opt/flink/python_apps` directory—this is the headquarters for all the Python scripts in the repo.
+Jump right into the container and take charge! You’ll have full control to run commands, explore the file system, and tackle any tasks you need. You’ll land directly in the `/opt/flink/python_apps/src` directory—this is the headquarters for all the Python scripts in the repo.
 
 Ready to launch one of those cool Java-to-Python Flink apps? Just use the [`flink run`](https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/cli/) command with the correct options, and kick off the Python Flink app script with its corresponding parameters below. Adventure awaits!
 
@@ -84,36 +82,7 @@ Curious to learn more about Astral's `uv`? Check these out:
 - Documentation: Learn about [uv](https://docs.astral.sh/uv/).
 - Video: [uv IS the Future of Python Packing!](https://www.youtube.com/watch?v=8UuW8o4bHbw).
 
-## 4.0 Unleash the Full Power of Flink to Bring Your Data Visualizations to Life!
-The exciting part is that after running all your Flink applications, the data now flows seamlessly into your Kafka Topics and Apache Iceberg Tables. But data alone doesn’t tell the story—it’s time to share those insights with the world! One fantastic way to do that is with Streamlit, which allows you to easily create interactive visualizations. Streamlit is intuitive, powerful, and designed with Python developers in mind, making it a breeze to turn raw data into captivating dashboards. 😉
-
-![iceberg-flink-streamlit-drawing](../.blog/images/iceberg-flink-streamlit-drawing.png)
-
-To illustrate, I created a Streamlit script that queries the `apache_kickstarter.airlines.flight` Apache Iceberg Table, harnessing Flink SQL to extract valuable insights. These insights are then brought to life through a Streamlit dashboard, transforming raw data into an accessible, visual experience.
-
-Here you go, run this in the docker container terminal command line:
-
-```bash
-uv run streamlit run kickstarter/local_flink_streamlit.py -- --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>
-```
-> _Notice the extra `--` between streamlit run `kickstarter/local_flink_streamlit.py` and the actual script arguments.  This is necessary to pass arguments to the Streamlit script without causing conflicts with Streamlit's own CLI options._
-
-When you run the script, for instance, it produces the following output:
-
-![streamlit-run-from-terminal-screenshot](../.blog/images/streamlit-run-from-terminal-screenshot.png)
-
-Open your host web browser, enter the local URL, `localhost:8501`, and in a few moments this web page will be displayed:
-
-![streamlit-screenshot](../.blog/images/streamlit-screenshot.png)
-
-> _**"After many years in this industry, I’m still amazed by what we can achieve today!  The possibilities are endless—enjoy the ride!"**_
-> 
-> _**---J3**_
-
-### 4.1 Have you noticed something curious about this example?
-When running Streamlit in this example with Apache Flink, Streamlit runs the Python script that uses PyFlink instead of submitting the Python script to the Flink cluster using the `flink run` CLI command.  The difference between the two approaches lies in the execution environment, resource utilization, and integration with the Flink cluster.   _**Stay tuned for the write-up on the different approaches and the code example that handles the approach of what to do if Flink is remote.**_	
-
-## 5.0 Resources
+## 4.0 Resources
 
 [Flink Python Docs](https://nightlies.apache.org/flink/flink-docs-master/api/python/)
 

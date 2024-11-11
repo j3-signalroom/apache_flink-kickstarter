@@ -8,7 +8,7 @@ dependencies = [
     "apache-flink==1.19.1",
     "boto3>=1.35.36",
     "botocore>=1.35.36",
-    "confluent-kafka==2.5.3",
+    "confluent-kafka==2.6.0",
     "grpcio-tools>=1.29.0,<=1.50.0",
     "plotly>=5.24.1",
     "py4j==0.10.9.7",

@@ -9,7 +9,7 @@ import argparse
 
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
-from helper.kafka_properties import execute_kafka_properties_udtf
+from helper.kafka_properties_udtf import execute_kafka_properties_udtf
 from helper.utilities import parse_isoformat, load_catalog, load_database
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
@@ -132,6 +132,9 @@ def main(args):
     # instance, this case we using it to get the fully qualified path of the `flight`
     # table
     flight_table_path = ObjectPath(tbl_env.get_current_database(), "flight")
+
+    # Print the current table name
+    print(f"Current table: {flight_table_path.get_full_name()}")
 
     # Check if the table exists.  If not, create it
     try:

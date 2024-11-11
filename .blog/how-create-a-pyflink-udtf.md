@@ -13,13 +13,13 @@ But then, Martijn Visser—shoutout to the Group Product Manager at Confluent—
 
 What followed was a classic journey of web searches, chatting with LLMs, scouring Apache Flink documentation, and assembling a puzzle with a million nearly identical pieces. 🧭
 
-And guess what? After much trial and error, I cracked the code! You can check it out in my GitHub repo [here]( https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/kickstarter/helper/kafka_properties.py)!
+And guess what? After much trial and error, I cracked the code! You can check it out in my GitHub repo [here]( https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/kickstarter/helper/kafka_properties_udtf.py)!
 
 ![matrix-brilliant](images/matrix-brilliant.gif)
 
 This article is here to share the solution, step-by-step, with you!
 
-The magic happens in the `kafka_properties.py module`, which contains the User-Defined Table Function (UDTF) `KafkaProperties` class, along with the `execute_kafka_properties_udtf()` method that kicks it off. Let's dive in and unravel it all together!
+The magic happens in the `kafka_properties_udtf.py module`, which contains the User-Defined Table Function (UDTF) `KafkaProperties` class, along with the `execute_kafka_properties_udtf()` method that kicks it off. Let's dive in and unravel it all together!
 
 ## The Class (`KafkaProperties`)
 The class is a User-Defined Table Function (UDTF), used to retrieve the Kafka Cluster properties from the AWS Secrets Manager and Parameter Store.  Below is a step-by-step breakdown of the class:
