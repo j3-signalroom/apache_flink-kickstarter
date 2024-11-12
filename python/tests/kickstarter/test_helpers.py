@@ -10,13 +10,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../s
 from model.flight_data import FlightData, FlyerStatsData
 from model.airline_flight_data import AirlineFlightData
 
-__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
-__credits__    = ["Jeffrey Jonathan Jennings"]
-__license__    = "MIT"
-__maintainer__ = "Jeffrey Jonathan Jennings"
-__email__      = "j3@thej3.com"
-__status__     = "dev"
-
 
 def generate_airport_code():
     airports = [

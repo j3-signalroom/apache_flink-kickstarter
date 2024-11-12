@@ -8,13 +8,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../s
 
 from test_helpers import AirlineFlightDataBuilder
 
-__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
-__credits__    = ["Jeffrey Jonathan Jennings"]
-__license__    = "MIT"
-__maintainer__ = "Jeffrey Jonathan Jennings"
-__email__      = "j3@thej3.com"
-__status__     = "dev"
-
 
 def test_define_workflow_should_convert_data_from_two_streams():
     sky_one_flight = AirlineFlightDataBuilder().build()
