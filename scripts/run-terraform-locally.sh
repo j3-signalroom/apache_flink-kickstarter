@@ -210,4 +210,7 @@ else
 
     # Delete the AWS Glue Data Catalog Database, and all associated tables within database will also be deleted
     aws glue delete-database --name airlines || true
+
+    # Delete the AWS S3 bucket and all objects within the bucket
+    aws s3 rb s3://${service_account_user} --force || true
 fi
