@@ -1,5 +1,7 @@
 CREATE TABLE airline_flights (
     departure_airport_code STRING,
+    window_start STRING,
+    window_end STRING,
     email_address STRING,
     departure_time STRING,    
     arrival_time STRING,
