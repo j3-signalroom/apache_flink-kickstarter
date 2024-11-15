@@ -52,3 +52,15 @@ module "snowflake_user_rsa_key_pairs_rotation" {
     aws_lambda_timeout        = var.aws_lambda_timeout
     aws_log_retention_in_days = var.aws_log_retention_in_days
 }
+
+# Reference the Confluent Cloud
+data "confluent_organization" "env" {}
+
+# Create the Confluent Cloud Environment
+resource "confluent_environment" "env" {
+  display_name = "${local.secrets_insert}"
+
+  stream_governance {
+    package = "ESSENTIALS"
+  }
+}
