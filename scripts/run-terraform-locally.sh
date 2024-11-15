@@ -203,11 +203,17 @@ else
     # Delete the secrets created by the Terraform configurations
     service_account_user=$(echo $service_account_user | tr '[:upper:]' '[:lower:]')
     aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/${service_account_user}/schema_registry_cluster/java_client --force-delete-without-recovery || true
+    aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/${service_account_user}/schema_registry_cluster/python_client --force-delete-without-recovery || true
     aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/${service_account_user}/kafka_cluster/java_client --force-delete-without-recovery || true
+    aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/${service_account_user}/kafka_cluster/python_client --force-delete-without-recovery || true
+    aws secretsmanager delete-secret --secret-id /confluent_cloud_resource/${service_account_user}/flink_compute_pool --force-delete-without-recovery || true
     aws secretsmanager delete-secret --secret-id /snowflake_resource/${service_account_user} --force-delete-without-recovery || true
     aws secretsmanager delete-secret --secret-id /snowflake_resource/${service_account_user}/rsa_private_key_pem_1 --force-delete-without-recovery || true
     aws secretsmanager delete-secret --secret-id /snowflake_resource/${service_account_user}/rsa_private_key_pem_2 --force-delete-without-recovery || true
 
     # Delete the AWS Glue Data Catalog Database, and all associated tables within database will also be deleted
     aws glue delete-database --name airlines || true
+
+    # Delete the AWS S3 bucket and all objects within the bucket
+    aws s3 rb s3://${service_account_user} --force || true
 fi

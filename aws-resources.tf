@@ -59,7 +59,7 @@ resource "aws_secretsmanager_secret_version" "flink_compute_pool" {
                                 "flink.region": "${var.aws_region}",
                                 "flink.api.key": "${module.flink_api_key_rotation.active_api_key.id}",
                                 "flink.api.secret": "${module.flink_api_key_rotation.active_api_key.secret}",
-                                "organzation.id": "${data.confluent_cloud_organization.env.id}",
+                                "organzation.id": "${data.confluent_organization.env.id}",
                                 "environment.id": "${confluent_environment.env.id}",
                                 "flink.compute.pool.id": "${confluent_flink_compute_pool.env.id}"})
 }

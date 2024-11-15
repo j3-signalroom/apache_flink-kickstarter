@@ -70,7 +70,7 @@ To help you start quickly, the repo comes with **_Docker containers_** for Mac M
     > - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
     > - [Java JDK (Java Development Kit) 11](https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html)
     > - [Python 3.11](https://www.python.org/downloads/release/python-3119/)
-    > - [Terraform CLI version 1.93 or higher](https://developer.hashicorp.com/terraform/install)
+    > - [Terraform CLI version 1.9.3 or higher](https://developer.hashicorp.com/terraform/install)
 
 2. Clone the repo:
     ```bash
