@@ -3,7 +3,7 @@ terraform {
       organization = "signalroom"
 
         workspaces {
-            name = "apache-flink-kickstarter-0003"
+            name = "apache-flink-kickstarter-0004"
         }
   }
 
