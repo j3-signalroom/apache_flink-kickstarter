@@ -47,6 +47,23 @@ resource "aws_secretsmanager_secret_version" "kafka_cluster_api_key_python_clien
                                 "bootstrap.servers": replace(confluent_kafka_cluster.kafka_cluster.bootstrap_endpoint, "SASL_SSL://", "")})
 }
 
+# Create the Flink Compute Pool: API Key Pair
+resource "aws_secretsmanager_secret" "flink_compute_pool" {
+    name = "${local.confluent_secrets_path_prefix}/flink_compute_pool"
+    description = "Confluent Cloud Apache Flink secrets"
+}
+
+resource "aws_secretsmanager_secret_version" "flink_compute_pool" {
+    secret_id     = aws_secretsmanager_secret.flink_compute_pool.id
+    secret_string = jsonencode({"flink.cloud": "${local.cloud}",
+                                "flink.region": "${var.aws_region}",
+                                "flink.api.key": "${module.flink_api_key_rotation.active_api_key.id}",
+                                "flink.api.secret": "${module.flink_api_key_rotation.active_api_key.secret}",
+                                "organzation.id": "${data.confluent_cloud_organization.env.id}",
+                                "environment.id": "${confluent_environment.env.id}",
+                                "flink.compute.pool.id": "${confluent_flink_compute_pool.env.id}"})
+}
+
 resource "aws_ssm_parameter" "consumer_kafka_client_auto_commit_interval_ms" {
   name        = "${local.confluent_secrets_path_prefix}/consumer_kafka_client/auto.commit.interval.ms"
   description = "The 'auto.commit.interval.ms' property in Apache Kafka defines the frequency (in milliseconds) at which the Kafka consumer automatically commits offsets. This is relevant when 'enable.auto.commit' is set to true, which allows Kafka to automatically commit the offsets periodically without requiring the application to do so explicitly."
