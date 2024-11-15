@@ -83,9 +83,9 @@ module "flink_api_key_rotation" {
     }
 
     resource = {
-        id          = confluent_flink_compute_pool.env.id
-        api_version = confluent_flink_compute_pool.env.api_version
-        kind        = confluent_flink_compute_pool.env.kind
+        id          = data.confluent_flink_region.env.id
+        api_version = data.confluent_flink_region.env.api_version
+        kind        = data.confluent_flink_region.env.kind
 
         environment = {
             id = confluent_environment.env.id

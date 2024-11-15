@@ -12,7 +12,6 @@ CREATE TABLE airline_flights (
 DISTRIBUTED BY (departure_airport_code) INTO 1 BUCKETS 
 WITH (
   'changelog.mode' = 'upsert',
-  'kafka.partitions' = '1',
   'kafka.retention.time' = '0',
   'value.format' = 'avro-registry'
 );
