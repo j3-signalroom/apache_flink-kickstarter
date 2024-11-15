@@ -126,8 +126,8 @@ resource "confluent_api_key" "flink_app_manager_api_key" {
   ]
 }
 
-# Create ACERTUS Order ID Lookup Table
-resource "confluent_flink_statement" "create-lookup-acertus-order-id-table" {
+# Create Airline Flights Table
+resource "confluent_flink_statement" "create_airline_flights_table" {
   organization {
     id = data.confluent_organization.env.id
   }

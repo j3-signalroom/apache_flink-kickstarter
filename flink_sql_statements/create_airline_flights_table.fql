@@ -9,10 +9,10 @@ CREATE TABLE airline_flights (
     airline STRING,
     PRIMARY KEY(departure_airport_code) NOT ENFORCED
 )
+DISTRIBUTED BY (departure_airport_code) INTO 1 BUCKETS 
 WITH (
   'changelog.mode' = 'upsert',
   'kafka.partitions' = '1',
-  'kafka.retention.time' = '0' 
+  'kafka.retention.time' = '0',
+  'value.format' = 'avro-registry'
 );
-DISTRIBUTED BY (departure_airport_code) INTO 1 BUCKETS
-WITH ('value.format' = 'json-registry');
