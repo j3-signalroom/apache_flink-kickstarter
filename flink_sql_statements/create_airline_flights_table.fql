@@ -1,0 +1,18 @@
+CREATE TABLE airline_flights (
+    email_address STRING,
+    departure_time STRING,
+    departure_airport_code STRING,
+    arrival_time STRING,
+    arrival_airport_code STRING,
+    flight_number STRING,
+    confirmation STRING,
+    airline STRING,
+    PRIMARY KEY(departure_airport_code) NOT ENFORCED
+)
+WITH (
+  'changelog.mode' = 'upsert',
+  'kafka.partitions' = '1',
+  'kafka.retention.time' = '0' 
+);
+DISTRIBUTED BY (departure_airport_code) INTO 1 BUCKETS
+WITH ('value.format' = 'json-registry');
