@@ -45,7 +45,7 @@ scripts/run-flink-locally.sh <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=
 ```
 
 - **on**: Start the environment.
-- **down**: Stop the environment.
+- **off**: Stop the environment.
 - `--profile=<AWS_SSO_PROFILE_NAME>`: The AWS SSO profile to use.
 - `--chip=<amd64 | arm64>`: Specify the chip architecture.
 - `--flink-language=<python | java>`: Specify the language to use for Flink applications.
