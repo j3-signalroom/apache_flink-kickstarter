@@ -11,13 +11,14 @@ import com.fasterxml.jackson.annotation.*;
 import org.apache.avro.*;
 import org.apache.avro.generic.*;
 import io.confluent.kafka.schemaregistry.avro.*;
+import java.io.Serializable;
 import java.math.*;
 import java.util.*;
 
 import kickstarter.helper.*;
 
 
-public class AirlineData {
+public class AirlineData implements Serializable {
     // --- The field names of the class object
     public static final String FIELD_EMAIL_ADDRESS = "email_address";
     public static final String FIELD_DEPARTURE_TIME = "departure_time";
@@ -227,7 +228,7 @@ public class AirlineData {
         return flightData;
     }
 
-    /**
+        /**
      * The method converts the instantiated class object into a generic record.
      * 
      * @return the generic record of the instantiated class object.
