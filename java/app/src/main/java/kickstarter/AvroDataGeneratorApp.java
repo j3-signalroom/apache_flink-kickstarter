@@ -8,6 +8,7 @@
 package kickstarter;
 
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import org.apache.avro.*;
 import org.apache.flink.formats.avro.registry.confluent.ConfluentRegistryAvroSerializationSchema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -32,7 +33,7 @@ import org.apache.iceberg.flink.sink.FlinkSink;
 import org.apache.hadoop.conf.Configuration;
 import java.util.*;
 
-import javax.xml.validation.Schema;
+import org.apache.avro.Schema;
 
 import org.slf4j.*;
 
@@ -135,23 +136,18 @@ public class AvroDataGeneratorApp {
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone` with the
          * specified serializer.
          */
-        final Schema airlineAvroSchema = new Schema.Parser().parse(AirlineData.buildSchema().rawSchema().toString());
-
         KafkaRecordSerializationSchema<GenericRecord> skyOneSerializer = 
             KafkaRecordSerializationSchema.<GenericRecord>builder()
                 .setTopic("airline.skyone_avro")
-                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(
-                    new Schema.Parser().parse(airlineAvroSchema), 
-                    producerProperties.getProperty("schema.registry.url")
-                ))
+                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(AirlineData.SUBJECT_AIRLINE_DATA, AirlineData.buildSchema().rawSchema(), producerProperties.getProperty("schema.registry.url")))
                 .build();
 
         /*
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG).
          */
-        KafkaSink<AirlineData> skyOneSink = 
-            KafkaSink.<AirlineData>builder()
+        KafkaSink<GenericRecord> skyOneSink = 
+            KafkaSink.<GenericRecord>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(skyOneSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
@@ -182,18 +178,15 @@ public class AvroDataGeneratorApp {
         KafkaRecordSerializationSchema<GenericRecord> sunsetSerializer = 
             KafkaRecordSerializationSchema.<GenericRecord>builder()
                 .setTopic("airline.sunset_avro")
-                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(
-                    new Schema.Parser().parse(airlineAvroSchema),
-                    producerProperties.getProperty("schema.registry.url")
-                ))
+                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(AirlineData.SUBJECT_AIRLINE_DATA, AirlineData.buildSchema().rawSchema(), producerProperties.getProperty("schema.registry.url")))
                 .build();
 
         /*
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG).
          */
-        KafkaSink<AirlineData> sunsetSink = 
-            KafkaSink.<AirlineData>builder()
+        KafkaSink<GenericRecord> sunsetSink = 
+            KafkaSink.<GenericRecord>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(sunsetSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
@@ -244,7 +237,7 @@ public class AvroDataGeneratorApp {
 
         // --- Define the RowType for the RowData.
         RowType rowType = RowType.of(
-            new LogicalType[] {
+            new org.apache.flink.table.types.logical.LogicalType[] {
                 DataTypes.STRING().getLogicalType(),
                 DataTypes.STRING().getLogicalType(),
                 DataTypes.STRING().getLogicalType(),

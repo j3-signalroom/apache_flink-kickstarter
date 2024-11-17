@@ -28,6 +28,7 @@ var jacksonVersion: String = "2.18.1"
 
 dependencies {
     implementation("org.apache.kafka:kafka-clients:${kafkaVersion}")
+    implementation("org.apache.avro:avro:1.12.0")
     implementation("io.confluent:kafka-avro-serializer:${confluentKafkaVersion}")
     implementation("io.confluent:kafka-schema-registry-client:${confluentKafkaVersion}")
     implementation("io.confluent:confluent-log4j:1.2.17-cp12")
@@ -45,7 +46,7 @@ dependencies {
     implementation("org.apache.flink:flink-connector-kafka:3.2.0-${flinkVersion}")
     implementation("org.apache.flink:flink-connector-datagen:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-avro:${flinkVersionWithPatch}")
-    Implementation("org.apache.flink:flink-avro-confluent-registry:${flinkVersionWithPatch}")
+    implementation("org.apache.flink:flink-avro-confluent-registry:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-json:${flinkVersionWithPatch}")
     implementation("org.slf4j:slf4j-log4j12:2.0.7")
     implementation("software.amazon.awssdk:sdk-core:${awssdkVersion}")
