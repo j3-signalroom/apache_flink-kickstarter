@@ -157,7 +157,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 
 ## [0.22.01.000] - 2024-08-18
 ### Fixed
-- Store and use the arguments pass to the `KafkaClientPropertiesLookup` constructor.
+- Store and use the arguments pass to the `ConfluentClientConfigurationLookup` constructor.
 
 ## [0.22.00.000] - 2024-08-17
 ### Added

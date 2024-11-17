@@ -45,6 +45,7 @@ dependencies {
     implementation("org.apache.flink:flink-connector-kafka:3.2.0-${flinkVersion}")
     implementation("org.apache.flink:flink-connector-datagen:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-avro:${flinkVersionWithPatch}")
+    Implementation("org.apache.flink:flink-avro-confluent-registry:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-json:${flinkVersionWithPatch}")
     implementation("org.slf4j:slf4j-log4j12:2.0.7")
     implementation("software.amazon.awssdk:sdk-core:${awssdkVersion}")

@@ -264,7 +264,7 @@ public class AirlineData implements Serializable {
      * These include compatibility checks, schema versioning, and other registry-specific
      * operations.
      */
-    public AvroSchema buildSchema() {
+    public static AvroSchema buildSchema() {
         // --- Returns the defined schema
         return 
             new AvroSchema(SchemaBuilder

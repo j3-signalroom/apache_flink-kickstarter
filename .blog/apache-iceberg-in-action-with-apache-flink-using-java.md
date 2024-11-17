@@ -210,7 +210,7 @@ StreamTableEnvironment tblEnv = StreamTableEnvironment.create(env, settings);
 ```java
 DataStream<Properties> dataStreamProducerProperties = 
     env.fromData(new Properties())
-       .map(new KafkaClientPropertiesLookup(false, serviceAccountUser))
+       .map(new ConfluentClientConfigurationLookup(false, serviceAccountUser))
        .name("kafka_producer_properties");
 Properties producerProperties = new Properties();
 
@@ -227,7 +227,7 @@ try {
 }
 ```
 
-- **Kafka Properties Lookup:** Uses [`KafkaClientPropertiesLookup`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/KafkaClientPropertiesLookup.java) to fetch the Producer Kafka Client properties (e.g., broker addresses, security settings) from AWS services (like AWS Secrets Manager). This is a custom source data stream I built, which I will explain in a later post!
+- **Kafka Properties Lookup:** Uses [`ConfluentClientConfigurationLookup`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/ConfluentClientConfigurationLookup.java) to fetch the Producer Kafka Client properties (e.g., broker addresses, security settings) from AWS services (like AWS Secrets Manager). This is a custom source data stream I built, which I will explain in a later post!
 
 - **Create DataStream:** Creates a `DataStream<Properties>` that contains the Kafka producer properties.
 
