@@ -7,8 +7,6 @@
  */
 package kickstarter;
 
-import io.confluent.kafka.serializers.KafkaAvroSerializer;
-import org.apache.avro.*;
 import org.apache.flink.formats.avro.registry.confluent.ConfluentRegistryAvroSerializationSchema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -18,7 +16,6 @@ import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
 import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.connector.kafka.sink.*;
-import org.apache.flink.formats.json.JsonSerializationSchema;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.*;
 import org.apache.flink.table.api.*;
@@ -31,10 +28,9 @@ import org.apache.iceberg.catalog.*;
 import org.apache.iceberg.flink.*;
 import org.apache.iceberg.flink.sink.FlinkSink;
 import org.apache.hadoop.conf.Configuration;
+
+import java.math.BigDecimal;
 import java.util.*;
-
-import org.apache.avro.Schema;
-
 import org.slf4j.*;
 
 import kickstarter.model.*;
@@ -291,23 +287,23 @@ public class AvroDataGeneratorApp {
      * @param tableName The name of the table. 
      * @param airlineDataStream The input data stream.
      */
-    private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineData> airlineDataStream) {
+    private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<GenericRecord> airlineDataStream) {
         // --- Convert DataStream<AirlineData> to DataStream<RowData>
-        DataStream<RowData> skyOneRowData = airlineDataStream.map(new MapFunction<AirlineData, RowData>() {
+        DataStream<RowData> skyOneRowData = airlineDataStream.map(new MapFunction<GenericRecord, RowData>() {
             @Override
-            public RowData map(AirlineData airlineData) throws Exception {
+            public RowData map(GenericRecord genericRecord) throws Exception {
                 GenericRowData rowData = new GenericRowData(RowKind.INSERT, fieldCount);
-                rowData.setField(0, StringData.fromString(airlineData.getEmailAddress()));
-                rowData.setField(1, StringData.fromString(airlineData.getDepartureTime()));
-                rowData.setField(2, StringData.fromString(airlineData.getDepartureAirportCode()));
-                rowData.setField(3, StringData.fromString(airlineData.getArrivalTime()));
-                rowData.setField(4, StringData.fromString(airlineData.getArrivalAirportCode()));
-                rowData.setField(5, airlineData.getFlightDuration());
-                rowData.setField(6, StringData.fromString(airlineData.getFlightNumber()));
-                rowData.setField(7, StringData.fromString(airlineData.getConfirmationCode()));
-                rowData.setField(8, DecimalData.fromBigDecimal(airlineData.getTicketPrice(), 10, 2));
-                rowData.setField(9, StringData.fromString(airlineData.getAircraft()));
-                rowData.setField(10, StringData.fromString(airlineData.getBookingAgencyEmail()));
+                rowData.setField(0, StringData.fromString(genericRecord.get(AirlineData.FIELD_EMAIL_ADDRESS).toString()));
+                rowData.setField(1, StringData.fromString(genericRecord.get(AirlineData.FIELD_DEPARTURE_TIME).toString()));
+                rowData.setField(2, StringData.fromString(genericRecord.get(AirlineData.FIELD_DEPARTURE_AIRPORT_CODE).toString()));
+                rowData.setField(3, StringData.fromString(genericRecord.get(AirlineData.FIELD_ARRIVAL_TIME).toString()));
+                rowData.setField(4, StringData.fromString(genericRecord.get(AirlineData.FIELD_ARRIVAL_AIRPORT_CODE).toString()));
+                rowData.setField(5, genericRecord.get(AirlineData.FIELD_FLIGHT_DURATION));
+                rowData.setField(6, StringData.fromString(genericRecord.get(AirlineData.FIELD_FLIGHT_NUMBER).toString()));
+                rowData.setField(7, StringData.fromString(genericRecord.get(AirlineData.FIELD_CONFIRMATION_CODE).toString()));
+                rowData.setField(8, DecimalData.fromBigDecimal((BigDecimal) genericRecord.get(AirlineData.FIELD_TICKET_PRICE), 10, 2));
+                rowData.setField(9, StringData.fromString(genericRecord.get(AirlineData.FIELD_AIRCRAFT).toString()));
+                rowData.setField(10, StringData.fromString(genericRecord.get(AirlineData.FIELD_BOOKING_AGENCY_EMAIL).toString()));
                 return rowData;
             }
         });
