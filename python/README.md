@@ -9,7 +9,7 @@ Curious about the differences between the DataStream API and Table API? Click [h
 + [1.0 Important Note(s)](#10-important-notes)
 + [2.0 Power up the Apache Flink Docker containers](#20-power-up-the-apache-flink-docker-containers)
 + [3.0 Discover What You Can Do with These Flink Apps](#30-discover-what-you-can-do-with-these-flink-apps)
-    - [3.1 Special Mention](#31-special-mention)
+    - [3.1 Did you notice we prepended `uv run` to `flink run`?](#31-did-you-notice-we-prepended-uv-run-to-flink-run)
 + [4.0 Resources](#40-resources)
 <!-- tocstop -->
 
@@ -33,14 +33,14 @@ Curious about the differences between the DataStream API and Table API? Click [h
 This section guides you through the local setup (on one machine but in separate containers) of the Apache Flink cluster in Session mode using Docker containers with support for Apache Iceberg.  Run the `bash` script below to start the Apache Flink cluster in Session Mode on your machine:
 
 ```bash
-scripts/run-flink-locally.sh on --profile=<AWS_SSO_PROFILE_NAME>
-                                --chip=<amd64 | arm64>
-                                --flink-language=python
-                                [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]
+scripts/run-flink-locally.sh <DOCKER_SWITCH> --profile=<AWS_SSO_PROFILE_NAME>
+                                             --chip=<amd64 | arm64>
+                                             --flink-language=python
+                                             [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]
 ```
 > Argument placeholder|Replace with
 > -|-
-> `<ACTIVATE_DOCKER_CONTAINER>`|`on` to turn on Flink locally, otherwise `off` to turn Flink off.
+> `<DOCKER_SWITCH>`|`on` to start up your very own local Apache Cluster running in Docker containers, otherwise `off` to stop the Docker containers.
 > `<AWS_SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
 > `<CHIP>`|if you are running on a Mac with M1, M2, or M3 chip, use `arm64`.  Otherwise, use `amd64`.
 > `<FLINK_LANGUAGE>`|`python` to specify Python is the language base of the Flink Apps you plan on running.  Otherwise, specifiy `java` if the language base of the Flink Apps are Java.
@@ -68,19 +68,19 @@ Flink App|Flink Run Command
 > `<AWS_S3_BUCKET>`|specify name of the AWS S3 bucket you chosen during the Terraform creation or created yourself separately.  The AWS S3 bucket is used to store the Apache Iceberg files (i.e., data files, manifest files, manifest list file, and metadata files).
 > `<AWS_REGION_NAME>`|specify the AWS Region your AWS Glue infrastructure resides.
 
-### 3.1 Special Mention
-Before we move on, take a moment to notice something new right before the `flink run` command—the `uv` run comes right before it! What is `uv`, you ask? Well, it's an incredibly fast Python package installer and dependency resolver, written in Rust, and designed to seamlessly replace `pip` and pip-tools in your workflows. By prefixing uv run to a command, you're ensuring that the command runs in an optimal Python environment.
+### 3.1 Did you notice we prepended `uv run` to `flink run`?
+You maybe asking yourself why.  Well, `uv` is an incredibly fast Python package installer and dependency resolver, written in [**Rust**](https://github.blog/developer-skills/programming-languages-and-frameworks/why-rust-is-the-most-admired-language-among-developers/), and designed to seamlessly replace `pip`, `pipx`, `poetry`, `pyenv`, `twine`, `virtualenv`, and more in your workflows. By prefixing `uv run` to a command, you're ensuring that the command runs in an optimal Python environment.
 
-Now, let's break down the magic behind uv run:
-- When you use it with a file ending in `.py` or an HTTP(S) URL, uv treats it as a script and runs it with a Python interpreter. In other words, `uv run` `file.py` is equivalent to `uv` run python file.py. If you're working with a URL, `uv` even downloads it temporarily to execute it. Any inline dependency metadata is installed into an isolated, temporary environment—meaning zero leftover mess! When used with `-`, the input will be read from `stdin`, and treated as a Python script.
-- If used in a project directory, uv will automatically create or update the project environment before running the command.
-- Outside of a project, if there's a virtual environment present in your current directory (or any parent directory), uv runs the command in that environment. If no environment is found, it uses the interpreter's environment.
+Now, let's go a little deeper into the magic behind `uv run`:
+- When you use it with a file ending in `.py` or an HTTP(S) URL, `uv` treats it as a script and runs it with a Python interpreter. In other words, `uv run file.py` is equivalent to `uv run python file.py`. If you're working with a URL, `uv` even downloads it temporarily to execute it. Any inline dependency metadata is installed into an isolated, temporary environment—meaning zero leftover mess! When used with `-`, the input will be read from `stdin`, and treated as a Python script.
+- If used in a project directory, `uv` will automatically create or update the project environment before running the command.
+- Outside of a project, if there's a virtual environment present in your current directory (or any parent directory), `uv` runs the command in that environment. If no environment is found, it uses the interpreter's environment.
 
-So what does this mean when we put `uv` run before `flink run`? It means uv takes care of all the setup—fast and seamless—right on the Flink cluster. If you think AI/ML is magic, the work the folks at Astral have done with uv is pure wizardry!
+So what does this mean when we put `uv run` before `flink run`? It means `uv` takes care of all the setup—fast and seamless—right in your local Docker container. If you think AI/ML is magic, the work the folks at [Astral](https://astral.sh/) have done with `uv` is pure wizardry!
 
-Curious to learn more about Astral's `uv`? Check these out:
-- Documentation: Learn about [uv](https://docs.astral.sh/uv/).
-- Video: [uv IS the Future of Python Packing!](https://www.youtube.com/watch?v=8UuW8o4bHbw).
+Curious to learn more about [Astral](https://astral.sh/)'s `uv`? Check these out:
+- Documentation: Learn about [`uv`](https://docs.astral.sh/uv/).
+- Video: [`uv` IS THE FUTURE OF PYTHON PACKING!](https://www.youtube.com/watch?v=8UuW8o4bHbw).
 
 ## 4.0 Resources
 
