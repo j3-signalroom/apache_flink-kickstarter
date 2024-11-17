@@ -43,7 +43,7 @@ public class ConfluentClientConfiguration {
 	public ObjectResult<Properties> getConfluentPropertiesFromAws() {
 		Properties properties = new Properties();
 		
-		// --- Retrieve the SECRET properties from the AWS Secrets Manager
+		// --- Retrieve the Kafka Cluster properties from the AWS Secrets Manager
 		ObjectResult<JSONObject> secret = AwsHelper.getSecrets(this.kafkaClusterSecretsPath, "AWSCURRENT");
 		if(secret.isSuccessful()) {
 			try {
@@ -57,19 +57,21 @@ public class ConfluentClientConfiguration {
 				return new ObjectResult<>(ErrorEnum.ERR_CODE_MISSING_OR_INVALID_FIELD.getCode(), e.getMessage());
 			}
 
+			// --- Retrieve the Schema Registry Cluster properties from the AWS Secrets Manager
 			ObjectResult<JSONObject> scrSecrets = AwsHelper.getSecrets(this.schemaRegistryClusterSecretsPath, "AWSCURRENT");
 			if(scrSecrets.isSuccessful()) {
 				try {
-					Iterator<?> iterator = secret.get().keys();
+					Iterator<?> iterator = scrSecrets.get().keys();
 					while (iterator.hasNext()) {
 						Object key = iterator.next();
-						Object value = secret.get().get(key.toString());
+						Object value = scrSecrets.get().get(key.toString());
 						properties.put(key, value);
 					}
 				} catch (final JSONException e) {
 					return new ObjectResult<>(ErrorEnum.ERR_CODE_MISSING_OR_INVALID_FIELD.getCode(), e.getMessage());
 				}
 	
+				// --- Retrieve the Kafka Client parameters from the AWS Systems Manager Parameter Store
 				ObjectResult<Properties> parameters = AwsHelper.getParameters(this.kafkaClientParametersPath);
 				if(parameters.isSuccessful()) {
 					Properties merged = new Properties();

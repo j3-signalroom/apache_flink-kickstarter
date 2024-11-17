@@ -42,7 +42,7 @@ import kickstarter.model.*;
  * Tables, respectively.
  */
 public class AvroDataGeneratorApp {
-    private static final Logger logger = LoggerFactory.getLogger(DataGeneratorApp.class);
+    private static final Logger logger = LoggerFactory.getLogger(AvroDataGeneratorApp.class);
 
 
 	/**
@@ -132,6 +132,9 @@ public class AvroDataGeneratorApp {
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone` with the
          * specified serializer.
          */
+        System.out.println("Schema Registry URL: " + producerProperties.getProperty("schema.registry.url"));
+        System.out.println(producerProperties.toString());
+        System.out.println(AirlineData.buildSchema().rawSchema().toString());
         KafkaRecordSerializationSchema<GenericRecord> skyOneSerializer = 
             KafkaRecordSerializationSchema.<GenericRecord>builder()
                 .setTopic("airline.skyone_avro")
