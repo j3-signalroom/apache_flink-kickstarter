@@ -97,7 +97,7 @@ public class AvroDataGeneratorApp {
 		 */
         DataStream<Properties> dataStreamProducerProperties = 
 			env.fromData(new Properties())
-			   .map(new ConfluentClientConfigurationLookup(false, serviceAccountUser))
+			   .map(new ConfluentClientConfigurationMapFunction(false, serviceAccountUser))
 			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
 
