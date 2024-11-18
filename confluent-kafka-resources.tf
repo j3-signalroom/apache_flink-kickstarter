@@ -103,6 +103,52 @@ resource "confluent_kafka_topic" "airline_sunset" {
   ]
 }
 
+# Create the `airline.skyone_avro` Kafka topic
+resource "confluent_kafka_topic" "airline_skyone_avro" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.kafka_cluster.id
+  }
+  topic_name         = "airline.skyone_avro"
+  partitions_count   = 1
+  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
+  credentials {
+    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
+    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
+  }
+
+  depends_on = [ 
+    confluent_kafka_cluster.kafka_cluster 
+  ]
+}
+
+# Create the `airline.sunset_avro` Kafka topic
+resource "confluent_kafka_topic" "airline_sunset_avro" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.kafka_cluster.id
+  }
+  topic_name         = "airline.sunset_avro"
+  partitions_count   = 1
+  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
+  credentials {
+    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
+    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
+  }
+
+  depends_on = [ 
+    confluent_kafka_cluster.kafka_cluster 
+  ]
+}
+
 # Create the `airline.flight` Kafka topic
 resource "confluent_kafka_topic" "airline_flight" {
   kafka_cluster {

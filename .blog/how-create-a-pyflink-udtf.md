@@ -1,6 +1,6 @@
 # How to create a User-Defined Table Function (UDTF) in PyFlink to fetch data from an external source for your Flink App?
 
-Here is my scenario: I needed to convert one of my Flink apps from Java to Python. However, I encountered a challenge: I used a custom DataStream source in my [Java code](../java/app/src/main/java/kickstarter/KafkaClientPropertiesLookup.java). The custom DataStream source aims to communicate with the AWS Secrets Manager and AWS Systems Manager Parameter Store to securely retrieve Kafka configuration details for the KafkaSource and KafkaSink operators in the Flink apps.
+Here is my scenario: I needed to convert one of my Flink apps from Java to Python. However, I encountered a challenge: I used a custom DataStream source in my [Java code](../java/app/src/main/java/kickstarter/ConfluentClientConfigurationLookup.java). The custom DataStream source aims to communicate with the AWS Secrets Manager and AWS Systems Manager Parameter Store to securely retrieve Kafka configuration details for the KafkaSource and KafkaSink operators in the Flink apps.
 
 After some struggles, I found that it was not a one-to-one conversion into Python, and indeed, I needed to use a different architectural approach to achieve the same functionality.
 

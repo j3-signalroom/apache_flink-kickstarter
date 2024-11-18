@@ -60,7 +60,7 @@ public class FlyerStatsApp {
 		 */
         DataStream<Properties> dataStreamConsumerProperties = 
 			env.fromData(new Properties())
-			   .map(new KafkaClientPropertiesLookup(true, serviceAccountUser))
+			   .map(new ConfluentClientConfigurationLookup(true, serviceAccountUser))
 			   .name("kafka_consumer_properties");
 		Properties consumerProperties = new Properties();
 
@@ -93,7 +93,7 @@ public class FlyerStatsApp {
 		 */
         DataStream<Properties> dataStreamProducerProperties = 
 			env.fromData(new Properties())
-			   .map(new KafkaClientPropertiesLookup(false, serviceAccountUser))
+			   .map(new ConfluentClientConfigurationLookup(false, serviceAccountUser))
 			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
 

@@ -23,10 +23,19 @@ val kafkaVersion: String = "3.7.0"
 val junitVersion: String = "5.10.0"
 val awssdkVersion: String = "2.26.29"
 var icebergVersion: String = "1.6.1"
+var confluentKafkaVersion: String = "7.7.1"
+var jacksonVersion: String = "2.18.1"
 
 dependencies {
-    implementation("org.apache.hadoop:hadoop-common:${hadoopVersion}")
     implementation("org.apache.kafka:kafka-clients:${kafkaVersion}")
+    implementation("org.apache.avro:avro:1.12.0")
+    implementation("io.confluent:kafka-avro-serializer:${confluentKafkaVersion}")
+    implementation("io.confluent:kafka-schema-registry-client:${confluentKafkaVersion}")
+    implementation("io.confluent:confluent-log4j:1.2.17-cp12")
+    implementation("tech.allegro.schema.json2avro:converter:0.2.15")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-avro:${jacksonVersion}")
+    implementation("org.apache.hadoop:hadoop-common:${hadoopVersion}")
     implementation("org.apache.flink:flink-java:${flinkVersionWithPatch}")
     compileOnly("org.apache.flink:flink-streaming-java:${flinkVersionWithPatch}")
     compileOnly("org.apache.flink:flink-table-common:${flinkVersionWithPatch}")
@@ -36,6 +45,8 @@ dependencies {
     implementation("org.apache.flink:flink-connector-base:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-connector-kafka:3.2.0-${flinkVersion}")
     implementation("org.apache.flink:flink-connector-datagen:${flinkVersionWithPatch}")
+    implementation("org.apache.flink:flink-avro:${flinkVersionWithPatch}")
+    implementation("org.apache.flink:flink-avro-confluent-registry:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-json:${flinkVersionWithPatch}")
     implementation("org.slf4j:slf4j-log4j12:2.0.7")
     implementation("software.amazon.awssdk:sdk-core:${awssdkVersion}")

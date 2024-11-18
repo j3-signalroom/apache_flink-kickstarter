@@ -30,7 +30,7 @@ import java.util.*;
  * Flink App, then caches the properties for use by any subsequent events that need these
  * properties.
  */
-public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Properties>{
+public class ConfluentClientConfigurationLookup extends RichMapFunction<Properties, Properties>{
     private transient AtomicReference<Properties> _properties;
     private volatile boolean _consumerKafkaClient;
     private volatile String _serviceAccountUser;
@@ -43,7 +43,7 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
      * @param serviceAccountUser
      * @throws Exception - Exception occurs when the service account user is empty.
      */
-    public KafkaClientPropertiesLookup(boolean consumerKafkaClient, String serviceAccountUser) throws Exception {
+    public ConfluentClientConfigurationLookup(boolean consumerKafkaClient, String serviceAccountUser) throws Exception {
         // --- Check if the service account user is empty
         if(serviceAccountUser.isEmpty()) {
             throw new Exception("The service account user must be provided.");
@@ -73,11 +73,12 @@ public class KafkaClientPropertiesLookup extends RichMapFunction<Properties, Pro
          * Manager Parameter Store.
          */
         final String secretPathPrefix = "/confluent_cloud_resource/" + this._serviceAccountUser;
-        final KafkaClient kafkaClient = 
-            new KafkaClient(
+        final ConfluentClientConfiguration confluentClientConfiguration = 
+            new ConfluentClientConfiguration(
                 secretPathPrefix + "/kafka_cluster/java_client", 
+                secretPathPrefix + "/schema_registry_cluster/java_client",
                 secretPathPrefix + (this._consumerKafkaClient ? "/consumer_kafka_client" : "/producer_kafka_client"));
-        ObjectResult<Properties> properties = kafkaClient.getKafkaClusterPropertiesFromAws();
+        ObjectResult<Properties> properties = confluentClientConfiguration.getConfluentPropertiesFromAws();
 
 		if(!properties.isSuccessful()) { 
 			throw new RuntimeException(String.format("Failed to retrieve the Kafka Client properties from '%s' secrets because %s:%s", secretPathPrefix, properties.getErrorMessageCode(), properties.getErrorMessage()));
