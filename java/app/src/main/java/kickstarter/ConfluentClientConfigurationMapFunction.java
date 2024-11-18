@@ -17,11 +17,10 @@ package kickstarter;
 
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
-
-import kickstarter.helper.*;
-
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.*;
+
+import kickstarter.helper.*;
 
 
 /**
