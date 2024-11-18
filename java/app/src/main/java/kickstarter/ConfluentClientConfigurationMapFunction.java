@@ -30,7 +30,7 @@ import java.util.*;
  * Flink App, then caches the properties for use by any subsequent events that need these
  * properties.
  */
-public class ConfluentClientConfigurationLookup extends RichMapFunction<Properties, Properties>{
+public class ConfluentClientConfigurationMapFunction extends RichMapFunction<Properties, Properties>{
     private transient AtomicReference<Properties> _properties;
     private volatile boolean _consumerKafkaClient;
     private volatile String _serviceAccountUser;
@@ -43,7 +43,7 @@ public class ConfluentClientConfigurationLookup extends RichMapFunction<Properti
      * @param serviceAccountUser
      * @throws Exception - Exception occurs when the service account user is empty.
      */
-    public ConfluentClientConfigurationLookup(boolean consumerKafkaClient, String serviceAccountUser) throws Exception {
+    public ConfluentClientConfigurationMapFunction(boolean consumerKafkaClient, String serviceAccountUser) throws Exception {
         // --- Check if the service account user is empty
         if(serviceAccountUser.isEmpty()) {
             throw new Exception("The service account user must be provided.");

@@ -128,7 +128,7 @@ public class AvroDataGeneratorApp {
                 Types.GENERIC(GenericRecord.class)
             );
 
-        // --- Sets up a Flink POJO source to consume data.
+        // --- Sets up a Flink Avro Generic Record source to consume data.
         DataStream<GenericRecord> skyOneStream = 
             env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
@@ -136,12 +136,13 @@ public class AvroDataGeneratorApp {
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone_avro` with the
          * specified serializer.
          */
+        final String subject = AirlineData.NAMESPACE_THEJ3_MODEL + "." + AirlineData.SUBJECT_AIRLINE_DATA;
+        final org.apache.avro.Schema schema = AirlineData.buildSchema().rawSchema();
+        final String schemaRegistryUrl = producerProperties.getProperty("schema.registry.url");
         KafkaRecordSerializationSchema<GenericRecord> skyOneSerializer = 
             KafkaRecordSerializationSchema.<GenericRecord>builder()
                 .setTopic("airline.skyone_avro")
-                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(AirlineData.SUBJECT_AIRLINE_DATA, 
-                                                                                                 AirlineData.buildSchema().rawSchema(), 
-                                                                                                 producerProperties.getProperty("schema.registry.url")))
+                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(subject, schema, schemaRegistryUrl))
                 .build();
 
         /*
@@ -161,7 +162,7 @@ public class AvroDataGeneratorApp {
          */
         skyOneStream.sinkTo(skyOneSink).name("skyone_sink");
 
-        // --- Sets up a Flink POJO source to consume data.
+        // --- Sets up a Flink Avro Generic Record source to consume data.
         DataGeneratorSource<GenericRecord> sunsetSource =
             new DataGeneratorSource<>(
                 index -> DataGenerator.generateAirlineFlightData("SUN").toGenericRecord(),
@@ -180,9 +181,7 @@ public class AvroDataGeneratorApp {
         KafkaRecordSerializationSchema<GenericRecord> sunsetSerializer = 
             KafkaRecordSerializationSchema.<GenericRecord>builder()
                 .setTopic("airline.sunset_avro")
-                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(AirlineData.SUBJECT_AIRLINE_DATA, 
-                                                                                                 AirlineData.buildSchema().rawSchema(), 
-                                                                                                 producerProperties.getProperty("schema.registry.url")))
+                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(subject, schema, schemaRegistryUrl))
                 .build();
 
         /*
