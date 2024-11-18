@@ -318,7 +318,7 @@ public class AvroDataGeneratorApp {
         
         TableIdentifier tableIdentifier = TableIdentifier.of(databaseName, tableName);
 
-        // Create the table if it does not exist
+        // --- Create the table if it does not exist.
         if (!catalog.tableExists(ObjectPath.fromString(databaseName + "." + tableName))) {
             tblEnv.executeSql(
                         "CREATE TABLE " + databaseName + "." + tableName + " ("
