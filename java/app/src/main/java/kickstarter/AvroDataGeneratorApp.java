@@ -29,7 +29,6 @@ import org.apache.iceberg.catalog.*;
 import org.apache.iceberg.flink.*;
 import org.apache.iceberg.flink.sink.FlinkSink;
 import org.apache.hadoop.conf.Configuration;
-
 import java.math.BigDecimal;
 import java.util.*;
 import org.slf4j.*;
@@ -203,7 +202,7 @@ public class AvroDataGeneratorApp {
          */
         sunsetStream.sinkTo(sunsetSink).name("sunset_sink");
 
-        // --- Describes and configures the catalog for the Table API and SQL.
+        // --- Describes and configures the catalog for the Table API and Flink SQL.
         String catalogName = "apache_kickstarter";
         String bucketName = serviceAccountUser.replace("_", "-");  // --- To follow S3 bucket naming convention, replace underscores with hyphens if exist in string.
         String catalogImpl = "org.apache.iceberg.aws.glue.GlueCatalog";
