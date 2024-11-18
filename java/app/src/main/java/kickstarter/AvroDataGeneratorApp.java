@@ -13,6 +13,7 @@ import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
+import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.datagen.source.DataGeneratorSource;
 import org.apache.flink.connector.kafka.sink.*;
@@ -61,8 +62,12 @@ public class AvroDataGeneratorApp {
         String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
         String awsRegion = Common.getAppArgumentValue(args, Common.ARG_AWS_REGION);
 
+        // --- Create a configuration to force Avro serialization instead of Kyro serialization.
+        org.apache.flink.configuration.Configuration config = new org.apache.flink.configuration.Configuration();
+        config.set(PipelineOptions.FORCE_AVRO, true);
+
 		// --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG).
-		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(config);
 
         // --- Enable checkpointing every 5000 milliseconds (5 seconds).
         env.enableCheckpointing(5000);
@@ -129,16 +134,15 @@ public class AvroDataGeneratorApp {
             env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
         /*
-         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone` with the
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone_avro` with the
          * specified serializer.
          */
-        System.out.println("Schema Registry URL: " + producerProperties.getProperty("schema.registry.url"));
-        System.out.println(producerProperties.toString());
-        System.out.println(AirlineData.buildSchema().rawSchema().toString());
         KafkaRecordSerializationSchema<GenericRecord> skyOneSerializer = 
             KafkaRecordSerializationSchema.<GenericRecord>builder()
                 .setTopic("airline.skyone_avro")
-                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(AirlineData.SUBJECT_AIRLINE_DATA, AirlineData.buildSchema().rawSchema(), producerProperties.getProperty("schema.registry.url")))
+                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(AirlineData.SUBJECT_AIRLINE_DATA, 
+                                                                                                 AirlineData.buildSchema().rawSchema(), 
+                                                                                                 producerProperties.getProperty("schema.registry.url")))
                 .build();
 
         /*
@@ -171,13 +175,15 @@ public class AvroDataGeneratorApp {
             env.fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
         /*
-         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset` with the
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset_avro` with the
          * specified serializer.
          */
         KafkaRecordSerializationSchema<GenericRecord> sunsetSerializer = 
             KafkaRecordSerializationSchema.<GenericRecord>builder()
                 .setTopic("airline.sunset_avro")
-                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(AirlineData.SUBJECT_AIRLINE_DATA, AirlineData.buildSchema().rawSchema(), producerProperties.getProperty("schema.registry.url")))
+                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(AirlineData.SUBJECT_AIRLINE_DATA, 
+                                                                                                 AirlineData.buildSchema().rawSchema(), 
+                                                                                                 producerProperties.getProperty("schema.registry.url")))
                 .build();
 
         /*
