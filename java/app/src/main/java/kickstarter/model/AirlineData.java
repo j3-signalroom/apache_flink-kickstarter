@@ -27,6 +27,7 @@ public class AirlineData implements Serializable {
     public static final String FIELD_AIRCRAFT = "aircraft";
     public static final String FIELD_BOOKING_AGENCY_EMAIL = "booking_agency_email";
 
+
     @JsonProperty(FIELD_EMAIL_ADDRESS)
     private String email_address;
 
@@ -155,25 +156,41 @@ public class AirlineData implements Serializable {
         this.booking_agency_email = bookingAgencyEmail;
     }
 
+    
     @Override
+    /**
+     * This method is used to compare two objects of the same type.
+     * 
+     * @param o The object to compare.
+     * 
+     * @return boolean True if the objects are equal, false otherwise.
+     */
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) 
+            return true;
+        if (o == null || getClass() != o.getClass()) 
+            return false;
         AirlineData that = (AirlineData) o;
+
         return Objects.equals(getEmailAddress(), that.email_address) && 
-                                Objects.equals(getDepartureTime(), that.departure_time) && 
-                                Objects.equals(getDepartureAirportCode(), that.departure_airport_code) && 
-                                Objects.equals(getArrivalTime(), that.arrival_time) && 
-                                Objects.equals(getArrivalAirportCode(), that.arrival_airport_code) && 
-                                Objects.equals(getFlightDuration(), that.flight_duration) && 
-                                Objects.equals(getFlightNumber(), that.flight_number) && 
-                                Objects.equals(getConfirmationCode(), that.confirmation_code) && 
-                                Objects.equals(getTicketPrice(), that.ticket_price) && 
-                                Objects.equals(getAircraft(), that.aircraft) &&
-                                Objects.equals(getBookingAgencyEmail(), that.booking_agency_email);
+                Objects.equals(getDepartureTime(), that.departure_time) && 
+                Objects.equals(getDepartureAirportCode(), that.departure_airport_code) && 
+                Objects.equals(getArrivalTime(), that.arrival_time) && 
+                Objects.equals(getArrivalAirportCode(), that.arrival_airport_code) && 
+                Objects.equals(getFlightDuration(), that.flight_duration) && 
+                Objects.equals(getFlightNumber(), that.flight_number) && 
+                Objects.equals(getConfirmationCode(), that.confirmation_code) && 
+                Objects.equals(getTicketPrice(), that.ticket_price) && 
+                Objects.equals(getAircraft(), that.aircraft) &&
+                Objects.equals(getBookingAgencyEmail(), that.booking_agency_email);
     }
 
     @Override
+    /**
+     * This method is used to generate a hash code for the object.
+     * 
+     * @return int The hash code for the object.
+     */
     public int hashCode() {
         return Objects.hash(getEmailAddress(),
                             getDepartureTime(), 
@@ -189,6 +206,11 @@ public class AirlineData implements Serializable {
     }
 
     @Override
+    /**
+     * This method is used to generate a string representation of the object.
+     * 
+     * @return String The string representation of the object.
+     */
     public String toString() {
         return "AirlineData{" +
             "email_address='" + getEmailAddress() + '\'' +
@@ -204,6 +226,7 @@ public class AirlineData implements Serializable {
             ", booking_agency_email='" + getBookingAgencyEmail() + '\'' +
             '}';
     }
+
     public FlightData toFlightData(final String airline) {
         FlightData flightData = new FlightData();
 
