@@ -46,3 +46,21 @@ module "schema_registry_cluster_api_key_rotation" {
     number_of_api_keys_to_retain = var.number_of_api_keys_to_retain
     day_count = var.day_count
 }
+
+resource "confluent_schema_registry_acl" "developer_read" {
+  subject_name = "*"
+  principal    = "ServiceAccount:${confluent_service_account.schema_registry_cluster_api.id}"
+  operation    = "READ"
+  permission   = "ALLOW"
+
+  depends_on = [ confluent_service_account.schema_registry_cluster_api ]
+}
+
+resource "confluent_schema_registry_acl" "developer_write" {
+  subject_name = "*"
+  principal    = "ServiceAccount:${confluent_service_account.schema_registry_cluster_api.id}"
+  operation    = "WRITE"
+  permission   = "ALLOW"
+
+  depends_on = [ confluent_service_account.schema_registry_cluster_api ]
+}
