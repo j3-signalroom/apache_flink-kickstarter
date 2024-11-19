@@ -17,8 +17,7 @@ import org.apache.avro.Conversions.DecimalConversion;
 import org.apache.avro.reflect.AvroName;
 
 
-@SuppressWarnings("unused")
-public class AirlineAvroData extends SpecificRecordBase implements SpecificRecord {
+public class AirlineAvroData extends SpecificRecordBase implements SpecificRecord  {
     public static final Schema SCHEMA = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AirlineAvroData\",\"namespace\":\"kickstarter.model\",\"fields\":[{\"name\":\"email_address\",\"type\":\"string\"},{\"name\":\"departure_time\",\"type\":\"string\"},{\"name\":\"departure_airport_code\",\"type\":\"string\"},{\"name\":\"arrival_time\",\"type\":\"string\"},{\"name\":\"arrival_airport_code\",\"type\":\"string\"},{\"name\":\"flight_duration\",\"type\":\"long\"},{\"name\":\"flight_number\",\"type\":\"string\"},{\"name\":\"confirmation_code\",\"type\":\"string\"},{\"name\":\"ticket_price\",\"type\":{\"type\":\"bytes\",\"logicalType\":\"decimal\",\"precision\":10,\"scale\":2}},{\"name\":\"aircraft\",\"type\":\"string\"},{\"name\":\"booking_agency_email\",\"type\":\"string\"}]}");
     public static final String SUBJECT = "kickstarter.model.AirlineAvroData";
 
@@ -61,6 +60,10 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
      * this class is capable of writing streams and from which it can read.
      */
     private static final long serialVersionUID = 1L;
+
+    private static final DecimalConversion DECIMAL_CONVERSION = new DecimalConversion();
+    private static final LogicalTypes.Decimal DECIMAL_TYPE = LogicalTypes.decimal(10, 2);
+    private static final Schema DECIMAL_SCHEMA = DECIMAL_TYPE.addToSchema(Schema.create(Schema.Type.BYTES));
 
 
     /**
@@ -178,7 +181,7 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
                 Objects.equals(getDepartureAirportCode(), that.getDepartureAirportCode()) && 
                 Objects.equals(getArrivalTime(), that.getArrivalTime()) && 
                 Objects.equals(getArrivalAirportCode(), that.getArrivalAirportCode()) && 
-                Objects.equals(getFlightDuration(), that.getFlightDuration()) && 
+                getFlightDuration() == that.getFlightDuration() && 
                 Objects.equals(getFlightNumber(), that.getFlightNumber()) && 
                 Objects.equals(getConfirmationCode(), that.getConfirmationCode()) && 
                 Objects.equals(getTicketPrice(), that.getTicketPrice()) && 
@@ -193,17 +196,18 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
      */
     @Override
     public int hashCode() {
-        return Objects.hash(getEmailAddress(),
-                            getDepartureTime(), 
-                            getDepartureAirportCode(), 
-                            getArrivalTime(), 
-                            getArrivalAirportCode(),
-                            getFlightDuration(), 
-                            getFlightNumber(), 
-                            getConfirmationCode(), 
-                            getTicketPrice(), 
-                            getAircraft(),
-                            getBookingAgencyEmail());
+        int result = Objects.hash(getEmailAddress(),
+                                    getDepartureTime(), 
+                                    getDepartureAirportCode(), 
+                                    getArrivalTime(), 
+                                    getArrivalAirportCode(),
+                                    getFlightNumber(), 
+                                    getConfirmationCode(), 
+                                    getTicketPrice(), 
+                                    getAircraft(),
+                                    getBookingAgencyEmail());
+        result = 31 * result + Long.hashCode(getFlightDuration());
+        return result;
     }
     
     /**
@@ -213,17 +217,17 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
     @Override
     public String toString() {
         return "AirlineAvroData{" +
-            "email_address='" + getEmailAddress() + '\'' +
-            ", departure_time=" + getDepartureTime() +
-            ", departure_airport_code='" + getDepartureAirportCode() + '\'' +
-            ", arrival_time=" + getArrivalTime() +
-            ", arrival_airport_code='" + getArrivalAirportCode() + '\'' +
-            ", flight_duration=" + getFlightDuration() +
-            ", flight_number='" + getFlightNumber() + '\'' +
-            ", confirmation_code='" + getConfirmationCode() + '\'' +
-            ", ticket_price=" + getTicketPrice() +
-            ", aircraft='" + getAircraft() + '\'' +
-            ", booking_agency_email='" + getBookingAgencyEmail() + '\'' +
+            "emailAddress='" + getEmailAddress() + "'" +
+            ", departureTime=" + getDepartureTime() +
+            ", departureAirportCode='" + getDepartureAirportCode() + "'" +
+            ", arrivalTime=" + getArrivalTime() +
+            ", arrivalAirportCode='" + getArrivalAirportCode() + "'" +
+            ", flightDuration=" + getFlightDuration() +
+            ", flightNumber='" + getFlightNumber() + "'" +
+            ", confirmationCode='" + getConfirmationCode() + "'" +
+            ", ticketPrice=" + getTicketPrice() +
+            ", aircraft='" + getAircraft() + "'" +
+            ", bookingAgencyEmail='" + getBookingAgencyEmail() + "'" +
             '}';
     }
 
@@ -264,9 +268,7 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
             case 7: 
                 return getConfirmationCode();
             case 8:
-                DecimalConversion decimalConversion = new DecimalConversion();
-                Schema decimalSchema = LogicalTypes.decimal(10, 2).addToSchema(Schema.create(Schema.Type.BYTES));
-                return decimalConversion.toBytes(getTicketPrice(), decimalSchema, LogicalTypes.decimal(10, 2));
+                return DECIMAL_CONVERSION.toBytes(getTicketPrice(), DECIMAL_SCHEMA, DECIMAL_TYPE);
             case 9: 
                 return getAircraft();
             case 10: 
@@ -345,10 +347,7 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
                 break;
             case 8:
                 if (fieldValue instanceof ByteBuffer) {
-                    DecimalConversion decimalConversion = new DecimalConversion();
-                    Schema decimalSchema = LogicalTypes.decimal(10, 2).addToSchema(Schema.create(Schema.Type.BYTES));
-                    BigDecimal decimal = decimalConversion.fromBytes((ByteBuffer) fieldValue, decimalSchema, LogicalTypes.decimal(10, 2));
-                    setTicketPrice(decimal);
+                    setTicketPrice(DECIMAL_CONVERSION.fromBytes((ByteBuffer) fieldValue, DECIMAL_SCHEMA, DECIMAL_TYPE));
                 } else if (fieldValue instanceof BigDecimal) {
                     setTicketPrice((BigDecimal) fieldValue);
                 } else {
