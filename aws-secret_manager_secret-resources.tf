@@ -4,8 +4,8 @@ resource "aws_secretsmanager_secret" "schema_registry_cluster_api_key_java_clien
 }
 resource "aws_secretsmanager_secret_version" "schema_registry_cluster_api_key_java_client" {
     secret_id     = aws_secretsmanager_secret.schema_registry_cluster_api_key_java_client.id
-    secret_string = jsonencode({"basic.auth.credentials.source": "USER_INFO",
-                                "basic.auth.user.info": "${module.schema_registry_cluster_api_key_rotation.active_api_key.id}:${module.schema_registry_cluster_api_key_rotation.active_api_key.secret}",
+    secret_string = jsonencode({"schema.registry.basic.auth.credentials.source": "USER_INFO",
+                                "schema.registry.basic.auth.user.info": "${module.schema_registry_cluster_api_key_rotation.active_api_key.id}:${module.schema_registry_cluster_api_key_rotation.active_api_key.secret}",
                                 "schema.registry.url": "${data.confluent_schema_registry_cluster.env.rest_endpoint}"})
 }
 
@@ -16,9 +16,9 @@ resource "aws_secretsmanager_secret" "schema_registry_cluster_api_key_python_cli
 }
 resource "aws_secretsmanager_secret_version" "schema_registry_cluster_api_key_python_client" {
     secret_id     = aws_secretsmanager_secret.schema_registry_cluster_api_key_python_client.id
-    secret_string = jsonencode({"basic.auth.credentials.source": "USER_INFO",
-                                "basic.auth.user.info": "${module.schema_registry_cluster_api_key_rotation.active_api_key.id}:${module.schema_registry_cluster_api_key_rotation.active_api_key.secret}",
-                                "url": "${data.confluent_schema_registry_cluster.env.rest_endpoint}"})
+    secret_string = jsonencode({"schema.registry.basic.auth.credentials.source": "USER_INFO",
+                                "schema.registry.basic.auth.user.info": "${module.schema_registry_cluster_api_key_rotation.active_api_key.id}:${module.schema_registry_cluster_api_key_rotation.active_api_key.secret}",
+                                "schema.registry.url": "${data.confluent_schema_registry_cluster.env.rest_endpoint}"})
 }
 
 # Create the Kafka Cluster Secrets: API Key Pair, JAAS (Java Authentication and Authorization) representation

@@ -121,7 +121,7 @@ public class AvroDataGeneratorApp {
         final String schemaRegistryUrl = producerProperties.getProperty("schema.registry.url");
         Map<String, String> registryConfigs = new HashMap<String, String>();
         registryConfigs.put("schema.registry.url", schemaRegistryUrl);
-        registryConfigs.put("basic.auth.credentials.source", producerProperties.getProperty("basic.auth.credentials.source"));
+        registryConfigs.put("schema.registry.basic.auth.credentials.source", producerProperties.getProperty("schema.registry.basic.auth.credentials.source"));
         registryConfigs.put("schema.registry.basic.auth.user.info", producerProperties.getProperty("schema.registry.basic.auth.user.info"));
 
         // --- Create a data generator source.
