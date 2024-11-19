@@ -8,7 +8,6 @@
 package kickstarter;
 
 import org.apache.flink.formats.avro.registry.confluent.ConfluentRegistryAvroSerializationSchema;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -29,7 +28,6 @@ import org.apache.iceberg.catalog.*;
 import org.apache.iceberg.flink.*;
 import org.apache.iceberg.flink.sink.FlinkSink;
 import org.apache.hadoop.conf.Configuration;
-import java.math.BigDecimal;
 import java.util.*;
 import org.slf4j.*;
 
@@ -97,7 +95,7 @@ public class AvroDataGeneratorApp {
 		 */
         DataStream<Properties> dataStreamProducerProperties = 
 			env.fromData(new Properties())
-			   .map(new ConfluentClientConfigurationLookup(false, serviceAccountUser))
+			   .map(new ConfluentClientConfigurationMapFunction(false, serviceAccountUser))
 			   .name("kafka_producer_properties");
 		Properties producerProperties = new Properties();
 
@@ -119,37 +117,42 @@ public class AvroDataGeneratorApp {
             System.exit(1);
 		}
 
+        // --- Retrieve the schema registry URL from the producer properties.
+        final String schemaRegistryUrl = producerProperties.getProperty("schema.registry.url");
+        Map<String, String> registryConfigs = new HashMap<String, String>();
+        registryConfigs.put("schema.registry.url", schemaRegistryUrl);
+        registryConfigs.put("basic.auth.credentials.source", producerProperties.getProperty("basic.auth.credentials.source"));
+        registryConfigs.put("schema.registry.basic.auth.user.info", producerProperties.getProperty("basic.auth.user.info"));
+
         // --- Create a data generator source.
-        DataGeneratorSource<GenericRecord> skyOneSource =
+        DataGeneratorSource<AirlineAvroData> skyOneSource =
             new DataGeneratorSource<>(
-                index -> DataGenerator.generateAirlineFlightData("SKY1").toGenericRecord(),
+                index -> DataGenerator.generateAirlineAvroData("SKY1"),
                 Long.MAX_VALUE,
                 RateLimiterStrategy.perSecond(1),
-                Types.GENERIC(GenericRecord.class)
+                Types.POJO(AirlineAvroData.class)
             );
 
-        // --- Sets up a Flink POJO source to consume data.
-        DataStream<GenericRecord> skyOneStream = 
+        // --- Sets up a Flink Avro Generic Record source to consume data.
+        DataStream<AirlineAvroData> skyOneStream = 
             env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
         /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone_avro` with the
          * specified serializer.
          */
-        KafkaRecordSerializationSchema<GenericRecord> skyOneSerializer = 
-            KafkaRecordSerializationSchema.<GenericRecord>builder()
+        KafkaRecordSerializationSchema<AirlineAvroData> skyOneSerializer = 
+            KafkaRecordSerializationSchema.<AirlineAvroData>builder()
                 .setTopic("airline.skyone_avro")
-                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(AirlineData.SUBJECT_AIRLINE_DATA, 
-                                                                                                 AirlineData.buildSchema().rawSchema(), 
-                                                                                                 producerProperties.getProperty("schema.registry.url")))
+                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forSpecific(AirlineAvroData.class, AirlineAvroData.SUBJECT, schemaRegistryUrl, registryConfigs))
                 .build();
 
         /*
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG).
          */
-        KafkaSink<GenericRecord> skyOneSink = 
-            KafkaSink.<GenericRecord>builder()
+        KafkaSink<AirlineAvroData> skyOneSink = 
+            KafkaSink.<AirlineAvroData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(skyOneSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
@@ -161,36 +164,34 @@ public class AvroDataGeneratorApp {
          */
         skyOneStream.sinkTo(skyOneSink).name("skyone_sink");
 
-        // --- Sets up a Flink POJO source to consume data.
-        DataGeneratorSource<GenericRecord> sunsetSource =
+        // --- Sets up a Flink Avro Generic Record source to consume data.
+        DataGeneratorSource<AirlineAvroData> sunsetSource =
             new DataGeneratorSource<>(
-                index -> DataGenerator.generateAirlineFlightData("SUN").toGenericRecord(),
+                index -> DataGenerator.generateAirlineAvroData("SUN"),
                 Long.MAX_VALUE,
                 RateLimiterStrategy.perSecond(1),
-                Types.GENERIC(GenericRecord.class)
+                Types.POJO(AirlineAvroData.class)
             );
 
-        DataStream<GenericRecord> sunsetStream = 
+        DataStream<AirlineAvroData> sunsetStream = 
             env.fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
         /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset_avro` with the
          * specified serializer.
          */
-        KafkaRecordSerializationSchema<GenericRecord> sunsetSerializer = 
-            KafkaRecordSerializationSchema.<GenericRecord>builder()
+        KafkaRecordSerializationSchema<AirlineAvroData> sunsetSerializer = 
+            KafkaRecordSerializationSchema.<AirlineAvroData>builder()
                 .setTopic("airline.sunset_avro")
-                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forGeneric(AirlineData.SUBJECT_AIRLINE_DATA, 
-                                                                                                 AirlineData.buildSchema().rawSchema(), 
-                                                                                                 producerProperties.getProperty("schema.registry.url")))
+                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forSpecific(AirlineAvroData.class, AirlineAvroData.SUBJECT, schemaRegistryUrl, registryConfigs))
                 .build();
 
         /*
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG).
          */
-        KafkaSink<GenericRecord> sunsetSink = 
-            KafkaSink.<GenericRecord>builder()
+        KafkaSink<AirlineAvroData> sunsetSink = 
+            KafkaSink.<AirlineAvroData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(sunsetSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
@@ -295,23 +296,23 @@ public class AvroDataGeneratorApp {
      * @param tableName The name of the table. 
      * @param airlineDataStream The input data stream.
      */
-    private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<GenericRecord> airlineDataStream) {
+    private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineAvroData> airlineDataStream) {
         // --- Convert DataStream<AirlineData> to DataStream<RowData>
-        DataStream<RowData> skyOneRowData = airlineDataStream.map(new MapFunction<GenericRecord, RowData>() {
+        DataStream<RowData> skyOneRowData = airlineDataStream.map(new MapFunction<AirlineAvroData, RowData>() {
             @Override
-            public RowData map(GenericRecord genericRecord) throws Exception {
+            public RowData map(AirlineAvroData airlineData) throws Exception {
                 GenericRowData rowData = new GenericRowData(RowKind.INSERT, fieldCount);
-                rowData.setField(0, StringData.fromString(genericRecord.get(AirlineData.FIELD_EMAIL_ADDRESS).toString()));
-                rowData.setField(1, StringData.fromString(genericRecord.get(AirlineData.FIELD_DEPARTURE_TIME).toString()));
-                rowData.setField(2, StringData.fromString(genericRecord.get(AirlineData.FIELD_DEPARTURE_AIRPORT_CODE).toString()));
-                rowData.setField(3, StringData.fromString(genericRecord.get(AirlineData.FIELD_ARRIVAL_TIME).toString()));
-                rowData.setField(4, StringData.fromString(genericRecord.get(AirlineData.FIELD_ARRIVAL_AIRPORT_CODE).toString()));
-                rowData.setField(5, genericRecord.get(AirlineData.FIELD_FLIGHT_DURATION));
-                rowData.setField(6, StringData.fromString(genericRecord.get(AirlineData.FIELD_FLIGHT_NUMBER).toString()));
-                rowData.setField(7, StringData.fromString(genericRecord.get(AirlineData.FIELD_CONFIRMATION_CODE).toString()));
-                rowData.setField(8, DecimalData.fromBigDecimal((BigDecimal) genericRecord.get(AirlineData.FIELD_TICKET_PRICE), 10, 2));
-                rowData.setField(9, StringData.fromString(genericRecord.get(AirlineData.FIELD_AIRCRAFT).toString()));
-                rowData.setField(10, StringData.fromString(genericRecord.get(AirlineData.FIELD_BOOKING_AGENCY_EMAIL).toString()));
+                rowData.setField(0, StringData.fromString(airlineData.getEmailAddress()));
+                rowData.setField(1, StringData.fromString(airlineData.getDepartureTime()));
+                rowData.setField(2, StringData.fromString(airlineData.getDepartureAirportCode()));
+                rowData.setField(3, StringData.fromString(airlineData.getArrivalTime()));
+                rowData.setField(4, StringData.fromString(airlineData.getArrivalAirportCode()));
+                rowData.setField(5, airlineData.getFlightDuration());
+                rowData.setField(6, StringData.fromString(airlineData.getFlightNumber()));
+                rowData.setField(7, StringData.fromString(airlineData.getConfirmationCode()));
+                rowData.setField(8, DecimalData.fromBigDecimal(airlineData.getTicketPrice(), 10, 2));
+                rowData.setField(9, StringData.fromString(airlineData.getAircraft()));
+                rowData.setField(10, StringData.fromString(airlineData.getBookingAgencyEmail()));
                 return rowData;
             }
         });

@@ -7,64 +7,48 @@
  */
 package kickstarter.model;
 
-import com.fasterxml.jackson.annotation.*;
-import java.io.Serializable;
+import org.apache.avro.specific.*;
+import org.apache.avro.io.*;
+import org.apache.avro.*;
+import org.apache.avro.generic.*;
+import io.confluent.kafka.schemaregistry.avro.*;
 import java.math.*;
 import java.util.*;
+import org.apache.avro.LogicalTypes;
+import org.apache.avro.Schema;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import org.apache.avro.generic.GenericFixed;
+
+import kickstarter.helper.*;
 
 
-public class AirlineData implements Serializable {
-    // --- The field names of the class object
-    public static final String FIELD_EMAIL_ADDRESS = "email_address";
-    public static final String FIELD_DEPARTURE_TIME = "departure_time";
-    public static final String FIELD_DEPARTURE_AIRPORT_CODE = "departure_airport_code";
-	public static final String FIELD_ARRIVAL_TIME = "arrival_time";
-    public static final String FIELD_ARRIVAL_AIRPORT_CODE = "arrival_airport_code";
-    public static final String FIELD_FLIGHT_DURATION = "flight_duration";
-    public static final String FIELD_FLIGHT_NUMBER = "flight_number";
-    public static final String FIELD_CONFIRMATION_CODE = "confirmation_code";
-    public static final String FIELD_TICKET_PRICE = "ticket_price";
-    public static final String FIELD_AIRCRAFT = "aircraft";
-    public static final String FIELD_BOOKING_AGENCY_EMAIL = "booking_agency_email";
+@SuppressWarnings("all")
+public class AirlineAvroData extends SpecificRecordBase implements SpecificRecord {
+    public static final Schema SCHEMA$ = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AirlineData\",\"namespace\":\"com.thej3.apache_flink_kickstater.model\",\"fields\":[{\"name\":\"email_address\",\"type\":\"string\"},{\"name\":\"departure_time\",\"type\":\"string\"},{\"name\":\"departure_airport_code\",\"type\":\"string\"},{\"name\":\"arrival_time\",\"type\":\"int\"},{\"name\":\"arrival_airport_code\",\"type\":\"string\"},{\"name\":\"flight_duration\",\"type\":\"long\"},{\"name\":\"flight_number\",\"type\":\"string\"},{\"name\":\"confirmation_code\",\"type\":\"string\"},{\"name\":\"ticket_price\",\"type\":{\"type\":\"bytes\",\"logicalType\":\"decimal\",\"precision\":10,\"scale\":2}},{\"name\":\"aircraft\",\"type\":\"string\"},{\"name\":\"booking_agency_email\",\"type\":\"string\"}]}");
 
-    @JsonProperty(FIELD_EMAIL_ADDRESS)
+    // --- The subject name of the class object
+    public static final String NAMESPACE = "com.thej3.apache_flink_kickstater.model";
+    public static final String SUBJECT = NAMESPACE + ".AirlineData";
+
+
     private String email_address;
-
-    @JsonProperty(FIELD_DEPARTURE_TIME)
     private String departure_time;
-
-    @JsonProperty(FIELD_DEPARTURE_AIRPORT_CODE)
     private String departure_airport_code;
-
-    @JsonProperty(FIELD_ARRIVAL_TIME)
     private String arrival_time;
-
-    @JsonProperty(FIELD_ARRIVAL_AIRPORT_CODE)
     private String arrival_airport_code;
-
-    @JsonProperty(FIELD_FLIGHT_DURATION)
     private long flight_duration;
-
-    @JsonProperty(FIELD_FLIGHT_NUMBER)
     private String flight_number;
-
-    @JsonProperty(FIELD_CONFIRMATION_CODE)
     private String confirmation_code;
-
-    @JsonProperty(FIELD_TICKET_PRICE)
     private BigDecimal ticket_price;
-
-    @JsonProperty(FIELD_AIRCRAFT)
     private String aircraft;
-
-    @JsonProperty(FIELD_BOOKING_AGENCY_EMAIL)
     private String booking_agency_email;
 
 
     /**
      * Default constructor.
      */
-	public AirlineData() {}
+	public AirlineAvroData() {}
 
 
     public String getEmailAddress() {
@@ -159,7 +143,7 @@ public class AirlineData implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AirlineData that = (AirlineData) o;
+        AirlineAvroData that = (AirlineAvroData) o;
         return Objects.equals(getEmailAddress(), that.email_address) && 
                                 Objects.equals(getDepartureTime(), that.departure_time) && 
                                 Objects.equals(getDepartureAirportCode(), that.departure_airport_code) && 
@@ -217,5 +201,82 @@ public class AirlineData implements Serializable {
         flightData.setAirline(airline);
 
         return flightData;
+    }
+
+    @Override
+    public Schema getSchema() {
+        return SCHEMA$;
+    }
+
+    @Override
+    public Object get(int field$) {
+        switch (field$) {
+            case 0: 
+                return getEmailAddress();
+            case 1: 
+                return getDepartureTime();
+            case 2: 
+                return getDepartureAirportCode();
+            case 3: 
+                return getArrivalTime();
+            case 4: 
+                return getArrivalAirportCode();
+            case 5: 
+                return getFlightDuration();
+            case 6: 
+                return getFlightNumber();
+            case 7: 
+                return getConfirmationCode();
+            case 8: 
+                return ByteBuffer.wrap(getTicketPrice().toString().getBytes(StandardCharsets.UTF_8));
+            case 9: 
+                return getAircraft();
+            case 10: 
+                return getBookingAgencyEmail();
+            default: 
+                throw new IndexOutOfBoundsException("Invalid field index: " + field$);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void put(int field$, Object value$) {
+        switch (field$) {
+            case 0: 
+                setEmailAddress((String) value$);
+                break;
+            case 1: 
+                setDepartureTime(value$.toString());
+                break;
+            case 2: 
+                setDepartureAirportCode((String) value$);
+                break;
+            case 3: 
+                setArrivalTime((String) value$);
+                break;
+            case 4: 
+                setArrivalAirportCode(value$.toString());
+                break;
+            case 5: 
+                setFlightDuration((long) value$);
+                break;
+            case 6: 
+                setFlightNumber((String) value$);
+                break;
+            case 7: 
+                setConfirmationCode(value$.toString());
+                break;
+            case 8:
+                setTicketPrice(new BigDecimal(new String(ByteBuffer.wrap(value$.toString().getBytes(StandardCharsets.UTF_8)).array(), StandardCharsets.UTF_8)));
+                break;
+            case 9: 
+                setAircraft(value$.toString());
+                break;
+            case 10: 
+                setBookingAgencyEmail((String) value$); 
+                break;
+            default: 
+                throw new IndexOutOfBoundsException("Invalid field index: " + field$);
+        }
     }
 }

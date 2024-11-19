@@ -56,7 +56,7 @@ Finally, to launch one of the **pre-complied** Flink applications, choose your a
 Flink App|Flink Run Command
 -|-
 **`DataGeneratorApp`**|`flink run --class kickstarter.DataGeneratorApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER> --aws-region <AWS_REGION_NAME>`
-**`AvroDataGeneratorApp`**|**WARNING:  STILL IN DEVELOPMENT [#463](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/463)** `flink run --class kickstarter.AvroDataGeneratorApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER> --aws-region <AWS_REGION_NAME>`
+**`AvroDataGeneratorApp`**|**WARNING:  STILL IN DEVELOPMENT [#470](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/470)** `flink run --class kickstarter.AvroDataGeneratorApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER> --aws-region <AWS_REGION_NAME>`
 **`FlightImporterApp`**|`flink run --class kickstarter.FlightImporterApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
 **`FlyerStatsApp`**|`flink run --class kickstarter.FlyerStatsApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
 
