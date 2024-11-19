@@ -25,12 +25,8 @@ import kickstarter.helper.*;
 
 @SuppressWarnings("all")
 public class AirlineAvroData extends SpecificRecordBase implements SpecificRecord {
-    public static final Schema SCHEMA$ = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AirlineData\",\"namespace\":\"com.thej3.apache_flink_kickstater.model\",\"fields\":[{\"name\":\"email_address\",\"type\":\"string\"},{\"name\":\"departure_time\",\"type\":\"string\"},{\"name\":\"departure_airport_code\",\"type\":\"string\"},{\"name\":\"arrival_time\",\"type\":\"int\"},{\"name\":\"arrival_airport_code\",\"type\":\"string\"},{\"name\":\"flight_duration\",\"type\":\"long\"},{\"name\":\"flight_number\",\"type\":\"string\"},{\"name\":\"confirmation_code\",\"type\":\"string\"},{\"name\":\"ticket_price\",\"type\":{\"type\":\"bytes\",\"logicalType\":\"decimal\",\"precision\":10,\"scale\":2}},{\"name\":\"aircraft\",\"type\":\"string\"},{\"name\":\"booking_agency_email\",\"type\":\"string\"}]}");
-
-    // --- The subject name of the class object
-    public static final String NAMESPACE = "com.thej3.apache_flink_kickstater.model";
-    public static final String SUBJECT = NAMESPACE + ".AirlineData";
-
+    public static final Schema SCHEMA = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AirlineData\",\"namespace\":\"com.thej3.apache_flink_kickstater.model\",\"fields\":[{\"name\":\"email_address\",\"type\":\"string\"},{\"name\":\"departure_time\",\"type\":\"string\"},{\"name\":\"departure_airport_code\",\"type\":\"string\"},{\"name\":\"arrival_time\",\"type\":\"int\"},{\"name\":\"arrival_airport_code\",\"type\":\"string\"},{\"name\":\"flight_duration\",\"type\":\"long\"},{\"name\":\"flight_number\",\"type\":\"string\"},{\"name\":\"confirmation_code\",\"type\":\"string\"},{\"name\":\"ticket_price\",\"type\":{\"type\":\"bytes\",\"logicalType\":\"decimal\",\"precision\":10,\"scale\":2}},{\"name\":\"aircraft\",\"type\":\"string\"},{\"name\":\"booking_agency_email\",\"type\":\"string\"}]}");
+    public static final String SUBJECT = "com.thej3.apache_flink_kickstater.model.AirlineData";
 
     private String email_address;
     private String departure_time;
@@ -139,25 +135,41 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
         this.booking_agency_email = bookingAgencyEmail;
     }
 
+
     @Override
+    /**
+     * This method is used to compare two objects of the same type.
+     * 
+     * @param o The object to compare.
+     * 
+     * @return boolean True if the objects are equal, false otherwise.
+     */
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) 
+            return true;
+        if (o == null || getClass() != o.getClass()) 
+            return false;
         AirlineAvroData that = (AirlineAvroData) o;
+
         return Objects.equals(getEmailAddress(), that.email_address) && 
-                                Objects.equals(getDepartureTime(), that.departure_time) && 
-                                Objects.equals(getDepartureAirportCode(), that.departure_airport_code) && 
-                                Objects.equals(getArrivalTime(), that.arrival_time) && 
-                                Objects.equals(getArrivalAirportCode(), that.arrival_airport_code) && 
-                                Objects.equals(getFlightDuration(), that.flight_duration) && 
-                                Objects.equals(getFlightNumber(), that.flight_number) && 
-                                Objects.equals(getConfirmationCode(), that.confirmation_code) && 
-                                Objects.equals(getTicketPrice(), that.ticket_price) && 
-                                Objects.equals(getAircraft(), that.aircraft) &&
-                                Objects.equals(getBookingAgencyEmail(), that.booking_agency_email);
+                Objects.equals(getDepartureTime(), that.departure_time) && 
+                Objects.equals(getDepartureAirportCode(), that.departure_airport_code) && 
+                Objects.equals(getArrivalTime(), that.arrival_time) && 
+                Objects.equals(getArrivalAirportCode(), that.arrival_airport_code) && 
+                Objects.equals(getFlightDuration(), that.flight_duration) && 
+                Objects.equals(getFlightNumber(), that.flight_number) && 
+                Objects.equals(getConfirmationCode(), that.confirmation_code) && 
+                Objects.equals(getTicketPrice(), that.ticket_price) && 
+                Objects.equals(getAircraft(), that.aircraft) &&
+                Objects.equals(getBookingAgencyEmail(), that.booking_agency_email);
     }
 
     @Override
+    /**
+     * This method is used to generate a hash code for the object.
+     * 
+     * @return int The hash code for the object.
+     */
     public int hashCode() {
         return Objects.hash(getEmailAddress(),
                             getDepartureTime(), 
@@ -173,6 +185,11 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
     }
 
     @Override
+    /**
+     * This method is used by the serializer to get the string representation of the record.
+     * 
+     * @return The string representation of the record.
+     */
     public String toString() {
         return "AirlineData{" +
             "email_address='" + getEmailAddress() + '\'' +
@@ -188,29 +205,27 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
             ", booking_agency_email='" + getBookingAgencyEmail() + '\'' +
             '}';
     }
-    public FlightData toFlightData(final String airline) {
-        FlightData flightData = new FlightData();
-
-        flightData.setEmailAddress(getEmailAddress());
-        flightData.setDepartureTime(getDepartureTime());
-        flightData.setDepartureAirportCode(getDepartureAirportCode());
-        flightData.setArrivalTime(getArrivalTime());
-        flightData.setArrivalAirportCode(getArrivalAirportCode());
-        flightData.setFlightNumber(getFlightNumber());
-        flightData.setConfirmationCode(getConfirmationCode());
-        flightData.setAirline(airline);
-
-        return flightData;
-    }
 
     @Override
+    /**
+     * This method is used by the serializer to get the schema.
+     * 
+     * @return The schema of the record.
+     */
     public Schema getSchema() {
-        return SCHEMA$;
+        return SCHEMA;
     }
 
     @Override
-    public Object get(int field$) {
-        switch (field$) {
+    /**
+     * This method is used by the serializer to get the values of the fields.
+     * 
+     * @param fieldIndex The index of the field to get.
+     * 
+     * @return The value of the field.
+     */
+    public Object get(int fieldIndex) {
+        switch (fieldIndex) {
             case 0: 
                 return getEmailAddress();
             case 1: 
@@ -234,14 +249,19 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
             case 10: 
                 return getBookingAgencyEmail();
             default: 
-                throw new IndexOutOfBoundsException("Invalid field index: " + field$);
+                throw new IndexOutOfBoundsException("Invalid field index: " + fieldIndex);
         }
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void put(int field$, Object value$) {
-        switch (field$) {
+    /**
+     * This method is used by the deserializer to set the values of the fields.
+     * 
+     * @param fieldIndex The index of the field to set.
+     */
+    public void put(int fieldIndex, Object value$) {
+        switch (fieldIndex) {
             case 0: 
                 setEmailAddress((String) value$);
                 break;
@@ -276,7 +296,7 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
                 setBookingAgencyEmail((String) value$); 
                 break;
             default: 
-                throw new IndexOutOfBoundsException("Invalid field index: " + field$);
+                throw new IndexOutOfBoundsException("Invalid field index: " + fieldIndex);
         }
     }
 }
