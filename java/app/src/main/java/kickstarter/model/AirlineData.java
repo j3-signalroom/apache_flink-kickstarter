@@ -8,17 +8,27 @@
 package kickstarter.model;
 
 import com.fasterxml.jackson.annotation.*;
+import org.apache.avro.specific.*;
+import org.apache.avro.io.*;
 import org.apache.avro.*;
 import org.apache.avro.generic.*;
 import io.confluent.kafka.schemaregistry.avro.*;
-import java.io.Serializable;
 import java.math.*;
 import java.util.*;
+import org.apache.avro.LogicalTypes;
+import org.apache.avro.Schema;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+
+import org.apache.avro.generic.GenericFixed;
 
 import kickstarter.helper.*;
 
 
-public class AirlineData implements Serializable {
+@SuppressWarnings("all")
+public class AirlineData extends SpecificRecordBase implements SpecificRecord {
+    public static final Schema SCHEMA$ = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AirlineData\",\"namespace\":\"com.thej3.apache_flink_kickstater.model\",\"fields\":[{\"name\":\"email_address\",\"type\":\"string\"},{\"name\":\"departure_time\",\"type\":\"string\"},{\"name\":\"departure_airport_code\",\"type\":\"string\"},{\"name\":\"arrival_time\",\"type\":\"int\"},{\"name\":\"arrival_airport_code\",\"type\":\"string\"},{\"name\":\"flight_duration\",\"type\":\"long\"},{\"name\":\"flight_number\",\"type\":\"string\"},{\"name\":\"confirmation_code\",\"type\":\"string\"},{\"name\":\"ticket_price\",\"type\":{\"type\":\"bytes\",\"logicalType\":\"decimal\",\"precision\":10,\"scale\":2}},{\"name\":\"aircraft\",\"type\":\"string\"},{\"name\":\"booking_agency_email\",\"type\":\"string\"}]}");
+
     // --- The field names of the class object
     public static final String FIELD_EMAIL_ADDRESS = "email_address";
     public static final String FIELD_DEPARTURE_TIME = "departure_time";
@@ -33,10 +43,11 @@ public class AirlineData implements Serializable {
     public static final String FIELD_BOOKING_AGENCY_EMAIL = "booking_agency_email";
 
     // --- The subject name of the class object
-    public static final String SUBJECT_AIRLINE_DATA = "AirlineData";
-    public static final String NAMESPACE_THEJ3_MODEL = "com.thej3.apache_flink_kickstater.model";
+    public static final String NAMESPACE = "com.thej3.apache_flink_kickstater.model";
+    public static final String SUBJECT = NAMESPACE + ".AirlineData";
 
-    @JsonProperty(FIELD_EMAIL_ADDRESS)
+
+     @JsonProperty(FIELD_EMAIL_ADDRESS)
     private String email_address;
 
     @JsonProperty(FIELD_DEPARTURE_TIME)
@@ -228,87 +239,56 @@ public class AirlineData implements Serializable {
         return flightData;
     }
 
-        /**
-     * The method converts the instantiated class object into a generic record.
-     * 
-     * @return the generic record of the instantiated class object.
-     * @throws AvroSchemaFieldNotExistException - The exception is thrown when the
-     * schema field does not exist.
-     */
-    public GenericRecord toGenericRecord() throws AvroSchemaFieldNotExistException {
-        Schema schema = buildSchema().rawSchema();
-        GenericRecord genericRecord = new GenericData.Record(schema);
-        AvroHelper.setRecordField(genericRecord, schema, FIELD_EMAIL_ADDRESS, getEmailAddress());
-        AvroHelper.setRecordField(genericRecord, schema, FIELD_DEPARTURE_TIME, getDepartureTime());
-        AvroHelper.setRecordField(genericRecord, schema, FIELD_DEPARTURE_AIRPORT_CODE, getDepartureAirportCode());
-        AvroHelper.setRecordField(genericRecord, schema, FIELD_ARRIVAL_TIME, getArrivalTime());
-        AvroHelper.setRecordField(genericRecord, schema, FIELD_ARRIVAL_AIRPORT_CODE, getArrivalAirportCode());
-        AvroHelper.setRecordField(genericRecord, schema, FIELD_FLIGHT_DURATION, getFlightDuration());
-        AvroHelper.setRecordField(genericRecord, schema, FIELD_FLIGHT_NUMBER, getFlightNumber());
-        AvroHelper.setRecordField(genericRecord, schema, FIELD_CONFIRMATION_CODE, getConfirmationCode());
-        AvroHelper.setRecordField(genericRecord, schema, FIELD_TICKET_PRICE, getTicketPrice());
-        AvroHelper.setRecordField(genericRecord, schema, FIELD_AIRCRAFT, getAircraft());
-        AvroHelper.setRecordField(genericRecord, schema, FIELD_BOOKING_AGENCY_EMAIL, getBookingAgencyEmail());
-        return genericRecord;
+    @Override
+    public Schema getSchema() {
+        return SCHEMA$;
     }
 
-    /**
-     * The method creates the class object record schema.
-     * 
-     * @return the class objects converts the underlying org.apache.avro.Schema 
-     * to an io.confluent.kafka.schemaregistry.avro.AvroSchema because it is tailored 
-     * to the needs of schema management within the ecosystem of Kafka and the 
-     * Confluent Schema Registry.  Moreover, the capabilities of 
-     * io.confluent.kafka.schemaregistry.avro.AvroSchema extends the ability to support
-     * the Confluent Schema Registry for registering, retrieving, and managing schemas.
-     * These include compatibility checks, schema versioning, and other registry-specific
-     * operations.
-     */
-    public static AvroSchema buildSchema() {
-        // --- Returns the defined schema
-        return 
-            new AvroSchema(SchemaBuilder
-                .record(SUBJECT_AIRLINE_DATA).namespace(NAMESPACE_THEJ3_MODEL)
-                    .doc("")
-                    .fields()
-                        .name(FIELD_EMAIL_ADDRESS)
-                            .doc("")
-                            .type().stringType().noDefault()
-                        .name(FIELD_DEPARTURE_TIME)
-                            .doc("")
-                            .type().stringType().noDefault()
-                        .name(FIELD_DEPARTURE_AIRPORT_CODE)
-                            .doc("")
-                            .type().stringType().noDefault()
-                        .name(FIELD_ARRIVAL_TIME)
-                            .doc("")
-                            .type().intType().noDefault()
-                        .name(FIELD_ARRIVAL_AIRPORT_CODE)
-                            .doc("")
-                            .type().stringType().noDefault()
-                        .name(FIELD_FLIGHT_DURATION)
-                            .doc("")
-                            .type().longType().noDefault()
-                        .name(FIELD_FLIGHT_NUMBER)
-                            .doc("")
-                            .type().stringType().noDefault()
-                        .name(FIELD_CONFIRMATION_CODE)
-                            .doc("")
-                            .type().stringType().noDefault()
-                        .name(FIELD_TICKET_PRICE)
-                            .doc("")
-                            /*
-                             * Since Avro does not have a built-in decimal type, the logical type of decimal
-                             * is used to represent the decimal type. The logical type of decimal is represented
-                             * by bytes.
-                             */
-                            .type(LogicalTypes.decimal(10, 2).addToSchema(Schema.create(Schema.Type.BYTES))).noDefault()
-                        .name(FIELD_AIRCRAFT)
-                            .doc("")
-                            .type().stringType().noDefault()
-                        .name(FIELD_BOOKING_AGENCY_EMAIL)
-                            .doc("")
-                            .type().stringType().noDefault()
-                .endRecord());
+    @Override
+    public Object get(int field$) {
+        switch (field$) {
+            case 0: return email_address;
+            case 1: return departure_time;
+            case 2: return departure_airport_code;
+            case 3: return arrival_time;
+            case 4: return arrival_airport_code;
+            case 5: return flight_duration;
+            case 6: return flight_number;
+            case 7: return confirmation_code;
+            case 8: 
+                return ByteBuffer.wrap(getTicketPrice().toString().getBytes(StandardCharsets.UTF_8));
+            case 9: 
+                return getAircraft();
+            case 10: 
+                return getBookingAgencyEmail();
+            default: 
+                throw new IndexOutOfBoundsException("Invalid field index: " + field$);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void put(int field$, Object value$) {
+        switch (field$) {
+            case 0: email_address = (String) value$; break;
+            case 1: departure_time = value$.toString(); break;
+            case 2: departure_airport_code = (String) value$; break;
+            case 3: arrival_time = (String) value$; break;
+            case 4: arrival_airport_code = value$.toString(); break;
+            case 5: flight_duration = (long) value$; break;
+            case 6: flight_number = (String) value$; break;
+            case 7: confirmation_code = value$.toString(); break;
+            case 8:
+                setTicketPrice(new BigDecimal(new String(ByteBuffer.wrap(value$.toString().getBytes(StandardCharsets.UTF_8)).array(), StandardCharsets.UTF_8)));
+                break;
+            case 9: 
+                setAircraft(value$.toString());
+                break;
+            case 10: 
+                setBookingAgencyEmail((String) value$); 
+                break;
+            default: 
+                throw new IndexOutOfBoundsException("Invalid field index: " + field$);
+        }
     }
 }
