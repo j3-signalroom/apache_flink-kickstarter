@@ -14,8 +14,6 @@ import org.apache.avro.generic.*;
 import io.confluent.kafka.schemaregistry.avro.*;
 import java.math.*;
 import java.util.*;
-import org.apache.avro.LogicalTypes;
-import org.apache.avro.Schema;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import org.apache.avro.generic.GenericFixed;
@@ -259,41 +257,52 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
      * This method is used by the deserializer to set the values of the fields.
      * 
      * @param fieldIndex The index of the field to set.
+     * @param fieldValue The value to set the field to.
      */
-    public void put(int fieldIndex, Object value$) {
+    public void put(int fieldIndex, Object fieldValue) {
         switch (fieldIndex) {
             case 0: 
-                setEmailAddress((String) value$);
+                setEmailAddress((String) fieldValue);
                 break;
             case 1: 
-                setDepartureTime(value$.toString());
+                setDepartureTime(fieldValue.toString());
                 break;
             case 2: 
-                setDepartureAirportCode((String) value$);
+                setDepartureAirportCode((String) fieldValue);
                 break;
             case 3: 
-                setArrivalTime((String) value$);
+                setArrivalTime((String) fieldValue);
                 break;
             case 4: 
-                setArrivalAirportCode(value$.toString());
+                setArrivalAirportCode(fieldValue.toString());
                 break;
             case 5: 
-                setFlightDuration((long) value$);
+                setFlightDuration((long) fieldValue);
                 break;
             case 6: 
-                setFlightNumber((String) value$);
+                setFlightNumber((String) fieldValue);
                 break;
             case 7: 
-                setConfirmationCode(value$.toString());
+                setConfirmationCode(fieldValue.toString());
                 break;
             case 8:
-                setTicketPrice(new BigDecimal(new String(ByteBuffer.wrap(value$.toString().getBytes(StandardCharsets.UTF_8)).array(), StandardCharsets.UTF_8)));
+                if (fieldValue instanceof ByteBuffer) {
+                    ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
+                    byteBuffer.rewind();
+                    byte[] bytes = new byte[byteBuffer.remaining()];
+                    byteBuffer.get(bytes);
+                    setTicketPrice(new BigDecimal(new String(bytes, StandardCharsets.UTF_8)));
+                } else if (fieldValue instanceof BigDecimal) {
+                    setTicketPrice((BigDecimal) fieldValue);
+                } else {
+                    throw new AvroRuntimeException("Unexpected type for ticket_price: " + fieldValue.getClass().getName());
+                }
                 break;
             case 9: 
-                setAircraft(value$.toString());
+                setAircraft(fieldValue.toString());
                 break;
             case 10: 
-                setBookingAgencyEmail((String) value$); 
+                setBookingAgencyEmail((String) fieldValue); 
                 break;
             default: 
                 throw new IndexOutOfBoundsException("Invalid field index: " + fieldIndex);
