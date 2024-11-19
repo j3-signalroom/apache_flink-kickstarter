@@ -117,12 +117,16 @@ public class AvroDataGeneratorApp {
             System.exit(1);
 		}
 
-        // --- Retrieve the schema registry URL from the producer properties.
-        final String schemaRegistryUrl = producerProperties.getProperty("schema.registry.url");
+        /*
+         * Retrieve the schema registry properties from the producer properties 
+         * and store them in a map.
+         */
         Map<String, String> registryConfigs = new HashMap<String, String>();
-        registryConfigs.put("schema.registry.url", schemaRegistryUrl);
-        registryConfigs.put("schema.registry.basic.auth.credentials.source", producerProperties.getProperty("schema.registry.basic.auth.credentials.source"));
-        registryConfigs.put("schema.registry.basic.auth.user.info", producerProperties.getProperty("schema.registry.basic.auth.user.info"));
+        for (String key : producerProperties.stringPropertyNames()) {
+            if (key.startsWith("schema.registry.")) {
+                registryConfigs.put(key, producerProperties.getProperty(key));
+            }
+        }
 
         // --- Create a data generator source.
         DataGeneratorSource<AirlineAvroData> skyOneSource =
@@ -144,7 +148,7 @@ public class AvroDataGeneratorApp {
         KafkaRecordSerializationSchema<AirlineAvroData> skyOneSerializer = 
             KafkaRecordSerializationSchema.<AirlineAvroData>builder()
                 .setTopic("airline.skyone_avro")
-                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forSpecific(AirlineAvroData.class, AirlineAvroData.SUBJECT, schemaRegistryUrl, registryConfigs))
+                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forSpecific(AirlineAvroData.class, AirlineAvroData.SUBJECT, producerProperties.getProperty("schema.registry.url"), registryConfigs))
                 .build();
 
         /*
@@ -183,7 +187,7 @@ public class AvroDataGeneratorApp {
         KafkaRecordSerializationSchema<AirlineAvroData> sunsetSerializer = 
             KafkaRecordSerializationSchema.<AirlineAvroData>builder()
                 .setTopic("airline.sunset_avro")
-                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forSpecific(AirlineAvroData.class, AirlineAvroData.SUBJECT, schemaRegistryUrl, registryConfigs))
+                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forSpecific(AirlineAvroData.class, AirlineAvroData.SUBJECT, producerProperties.getProperty("schema.registry.url"), registryConfigs))
                 .build();
 
         /*
