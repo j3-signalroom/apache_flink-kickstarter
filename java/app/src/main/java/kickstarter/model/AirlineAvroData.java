@@ -211,14 +211,22 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
     @Override
     public Object get(int field$) {
         switch (field$) {
-            case 0: return email_address;
-            case 1: return departure_time;
-            case 2: return departure_airport_code;
-            case 3: return arrival_time;
-            case 4: return arrival_airport_code;
-            case 5: return flight_duration;
-            case 6: return flight_number;
-            case 7: return confirmation_code;
+            case 0: 
+                return getEmailAddress();
+            case 1: 
+                return getDepartureTime();
+            case 2: 
+                return getDepartureAirportCode();
+            case 3: 
+                return getArrivalTime();
+            case 4: 
+                return getArrivalAirportCode();
+            case 5: 
+                return getFlightDuration();
+            case 6: 
+                return getFlightNumber();
+            case 7: 
+                return getConfirmationCode();
             case 8: 
                 return ByteBuffer.wrap(getTicketPrice().toString().getBytes(StandardCharsets.UTF_8));
             case 9: 
@@ -234,14 +242,30 @@ public class AirlineAvroData extends SpecificRecordBase implements SpecificRecor
     @SuppressWarnings("unchecked")
     public void put(int field$, Object value$) {
         switch (field$) {
-            case 0: email_address = (String) value$; break;
-            case 1: departure_time = value$.toString(); break;
-            case 2: departure_airport_code = (String) value$; break;
-            case 3: arrival_time = (String) value$; break;
-            case 4: arrival_airport_code = value$.toString(); break;
-            case 5: flight_duration = (long) value$; break;
-            case 6: flight_number = (String) value$; break;
-            case 7: confirmation_code = value$.toString(); break;
+            case 0: 
+                setEmailAddress((String) value$);
+                break;
+            case 1: 
+                setDepartureTime(value$.toString());
+                break;
+            case 2: 
+                setDepartureAirportCode((String) value$);
+                break;
+            case 3: 
+                setArrivalTime((String) value$);
+                break;
+            case 4: 
+                setArrivalAirportCode(value$.toString());
+                break;
+            case 5: 
+                setFlightDuration((long) value$);
+                break;
+            case 6: 
+                setFlightNumber((String) value$);
+                break;
+            case 7: 
+                setConfirmationCode(value$.toString());
+                break;
             case 8:
                 setTicketPrice(new BigDecimal(new String(ByteBuffer.wrap(value$.toString().getBytes(StandardCharsets.UTF_8)).array(), StandardCharsets.UTF_8)));
                 break;
