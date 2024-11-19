@@ -7,7 +7,6 @@
  */
 package kickstarter.model;
 
-import com.fasterxml.jackson.annotation.*;
 import org.apache.avro.specific.*;
 import org.apache.avro.io.*;
 import org.apache.avro.*;
@@ -19,7 +18,6 @@ import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-
 import org.apache.avro.generic.GenericFixed;
 
 import kickstarter.helper.*;
@@ -29,55 +27,21 @@ import kickstarter.helper.*;
 public class AirlineAvroData extends SpecificRecordBase implements SpecificRecord {
     public static final Schema SCHEMA$ = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AirlineData\",\"namespace\":\"com.thej3.apache_flink_kickstater.model\",\"fields\":[{\"name\":\"email_address\",\"type\":\"string\"},{\"name\":\"departure_time\",\"type\":\"string\"},{\"name\":\"departure_airport_code\",\"type\":\"string\"},{\"name\":\"arrival_time\",\"type\":\"int\"},{\"name\":\"arrival_airport_code\",\"type\":\"string\"},{\"name\":\"flight_duration\",\"type\":\"long\"},{\"name\":\"flight_number\",\"type\":\"string\"},{\"name\":\"confirmation_code\",\"type\":\"string\"},{\"name\":\"ticket_price\",\"type\":{\"type\":\"bytes\",\"logicalType\":\"decimal\",\"precision\":10,\"scale\":2}},{\"name\":\"aircraft\",\"type\":\"string\"},{\"name\":\"booking_agency_email\",\"type\":\"string\"}]}");
 
-    // --- The field names of the class object
-    public static final String FIELD_EMAIL_ADDRESS = "email_address";
-    public static final String FIELD_DEPARTURE_TIME = "departure_time";
-    public static final String FIELD_DEPARTURE_AIRPORT_CODE = "departure_airport_code";
-	public static final String FIELD_ARRIVAL_TIME = "arrival_time";
-    public static final String FIELD_ARRIVAL_AIRPORT_CODE = "arrival_airport_code";
-    public static final String FIELD_FLIGHT_DURATION = "flight_duration";
-    public static final String FIELD_FLIGHT_NUMBER = "flight_number";
-    public static final String FIELD_CONFIRMATION_CODE = "confirmation_code";
-    public static final String FIELD_TICKET_PRICE = "ticket_price";
-    public static final String FIELD_AIRCRAFT = "aircraft";
-    public static final String FIELD_BOOKING_AGENCY_EMAIL = "booking_agency_email";
-
     // --- The subject name of the class object
     public static final String NAMESPACE = "com.thej3.apache_flink_kickstater.model";
     public static final String SUBJECT = NAMESPACE + ".AirlineData";
 
 
-     @JsonProperty(FIELD_EMAIL_ADDRESS)
     private String email_address;
-
-    @JsonProperty(FIELD_DEPARTURE_TIME)
     private String departure_time;
-
-    @JsonProperty(FIELD_DEPARTURE_AIRPORT_CODE)
     private String departure_airport_code;
-
-    @JsonProperty(FIELD_ARRIVAL_TIME)
     private String arrival_time;
-
-    @JsonProperty(FIELD_ARRIVAL_AIRPORT_CODE)
     private String arrival_airport_code;
-
-    @JsonProperty(FIELD_FLIGHT_DURATION)
     private long flight_duration;
-
-    @JsonProperty(FIELD_FLIGHT_NUMBER)
     private String flight_number;
-
-    @JsonProperty(FIELD_CONFIRMATION_CODE)
     private String confirmation_code;
-
-    @JsonProperty(FIELD_TICKET_PRICE)
     private BigDecimal ticket_price;
-
-    @JsonProperty(FIELD_AIRCRAFT)
     private String aircraft;
-
-    @JsonProperty(FIELD_BOOKING_AGENCY_EMAIL)
     private String booking_agency_email;
 
 
