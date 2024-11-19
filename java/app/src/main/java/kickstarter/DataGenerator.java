@@ -8,6 +8,7 @@
 package kickstarter;
 
 import java.math.*;
+import java.nio.ByteBuffer;
 import java.time.*;
 import java.time.format.*;
 import java.util.*;
@@ -110,7 +111,9 @@ public class DataGenerator {
         airlineData.setFlightDuration(Duration.between(localDepartureTime, localArrivalTime).toMinutes());
         airlineData.setFlightNumber(airlinePrefix + random.nextInt(1000));
         airlineData.setConfirmationCode(airlinePrefix + generateString(6));
-        airlineData.setTicketPrice(BigDecimal.valueOf(500L + (long)random.nextInt(1000)));
+        BigDecimal ticketPrice = BigDecimal.valueOf(500L + (long)random.nextInt(1000));
+        ByteBuffer ticketPriceBuffer = ByteBuffer.wrap(ticketPrice.unscaledValue().toByteArray());
+        airlineData.setTicketPrice(ticketPriceBuffer);
         airlineData.setAircraft("Aircraft" + generateString(3));
         airlineData.setBookingAgencyEmail(generateEmail());
 
