@@ -133,84 +133,9 @@ public class AvroDataGeneratorApp {
             }
         }
 
-        // --- Create a data generator source.
-        DataGeneratorSource<AirlineAvroData> skyOneSource =
-            new DataGeneratorSource<>(
-                index -> DataGenerator.generateAirlineAvroData("SKY1"),
-                Long.MAX_VALUE,
-                RateLimiterStrategy.perSecond(1),
-                Types.POJO(AirlineAvroData.class)
-            );
-
-        // --- Sets up a Flink Avro Generic Record source to consume data.
-        DataStream<AirlineAvroData> skyOneStream = 
-            env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
-
-        /*
-         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone_avro` with the
-         * specified serializer.
-         */
-        KafkaRecordSerializationSchema<AirlineAvroData> skyOneSerializer = 
-            KafkaRecordSerializationSchema.<AirlineAvroData>builder()
-                .setTopic("airline.skyone_avro")
-                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forSpecific(AirlineAvroData.class, "kickstarter.model.AirlineAvroData", producerProperties.getProperty("schema.registry.url"), registryConfigs))
-                .build();
-
-        /*
-         * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
-         * environment (a.k.a. the Flink job graph -- the DAG).
-         */
-        KafkaSink<AirlineAvroData> skyOneSink = 
-            KafkaSink.<AirlineAvroData>builder()
-                .setKafkaProducerConfig(producerProperties)
-                .setRecordSerializer(skyOneSerializer)
-                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
-                .build();
-
-        /*
-         * Adds the given Sink to the DAG. Note only streams with sinks added will be executed
-         * once the StreamExecutionEnvironment.execute() method is called.
-         */
-        skyOneStream.sinkTo(skyOneSink).name("skyone_sink");
-
-        // --- Sets up a Flink Avro Generic Record source to consume data.
-        DataGeneratorSource<AirlineAvroData> sunsetSource =
-            new DataGeneratorSource<>(
-                index -> DataGenerator.generateAirlineAvroData("SUN"),
-                Long.MAX_VALUE,
-                RateLimiterStrategy.perSecond(1),
-                Types.POJO(AirlineAvroData.class)
-            );
-
-        DataStream<AirlineAvroData> sunsetStream = 
-            env.fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
-
-        /*
-         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset_avro` with the
-         * specified serializer.
-         */
-        KafkaRecordSerializationSchema<AirlineAvroData> sunsetSerializer = 
-            KafkaRecordSerializationSchema.<AirlineAvroData>builder()
-                .setTopic("airline.sunset_avro")
-                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forSpecific(AirlineAvroData.class, "kickstarter.model.AirlineAvroData", producerProperties.getProperty("schema.registry.url"), registryConfigs))
-                .build();
-
-        /*
-         * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
-         * environment (a.k.a. the Flink job graph -- the DAG).
-         */
-        KafkaSink<AirlineAvroData> sunsetSink = 
-            KafkaSink.<AirlineAvroData>builder()
-                .setKafkaProducerConfig(producerProperties)
-                .setRecordSerializer(sunsetSerializer)
-                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
-                .build();
-
-        /*
-         * Adds the given Sink to the DAG. Note only streams with sinks added will be executed
-         * once the StreamExecutionEnvironment.execute() method is called.
-         */
-        sunsetStream.sinkTo(sunsetSink).name("sunset_sink");
+        // --- Create the data streams for the two airlines.
+        DataStream<AirlineAvroData> skyOneStream = SinToKafkaTopic(env, "SKY1", "skyone", producerProperties, registryConfigs);
+        DataStream<AirlineAvroData> sunsetStream = SinToKafkaTopic(env, "SUN", "sunset", producerProperties, registryConfigs);
 
         // --- Describes and configures the catalog for the Table API and Flink SQL.
         String catalogName = "apache_kickstarter";
@@ -295,6 +220,57 @@ public class AvroDataGeneratorApp {
 	}
 
     /**
+     * This method is used to sink the data from the input data stream into the Kafka topic.
+     * 
+     * @param env The StreamExecutionEnvironment.
+     * @param airlinePrefix The airline prefix.
+     * @param airline The airline name.
+     * @param producerProperties The Kafka producer properties.
+     * 
+     * @return The data stream.
+     */
+    private static DataStream<AirlineAvroData> SinToKafkaTopic(final StreamExecutionEnvironment env, final String airlinePrefix, final String airline, Properties producerProperties, Map<String, String> registryConfigs) {
+        // --- Create a data generator source.
+        DataGeneratorSource<AirlineAvroData> airlineSource =
+            new DataGeneratorSource<>(
+                index -> DataGenerator.generateAirlineAvroData(airlinePrefix),
+                Long.MAX_VALUE,
+                RateLimiterStrategy.perSecond(1),
+                Types.POJO(AirlineAvroData.class)
+            );
+
+        // --- Sets up a Flink Avro Generic Record source to consume data.
+        DataStream<AirlineAvroData> airlineDataStream = env.fromSource(airlineSource, WatermarkStrategy.noWatermarks(), airline + "_source");
+
+        // --- Sets up a Flink Kafka sink to produce data to the Kafka topic with the specified serializer.
+        final String topicName = "airline." + airline + "_avro";
+        KafkaRecordSerializationSchema<AirlineAvroData> skyOneSerializer = 
+            KafkaRecordSerializationSchema.<AirlineAvroData>builder()
+                .setTopic(topicName)
+                .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forSpecific(AirlineAvroData.class, topicName + "-value", producerProperties.getProperty("schema.registry.url"), registryConfigs))
+                .build();
+
+        /*
+         * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
+         * environment (a.k.a. the Flink job graph -- the DAG).
+         */
+        KafkaSink<AirlineAvroData> airlineSink = 
+            KafkaSink.<AirlineAvroData>builder()
+                .setKafkaProducerConfig(producerProperties)
+                .setRecordSerializer(skyOneSerializer)
+                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                .build();
+
+        /*
+         * Adds the given Sink to the DAG. Note only streams with sinks added will be executed
+         * once the StreamExecutionEnvironment.execute() method is called.
+         */
+        airlineDataStream.sinkTo(airlineSink).name(airline + "_sink");
+
+        return airlineDataStream;
+    }
+
+    /**
      * This method is used to sink the data from the input data stream into the iceberg table.
      * 
      * @param tblEnv The StreamTableEnvironment.
@@ -306,8 +282,6 @@ public class AvroDataGeneratorApp {
      * @param airlineDataStream The input data stream.
      */
     private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineAvroData> airlineDataStream) {
-        
-
         // --- Convert DataStream<AirlineData> to DataStream<RowData>
         DataStream<RowData> skyOneRowData = airlineDataStream.map(new MapFunction<AirlineAvroData, RowData>() {
             @Override
