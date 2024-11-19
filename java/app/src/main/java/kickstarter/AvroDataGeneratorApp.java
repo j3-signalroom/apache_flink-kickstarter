@@ -134,8 +134,8 @@ public class AvroDataGeneratorApp {
         }
 
         // --- Create the data streams for the two airlines.
-        DataStream<AirlineAvroData> skyOneStream = SinToKafkaTopic(env, "SKY1", "skyone", producerProperties, registryConfigs);
-        DataStream<AirlineAvroData> sunsetStream = SinToKafkaTopic(env, "SUN", "sunset", producerProperties, registryConfigs);
+        DataStream<AirlineAvroData> skyOneDataStream = SinToKafkaTopic(env, "SKY1", "skyone", producerProperties, registryConfigs);
+        DataStream<AirlineAvroData> sunsetDataStream = SinToKafkaTopic(env, "SUN", "sunset", producerProperties, registryConfigs);
 
         // --- Describes and configures the catalog for the Table API and Flink SQL.
         String catalogName = "apache_kickstarter";
@@ -208,8 +208,8 @@ public class AvroDataGeneratorApp {
         CatalogLoader catalogLoader = CatalogLoader.custom(catalogName, catalogProperties,  new Configuration(false), catalogImpl);
 
         // --- Sink the datastreams to their respective Apache Iceberg tables.
-        SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "skyone_airline", skyOneStream);
-        SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "sunset_airline", sunsetStream);
+        SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "skyone_airline", skyOneDataStream);
+        SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "sunset_airline", sunsetDataStream);
 
         // --- Execute the Flink job graph (DAG)
         try {            
@@ -226,6 +226,7 @@ public class AvroDataGeneratorApp {
      * @param airlinePrefix The airline prefix.
      * @param airline The airline name.
      * @param producerProperties The Kafka producer properties.
+     * @param registryConfigs The schema registry properties.
      * 
      * @return The data stream.
      */
@@ -244,7 +245,7 @@ public class AvroDataGeneratorApp {
 
         // --- Sets up a Flink Kafka sink to produce data to the Kafka topic with the specified serializer.
         final String topicName = "airline." + airline + "_avro";
-        KafkaRecordSerializationSchema<AirlineAvroData> skyOneSerializer = 
+        KafkaRecordSerializationSchema<AirlineAvroData> airlineSerializer = 
             KafkaRecordSerializationSchema.<AirlineAvroData>builder()
                 .setTopic(topicName)
                 .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forSpecific(AirlineAvroData.class, topicName + "-value", producerProperties.getProperty("schema.registry.url"), registryConfigs))
@@ -257,7 +258,7 @@ public class AvroDataGeneratorApp {
         KafkaSink<AirlineAvroData> airlineSink = 
             KafkaSink.<AirlineAvroData>builder()
                 .setKafkaProducerConfig(producerProperties)
-                .setRecordSerializer(skyOneSerializer)
+                .setRecordSerializer(airlineSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
                 .build();
 
