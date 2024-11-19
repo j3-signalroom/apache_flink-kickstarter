@@ -283,7 +283,7 @@ public class AvroDataGeneratorApp {
 
         // --- Execute the Flink job graph (DAG)
         try {            
-            env.execute("DataGeneratorApp");
+            env.execute("AvroDataGeneratorApp");
         } catch (Exception e) {
             logger.error("The App stopped early due to the following: {}", e.getMessage());
         }

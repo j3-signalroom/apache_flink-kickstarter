@@ -107,7 +107,6 @@ public class FlightData implements Serializable {
         this.airline = airline;
     }
 
-    @Override
     /**
      * This method is used to compare two objects of the same type.
      * 
@@ -115,6 +114,7 @@ public class FlightData implements Serializable {
      * 
      * @return boolean True if the objects are equal, false otherwise.
      */
+    @Override
     public boolean equals(Object o) {
         if (this == o) 
             return true;
@@ -132,12 +132,12 @@ public class FlightData implements Serializable {
                 Objects.equals(this.airline, that.airline);
     }
 
-    @Override
     /**
      * This method is used to generate a hash code for the object.
      * 
      * @return int The hash code for the object.
      */
+    @Override
     public int hashCode() {
         return Objects.hash(this.email_address,
                             this.departure_time, 
@@ -149,12 +149,11 @@ public class FlightData implements Serializable {
                             this.airline);
     }
 
-    @Override
     /**
-     * This method is used to generate a string representation of the object.
-     * 
-     * @return String The string representation of the object.
+     * @return a string representation of the object.
+     * Useful for debugging and logging.
      */
+    @Override
     public String toString() {
         return "FlightData{" +
                 "email_address='" + this.email_address + '\'' +

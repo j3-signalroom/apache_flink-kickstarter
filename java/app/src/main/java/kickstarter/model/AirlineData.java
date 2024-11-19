@@ -157,7 +157,6 @@ public class AirlineData implements Serializable {
     }
 
     
-    @Override
     /**
      * This method is used to compare two objects of the same type.
      * 
@@ -165,6 +164,7 @@ public class AirlineData implements Serializable {
      * 
      * @return boolean True if the objects are equal, false otherwise.
      */
+    @Override
     public boolean equals(Object o) {
         if (this == o) 
             return true;
@@ -185,12 +185,12 @@ public class AirlineData implements Serializable {
                 Objects.equals(getBookingAgencyEmail(), that.booking_agency_email);
     }
 
-    @Override
     /**
      * This method is used to generate a hash code for the object.
      * 
      * @return int The hash code for the object.
      */
+    @Override
     public int hashCode() {
         return Objects.hash(getEmailAddress(),
                             getDepartureTime(), 
@@ -205,12 +205,11 @@ public class AirlineData implements Serializable {
                             getBookingAgencyEmail());
     }
 
-    @Override
     /**
-     * This method is used to generate a string representation of the object.
-     * 
-     * @return String The string representation of the object.
+     * @return a string representation of the object.
+     * Useful for debugging and logging.
      */
+    @Override
     public String toString() {
         return "AirlineData{" +
             "email_address='" + getEmailAddress() + '\'' +
