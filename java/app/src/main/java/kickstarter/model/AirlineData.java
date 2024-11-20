@@ -172,17 +172,17 @@ public class AirlineData implements Serializable {
             return false;
         AirlineData that = (AirlineData) o;
 
-        return Objects.equals(getEmailAddress(), that.email_address) && 
-                Objects.equals(getDepartureTime(), that.departure_time) && 
-                Objects.equals(getDepartureAirportCode(), that.departure_airport_code) && 
-                Objects.equals(getArrivalTime(), that.arrival_time) && 
-                Objects.equals(getArrivalAirportCode(), that.arrival_airport_code) && 
-                Objects.equals(getFlightDuration(), that.flight_duration) && 
-                Objects.equals(getFlightNumber(), that.flight_number) && 
-                Objects.equals(getConfirmationCode(), that.confirmation_code) && 
-                Objects.equals(getTicketPrice(), that.ticket_price) && 
-                Objects.equals(getAircraft(), that.aircraft) &&
-                Objects.equals(getBookingAgencyEmail(), that.booking_agency_email);
+        return Objects.equals(getEmailAddress(), that.getEmailAddress()) && 
+                Objects.equals(getDepartureTime(), that.getDepartureTime()) && 
+                Objects.equals(getDepartureAirportCode(), that.getDepartureAirportCode()) && 
+                Objects.equals(getArrivalTime(), that.getArrivalTime()) && 
+                Objects.equals(getArrivalAirportCode(), that.getArrivalAirportCode()) && 
+                Objects.equals(getFlightDuration(), that.getFlightDuration()) && 
+                Objects.equals(getFlightNumber(), that.getFlightNumber()) && 
+                Objects.equals(getConfirmationCode(), that.getConfirmationCode()) && 
+                Objects.equals(getTicketPrice(), that.getTicketPrice()) && 
+                Objects.equals(getAircraft(), that.getAircraft()) &&
+                Objects.equals(getBookingAgencyEmail(), that.getBookingAgencyEmail());
     }
 
     /**
@@ -212,17 +212,17 @@ public class AirlineData implements Serializable {
     @Override
     public String toString() {
         return "AirlineData{" +
-            "email_address='" + getEmailAddress() + '\'' +
+            "email_address='" + getEmailAddress() + "'" +
             ", departure_time=" + getDepartureTime() +
-            ", departure_airport_code='" + getDepartureAirportCode() + '\'' +
+            ", departure_airport_code='" + getDepartureAirportCode() + "'" +
             ", arrival_time=" + getArrivalTime() +
-            ", arrival_airport_code='" + getArrivalAirportCode() + '\'' +
+            ", arrival_airport_code='" + getArrivalAirportCode() + "'" +
             ", flight_duration=" + getFlightDuration() +
-            ", flight_number='" + getFlightNumber() + '\'' +
-            ", confirmation_code='" + getConfirmationCode() + '\'' +
+            ", flight_number='" + getFlightNumber() + "'" +
+            ", confirmation_code='" + getConfirmationCode() + "'" +
             ", ticket_price=" + getTicketPrice() +
-            ", aircraft='" + getAircraft() + '\'' +
-            ", booking_agency_email='" + getBookingAgencyEmail() + '\'' +
+            ", aircraft='" + getAircraft() + "'" +
+            ", booking_agency_email='" + getBookingAgencyEmail() + "'" +
             '}';
     }
 

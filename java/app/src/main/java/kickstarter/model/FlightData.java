@@ -121,15 +121,15 @@ public class FlightData implements Serializable {
         if (o == null || getClass() != o.getClass()) 
             return false;
         FlightData that = (FlightData) o;
-
-        return Objects.equals(this.email_address, that.email_address) && 
-                Objects.equals(this.departure_time, that.departure_time) && 
-                Objects.equals(this.departure_airport_code, that.departure_airport_code) && 
-                Objects.equals(this.arrival_time, that.arrival_time) && 
-                Objects.equals(this.arrival_airport_code, that.arrival_airport_code) && 
-                Objects.equals(this.flight_number, that.flight_number) && 
-                Objects.equals(this.confirmation_code, that.confirmation_code) &&
-                Objects.equals(this.airline, that.airline);
+        
+        return Objects.equals(getEmailAddress(), that.getEmailAddress()) && 
+                Objects.equals(getDepartureTime(), that.getDepartureTime()) && 
+                Objects.equals(getDepartureAirportCode(), that.getDepartureAirportCode()) && 
+                Objects.equals(getArrivalTime(), that.getArrivalTime()) && 
+                Objects.equals(getArrivalAirportCode(), that.getArrivalAirportCode()) && 
+                Objects.equals(getFlightNumber(), that.getFlightNumber()) && 
+                Objects.equals(getConfirmationCode(), that.getConfirmationCode()) && 
+                Objects.equals(getAirline(), that.getAirline());
     }
 
     /**
@@ -139,14 +139,14 @@ public class FlightData implements Serializable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(this.email_address,
-                            this.departure_time, 
-                            this.departure_airport_code, 
-                            this.arrival_time, 
-                            this.arrival_airport_code, 
-                            this.flight_number, 
-                            this.confirmation_code,
-                            this.airline);
+        return Objects.hash(getEmailAddress(),
+                            getDepartureTime(), 
+                            getDepartureAirportCode(), 
+                            getArrivalTime(), 
+                            getArrivalAirportCode(),
+                            getFlightNumber(), 
+                            getConfirmationCode(),
+                            getAirline());
     }
 
     /**
@@ -156,14 +156,14 @@ public class FlightData implements Serializable {
     @Override
     public String toString() {
         return "FlightData{" +
-                "email_address='" + this.email_address + '\'' +
-                ", departure_time=" + this.departure_time +
-                ", departure_airport_code='" + this.departure_airport_code + '\'' +
-                ", arrival_time=" + this.arrival_time +
-                ", arrival_airport_code='" + this.arrival_airport_code + '\'' +
-                ", flight_number='" + this.flight_number + '\'' +
-                ", confirmation_code='" + this.confirmation_code + '\'' +
-                ", airline='" + this.airline + '\'' +
+                "email_address='" + getEmailAddress() + "'" +
+                ", departure_time=" + getDepartureTime() +
+                ", departure_airport_code='" + getDepartureAirportCode() + "'" +
+                ", arrival_time=" + getArrivalTime() +
+                ", arrival_airport_code='" + getArrivalAirportCode() + "'" +
+                ", flight_number='" + getFlightNumber() + "'" +
+                ", confirmation_code='" + getConfirmationCode() + "'" +
+                ", airline='" + getAirline() + "'" +
                 '}';
     }
 }

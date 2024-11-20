@@ -75,9 +75,9 @@ public class FlyerStatsData implements Serializable {
             return false;
         FlyerStatsData that = (FlyerStatsData) o;
 
-        return this.number_of_flights == that.number_of_flights && 
-                Objects.equals(this.email_address, that.email_address) &&
-                Objects.equals(this.total_flight_duration, that.total_flight_duration);
+        return this.getNumberOfFlights() == that.getNumberOfFlights() && 
+                Objects.equals(this.getEmailAddress(), that.getEmailAddress()) &&
+                Objects.equals(this.getTotalFlightDuration(), that.getTotalFlightDuration());
     }
 
     /**
@@ -87,7 +87,7 @@ public class FlyerStatsData implements Serializable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(this.email_address, this.total_flight_duration, this.number_of_flights);
+        return Objects.hash(this.getEmailAddress(), this.getTotalFlightDuration(), this.getNumberOfFlights());
     }
 
     /**
@@ -97,19 +97,19 @@ public class FlyerStatsData implements Serializable {
     @Override
     public String toString() {
         return "FlyerStatsData{" +
-                "email_address='" + this.email_address + '\'' +
-                ", totalFlightDuration=" + this.total_flight_duration +
-                ", number_of_flights=" + this.number_of_flights +
+                "email_address='" + this.getEmailAddress() + "'" +
+                ", totalFlightDuration=" + this.getTotalFlightDuration() +
+                ", number_of_flights=" + this.getNumberOfFlights() +
                 '}';
     }
 
     public FlyerStatsData merge(FlyerStatsData that) {
-        if(this.email_address.equals(that.email_address)) {
+        if(this.getEmailAddress().equals(that.getEmailAddress())) {
             FlyerStatsData merged = new FlyerStatsData();
 
-            merged.setEmailAddress(this.email_address);
-            merged.setTotalFlightDuration(this.total_flight_duration + that.getTotalFlightDuration());
-            merged.setNumberOfFlights(this.number_of_flights + that.getNumberOfFlights());
+            merged.setEmailAddress(this.getEmailAddress());
+            merged.setTotalFlightDuration(this.getTotalFlightDuration() + that.getTotalFlightDuration());
+            merged.setNumberOfFlights(this.getNumberOfFlights() + that.getNumberOfFlights());
 
             return merged;
         } else {
