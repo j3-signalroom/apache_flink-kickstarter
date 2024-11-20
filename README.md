@@ -27,6 +27,7 @@ Explore the repo, run the Docker containers (compatible with both Mac M chips an
         + [2.1.1 Run locally](#211-run-locally)
     - [2.2 DevOps in Action: Running Terraform in the cloud](#22-devops-in-action-running-terraform-in-the-cloud)
         + [2.2.1 Run from the cloud](#221-run-from-the-cloud)
+    - [2.3 Visualizing the Terraform Configuration](#23-visualizing-the-terraform-configuration)
 + [3.0 Hands-On Kickoff: Practical Examples for Rapid Learning](#30-hands-on-kickoff-practical-examples-for-rapid-learning)
     - [3.1 Flink Applications Powered by Java](#31-flink-applications-powered-by-java)
     - [3.2 Flink Applications Powered by Python](#32-flink-applications-powered-by-python)
@@ -85,10 +86,6 @@ To help you start quickly, the repo comes with **_Docker containers_** for Mac M
     - AWS Secrets Manager securely storing API Key Secrets for the Kafka Cluster, along with AWS Systems Manager Parameter Store containing Kafka Consumer and Producer properties for easy integration.
 
     - An AWS S3 bucket with a dedicated `warehouse` folder, serving as the landing zone for Apache Iceberg Tables populated by two Python-based Flink apps, bringing your data streaming architecture to life.
-
-    ![Terraform Visulization](.blog/images/terraform-visualization.png)
-
-    _Above is the Terraform visualization of the Terraform configuration.  It shows the resources and their dependencies, making it easier to understand the infrastructure setup.  **To fully view the image, open it in another tab in your browser to zoom in.**_
 
 4. Run Apache Flink locally on your Mac, or use the provided Docker containers from the project to launch Apache Flink and Apache Iceberg seamlessly on your machine.
 
@@ -154,6 +151,19 @@ d. **Select and Run the Deploy Workflow**:
     ![github-run-deploy-workflow-screenshot](.blog/images/github-run-deploy-workflow-screenshot.png)
 
 By following these steps, you will run the Terraform configuration directly from GitHub, leveraging GitHub Actions for automation and deployment.
+
+### 2.3 Visualizing the Terraform Configuration
+Below is the Terraform visualization of the Terraform configuration.  It shows the resources and their dependencies, making the infrastructure setup easier to understand.
+
+![Terraform Visulization](.blog/images/terraform-visualization.png)
+
+> **To fully view the image, open it in another tab on your browser to zoom in.**
+
+When you update the Terraform Configuration, to update the Terraform visualization, use the [`terraform graph`](https://developer.hashicorp.com/terraform/cli/commands/graph) command with [Graphviz](https://graphviz.org/) to generate a visual representation of the resources and their dependencies.  To do this, run the following command:
+
+```bash
+terraform graph | dot -Tpng > .blog/images/terraform-visualization.png
+```
 
 ## 3.0 Hands-On Kickoff: Practical Examples for Rapid Learning
 
