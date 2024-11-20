@@ -20,7 +20,10 @@ class ProcessFlyerStatsDataFunction extends ProcessWindowFunction<FlyerStatsData
     private ValueStateDescriptor<FlyerStatsData> stateDescriptor;
 
     /**
-     * The open method is called when the function is first initialized.
+     * The open method is called when the function is first initialized.  It instantiates a new ValueStateDescriptor
+     * to create a ValueState object for the function.  The ValueState object is used to store a single value for
+     * each key in a keyed stream.  The state is used to store the accumulated statistics for the user.  The state is 
+     * updated each time the function processes a new element.
      * 
      * @param parameters The configuration parameters for the function.
      * @throws Exception - Implementations may forward exceptions, which are caught
@@ -42,8 +45,11 @@ class ProcessFlyerStatsDataFunction extends ProcessWindowFunction<FlyerStatsData
      */
     @Override
     public void process(String emailAddress, ProcessWindowFunction<FlyerStatsData, FlyerStatsData, String, TimeWindow>.Context context, Iterable<FlyerStatsData> statsList, Collector<FlyerStatsData> collector) throws Exception {
-        // --- Retrieve the state
-        ValueState<FlyerStatsData> state = context.globalState().getState(stateDescriptor);
+        // --- Retrieve the state that is persisted across windows
+        ValueState<FlyerStatsData> state = 
+            context
+                .globalState()
+                .getState(stateDescriptor);
 
         // --- Get the accumulated stats
         FlyerStatsData accumulatedStats = state.value();
@@ -51,12 +57,13 @@ class ProcessFlyerStatsDataFunction extends ProcessWindowFunction<FlyerStatsData
         // --- Merge the stats
         for (FlyerStatsData newStats: statsList) {
             if(accumulatedStats == null)
+                // --- This is the first time we've seen this flyer
                 accumulatedStats = newStats;
             else
                 accumulatedStats = accumulatedStats.merge(newStats);
         }
 
-        // --- Update the state
+        // --- Update the stored state
         state.update(accumulatedStats);
 
         // --- Emit the accumulated stats
