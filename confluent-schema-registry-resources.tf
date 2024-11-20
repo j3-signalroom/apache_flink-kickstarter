@@ -47,24 +47,24 @@ module "schema_registry_cluster_api_key_rotation" {
     day_count = var.day_count
 }
 
-resource "confluent_role_binding" "schema_registry_developer_read" {
+resource "confluent_role_binding" "schema_registry_developer_read_all_subjects" {
   principal   = "User:${confluent_service_account.schema_registry_cluster_api.id}"
   role_name   = "DeveloperRead"
-  crn_pattern = data.confluent_schema_registry_cluster.env.resource_name
+  crn_pattern = "${data.confluent_schema_registry_cluster.env.resource_name}/subject=*"
 
   depends_on = [ 
     confluent_service_account.schema_registry_cluster_api,
     data.confluent_schema_registry_cluster.env 
-  ] 
+  ]
 }
 
-resource "confluent_role_binding" "schema_registry_developer_write" {
+resource "confluent_role_binding" "schema_registry_developer_write_all_subjects" {
   principal   = "User:${confluent_service_account.schema_registry_cluster_api.id}"
   role_name   = "DeveloperWrite"
-  crn_pattern = data.confluent_schema_registry_cluster.env.resource_name
+  crn_pattern = "${data.confluent_schema_registry_cluster.env.resource_name}/subject=*"
 
   depends_on = [ 
     confluent_service_account.schema_registry_cluster_api,
-    data.confluent_schema_registry_cluster.env
+    data.confluent_schema_registry_cluster.env 
   ]
 }
