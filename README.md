@@ -86,6 +86,8 @@ To help you start quickly, the repo comes with **_Docker containers_** for Mac M
 
     - An AWS S3 bucket with a dedicated `warehouse` folder, serving as the landing zone for Apache Iceberg Tables populated by two Python-based Flink apps, bringing your data streaming architecture to life.
 
+    ![Terraform Visulization](.blog/images/terraform-visualization.png)
+
 4. Run Apache Flink locally on your Mac, or use the provided Docker containers from the project to launch Apache Flink and Apache Iceberg seamlessly on your machine.
 
 With these steps, you'll have everything set up to run enterprise-grade data streaming applications in no time!
