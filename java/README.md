@@ -67,7 +67,7 @@ Flink App|Flink Run Command
 > `<AWS_REGION_NAME>`|specify the AWS Region your AWS Glue infrastructure resides.
 
 ### 2.1 `AvroDataGeneratorApp` Flink App Special Consideration
-Whenever the [`AirlineAvroData.avsc`](app/src/main/java/kickstarter/model/avro/AirlineAvroData.avsc) is updated, the `avro-tools-1.12.0.jar` must be used to generate the [`AirlineAvroData.java`](app/src/main/java/kickstarter/model/AirlineAvroData.java) Java class. This is necessary to ensure that the Avro schema is in sync with the Java class. To generate the Java class, run the following command from the `apache_flink-kickstarter-jobmanager-1` Docker container:
+Whenever the [`AirlineAvroData.avsc`](app/src/main/java/kickstarter/model/avro/AirlineAvroData.avsc) is updated, the [`avro-tools-1.12.0.jar`](https://avro.apache.org/docs/++version++/getting-started-java/#serializing-and-deserializing-with-code-generation) must be used to generate the [`AirlineAvroData.java`](app/src/main/java/kickstarter/model/AirlineAvroData.java) Java class. This is necessary to ensure that the Avro schema is in sync with the Java class. To generate the Java class, run the following command from the `apache_flink-kickstarter-jobmanager-1` Docker container:
 
 ```bash 
 java -jar avro-tools-1.12.0.jar compile schema app/src/main/java/kickstarter/model/avro/AirlineAvroData.avsc app/src/main/java/kickstarter/model/
