@@ -3,15 +3,27 @@ All notable changes to this project will be documented in this file.
 
 The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.53.00.000] - TBD
+## [0.53.00.000] - 2024-11-19
 ### Added
 - Issue [#441](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/441).
+- Issue [#447](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/447).
+- Issue [#457](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/457).
+- Issue [#469](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/469).
+- Issue [#470](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/470).
+- Issue [#474](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/474).
+- Issue [#476](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/476).
 
 ### Changed
 - Updated the AWS Terrafom Provider to `5.75.0`.
 - Updated the Confluent Terrafom Provider to `2.9.0`.
 - Updated the Snowflake Terrafom Provider to `0.97.0`.
 - Issue [#444](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/444).
+- Issue [#449](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/449).
+- Issue [#455](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/455).
+
+### Fixed
+- Issue [#451](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/451).
+- Issue [#453](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/453).
 
 ## [0.52.00.000] - 2024-11-07
 ### Added
