@@ -88,6 +88,8 @@ To help you start quickly, the repo comes with **_Docker containers_** for Mac M
 
     ![Terraform Visulization](.blog/images/terraform-visualization.png)
 
+    _Above is the Terraform visualization of the Terraform configuration.  It shows the resources and their dependencies, making it easier to understand the infrastructure setup.  **To fully view the image, open it in another tab in your browser to zoom in.**_
+
 4. Run Apache Flink locally on your Mac, or use the provided Docker containers from the project to launch Apache Flink and Apache Iceberg seamlessly on your machine.
 
 With these steps, you'll have everything set up to run enterprise-grade data streaming applications in no time!
