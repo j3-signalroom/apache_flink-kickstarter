@@ -8,6 +8,7 @@ Curious about the differences between the DataStream API and Table API? Click [h
 <!-- toc -->
 + [1.0 Power up the Apache Flink Docker containers](#10-power-up-the-apache-flink-docker-containers)
 + [2.0 Discover What You Can Do with These Flink Apps](#20-discover-what-you-can-do-with-these-flink-apps)
+    - [2.1 `AvroDataGeneratorApp` Flink App Special Consideration](#21-avrodatageneratorapp-flink-app-special-consideration)
 + [3.0 Resources](#30-resources)
 <!-- tocstop -->
 
@@ -64,6 +65,15 @@ Flink App|Flink Run Command
 > -|-
 > `<SERVICE_ACCOUNT_USER>`|specify the name of the service account user, used in the the AWS Secrets and Parameter Store Path name.
 > `<AWS_REGION_NAME>`|specify the AWS Region your AWS Glue infrastructure resides.
+
+### 2.1 `AvroDataGeneratorApp` Flink App Special Consideration
+Whenever the [`AirlineAvroData.avsc`](app/src/main/java/kickstarter/model/avro/AirlineAvroData.avsc) is updated, the `avro-tools-1.12.0.jar` must be used to generate the [`AirlineAvroData.java`](app/src/main/java/kickstarter/model/AirlineAvroData.java) Java class. This is necessary to ensure that the Avro schema is in sync with the Java class. To generate the Java class, run the following command from the `apache_flink-kickstarter-jobmanager-1` Docker container:
+
+```bash 
+java -jar avro-tools-1.12.0.jar compile schema app/src/main/java/kickstarter/model/avro/AirlineAvroData.avsc app/src/main/java/kickstarter/model/
+```
+
+> You can download the `avro-tools-1.12.0.jar` by clicking [here](https://repo1.maven.org/maven2/org/apache/avro/avro-tools/1.12.0/avro-tools-1.12.0.jar).
 
 ## 3.0 Resources
 [Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!](../.blog/get-your-jar-versions-right.md)
