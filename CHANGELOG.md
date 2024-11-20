@@ -5,6 +5,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 
 ## [0.53.00.000] - 2024-11-19
 ### Added
+- Issue [#79](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/79).
 - Issue [#441](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/441).
 - Issue [#447](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/447).
 - Issue [#457](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/457).
