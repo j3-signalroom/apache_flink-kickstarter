@@ -185,5 +185,7 @@ terraform graph | dot -Tpng > .blog/images/terraform-visualization.png
 
 [J3's techStack Lexicon](https://github.com/j3-signalroom/j3-techstack-lexicon/blob/main/README.md)
 
+[Unlocking Schema Registry Access: Granting Confluent Service Account Permissions with Terraform.](.blog/unlocking-schema-registry-access.md)
+
 ## 5.0 Important Note(s)
 [Known Issue(s)](KNOWNISSUES.md)
