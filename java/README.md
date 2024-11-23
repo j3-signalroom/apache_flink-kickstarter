@@ -82,7 +82,7 @@ Then copy the generated Java class to the `app/src/main/java/kickstarter/model/`
 cp kickstarter/model/AirlineAvroData.java app/src/main/java/kickstarter/model/
 ```
 
-> You can download the [`avro-tools-1.12.0.jar`](https://avro.apache.org/docs/++version++/getting-started-java/#serializing-and-deserializing-with-code-generation) must be used to generate the [`AirlineAvroData.java`](app/src/main/java/kickstarter/model/AirlineAvroData.java) by clicking [here](https://repo1.maven.org/maven2/org/apache/avro/avro-tools/1.12.0/avro-tools-1.12.0.jar).
+> You can download the [`avro-tools-1.12.0.jar`](https://avro.apache.org/docs/++version++/getting-started-java/#serializing-and-deserializing-with-code-generation) [here](https://repo1.maven.org/maven2/org/apache/avro/avro-tools/1.12.0/avro-tools-1.12.0.jar).
 
 ## 3.0 Resources
 [Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!](../.blog/get-your-jar-versions-right.md)
