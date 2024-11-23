@@ -71,28 +71,19 @@ def main(args):
         'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
     })
 
-    # Note: KafkaSink was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
-    # you will need to use the FlinkKafkaProducer class.
-    # Initialize the KafkaSink builder
-    kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
-
-    # Loop through the producer properties and set each property
-    for key, value in producer_properties.items():
-        if key != 'bootstrap.servers':  # Skip the bootstrap.servers as it is already set
-            kafka_sink_builder.set_property(key, value)
-
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
-    stats_sink = (kafka_sink_builder
-                  .set_record_serializer(KafkaRecordSerializationSchema
-                                         .builder()
-                                         .set_topic("airline.flyer_stats")
-                                         .set_value_serialization_schema(ConfluentRegistryAvroSerializationSchema
-                                                                         .builder()
-                                                                         .with_type_info(FlyerStatsData.get_value_type_info())
-                                                                         .build())
-                                         .build())
-                  .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                  .build())
+    stats_sink = (KafkaSink.builder()
+                            .set_kafka_producer_config(producer_properties)
+                            .set_record_serializer(KafkaRecordSerializationSchema
+                                                    .builder()
+                                                    .set_topic("airline.flyer_stats")
+                                                    .set_value_serialization_schema(ConfluentRegistryAvroSerializationSchema
+                                                                                    .builder()
+                                                                                    .with_type_info(FlyerStatsData.get_value_type_info())
+                                                                                    .build())
+                                                    .build())
+                            .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                            .build())
 
     # --- Load Apache Iceberg catalog
     catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
