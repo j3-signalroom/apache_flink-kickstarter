@@ -467,13 +467,13 @@ except Exception as e:
 ### Step 11 of 14.  Combine the `skyone` and `sunset` Airline DataStreams into one DataStream
 ```python
 # Combine the Airline DataStreams into one DataStream
-flight_datastream = combine_datestreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
+flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
 ```
 
-- The `combine_datestreams()` function is used to merge the `skyone` and `sunset` airline DataStreams into a single DataStream. This function is essential for combining the two streams and mapping the data to the `FlightData` schema.
+- The `combine_datastreams()` function is used to merge the `skyone` and `sunset` airline DataStreams into a single DataStream. This function is essential for combining the two streams and mapping the data to the `FlightData` schema.
 
 ```python
-def combine_datestreams(skyone_stream: DataStream, sunset_stream: DataStream) -> DataStream:
+def combine_datastreams(skyone_stream: DataStream, sunset_stream: DataStream) -> DataStream:
     """This method defines the workflow for the Flink job graph (DAG) by connecting the data streams.
 
     Args:

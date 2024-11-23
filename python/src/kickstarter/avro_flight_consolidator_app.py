@@ -173,7 +173,7 @@ def main(args):
         exit(1)
 
     # Combine the Airline DataStreams into one DataStream
-    flight_datastream = combine_datestreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
+    flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
 
     # Populate the Apache Iceberg Table with the data from the data stream
     (tbl_env.from_data_stream(flight_datastream)
@@ -191,8 +191,9 @@ def main(args):
         print(f"The App stopped early due to the following: {e}.")
 
 
-def combine_datestreams(skyone_stream: DataStream, sunset_stream: DataStream) -> DataStream:
-    """This method defines the workflow for the Flink job graph (DAG) by connecting the data streams.
+def combine_datastreams(skyone_stream: DataStream, sunset_stream: DataStream) -> DataStream:
+    """This function combines the SkyOne Airlines and Sunset Air flight data streams into
+    a single data stream.
 
     Args:
         skyone_stream (DataStream): is the source of the SkyOne Airlines flight data.
