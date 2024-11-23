@@ -47,10 +47,8 @@ def main(args):
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
-    # Get the Kafka Cluster properties for the Kafka clients, and the
-    # Schema Registry properties for the Avro deserialization schema
-    consumer_properties, scheam_registry_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
-    producer_properties, _ = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
+    # Get the Kafka Cluster properties for the consumer
+    consumer_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
     flight_source = (KafkaSource.builder()
@@ -67,19 +65,25 @@ def main(args):
     # Takes the results of the Kafka source and attaches the unbounded data stream
     flight_data_stream = env.from_source(flight_source, WatermarkStrategy.for_monotonous_timestamps(), "flight_data_source")
 
-    # Sets up the Flink Kafka sink to produce records to the Kafka topic `airline.flyer_stats`
-    kafka_sink = (KafkaSink.builder()
-                           .set_kafka_producer_config(producer_properties)
-                           .set_record_serializer(KafkaRecordSerializationSchema
-                                                  .builder()
-                                                  .set_topic("airline.flyer_stats")
-                                                  .set_value_serialization_schema(ConfluentRegistryAvroSerializationSchema
-                                                                                  .builder()
-                                                                                  .with_type_info(FlyerStatsData.get_value_type_info())
-                                                                                  .build())
-                                                  .build())
-                           .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                           .build())
+    # Get the Kafka Cluster properties for the producer
+    producer_properties = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
+    producer_properties.update({
+        'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
+    })
+
+    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
+    stats_sink = (KafkaSink.builder()
+                            .set_kafka_producer_config(producer_properties)
+                            .set_record_serializer(KafkaRecordSerializationSchema
+                                                    .builder()
+                                                    .set_topic("airline.flyer_stats")
+                                                    .set_value_serialization_schema(ConfluentRegistryAvroSerializationSchema
+                                                                                    .builder()
+                                                                                    .with_type_info(FlyerStatsData.get_value_type_info())
+                                                                                    .build())
+                                                    .build())
+                            .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                            .build())
 
     # --- Load Apache Iceberg catalog
     catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
@@ -128,9 +132,9 @@ def main(args):
             .execute_insert(stats_table_path.get_full_name()))
 
     # Sinks the User Statistics DataStream Kafka topic
-    (stats_datastream.sink_to(kafka_sink)
-                     .name("kafka_sink")
-                     .uid("kafka_sink"))
+    (stats_datastream.sink_to(stats_sink)
+                     .name("stats_sink")
+                     .uid("stats_sink"))
 
     # Execute the Flink job graph (DAG)
     try:

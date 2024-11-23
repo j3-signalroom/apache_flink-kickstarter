@@ -47,10 +47,9 @@ def main(args):
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
-    # Get the Kafka Cluster properties for the Kafka clients, and the
+    # Get the Kafka Cluster properties for the Kafka consumer client, and the
     # Schema Registry properties for the Avro deserialization schema
     consumer_properties, scheam_registry_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
-    producer_properties, _ = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
     # Note: KafkaSource was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
@@ -94,10 +93,14 @@ def main(args):
     sunset_stream = (env.from_source(sunset_source, WatermarkStrategy.no_watermarks(), "sunset_source")
                         .uid("sunset_source"))
 
+    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
     # Get the Kafka Cluster properties for the producer
     producer_properties, scheam_registry_properties = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
+    producer_properties.update({
+        'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
+    })
 
-    # Sets up the Flink Kafka sink to produce data to the Kafka topic `airline.flight`
+    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
     topic_name = "airline.flight"
     flight_sink = (KafkaSink.builder()
                             .set_kafka_producer_config(producer_properties)
