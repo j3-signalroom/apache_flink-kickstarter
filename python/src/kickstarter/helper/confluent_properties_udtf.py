@@ -2,7 +2,7 @@ from pyflink.common import Row
 from pyflink.table import DataTypes, StreamTableEnvironment
 from pyflink.table.expressions import col
 from pyflink.table.udf import udtf, TableFunction
-from typing import Iterator
+from typing import Iterator, Dict, Tuple
 import boto3
 from botocore.exceptions import ClientError
 import json
@@ -19,25 +19,29 @@ __status__     = "dev"
 
 
 class ConfluentProperties(TableFunction):
-    """This User-Defined Table Function (UDTF) is used to retrieve the Kafka Cluster properties
-    from the AWS Secrets Manager and Parameter Store.
+    """This method retrieves the Kafka Cluster and Schema Registry Cluster properties from the
+    AWS Secrets Manager, and the Kafka Client properties from the AWS Systems Manager. It yields
+    the combination of Kafka Cluster properties, Schema Registry Cluster properties, and Kafka
+    Client parameters.
     """
-    def __init__(self, for_consumer: bool, service_account_user: str):
+    def __init__(self, is_consumer: bool, service_account_user: str):
         """Initializes the UDTF with the necessary parameters.
 
         Args:
-            for_consumer (bool): determines if the Kafka Client is a consumer or producer.
+            is_consumer (bool): determines if the Kafka Client is a consumer or producer.
             service_account_user (str): is the name of the service account user.  It is used in
             the prefix to the path of the Kafka Cluster secrets in the AWS Secrets Manager and
             the Kafka Client parameters in the AWS Systems Manager Parameter Store.
         """
-        self._for_consumer = for_consumer
+        self._is_consumer = is_consumer
         self._service_account_user = service_account_user
         self._aws_region_name = os.environ['AWS_REGION']
 
     def eval(self, confluent_properties: Row) -> Iterator[Row]:
-        """This method retrieves the Kafka Cluster properties from the AWS Secrets Manager 
-        and AWS Systems Manager.
+        """This method retrieves the Kafka Cluster and Schema Registry Cluster properties from the
+        AWS Secrets Manager, and the Kafka Client properties from the AWS Systems Manager. It
+        yields the combination of Kafka Cluster properties, Schema Registry Cluster properties,
+        and Kafka Client parameters. 
 
         Args:
             confluent_properties (Row): is a Row object that contains the Kafka Cluster
@@ -57,7 +61,7 @@ class ConfluentProperties(TableFunction):
         properties = self.__get_confluent_properties(
             f"{secret_path_prefix}/kafka_cluster/python_client",
             f"{secret_path_prefix}/schema_registry_cluster/python_client",
-            f"{secret_path_prefix}/consumer_kafka_client" if self._for_consumer else f"{secret_path_prefix}/producer_kafka_client"
+            f"{secret_path_prefix}/consumer_kafka_client" if self._is_consumer else f"{secret_path_prefix}/producer_kafka_client"
         )
         if properties is None:
             raise RuntimeError(f"Failed to retrieve the Kafka Client properties from '{secret_path_prefix}' secrets because {properties.get_error_message_code()}:{properties.get_error_message()}")
@@ -66,8 +70,8 @@ class ConfluentProperties(TableFunction):
                 yield Row(str(property_key), str(property_value))
 
     def __get_confluent_properties(self, kafka_cluster_secrets_path: str, schema_registry_cluster_secrets_path: str, client_parameters_path: str) -> tuple[str, str]:
-        """This method returns the Kafka Cluster/Schema Registry Cluster properties from the AWS Secrets 
-        Manager and Parameter Store.
+        """This method retrieves the Kafka Cluster and Schema Registry Cluster properties from the
+        AWS Secrets Manager, and the Kafka Client properties from the AWS Systems Manager.
 
         Args:
             kafka_cluster_secrets_path (str): the path to the Kafka Cluster secrets in the AWS Secrets Manager.
@@ -212,22 +216,24 @@ class ConfluentProperties(TableFunction):
             return parameters
 
 
-def execute_confluent_properties_udtf(tbl_env: StreamTableEnvironment, for_consumer: bool, service_account_user: str) -> dict:
-    """This method retrieves the Kafka Cluster/Schema Registry Cluster properties from the
-    AWS Secrets Manager and AWS Systems Manager.
+def execute_confluent_properties_udtf(tbl_env: StreamTableEnvironment, is_consumer: bool, service_account_user: str) -> Tuple[Dict[str, str], Dict[str, str]]:
+    """This method retrieves the Kafka Cluster and Schema Registry Cluster properties from the
+    AWS Secrets Manager, and the Kafka Client properties from the AWS Systems Manager.
 
     Args:
         tbl_env (TableEnvironment): is the instantiated Flink Table Environment.  A Table
         Environment is a unified entry point for creating Table and SQL API programs.  It
         is used to convert a DataStream into a Table or vice versa.  It is also used to
         register a Table in a catalog.
-        for_consumer (bool): determines if the Kafka Client is a consumer or producer.
+        is_consumer (bool): determines if the Kafka Client is a consumer or producer.
         service_account_user (str): is the name of the service account user.  It is used in
-        the prefix to the path of the Kafka Cluster secrets in the AWS Secrets Manager and
-        the Kafka Client parameters in the AWS Systems Manager Parameter Store.
+        the prefix to the path of the Kafka Cluster and Schema Registry Cluster secrets in 
+        the AWS Secrets Manager, and the Kafka Client parameters in the AWS Systems Manager 
+        Parameter Store.
 
     Returns:
-        dict: combination of Kafka Cluster properties and Kafka Client parameters.
+        Tuple[Dict[str, str], Dict[str, str]]: combination of Kafka Cluster and Kafka Client
+        properties and Schema Registry Cluster properties.
     """
     # Define the schema for the table and the return result of the UDTF
     schema = DataTypes.ROW([
@@ -236,42 +242,46 @@ def execute_confluent_properties_udtf(tbl_env: StreamTableEnvironment, for_consu
     ])
 
     # Create an empty table
-    kafka_property_table = tbl_env.from_elements([('','')], schema)
+    confluent_property_table = tbl_env.from_elements([('','')], schema)
 
     # Define the table name based on the type of Kafka client
-    table_name = "kafka_property_table_" + ("consumer" if for_consumer else "producer")
+    table_name = "confluent_property_table_" + ("consumer" if is_consumer else "producer")
 
     # Register the table as a temporary view
-    tbl_env.create_temporary_view(table_name, kafka_property_table)
+    tbl_env.create_temporary_view(table_name, confluent_property_table)
 
     # Get the table from the temporary view
-    kafka_property_table = tbl_env.from_path(table_name)
+    confluent_property_table = tbl_env.from_path(table_name)
 
-    # print('\n Kafka Property Table Schema:--->')
-    # kafka_property_table.print_schema()
+    # print('\n Confluent Property Table Schema:--->')
+    # confluent_property_table.print_schema()
 
     # Register the Python function as a PyFlink UDTF (User-Defined Table Function)
-    kafka_properties_udtf = udtf(f=ConfluentProperties(for_consumer, service_account_user), 
+    kafka_properties_udtf = udtf(f=ConfluentProperties(is_consumer, service_account_user), 
                                  result_types=schema)
 
-    # Join the Kafka Property Table with the UDTF
-    func_results = kafka_property_table.join_lateral(kafka_properties_udtf.alias("key", "value")).select(col("key"), col("value"))
+    # Join the Confluent Property Table with the UDTF
+    func_results = confluent_property_table.join_lateral(kafka_properties_udtf.alias("key", "value")).select(col("key"), col("value"))
 
-    # print("\n Kafka " + ("Consumer" if for_consumer else "Producer") + " Client Property Table Data:--->")
+    # print("\n Confluent " + ("Consumer" if is_consumer else "Producer") + " Client Property Table Data:--->")
     # func_results.execute().print()
 
-    # Convert the result into a Python dictionary
-    result = func_results.execute().collect()
-    result_dict = {}
-    for row in result:
-        result_dict[row[0]] = row[1]
-    result.close()
+    # Convert results using dictionary comprehension that generates a Schema Registry 
+    # Cluster properties dict
+    kafka_dict = {row[0]: row[1] for row in func_results.execute().collect()}
+    func_results.execute().collect().close()
 
-    # Convert the table back to a DataStream
-    #result_stream = tbl_env.to_data_stream(kafka_property_table)
+    # Converts the table into a datastream
+    # result_stream = tbl_env.to_data_stream(confluent_property_table)
     
-    # print('\n Kafka Client Properties Python dictionary:--->')
-    # print(result_dict)
+    # print('\n Kafka Cluster and Client Properties Python dictionary:--->')
+    # print(kafka_dict)
 
-    # Return the table results into a dictionary
-    return result_dict
+    # Dictionary Comprehension that generates a Schema Registry Cluster properties dict
+    schema_registry_dict = { key: value for key, value in kafka_dict.items() if key.startswith("schema.registry.") }
+
+    # print('\n Schema Registry Cluster Properties Python dictionary:--->')
+    # print(schema_registry_dict)
+
+    # Returns the Kafka Cluster properties and Schema Registry Cluster properties
+    return kafka_dict, schema_registry_dict
