@@ -10,7 +10,7 @@ import argparse
 
 from model.flight_data import FlightData, FlyerStatsData
 from helper.confluent_properties_udtf import execute_confluent_properties_udtf
-from helper.process_flyer_stats_data_function import ProcessFlyerStatsDataFunction
+from helper.flyer_stats_process_window_function import FlyerStatsProcessWindowFunction
 from helper.common import load_catalog, load_database
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
@@ -167,7 +167,7 @@ def define_workflow(flight_data_stream: DataStream) -> DataStream:
             .map(FlightData.to_flyer_stats_data)    # Transforms each element in the datastream to a FlyerStatsData object
             .key_by(lambda s: s.email_address)          # Groups the data by email address
             .window(TumblingEventTimeWindows.of(Time.minutes(1)))   # Each window will contain all events that occur within that 1-minute period
-            .reduce(FlyerStatsData.merge, window_function=ProcessFlyerStatsDataFunction())) # Applies a reduce function to each window
+            .reduce(FlyerStatsData.merge, window_function=FlyerStatsProcessWindowFunction())) # Applies a reduce function to each window
 
 
 if __name__ == "__main__":
