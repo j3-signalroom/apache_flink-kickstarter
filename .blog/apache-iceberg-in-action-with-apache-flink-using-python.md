@@ -181,7 +181,7 @@ import argparse
 
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
-from helper.kafka_properties_udtf import execute_kafka_properties_udtf
+from helper.kafka_properties_udtf import execute_confluent_properties_udtf
 from helper.utilities import parse_isoformat, load_catalog, load_database
 ```
 
@@ -245,9 +245,9 @@ if __name__ == "__main__":
 ### Step 4 of 14.  Get Kafka Consumer Client Kafka Cluster properties
 ```python
     # Get Kafka Consumer Client Kafka Cluster properties
-    consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    consumer_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
 ```
-- The function `execute_kafka_properties_udtf()` is designed to retrieve Kafka cluster properties by triggering the KafkaProperties User-Defined Table Function (UDTF).
+- The function `execute_confluent_properties_udtf()` is designed to retrieve Kafka cluster properties by triggering the ConfluentProperties User-Defined Table Function (UDTF).
 
 ### Step 5 of 14.  Consumer the `airline.skyone` and `airline.sunset` Kafka topics
 ```python
@@ -290,7 +290,7 @@ sunset_stream = (env.from_source(sunset_source, WatermarkStrategy.no_watermarks(
 ```python
 # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
 # Get the Kafka Cluster properties for the producer
-producer_properties = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
+producer_properties = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
 producer_properties.update({
     'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
 })
