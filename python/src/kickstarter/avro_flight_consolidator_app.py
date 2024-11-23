@@ -1,7 +1,7 @@
 from pyflink.common import WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
-from pyflink.datastream.formats.avro import ConfluentRegistryAvroDeserializationSchema, ConfluentRegistryAvroSerializationSchema
+from pyflink.datastream.formats.avro import AvroRowDeserializationSchema, AvroRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
@@ -10,7 +10,7 @@ import argparse
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
 from helper.confluent_properties_udtf import execute_confluent_properties_udtf
-from helper.common import parse_isoformat, load_catalog, load_database
+from helper.common import parse_isoformat, load_catalog, load_database, read_schema_file
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -53,21 +53,14 @@ def main(args):
     producer_properties, _ = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
-    # Note: KafkaSource was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
-    # you will need to use the FlinkKafkaConsumer class.
     topic_name = "airline.skyone"
+    schema_str = read_schema_file("AirlineAvroData.avsc")
     skyone_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
                                 .set_topics(topic_name)
                                 .set_group_id("skyone_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(ConfluentRegistryAvroDeserializationSchema
-                                                             .builder()
-                                                             .set_schema_registry_url(schema_registry_properties['schema.registry.url'])
-                                                             .set_registry_config(schema_registry_properties)
-                                                             .set_schema_registry_subject(f"{topic_name}-value")
-                                                             .set_type_info(AirlineFlightData.get_value_type_info())
-                                                             .build())
+                                .set_value_only_deserializer(AvroRowDeserializationSchema(avro_schema_string=schema_str))
                                 .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
@@ -81,36 +74,26 @@ def main(args):
                                 .set_topics("airline.sunset")
                                 .set_group_id(topic_name)
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(ConfluentRegistryAvroDeserializationSchema
-                                                             .builder()
-                                                             .set_schema_registry_url(schema_registry_properties['schema.registry.url'])
-                                                             .set_registry_config(schema_registry_properties)
-                                                             .set_schema_registry_subject(f"{topic_name}-value")
-                                                             .set_type_info(AirlineFlightData.get_value_type_info())
-                                                             .build())
+                                .set_value_only_deserializer(AvroRowDeserializationSchema(avro_schema_string=schema_str))
                                 .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
     sunset_stream = (env.from_source(sunset_source, WatermarkStrategy.no_watermarks(), "sunset_source")
                         .uid("sunset_source"))
 
-    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
+    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
     topic_name = "airline.flight"
-    flight_sink = (KafkaSink.builder()
-                            .set_kafka_producer_config(producer_properties)
-                            .set_record_serializer(KafkaRecordSerializationSchema
-                                                    .builder()
-                                                    .set_topic(topic_name)
-                                                    .set_value_serialization_schema(ConfluentRegistryAvroSerializationSchema
-                                                                                    .builder()
-                                                                                    .set_schema_registry_url(schema_registry_properties['schema.registry.url'])
-                                                                                    .set_registry_config(schema_registry_properties)
-                                                                                    .set_schema_registry_subject(f"{topic_name}-value")
-                                                                                    .set_type_info(AirlineFlightData.get_value_type_info())
-                                                                                    .build())
-                                                    .build())
-                            .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                            .build())
+    schema_str = read_schema_file("FlightAvroData.avsc")
+    flight_sink = (KafkaSink
+                   .builder()
+                   .set_kafka_producer_config(producer_properties)
+                   .set_record_serializer(KafkaRecordSerializationSchema
+                                          .builder()
+                                          .set_topic(topic_name)
+                                          .set_value_serialization_schema(AvroRowSerializationSchema(avro_schema_string=schema_str))
+                                         .build())
+                   .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                   .build())
     
     # --- Load Apache Iceberg catalog
     catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")

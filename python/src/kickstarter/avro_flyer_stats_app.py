@@ -2,7 +2,7 @@ from pyflink.common import WatermarkStrategy
 from pyflink.datastream.window import TumblingEventTimeWindows, Time
 from pyflink.datastream import StreamExecutionEnvironment, DataStream, TimeCharacteristic
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
-from pyflink.datastream.formats.avro import ConfluentRegistryAvroDeserializationSchema, ConfluentRegistryAvroSerializationSchema
+from pyflink.datastream.formats.avro import AvroRowDeserializationSchema, AvroRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 import logging
@@ -11,7 +11,7 @@ import argparse
 from model.flight_data import FlightData, FlyerStatsData
 from helper.confluent_properties_udtf import execute_confluent_properties_udtf
 from helper.flyer_stats_process_window_function import FlyerStatsProcessWindowFunction
-from helper.common import load_catalog, load_database
+from helper.common import load_catalog, load_database, read_schema_file
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -54,18 +54,13 @@ def main(args):
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
     topic_name = "airline.flight"
+    schema_str = read_schema_file("FlightAvroData.avsc")
     flight_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
                                 .set_topics(topic_name)
                                 .set_group_id("flight_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(ConfluentRegistryAvroDeserializationSchema
-                                                             .builder()
-                                                             .set_schema_registry_url(schema_registry_properties['schema.registry.url'])
-                                                             .set_registry_config(schema_registry_properties)
-                                                             .set_schema_registry_subject(f"{topic_name}-value")
-                                                             .set_type_info(FlightData.get_value_type_info()
-                                                             .build()))
+                                .set_value_only_deserializer(AvroRowDeserializationSchema(avro_schema_string=schema_str))
                                 .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
@@ -73,21 +68,16 @@ def main(args):
 
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
     topic_name = "airline.flyer_stats"
+    schema_str = read_schema_file("FlyerStatsAvroData.avsc")
     flyer_stats_sink = (KafkaSink.builder()
                         .set_kafka_producer_config(producer_properties)
                         .set_record_serializer(KafkaRecordSerializationSchema
                                                 .builder()
                                                 .set_topic(topic_name)
-                                                .set_value_serialization_schema(ConfluentRegistryAvroSerializationSchema
-                                                                                .builder()
-                                                                                .set_schema_registry_url(schema_registry_properties['schema.registry.url'])
-                                                                                .set_registry_config(schema_registry_properties)
-                                                                                .set_schema_registry_subject(f"{topic_name}-value")
-                                                                                .set_type_info(FlyerStatsData.get_value_type_info())
-                                                                                .build())
-                                                .build())
-                        .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                        .build())
+                                                .set_value_serialization_schema(AvroRowSerializationSchema(avro_schema_string=schema_str))
+                                         .build())
+                   .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                   .build())
 
     # --- Load Apache Iceberg catalog
     catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
