@@ -2,7 +2,7 @@ from pyflink.common import WatermarkStrategy
 from pyflink.datastream.window import TumblingEventTimeWindows, Time
 from pyflink.datastream import StreamExecutionEnvironment, DataStream, TimeCharacteristic
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
-from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
+from pyflink.datastream.formats.avro import AvroRowDeserializationSchema, AvroRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 import logging
@@ -56,7 +56,7 @@ def main(args):
                                 .set_topics("airline.flight")
                                 .set_group_id("flight_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(JsonRowDeserializationSchema
+                                .set_value_only_deserializer(AvroRowDeserializationSchema
                                                              .builder()
                                                              .type_info(FlightData.get_value_type_info())
                                                              .build())
@@ -86,7 +86,7 @@ def main(args):
                   .set_record_serializer(KafkaRecordSerializationSchema
                                          .builder()
                                          .set_topic("airline.flyer_stats")
-                                         .set_value_serialization_schema(JsonRowSerializationSchema
+                                         .set_value_serialization_schema(AvroRowSerializationSchema
                                                                          .builder()
                                                                          .with_type_info(FlyerStatsData.get_value_type_info())
                                                                          .build())

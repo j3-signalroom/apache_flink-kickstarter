@@ -1,7 +1,7 @@
 from pyflink.common import WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
-from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
+from pyflink.datastream.formats.avro import AvroRowDeserializationSchema, AvroRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
@@ -58,7 +58,7 @@ def main(args):
                                 .set_topics("airline.skyone")
                                 .set_group_id("skyone_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(JsonRowDeserializationSchema
+                                .set_value_only_deserializer(AvroRowDeserializationSchema
                                                              .builder()
                                                              .type_info(AirlineFlightData.get_value_type_info())
                                                              .build())
@@ -74,7 +74,7 @@ def main(args):
                                 .set_topics("airline.sunset")
                                 .set_group_id("sunset_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(JsonRowDeserializationSchema
+                                .set_value_only_deserializer(AvroRowDeserializationSchema
                                                              .builder()
                                                              .type_info(AirlineFlightData.get_value_type_info())
                                                              .build())
@@ -106,7 +106,7 @@ def main(args):
                    .set_record_serializer(KafkaRecordSerializationSchema
                                           .builder()
                                           .set_topic("airline.flight")
-                                          .set_value_serialization_schema(JsonRowSerializationSchema
+                                          .set_value_serialization_schema(AvroRowSerializationSchema
                                                                           .builder()
                                                                           .with_type_info(FlightData.get_value_type_info())
                                                                           .build())
