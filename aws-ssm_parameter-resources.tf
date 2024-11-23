@@ -96,3 +96,10 @@ resource "aws_ssm_parameter" "producer_kafka_client_acks" {
   type        = "String"
   value       = "all"
 }
+
+resource "aws_ssm_parameter" "producer_kafka_client_transaction_timeout_ms" {
+  name        = "${local.confluent_secrets_path_prefix}/producer_kafka_client/transaction.timeout.ms"
+  description = "This property specifies the maximum amount of time (in milliseconds) a transaction can remain open. This property is critical for Kafka producers that use transactional messaging to ensure exactly-once delivery semantics."
+  type        = "String"
+  value       = "60000"
+}
