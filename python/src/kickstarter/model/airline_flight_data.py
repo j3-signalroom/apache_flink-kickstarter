@@ -88,7 +88,7 @@ class AirlineFlightData():
                 Types.STRING(),
                 Types.STRING(),
                 Types.STRING(),
-                Types.STRING(),
+                Types.BIG_DEC(),
                 Types.STRING(),
                 Types.STRING(),
             ],

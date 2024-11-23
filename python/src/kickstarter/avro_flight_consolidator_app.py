@@ -47,8 +47,9 @@ def main(args):
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
-    # Get the Kafka Cluster properties for the Kafka consumer client
-    consumer_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    # Get the Kafka Cluster properties for the Kafka consumer client, and the
+    # Schema Registry properties for the Avro deserialization schema
+    consumer_properties, scheam_registry_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
     # Note: KafkaSource was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
@@ -60,7 +61,7 @@ def main(args):
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
                                 .set_value_only_deserializer(ConfluentRegistryAvroDeserializationSchema
                                                              .builder()
-                                                             .set_schema_registry_url(consumer_properties['schema.registry.url'])
+                                                             .set_schema_registry_url(scheam_registry_properties['schema.registry.url'])
                                                              .set_schema_registry_subject("airline.skyone-value")
                                                              .set_type_info(AirlineFlightData.get_value_type_info())
                                                              .set_value_type_info(AirlineFlightData.get_value_type_info())
