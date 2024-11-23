@@ -1,7 +1,7 @@
 from pyflink.common import WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
-from pyflink.datastream.formats.avro import AvroRowDeserializationSchema, AvroRowSerializationSchema
+from pyflink.datastream.formats.avro import ConfluentRegistryAvroDeserializationSchema, ConfluentRegistryAvroSerializationSchema
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
@@ -9,7 +9,7 @@ import argparse
 
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
-from helper.kafka_properties_udtf import execute_kafka_properties_udtf
+from helper.confluent_properties_udtf import execute_confluent_properties_udtf
 from helper.utilities import parse_isoformat, load_catalog, load_database
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
@@ -48,7 +48,7 @@ def main(args):
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Get the Kafka Cluster properties for the Kafka consumer client
-    consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    consumer_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
     # Note: KafkaSource was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
@@ -58,8 +58,9 @@ def main(args):
                                 .set_topics("airline.skyone")
                                 .set_group_id("skyone_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(AvroRowDeserializationSchema
+                                .set_value_only_deserializer(ConfluentRegistryAvroDeserializationSchema
                                                              .builder()
+                                                             .set_schema_registry_url(consumer_properties['schema.registry.url'])
                                                              .type_info(AirlineFlightData.get_value_type_info())
                                                              .build())
                                 .build())
@@ -74,7 +75,7 @@ def main(args):
                                 .set_topics("airline.sunset")
                                 .set_group_id("sunset_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(AvroRowDeserializationSchema
+                                .set_value_only_deserializer(ConfluentRegistryAvroDeserializationSchema
                                                              .builder()
                                                              .type_info(AirlineFlightData.get_value_type_info())
                                                              .build())
@@ -86,7 +87,7 @@ def main(args):
 
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
     # Get the Kafka Cluster properties for the producer
-    producer_properties = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
+    producer_properties = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
     producer_properties.update({
         'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
     })
@@ -106,7 +107,7 @@ def main(args):
                    .set_record_serializer(KafkaRecordSerializationSchema
                                           .builder()
                                           .set_topic("airline.flight")
-                                          .set_value_serialization_schema(AvroRowSerializationSchema
+                                          .set_value_serialization_schema(ConfluentRegistryAvroSerializationSchema
                                                                           .builder()
                                                                           .with_type_info(FlightData.get_value_type_info())
                                                                           .build())

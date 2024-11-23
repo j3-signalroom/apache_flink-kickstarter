@@ -2,14 +2,14 @@ from pyflink.common import WatermarkStrategy
 from pyflink.datastream.window import TumblingEventTimeWindows, Time
 from pyflink.datastream import StreamExecutionEnvironment, DataStream, TimeCharacteristic
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
-from pyflink.datastream.formats.avro import AvroRowDeserializationSchema, AvroRowSerializationSchema
+from pyflink.datastream.formats.avro import ConfluentRegistryAvroDeserializationSchema, ConfluentRegistryAvroSerializationSchema
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 import logging
 import argparse
 
 from model.flight_data import FlightData, FlyerStatsData
-from helper.kafka_properties_udtf import execute_kafka_properties_udtf
+from helper.confluent_properties_udtf import execute_confluent_properties_udtf
 from helper.process_flyer_stats_data_function import ProcessFlyerStatsDataFunction
 from helper.utilities import load_catalog, load_database
 
@@ -48,7 +48,7 @@ def main(args):
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Get the Kafka Cluster properties for the consumer
-    consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    consumer_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
     flight_source = (KafkaSource.builder()
@@ -56,7 +56,7 @@ def main(args):
                                 .set_topics("airline.flight")
                                 .set_group_id("flight_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(AvroRowDeserializationSchema
+                                .set_value_only_deserializer(ConfluentRegistryAvroDeserializationSchema
                                                              .builder()
                                                              .type_info(FlightData.get_value_type_info())
                                                              .build())
@@ -66,7 +66,7 @@ def main(args):
     flight_data_stream = env.from_source(flight_source, WatermarkStrategy.for_monotonous_timestamps(), "flight_data_source")
 
     # Get the Kafka Cluster properties for the producer
-    producer_properties = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
+    producer_properties = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
     producer_properties.update({
         'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
     })
@@ -86,7 +86,7 @@ def main(args):
                   .set_record_serializer(KafkaRecordSerializationSchema
                                          .builder()
                                          .set_topic("airline.flyer_stats")
-                                         .set_value_serialization_schema(AvroRowSerializationSchema
+                                         .set_value_serialization_schema(ConfluentRegistryAvroSerializationSchema
                                                                          .builder()
                                                                          .with_type_info(FlyerStatsData.get_value_type_info())
                                                                          .build())

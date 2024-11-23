@@ -595,6 +595,7 @@ version = "0.54.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "apache-flink" },
+    { name = "avro-python3" },
     { name = "boto3" },
     { name = "botocore" },
     { name = "confluent-kafka" },
@@ -612,6 +613,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "apache-flink", specifier = "==1.20.0" },
+    { name = "avro-python3", specifier = ">=1.10.2" },
     { name = "boto3", specifier = ">=1.35.36" },
     { name = "botocore", specifier = ">=1.35.36" },
     { name = "confluent-kafka", specifier = "==2.6.0" },
