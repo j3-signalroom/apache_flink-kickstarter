@@ -1,6 +1,7 @@
 from pyflink.datastream import StreamExecutionEnvironment
 from datetime import datetime, timezone
 from pyflink.table.catalog import Catalog
+import os
 
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
@@ -123,3 +124,24 @@ def load_database(tbl_env: StreamExecutionEnvironment, catalog: Catalog, databas
     except Exception as e:
         print(f"A critical error occurred to during the processing of the database because {e}")
         exit(1)
+
+def read_schema_file(schema_filename: str) -> str:
+    """This method reads the schema from the schema file.
+
+    Args:
+        schema_filename (str): The schema_filename is the filename of the schema file.
+
+    Returns:
+        str: The schema is returned as a string.
+    """
+    # Get the directory of the current script
+    path = os.path.realpath(os.path.dirname(__file__))
+
+    # Define the path to the avro file
+    avro_file_path = os.path.join(path, "../model/avro/")
+
+    # Resolve the absolute path to the avro file
+    avro_file_path = os.path.realpath(avro_file_path)
+
+    with open(f"{path}/{schema_filename}") as schema_file:
+        return schema_file.read()

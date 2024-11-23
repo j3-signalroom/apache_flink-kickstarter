@@ -61,6 +61,9 @@ def main(args):
                                 .set_value_only_deserializer(ConfluentRegistryAvroDeserializationSchema
                                                              .builder()
                                                              .set_schema_registry_url(consumer_properties['schema.registry.url'])
+                                                             .set_schema_registry_subject("airline.skyone-value")
+                                                             .set_type_info(AirlineFlightData.get_value_type_info())
+                                                             .set_value_type_info(AirlineFlightData.get_value_type_info())
                                                              .type_info(AirlineFlightData.get_value_type_info())
                                                              .build())
                                 .build())

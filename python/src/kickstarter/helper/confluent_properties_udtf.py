@@ -54,7 +54,7 @@ class ConfluentProperties(TableFunction):
         # Systems Manager Parameter Store.
         secret_path_prefix = f"/confluent_cloud_resource/{self._service_account_user}"
 
-        properties = self.get_confluent_properties(
+        properties = self.__get_confluent_properties(
             f"{secret_path_prefix}/kafka_cluster/python_client",
             f"{secret_path_prefix}/schema_registry_cluster/python_client",
             f"{secret_path_prefix}/consumer_kafka_client" if self._for_consumer else f"{secret_path_prefix}/producer_kafka_client"
@@ -65,7 +65,7 @@ class ConfluentProperties(TableFunction):
             for property_key, property_value in properties.items():
                 yield Row(str(property_key), str(property_value))
 
-    def get_confluent_properties(self, kafka_cluster_secrets_path: str, schema_registry_cluster_secrets_path: str, client_parameters_path: str) -> tuple[str, str]:
+    def __get_confluent_properties(self, kafka_cluster_secrets_path: str, schema_registry_cluster_secrets_path: str, client_parameters_path: str) -> tuple[str, str]:
         """This method returns the Kafka Cluster/Schema Registry Cluster properties from the AWS Secrets 
         Manager and Parameter Store.
 
@@ -82,7 +82,7 @@ class ConfluentProperties(TableFunction):
         properties = {}
 
         # Retrieve the Kafka Cluster properties from the AWS Secrets Manager
-        secret = self.get_secrets(kafka_cluster_secrets_path)
+        secret = self.__get_secrets(kafka_cluster_secrets_path)
         if secret is not None:
             try:
                 # Convert the JSON object to a dictionary
@@ -96,7 +96,7 @@ class ConfluentProperties(TableFunction):
             return None
         
         # Retrieve the Schema Registry Cluster properties from the AWS Secrets Manager
-        secret = self.get_secrets(schema_registry_cluster_secrets_path)
+        secret = self.__get_secrets(schema_registry_cluster_secrets_path)
         if secret is not None:
             try:
                 # Convert the JSON object to a dictionary
@@ -110,7 +110,7 @@ class ConfluentProperties(TableFunction):
             return None
 
         # Retrieve the parameters from the AWS Systems Manager Parameter Store
-        parameters = self.get_parameters(client_parameters_path)
+        parameters = self.__get_parameters(client_parameters_path)
         if parameters is not None:
             for key in parameters:
                 properties[key] = parameters[key]
@@ -119,7 +119,7 @@ class ConfluentProperties(TableFunction):
             return None
         
         
-    def get_secrets(self, secrets_name: str) -> (dict):
+    def __get_secrets(self, secrets_name: str) -> (dict):
         """This method retrieve secrets from the AWS Secrets Manager.
         
         Arg(s):
@@ -160,7 +160,7 @@ class ConfluentProperties(TableFunction):
                     raise ValueError(e.response['Error']['Code'])
             return None
 
-    def get_parameters(self, parameter_path: str) -> (dict):
+    def __get_parameters(self, parameter_path: str) -> (dict):
         """This method retrieves the parameteres from the System Manager Parameter Store.
         Moreover, it converts the values to the appropriate data type.
         
