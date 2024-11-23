@@ -86,26 +86,18 @@ public class AvroDataGeneratorApp {
          */
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
 
-        // --- Create a StreamTableEnvironment
+        // --- Create a StreamTableEnvironment.
         EnvironmentSettings settings = 
             EnvironmentSettings.newInstance()
                                .inStreamingMode()
                                .build();
         StreamTableEnvironment tblEnv = StreamTableEnvironment.create(env, settings);
 
-		// --- Kafka Producer Client Properties
+		// --- Kafka Producer Client Properties.
         Properties producerProperties = Common.collectConfluentProperties(env, serviceAccountUser, false);
 
-        /*
-         * Retrieve the schema registry properties from the producer properties 
-         * and store them in a map.
-         */
-        Map<String, String> registryConfigs = new HashMap<String, String>();
-        for (String key : producerProperties.stringPropertyNames()) {
-            if (key.startsWith("schema.registry.")) {
-                registryConfigs.put(key, producerProperties.getProperty(key));
-            }
-        }
+        // --- Retrieve the schema registry properties and store it in a map.
+        Map<String, String> registryConfigs = Common.extractRegistryConfigs(producerProperties);
 
         // --- Create the data streams for the two airlines.
         DataStream<AirlineAvroData> skyOneDataStream = SinToKafkaTopic(env, "SKY1", "skyone", producerProperties, registryConfigs);

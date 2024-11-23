@@ -17,6 +17,7 @@ import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.util.CloseableIterator;
 import org.slf4j.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class Common {
@@ -104,4 +105,18 @@ public class Common {
         return properties;
     }
 
+    /**
+     * This method extracts the registry configurations from the properties.
+     * 
+     * @param properties the properties to extract the registry configurations from.
+     * 
+     * @return a map of the registry configurations.
+     */
+    public static Map<String, String> extractRegistryConfigs(Properties properties) {
+        return properties
+                    .stringPropertyNames()
+                    .stream()
+                    .filter(key -> key.startsWith("schema.registry."))
+                    .collect(Collectors.toMap(key -> key, properties::getProperty));
+    }
 }

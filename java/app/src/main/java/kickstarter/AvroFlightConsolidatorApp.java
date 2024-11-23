@@ -64,16 +64,8 @@ public class AvroFlightConsolidatorApp {
         Properties consumerProperties = Common.collectConfluentProperties(env, serviceAccountUser, true);
         Properties producerProperties = Common.collectConfluentProperties(env, serviceAccountUser, false);
         
-        /*
-         * Retrieve the schema registry properties from the producer properties 
-         * and store them in a map.
-         */
-        Map<String, String> registryConfigs = new HashMap<String, String>();
-        for (String key : producerProperties.stringPropertyNames()) {
-            if (key.startsWith("schema.registry.")) {
-                registryConfigs.put(key, producerProperties.getProperty(key));
-            }
-        }
+        // --- Retrieve the schema registry properties and store it in a map.
+        Map<String, String> registryConfigs = Common.extractRegistryConfigs(producerProperties);
         
         /*
          * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
