@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "FlyerStatsAvroData",
+  "namespace": "kickstarter.model",
+  "fields": [
+    {
+      "name": "email_address",
+      "type": "string"
+    },
+    {
+      "name": "total_flight_duration",
+      "type": "long"
+    },
+    {
+      "name": "number_of_flights",
+      "type": "long"
+    }
+  ]
+}

@@ -21,11 +21,11 @@
  */
 package kickstarter;
 
+import org.apache.flink.formats.avro.registry.confluent.*;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.sink.*;
-import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.*;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
-import org.apache.flink.formats.json.*;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import java.util.*;
@@ -36,8 +36,8 @@ import org.slf4j.*;
 import kickstarter.model.*;
 
 
-public class FlightImporterApp {
-    private static final Logger logger = LoggerFactory.getLogger(FlightImporterApp.class);
+public class AvroFlightConsolidatorApp {
+    private static final Logger logger = LoggerFactory.getLogger(AvroFlightConsolidatorApp.class);
     
 
 	/**
@@ -51,7 +51,6 @@ public class FlightImporterApp {
      * When the runtime catches an exception, it aborts the task and lets the fail-over logic
 	 * decide whether to retry the task execution.
 	 */
-    @SuppressWarnings("rawtypes")
     public static void main(String[] args) throws Exception {
         /*
          * Retrieve the value(s) from the command line argument(s)
@@ -61,115 +60,72 @@ public class FlightImporterApp {
         // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         
+        // --- Kafka Consumer and Producer Client Properties
+        Properties consumerProperties = Common.collectConfluentProperties(env, serviceAccountUser, true);
+        Properties producerProperties = Common.collectConfluentProperties(env, serviceAccountUser, false);
+        
         /*
-		 * --- Kafka Consumer Config
-		 * Retrieve the properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
-		 * Then ingest properties into the Flink app
-		 */
-        DataStream<Properties> dataStreamConsumerProperties = 
-			env.fromData(new Properties())
-			   .map(new ConfluentClientConfigurationMapFunction(true, serviceAccountUser))
-			   .name("kafka_consumer_properties");
-		Properties consumerProperties = new Properties();
-
-        /*
-		 * Execute the data stream and collect the properties.
-		 * 
-		 * Note, the try-with-resources block ensures that the close() method of the CloseableIterator is
-		 * called automatically at the end, even if an exception occurs during iteration.
-		 */
-		try {
-		    dataStreamConsumerProperties
-                .executeAndCollect()
-                .forEachRemaining(typeValue -> {
-                    consumerProperties.putAll(typeValue);
-                });
-        } catch (final Exception e) {
-            System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-		}
-
-        /*
-		 * --- Kafka Producer Config
-		 * Retrieve the properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
-		 * Then ingest properties into the Flink app
-		 */
-        DataStream<Properties> dataStreamProducerProperties = 
-			env.fromData(new Properties())
-			   .map(new ConfluentClientConfigurationMapFunction(false, serviceAccountUser))
-			   .name("kafka_producer_properties");
-		Properties producerProperties = new Properties();
-
-        /*
-         * Execute the data stream and collect the properties.
-         * 
-         * Note, the try-with-resources block ensures that the close() method of the CloseableIterator is
-         * called automatically at the end, even if an exception occurs during iteration.
+         * Retrieve the schema registry properties from the producer properties 
+         * and store them in a map.
          */
-        try{
-            dataStreamProducerProperties.executeAndCollect()
-                                        .forEachRemaining(typeValue -> {
-                                            producerProperties.putAll(typeValue);
-                                        });
-        } catch (final Exception e) {
-            System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
+        Map<String, String> registryConfigs = new HashMap<String, String>();
+        for (String key : producerProperties.stringPropertyNames()) {
+            if (key.startsWith("schema.registry.")) {
+                registryConfigs.put(key, producerProperties.getProperty(key));
+            }
         }
         
         /*
          * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
          */
-        @SuppressWarnings("unchecked")
-        KafkaSource<AirlineData> skyOneSource = KafkaSource.<AirlineData>builder()
+        KafkaSource<AirlineAvroData> skyOneSource = KafkaSource.<AirlineAvroData>builder()
             .setProperties(consumerProperties)
             .setTopics("airline.skyone")
             .setGroupId("skyone_group")
             .setStartingOffsets(OffsetsInitializer.earliest())
-            .setValueOnlyDeserializer(new JsonDeserializationSchema(AirlineData.class))
+            .setValueOnlyDeserializer(ConfluentRegistryAvroDeserializationSchema.forSpecific(AirlineAvroData.class, producerProperties.getProperty("schema.registry.url"), registryConfigs))
             .build();
 
         /*
          * Takes the results of the Kafka source and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
-        DataStream<AirlineData> skyOneStream = env
+        DataStream<AirlineAvroData> skyOneStream = env
             .fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
         /*
          * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset`
          */
-		@SuppressWarnings("unchecked")
-        KafkaSource<AirlineData> sunsetSource = KafkaSource.<AirlineData>builder()
+        KafkaSource<AirlineAvroData> sunsetSource = KafkaSource.<AirlineAvroData>builder()
             .setProperties(consumerProperties)
             .setTopics("airline.sunset")
             .setGroupId("sunset_group")
             .setStartingOffsets(OffsetsInitializer.earliest())
-            .setValueOnlyDeserializer(new JsonDeserializationSchema(AirlineData.class))
+            .setValueOnlyDeserializer(ConfluentRegistryAvroDeserializationSchema.forSpecific(AirlineAvroData.class, producerProperties.getProperty("schema.registry.url"), registryConfigs))
             .build();
 
         /*
          * Takes the results of the Kafka source and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
-        DataStream<AirlineData> sunsetStream = env
+        DataStream<AirlineAvroData> sunsetStream = env
             .fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
         /*
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight` with the
          * specified serializer
          */
-		KafkaRecordSerializationSchema<FlightData> flightSerializer = KafkaRecordSerializationSchema.<FlightData>builder()
-            .setTopic("airline.flight")
-			.setValueSerializationSchema(new JsonSerializationSchema<FlightData>(Common::getMapper))
+        final String topicName = "airline.flight";
+		KafkaRecordSerializationSchema<FlightAvroData> flightSerializer = KafkaRecordSerializationSchema.<FlightAvroData>builder()
+            .setTopic(topicName)
+            .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forSpecific(FlightAvroData.class, topicName + "-value", producerProperties.getProperty("schema.registry.url"), registryConfigs))
             .build();
 
         /*
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
-        KafkaSink<FlightData> flightSink = KafkaSink.<FlightData>builder()
+        KafkaSink<FlightAvroData> flightSink = KafkaSink.<FlightAvroData>builder()
             .setKafkaProducerConfig(producerProperties)
             .setRecordSerializer(flightSerializer)
             .build();
@@ -178,36 +134,63 @@ public class FlightImporterApp {
          * Defines the workflow for the Flink job graph (DAG) by connecting the data streams and
          * applying transformations to the data streams
          */
-        defineWorkflow(skyOneStream, sunsetStream)
+        consolidatesFlightData(skyOneStream, sunsetStream)
             .sinkTo(flightSink)
             .name("flightdata_sink");
 
         try {
             // --- Execute the Flink job graph (DAG)
-            env.execute("FlightImporterApp");
+            env.execute("AvroFlightConsolidatorApp");
         } catch (Exception e) {
             logger.error("The App stopped early due to the following: {}", e.getMessage());
         }
     }
 
     /**
-     * This method defines the workflow for the Flink job graph (DAG) by connecting the 
-     * data streams and applying transformations to the data streams.
+     * This method consolidates the flight data from the two airlines.
      * 
-     * @param skyOneSource - The data stream source for the `airline.skyone` Kafka topic
-     * @param sunsetSource - The data stream source for the `airline.sunset` Kafka topic
-     * @return The data stream that is the result of the transformations
+     * @param skyOneSource - The datastream source for the `airline.skyone` Kafka topic
+     * @param sunsetSource - The datastream source for the `airline.sunset` Kafka topic
+     * @return the consolidate flight data into one datastream.
      */
-	public static DataStream<FlightData> defineWorkflow(DataStream<AirlineData> skyOneSource, DataStream<AirlineData> sunsetSource) {
-        DataStream<FlightData> skyOneFlightStream = 
+	public static DataStream<FlightAvroData> consolidatesFlightData(DataStream<AirlineAvroData> skyOneSource, DataStream<AirlineAvroData> sunsetSource) {
+        DataStream<FlightAvroData> skyOneFlightStream = 
             skyOneSource
                 .filter(flight -> LocalDateTime.parse(flight.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).isAfter(LocalDateTime.now()))
-                .map(flight -> flight.toFlightData("SkyOne"));
+                .map(flight -> 
+                    {
+                        FlightAvroData flightData = new FlightAvroData();
 
-		DataStream<FlightData> sunsetFlightStream = 
+                        flightData.setEmailAddress(flight.getEmailAddress());
+                        flightData.setDepartureTime(flight.getDepartureTime());
+                        flightData.setDepartureAirportCode(flight.getDepartureAirportCode());
+                        flightData.setArrivalTime(flight.getArrivalTime());
+                        flightData.setArrivalAirportCode(flight.getArrivalAirportCode());
+                        flightData.setFlightNumber(flight.getFlightNumber());
+                        flightData.setConfirmationCode(flight.getConfirmationCode());
+                        
+                        flightData.setAirline("SkyOne");
+                        return flightData;
+                    });
+
+		DataStream<FlightAvroData> sunsetFlightStream = 
             sunsetSource
-            .filter(flight -> LocalDateTime.parse(flight.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).isAfter(LocalDateTime.now()))
-                .map(flight -> flight.toFlightData("Sunset"));
+                .filter(flight -> LocalDateTime.parse(flight.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).isAfter(LocalDateTime.now()))
+                .map(flight -> 
+                    {
+                        FlightAvroData flightData = new FlightAvroData();
+
+                        flightData.setEmailAddress(flight.getEmailAddress());
+                        flightData.setDepartureTime(flight.getDepartureTime());
+                        flightData.setDepartureAirportCode(flight.getDepartureAirportCode());
+                        flightData.setArrivalTime(flight.getArrivalTime());
+                        flightData.setArrivalAirportCode(flight.getArrivalAirportCode());
+                        flightData.setFlightNumber(flight.getFlightNumber());
+                        flightData.setConfirmationCode(flight.getConfirmationCode());
+                        
+                        flightData.setAirline("Sunset");
+                        return flightData;
+                    });
 
 		return skyOneFlightStream.union(sunsetFlightStream);
     }

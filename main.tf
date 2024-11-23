@@ -3,7 +3,7 @@ terraform {
       organization = "signalroom"
 
         workspaces {
-            name = "apache-flink-kickstarter-0005"
+            name = "apache-flink-kickstarter-0007"
         }
   }
 
@@ -14,15 +14,15 @@ terraform {
   required_providers {
         confluent = {
             source  = "confluentinc/confluent"
-            version = "~> 2.9.0"
+            version = "~> 2.10.0"
         }
         aws = {
             source  = "hashicorp/aws"
-            version = "~> 5.75.0"
+            version = "~> 5.77.0"
         }
         snowflake = {
             source = "Snowflake-Labs/snowflake"
-            version = "~> 0.97.0"
+            version = "~> 0.98.0"
         }
     }
 }

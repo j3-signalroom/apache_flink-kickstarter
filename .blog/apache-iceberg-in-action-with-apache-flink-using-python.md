@@ -127,17 +127,16 @@ The [`flight_importer_app`](https://github.com/j3-signalroom/apache_flink-kickst
 
 ### Step 1 of 14. The required JARs for the Flink app
 ```bash
-curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.19.1/flink-s3-fs-hadoop-1.19.1.jar" -o "/opt/flink/lib/flink-s3-fs-hadoop-1.19.1.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/1.19.1/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar" -o "/opt/flink/lib/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.4.0/hadoop-common-3.4.0.jar" -o "/opt/flink/lib/hadoop-common-3.4.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.20.0/flink-s3-fs-hadoop-1.20.0.jar" -o "/opt/flink/lib/flink-s3-fs-hadoop-1.20.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.4.1/hadoop-common-3.4.1.jar" -o "/opt/flink/lib/hadoop-common-3.4.1.jar"
 curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-shaded-hadoop-2-uber/2.8.3-10.0/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" -o "/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.19/1.6.1/iceberg-flink-runtime-1.19-1.6.1.jar" -o "/opt/flink/lib/iceberg-flink-runtime-1.19-1.6.1.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws-bundle/1.6.1/iceberg-aws-bundle-1.6.1.jar" -o "/opt/flink/lib/iceberg-aws-bundle-1.6.1.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-hdfs-client/3.4.0/hadoop-hdfs-client-3.4.0.jar" -o "/opt/flink/lib/hadoop-hdfs-client-3.4.0.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.2.0-1.19/flink-sql-connector-kafka-3.2.0-1.19.jar" -o "/opt/flink/lib/flink-sql-connector-kafka-3.2.0-1.19.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-connector-kafka/3.2.0-1.19/flink-connector-kafka-3.2.0-1.19.jar" -o "/opt/flink/lib/flink-connector-kafka-3.2.0-1.19.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-json/1.19.1/flink-json-1.19.1.jar" -o "/opt/flink/lib/flink-json-1.19.1.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.7.0/kafka-clients-3.7.0.jar" -o "/opt/flink/lib/kafka-clients-3.7.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.20/1.7.0/iceberg-flink-runtime-1.20-1.7.0.jar" -o "/opt/flink/lib/iceberg-flink-runtime-1.20-1.7.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws-bundle/1.7.0/iceberg-aws-bundle-1.7.0.jar" -o "/opt/flink/lib/iceberg-aws-bundle-1.7.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-hdfs-client/3.4.1/hadoop-hdfs-client-3.4.1.jar" -o "/opt/flink/lib/hadoop-hdfs-client-3.4.1.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.3.0-1.20/flink-sql-connector-kafka-3.3.0-1.20.jar" -o "/opt/flink/lib/flink-sql-connector-kafka-3.3.0-1.20.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-connector-kafka/3.3.0-1.20/flink-connector-kafka-3.3.0-1.20.jar" -o "/opt/flink/lib/flink-connector-kafka-3.3.0-1.20.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-json/1.20.0/flink-json-1.20.0.jar" -o "/opt/flink/lib/flink-json-1.20.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.8.0/kafka-clients-3.8.0.jar" -o "/opt/flink/lib/kafka-clients-3.8.0.jar"
 ```
 
 - The code example above is the list of JARs I used to run the Flink app successfully. These JARs include the Flink S3 connector, Flink Hive connector, Hadoop, Iceberg, Kafka, and JSON connectors. These dependencies are essential for integrating Flink with Apache Iceberg, Kafka, and other services required for the streaming analytics pipeline.
@@ -150,7 +149,7 @@ description = "Apache Flink Kickstarter"
 readme = "README.md"
 requires-python = "~=3.11.9"
 dependencies = [
-    "apache-flink==1.19.1",
+    "apache-flink==1.20.0",
     "boto3>=1.35.36",
     "botocore>=1.35.36",
     "confluent-kafka==2.5.3",
@@ -584,4 +583,4 @@ This code example embodies the principles of modern data architectures, such as 
 - Jeffrey Jonathan Jennings.  [Apache Iceberg in Action with Apache Flink using Java](https://thej3.com/apache-iceberg-in-action-with-apache-flink-using-java-158500688ead).  Medium, 2024.
 - Tomer Shiran, Jason Hughes & Alex Merced.  [Apache Iceberg — The Definitive Guide](https://www.dremio.com/wp-content/uploads/2023/02/apache-iceberg-TDG_ER1.pdf).  O’Reilly, 2024.
 - Jeffrey Jonathan Jennings. [Apache Flink Kickstarter](https://github.com/j3-signalroom/apache_flink-kickstarter/tree/main).  GitHub, 2024.
-- Apache Iceberg Community.  [Apache Iceberg v1.6.1 Documentation](https://iceberg.apache.org/docs/1.6.1/). The Apache Software Foundation, 2024.
+- Apache Iceberg Community.  [Apache Iceberg v1.7.0 Documentation](https://iceberg.apache.org/docs/1.7.0/). The Apache Software Foundation, 2024.

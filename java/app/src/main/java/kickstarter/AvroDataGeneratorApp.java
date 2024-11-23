@@ -93,34 +93,8 @@ public class AvroDataGeneratorApp {
                                .build();
         StreamTableEnvironment tblEnv = StreamTableEnvironment.create(env, settings);
 
-		/*
-		 * --- Kafka Producer Config
-		 * Retrieve the properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
-		 * Then ingest properties into the Flink app's data stream.
-		 */
-        DataStream<Properties> dataStreamProducerProperties = 
-			env.fromData(new Properties())
-			   .map(new ConfluentClientConfigurationMapFunction(false, serviceAccountUser))
-			   .name("kafka_producer_properties");
-		Properties producerProperties = new Properties();
-
-		/*
-		 * Execute the data stream and collect the properties.
-		 * 
-		 * Note, the try-with-resources block ensures that the close() method of the CloseableIterator is
-		 * called automatically at the end, even if an exception occurs during iteration.
-		 */
-		try {
-			dataStreamProducerProperties
-				.executeAndCollect()
-                .forEachRemaining(typeValue -> {
-                    producerProperties.putAll(typeValue);
-                });
-		} catch (final Exception e) {
-            System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-		}
+		// --- Kafka Producer Client Properties
+        Properties producerProperties = Common.collectConfluentProperties(env, serviceAccountUser, false);
 
         /*
          * Retrieve the schema registry properties from the producer properties 
@@ -244,7 +218,7 @@ public class AvroDataGeneratorApp {
         DataStream<AirlineAvroData> airlineDataStream = env.fromSource(airlineSource, WatermarkStrategy.noWatermarks(), airline + "_source");
 
         // --- Sets up a Flink Kafka sink to produce data to the Kafka topic with the specified serializer.
-        final String topicName = "airline." + airline + "_avro";
+        final String topicName = "airline." + airline;
         KafkaRecordSerializationSchema<AirlineAvroData> airlineSerializer = 
             KafkaRecordSerializationSchema.<AirlineAvroData>builder()
                 .setTopic(topicName)

@@ -12,29 +12,26 @@ import org.apache.avro.message.BinaryMessageDecoder;
 import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
-public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -5908482135183982478L;
+public class FlightAvroData extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
+  private static final long serialVersionUID = -5051099629934790308L;
 
 
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AirlineAvroData\",\"namespace\":\"kickstarter.model\",\"fields\":[{\"name\":\"email_address\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"departure_time\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"departure_airport_code\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"arrival_time\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"arrival_airport_code\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"flight_duration\",\"type\":\"long\"},{\"name\":\"flight_number\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"confirmation_code\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"ticket_price\",\"type\":{\"type\":\"bytes\",\"logicalType\":\"decimal\",\"precision\":10,\"scale\":2}},{\"name\":\"aircraft\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"booking_agency_email\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"FlightAvroData\",\"namespace\":\"kickstarter.model\",\"fields\":[{\"name\":\"email_address\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"departure_time\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"departure_airport_code\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"arrival_time\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"arrival_airport_code\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"flight_number\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"confirmation_code\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"airline\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static final SpecificData MODEL$ = new SpecificData();
-  static {
-    MODEL$.addLogicalTypeConversion(new org.apache.avro.Conversions.DecimalConversion());
-  }
 
-  private static final BinaryMessageEncoder<AirlineAvroData> ENCODER =
+  private static final BinaryMessageEncoder<FlightAvroData> ENCODER =
       new BinaryMessageEncoder<>(MODEL$, SCHEMA$);
 
-  private static final BinaryMessageDecoder<AirlineAvroData> DECODER =
+  private static final BinaryMessageDecoder<FlightAvroData> DECODER =
       new BinaryMessageDecoder<>(MODEL$, SCHEMA$);
 
   /**
    * Return the BinaryMessageEncoder instance used by this class.
    * @return the message encoder used by this class
    */
-  public static BinaryMessageEncoder<AirlineAvroData> getEncoder() {
+  public static BinaryMessageEncoder<FlightAvroData> getEncoder() {
     return ENCODER;
   }
 
@@ -42,7 +39,7 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
    * Return the BinaryMessageDecoder instance used by this class.
    * @return the message decoder used by this class
    */
-  public static BinaryMessageDecoder<AirlineAvroData> getDecoder() {
+  public static BinaryMessageDecoder<FlightAvroData> getDecoder() {
     return DECODER;
   }
 
@@ -51,12 +48,12 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
    * @param resolver a {@link SchemaStore} used to find schemas by fingerprint
    * @return a BinaryMessageDecoder instance for this class backed by the given SchemaStore
    */
-  public static BinaryMessageDecoder<AirlineAvroData> createDecoder(SchemaStore resolver) {
+  public static BinaryMessageDecoder<FlightAvroData> createDecoder(SchemaStore resolver) {
     return new BinaryMessageDecoder<>(MODEL$, SCHEMA$, resolver);
   }
 
   /**
-   * Serializes this AirlineAvroData to a ByteBuffer.
+   * Serializes this FlightAvroData to a ByteBuffer.
    * @return a buffer holding the serialized data for this instance
    * @throws java.io.IOException if this instance could not be serialized
    */
@@ -65,12 +62,12 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
   }
 
   /**
-   * Deserializes a AirlineAvroData from a ByteBuffer.
+   * Deserializes a FlightAvroData from a ByteBuffer.
    * @param b a byte buffer holding serialized data for an instance of this class
-   * @return a AirlineAvroData instance decoded from the given buffer
+   * @return a FlightAvroData instance decoded from the given buffer
    * @throws java.io.IOException if the given bytes could not be deserialized into an instance of this class
    */
-  public static AirlineAvroData fromByteBuffer(
+  public static FlightAvroData fromByteBuffer(
       java.nio.ByteBuffer b) throws java.io.IOException {
     return DECODER.decode(b);
   }
@@ -80,19 +77,16 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
   private java.lang.String departure_airport_code;
   private java.lang.String arrival_time;
   private java.lang.String arrival_airport_code;
-  private long flight_duration;
   private java.lang.String flight_number;
   private java.lang.String confirmation_code;
-  private java.nio.ByteBuffer ticket_price;
-  private java.lang.String aircraft;
-  private java.lang.String booking_agency_email;
+  private java.lang.String airline;
 
   /**
    * Default constructor.  Note that this does not initialize fields
    * to their default values from the schema.  If that is desired then
    * one should use <code>newBuilder()</code>.
    */
-  public AirlineAvroData() {}
+  public FlightAvroData() {}
 
   /**
    * All-args constructor.
@@ -101,25 +95,19 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
    * @param departure_airport_code The new value for departure_airport_code
    * @param arrival_time The new value for arrival_time
    * @param arrival_airport_code The new value for arrival_airport_code
-   * @param flight_duration The new value for flight_duration
    * @param flight_number The new value for flight_number
    * @param confirmation_code The new value for confirmation_code
-   * @param ticket_price The new value for ticket_price
-   * @param aircraft The new value for aircraft
-   * @param booking_agency_email The new value for booking_agency_email
+   * @param airline The new value for airline
    */
-  public AirlineAvroData(java.lang.String email_address, java.lang.String departure_time, java.lang.String departure_airport_code, java.lang.String arrival_time, java.lang.String arrival_airport_code, java.lang.Long flight_duration, java.lang.String flight_number, java.lang.String confirmation_code, java.nio.ByteBuffer ticket_price, java.lang.String aircraft, java.lang.String booking_agency_email) {
+  public FlightAvroData(java.lang.String email_address, java.lang.String departure_time, java.lang.String departure_airport_code, java.lang.String arrival_time, java.lang.String arrival_airport_code, java.lang.String flight_number, java.lang.String confirmation_code, java.lang.String airline) {
     this.email_address = email_address;
     this.departure_time = departure_time;
     this.departure_airport_code = departure_airport_code;
     this.arrival_time = arrival_time;
     this.arrival_airport_code = arrival_airport_code;
-    this.flight_duration = flight_duration;
     this.flight_number = flight_number;
     this.confirmation_code = confirmation_code;
-    this.ticket_price = ticket_price;
-    this.aircraft = aircraft;
-    this.booking_agency_email = booking_agency_email;
+    this.airline = airline;
   }
 
   @Override
@@ -137,35 +125,11 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
     case 2: return departure_airport_code;
     case 3: return arrival_time;
     case 4: return arrival_airport_code;
-    case 5: return flight_duration;
-    case 6: return flight_number;
-    case 7: return confirmation_code;
-    case 8: return ticket_price;
-    case 9: return aircraft;
-    case 10: return booking_agency_email;
+    case 5: return flight_number;
+    case 6: return confirmation_code;
+    case 7: return airline;
     default: throw new IndexOutOfBoundsException("Invalid index: " + field$);
     }
-  }
-
-  private static final org.apache.avro.Conversion<?>[] conversions =
-      new org.apache.avro.Conversion<?>[] {
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
-  };
-
-  @Override
-  public org.apache.avro.Conversion<?> getConversion(int field) {
-    return conversions[field];
   }
 
   // Used by DatumReader.  Applications should not call.
@@ -178,12 +142,9 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
     case 2: departure_airport_code = value$ != null ? value$.toString() : null; break;
     case 3: arrival_time = value$ != null ? value$.toString() : null; break;
     case 4: arrival_airport_code = value$ != null ? value$.toString() : null; break;
-    case 5: flight_duration = (java.lang.Long)value$; break;
-    case 6: flight_number = value$ != null ? value$.toString() : null; break;
-    case 7: confirmation_code = value$ != null ? value$.toString() : null; break;
-    case 8: ticket_price = (java.nio.ByteBuffer)value$; break;
-    case 9: aircraft = value$ != null ? value$.toString() : null; break;
-    case 10: booking_agency_email = value$ != null ? value$.toString() : null; break;
+    case 5: flight_number = value$ != null ? value$.toString() : null; break;
+    case 6: confirmation_code = value$ != null ? value$.toString() : null; break;
+    case 7: airline = value$ != null ? value$.toString() : null; break;
     default: throw new IndexOutOfBoundsException("Invalid index: " + field$);
     }
   }
@@ -274,23 +235,6 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
   }
 
   /**
-   * Gets the value of the 'flight_duration' field.
-   * @return The value of the 'flight_duration' field.
-   */
-  public long getFlightDuration() {
-    return flight_duration;
-  }
-
-
-  /**
-   * Sets the value of the 'flight_duration' field.
-   * @param value the value to set.
-   */
-  public void setFlightDuration(long value) {
-    this.flight_duration = value;
-  }
-
-  /**
    * Gets the value of the 'flight_number' field.
    * @return The value of the 'flight_number' field.
    */
@@ -325,108 +269,71 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
   }
 
   /**
-   * Gets the value of the 'ticket_price' field.
-   * @return The value of the 'ticket_price' field.
+   * Gets the value of the 'airline' field.
+   * @return The value of the 'airline' field.
    */
-  public java.nio.ByteBuffer getTicketPrice() {
-    return ticket_price;
+  public java.lang.String getAirline() {
+    return airline;
   }
 
 
   /**
-   * Sets the value of the 'ticket_price' field.
+   * Sets the value of the 'airline' field.
    * @param value the value to set.
    */
-  public void setTicketPrice(java.nio.ByteBuffer value) {
-    this.ticket_price = value;
+  public void setAirline(java.lang.String value) {
+    this.airline = value;
   }
 
   /**
-   * Gets the value of the 'aircraft' field.
-   * @return The value of the 'aircraft' field.
+   * Creates a new FlightAvroData RecordBuilder.
+   * @return A new FlightAvroData RecordBuilder
    */
-  public java.lang.String getAircraft() {
-    return aircraft;
-  }
-
-
-  /**
-   * Sets the value of the 'aircraft' field.
-   * @param value the value to set.
-   */
-  public void setAircraft(java.lang.String value) {
-    this.aircraft = value;
+  public static kickstarter.model.FlightAvroData.Builder newBuilder() {
+    return new kickstarter.model.FlightAvroData.Builder();
   }
 
   /**
-   * Gets the value of the 'booking_agency_email' field.
-   * @return The value of the 'booking_agency_email' field.
-   */
-  public java.lang.String getBookingAgencyEmail() {
-    return booking_agency_email;
-  }
-
-
-  /**
-   * Sets the value of the 'booking_agency_email' field.
-   * @param value the value to set.
-   */
-  public void setBookingAgencyEmail(java.lang.String value) {
-    this.booking_agency_email = value;
-  }
-
-  /**
-   * Creates a new AirlineAvroData RecordBuilder.
-   * @return A new AirlineAvroData RecordBuilder
-   */
-  public static kickstarter.model.AirlineAvroData.Builder newBuilder() {
-    return new kickstarter.model.AirlineAvroData.Builder();
-  }
-
-  /**
-   * Creates a new AirlineAvroData RecordBuilder by copying an existing Builder.
+   * Creates a new FlightAvroData RecordBuilder by copying an existing Builder.
    * @param other The existing builder to copy.
-   * @return A new AirlineAvroData RecordBuilder
+   * @return A new FlightAvroData RecordBuilder
    */
-  public static kickstarter.model.AirlineAvroData.Builder newBuilder(kickstarter.model.AirlineAvroData.Builder other) {
+  public static kickstarter.model.FlightAvroData.Builder newBuilder(kickstarter.model.FlightAvroData.Builder other) {
     if (other == null) {
-      return new kickstarter.model.AirlineAvroData.Builder();
+      return new kickstarter.model.FlightAvroData.Builder();
     } else {
-      return new kickstarter.model.AirlineAvroData.Builder(other);
+      return new kickstarter.model.FlightAvroData.Builder(other);
     }
   }
 
   /**
-   * Creates a new AirlineAvroData RecordBuilder by copying an existing AirlineAvroData instance.
+   * Creates a new FlightAvroData RecordBuilder by copying an existing FlightAvroData instance.
    * @param other The existing instance to copy.
-   * @return A new AirlineAvroData RecordBuilder
+   * @return A new FlightAvroData RecordBuilder
    */
-  public static kickstarter.model.AirlineAvroData.Builder newBuilder(kickstarter.model.AirlineAvroData other) {
+  public static kickstarter.model.FlightAvroData.Builder newBuilder(kickstarter.model.FlightAvroData other) {
     if (other == null) {
-      return new kickstarter.model.AirlineAvroData.Builder();
+      return new kickstarter.model.FlightAvroData.Builder();
     } else {
-      return new kickstarter.model.AirlineAvroData.Builder(other);
+      return new kickstarter.model.FlightAvroData.Builder(other);
     }
   }
 
   /**
-   * RecordBuilder for AirlineAvroData instances.
+   * RecordBuilder for FlightAvroData instances.
    */
   @org.apache.avro.specific.AvroGenerated
-  public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<AirlineAvroData>
-    implements org.apache.avro.data.RecordBuilder<AirlineAvroData> {
+  public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<FlightAvroData>
+    implements org.apache.avro.data.RecordBuilder<FlightAvroData> {
 
     private java.lang.String email_address;
     private java.lang.String departure_time;
     private java.lang.String departure_airport_code;
     private java.lang.String arrival_time;
     private java.lang.String arrival_airport_code;
-    private long flight_duration;
     private java.lang.String flight_number;
     private java.lang.String confirmation_code;
-    private java.nio.ByteBuffer ticket_price;
-    private java.lang.String aircraft;
-    private java.lang.String booking_agency_email;
+    private java.lang.String airline;
 
     /** Creates a new Builder */
     private Builder() {
@@ -437,7 +344,7 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
      * Creates a Builder by copying an existing Builder.
      * @param other The existing Builder to copy.
      */
-    private Builder(kickstarter.model.AirlineAvroData.Builder other) {
+    private Builder(kickstarter.model.FlightAvroData.Builder other) {
       super(other);
       if (isValidValue(fields()[0], other.email_address)) {
         this.email_address = data().deepCopy(fields()[0].schema(), other.email_address);
@@ -459,37 +366,25 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
         this.arrival_airport_code = data().deepCopy(fields()[4].schema(), other.arrival_airport_code);
         fieldSetFlags()[4] = other.fieldSetFlags()[4];
       }
-      if (isValidValue(fields()[5], other.flight_duration)) {
-        this.flight_duration = data().deepCopy(fields()[5].schema(), other.flight_duration);
+      if (isValidValue(fields()[5], other.flight_number)) {
+        this.flight_number = data().deepCopy(fields()[5].schema(), other.flight_number);
         fieldSetFlags()[5] = other.fieldSetFlags()[5];
       }
-      if (isValidValue(fields()[6], other.flight_number)) {
-        this.flight_number = data().deepCopy(fields()[6].schema(), other.flight_number);
+      if (isValidValue(fields()[6], other.confirmation_code)) {
+        this.confirmation_code = data().deepCopy(fields()[6].schema(), other.confirmation_code);
         fieldSetFlags()[6] = other.fieldSetFlags()[6];
       }
-      if (isValidValue(fields()[7], other.confirmation_code)) {
-        this.confirmation_code = data().deepCopy(fields()[7].schema(), other.confirmation_code);
+      if (isValidValue(fields()[7], other.airline)) {
+        this.airline = data().deepCopy(fields()[7].schema(), other.airline);
         fieldSetFlags()[7] = other.fieldSetFlags()[7];
-      }
-      if (isValidValue(fields()[8], other.ticket_price)) {
-        this.ticket_price = data().deepCopy(fields()[8].schema(), other.ticket_price);
-        fieldSetFlags()[8] = other.fieldSetFlags()[8];
-      }
-      if (isValidValue(fields()[9], other.aircraft)) {
-        this.aircraft = data().deepCopy(fields()[9].schema(), other.aircraft);
-        fieldSetFlags()[9] = other.fieldSetFlags()[9];
-      }
-      if (isValidValue(fields()[10], other.booking_agency_email)) {
-        this.booking_agency_email = data().deepCopy(fields()[10].schema(), other.booking_agency_email);
-        fieldSetFlags()[10] = other.fieldSetFlags()[10];
       }
     }
 
     /**
-     * Creates a Builder by copying an existing AirlineAvroData instance
+     * Creates a Builder by copying an existing FlightAvroData instance
      * @param other The existing instance to copy.
      */
-    private Builder(kickstarter.model.AirlineAvroData other) {
+    private Builder(kickstarter.model.FlightAvroData other) {
       super(SCHEMA$, MODEL$);
       if (isValidValue(fields()[0], other.email_address)) {
         this.email_address = data().deepCopy(fields()[0].schema(), other.email_address);
@@ -511,29 +406,17 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
         this.arrival_airport_code = data().deepCopy(fields()[4].schema(), other.arrival_airport_code);
         fieldSetFlags()[4] = true;
       }
-      if (isValidValue(fields()[5], other.flight_duration)) {
-        this.flight_duration = data().deepCopy(fields()[5].schema(), other.flight_duration);
+      if (isValidValue(fields()[5], other.flight_number)) {
+        this.flight_number = data().deepCopy(fields()[5].schema(), other.flight_number);
         fieldSetFlags()[5] = true;
       }
-      if (isValidValue(fields()[6], other.flight_number)) {
-        this.flight_number = data().deepCopy(fields()[6].schema(), other.flight_number);
+      if (isValidValue(fields()[6], other.confirmation_code)) {
+        this.confirmation_code = data().deepCopy(fields()[6].schema(), other.confirmation_code);
         fieldSetFlags()[6] = true;
       }
-      if (isValidValue(fields()[7], other.confirmation_code)) {
-        this.confirmation_code = data().deepCopy(fields()[7].schema(), other.confirmation_code);
+      if (isValidValue(fields()[7], other.airline)) {
+        this.airline = data().deepCopy(fields()[7].schema(), other.airline);
         fieldSetFlags()[7] = true;
-      }
-      if (isValidValue(fields()[8], other.ticket_price)) {
-        this.ticket_price = data().deepCopy(fields()[8].schema(), other.ticket_price);
-        fieldSetFlags()[8] = true;
-      }
-      if (isValidValue(fields()[9], other.aircraft)) {
-        this.aircraft = data().deepCopy(fields()[9].schema(), other.aircraft);
-        fieldSetFlags()[9] = true;
-      }
-      if (isValidValue(fields()[10], other.booking_agency_email)) {
-        this.booking_agency_email = data().deepCopy(fields()[10].schema(), other.booking_agency_email);
-        fieldSetFlags()[10] = true;
       }
     }
 
@@ -551,7 +434,7 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * @param value The value of 'email_address'.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder setEmailAddress(java.lang.String value) {
+    public kickstarter.model.FlightAvroData.Builder setEmailAddress(java.lang.String value) {
       validate(fields()[0], value);
       this.email_address = value;
       fieldSetFlags()[0] = true;
@@ -571,7 +454,7 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * Clears the value of the 'email_address' field.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder clearEmailAddress() {
+    public kickstarter.model.FlightAvroData.Builder clearEmailAddress() {
       email_address = null;
       fieldSetFlags()[0] = false;
       return this;
@@ -591,7 +474,7 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * @param value The value of 'departure_time'.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder setDepartureTime(java.lang.String value) {
+    public kickstarter.model.FlightAvroData.Builder setDepartureTime(java.lang.String value) {
       validate(fields()[1], value);
       this.departure_time = value;
       fieldSetFlags()[1] = true;
@@ -611,7 +494,7 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * Clears the value of the 'departure_time' field.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder clearDepartureTime() {
+    public kickstarter.model.FlightAvroData.Builder clearDepartureTime() {
       departure_time = null;
       fieldSetFlags()[1] = false;
       return this;
@@ -631,7 +514,7 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * @param value The value of 'departure_airport_code'.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder setDepartureAirportCode(java.lang.String value) {
+    public kickstarter.model.FlightAvroData.Builder setDepartureAirportCode(java.lang.String value) {
       validate(fields()[2], value);
       this.departure_airport_code = value;
       fieldSetFlags()[2] = true;
@@ -651,7 +534,7 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * Clears the value of the 'departure_airport_code' field.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder clearDepartureAirportCode() {
+    public kickstarter.model.FlightAvroData.Builder clearDepartureAirportCode() {
       departure_airport_code = null;
       fieldSetFlags()[2] = false;
       return this;
@@ -671,7 +554,7 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * @param value The value of 'arrival_time'.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder setArrivalTime(java.lang.String value) {
+    public kickstarter.model.FlightAvroData.Builder setArrivalTime(java.lang.String value) {
       validate(fields()[3], value);
       this.arrival_time = value;
       fieldSetFlags()[3] = true;
@@ -691,7 +574,7 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * Clears the value of the 'arrival_time' field.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder clearArrivalTime() {
+    public kickstarter.model.FlightAvroData.Builder clearArrivalTime() {
       arrival_time = null;
       fieldSetFlags()[3] = false;
       return this;
@@ -711,7 +594,7 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * @param value The value of 'arrival_airport_code'.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder setArrivalAirportCode(java.lang.String value) {
+    public kickstarter.model.FlightAvroData.Builder setArrivalAirportCode(java.lang.String value) {
       validate(fields()[4], value);
       this.arrival_airport_code = value;
       fieldSetFlags()[4] = true;
@@ -731,48 +614,9 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * Clears the value of the 'arrival_airport_code' field.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder clearArrivalAirportCode() {
+    public kickstarter.model.FlightAvroData.Builder clearArrivalAirportCode() {
       arrival_airport_code = null;
       fieldSetFlags()[4] = false;
-      return this;
-    }
-
-    /**
-      * Gets the value of the 'flight_duration' field.
-      * @return The value.
-      */
-    public long getFlightDuration() {
-      return flight_duration;
-    }
-
-
-    /**
-      * Sets the value of the 'flight_duration' field.
-      * @param value The value of 'flight_duration'.
-      * @return This builder.
-      */
-    public kickstarter.model.AirlineAvroData.Builder setFlightDuration(long value) {
-      validate(fields()[5], value);
-      this.flight_duration = value;
-      fieldSetFlags()[5] = true;
-      return this;
-    }
-
-    /**
-      * Checks whether the 'flight_duration' field has been set.
-      * @return True if the 'flight_duration' field has been set, false otherwise.
-      */
-    public boolean hasFlightDuration() {
-      return fieldSetFlags()[5];
-    }
-
-
-    /**
-      * Clears the value of the 'flight_duration' field.
-      * @return This builder.
-      */
-    public kickstarter.model.AirlineAvroData.Builder clearFlightDuration() {
-      fieldSetFlags()[5] = false;
       return this;
     }
 
@@ -790,10 +634,10 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * @param value The value of 'flight_number'.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder setFlightNumber(java.lang.String value) {
-      validate(fields()[6], value);
+    public kickstarter.model.FlightAvroData.Builder setFlightNumber(java.lang.String value) {
+      validate(fields()[5], value);
       this.flight_number = value;
-      fieldSetFlags()[6] = true;
+      fieldSetFlags()[5] = true;
       return this;
     }
 
@@ -802,7 +646,7 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * @return True if the 'flight_number' field has been set, false otherwise.
       */
     public boolean hasFlightNumber() {
-      return fieldSetFlags()[6];
+      return fieldSetFlags()[5];
     }
 
 
@@ -810,9 +654,9 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * Clears the value of the 'flight_number' field.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder clearFlightNumber() {
+    public kickstarter.model.FlightAvroData.Builder clearFlightNumber() {
       flight_number = null;
-      fieldSetFlags()[6] = false;
+      fieldSetFlags()[5] = false;
       return this;
     }
 
@@ -830,10 +674,10 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * @param value The value of 'confirmation_code'.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder setConfirmationCode(java.lang.String value) {
-      validate(fields()[7], value);
+    public kickstarter.model.FlightAvroData.Builder setConfirmationCode(java.lang.String value) {
+      validate(fields()[6], value);
       this.confirmation_code = value;
-      fieldSetFlags()[7] = true;
+      fieldSetFlags()[6] = true;
       return this;
     }
 
@@ -842,7 +686,7 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * @return True if the 'confirmation_code' field has been set, false otherwise.
       */
     public boolean hasConfirmationCode() {
-      return fieldSetFlags()[7];
+      return fieldSetFlags()[6];
     }
 
 
@@ -850,148 +694,65 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
       * Clears the value of the 'confirmation_code' field.
       * @return This builder.
       */
-    public kickstarter.model.AirlineAvroData.Builder clearConfirmationCode() {
+    public kickstarter.model.FlightAvroData.Builder clearConfirmationCode() {
       confirmation_code = null;
+      fieldSetFlags()[6] = false;
+      return this;
+    }
+
+    /**
+      * Gets the value of the 'airline' field.
+      * @return The value.
+      */
+    public java.lang.String getAirline() {
+      return airline;
+    }
+
+
+    /**
+      * Sets the value of the 'airline' field.
+      * @param value The value of 'airline'.
+      * @return This builder.
+      */
+    public kickstarter.model.FlightAvroData.Builder setAirline(java.lang.String value) {
+      validate(fields()[7], value);
+      this.airline = value;
+      fieldSetFlags()[7] = true;
+      return this;
+    }
+
+    /**
+      * Checks whether the 'airline' field has been set.
+      * @return True if the 'airline' field has been set, false otherwise.
+      */
+    public boolean hasAirline() {
+      return fieldSetFlags()[7];
+    }
+
+
+    /**
+      * Clears the value of the 'airline' field.
+      * @return This builder.
+      */
+    public kickstarter.model.FlightAvroData.Builder clearAirline() {
+      airline = null;
       fieldSetFlags()[7] = false;
-      return this;
-    }
-
-    /**
-      * Gets the value of the 'ticket_price' field.
-      * @return The value.
-      */
-    public java.nio.ByteBuffer getTicketPrice() {
-      return ticket_price;
-    }
-
-
-    /**
-      * Sets the value of the 'ticket_price' field.
-      * @param value The value of 'ticket_price'.
-      * @return This builder.
-      */
-    public kickstarter.model.AirlineAvroData.Builder setTicketPrice(java.nio.ByteBuffer value) {
-      validate(fields()[8], value);
-      this.ticket_price = value;
-      fieldSetFlags()[8] = true;
-      return this;
-    }
-
-    /**
-      * Checks whether the 'ticket_price' field has been set.
-      * @return True if the 'ticket_price' field has been set, false otherwise.
-      */
-    public boolean hasTicketPrice() {
-      return fieldSetFlags()[8];
-    }
-
-
-    /**
-      * Clears the value of the 'ticket_price' field.
-      * @return This builder.
-      */
-    public kickstarter.model.AirlineAvroData.Builder clearTicketPrice() {
-      ticket_price = null;
-      fieldSetFlags()[8] = false;
-      return this;
-    }
-
-    /**
-      * Gets the value of the 'aircraft' field.
-      * @return The value.
-      */
-    public java.lang.String getAircraft() {
-      return aircraft;
-    }
-
-
-    /**
-      * Sets the value of the 'aircraft' field.
-      * @param value The value of 'aircraft'.
-      * @return This builder.
-      */
-    public kickstarter.model.AirlineAvroData.Builder setAircraft(java.lang.String value) {
-      validate(fields()[9], value);
-      this.aircraft = value;
-      fieldSetFlags()[9] = true;
-      return this;
-    }
-
-    /**
-      * Checks whether the 'aircraft' field has been set.
-      * @return True if the 'aircraft' field has been set, false otherwise.
-      */
-    public boolean hasAircraft() {
-      return fieldSetFlags()[9];
-    }
-
-
-    /**
-      * Clears the value of the 'aircraft' field.
-      * @return This builder.
-      */
-    public kickstarter.model.AirlineAvroData.Builder clearAircraft() {
-      aircraft = null;
-      fieldSetFlags()[9] = false;
-      return this;
-    }
-
-    /**
-      * Gets the value of the 'booking_agency_email' field.
-      * @return The value.
-      */
-    public java.lang.String getBookingAgencyEmail() {
-      return booking_agency_email;
-    }
-
-
-    /**
-      * Sets the value of the 'booking_agency_email' field.
-      * @param value The value of 'booking_agency_email'.
-      * @return This builder.
-      */
-    public kickstarter.model.AirlineAvroData.Builder setBookingAgencyEmail(java.lang.String value) {
-      validate(fields()[10], value);
-      this.booking_agency_email = value;
-      fieldSetFlags()[10] = true;
-      return this;
-    }
-
-    /**
-      * Checks whether the 'booking_agency_email' field has been set.
-      * @return True if the 'booking_agency_email' field has been set, false otherwise.
-      */
-    public boolean hasBookingAgencyEmail() {
-      return fieldSetFlags()[10];
-    }
-
-
-    /**
-      * Clears the value of the 'booking_agency_email' field.
-      * @return This builder.
-      */
-    public kickstarter.model.AirlineAvroData.Builder clearBookingAgencyEmail() {
-      booking_agency_email = null;
-      fieldSetFlags()[10] = false;
       return this;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public AirlineAvroData build() {
+    public FlightAvroData build() {
       try {
-        AirlineAvroData record = new AirlineAvroData();
+        FlightAvroData record = new FlightAvroData();
         record.email_address = fieldSetFlags()[0] ? this.email_address : (java.lang.String) defaultValue(fields()[0]);
         record.departure_time = fieldSetFlags()[1] ? this.departure_time : (java.lang.String) defaultValue(fields()[1]);
         record.departure_airport_code = fieldSetFlags()[2] ? this.departure_airport_code : (java.lang.String) defaultValue(fields()[2]);
         record.arrival_time = fieldSetFlags()[3] ? this.arrival_time : (java.lang.String) defaultValue(fields()[3]);
         record.arrival_airport_code = fieldSetFlags()[4] ? this.arrival_airport_code : (java.lang.String) defaultValue(fields()[4]);
-        record.flight_duration = fieldSetFlags()[5] ? this.flight_duration : (java.lang.Long) defaultValue(fields()[5]);
-        record.flight_number = fieldSetFlags()[6] ? this.flight_number : (java.lang.String) defaultValue(fields()[6]);
-        record.confirmation_code = fieldSetFlags()[7] ? this.confirmation_code : (java.lang.String) defaultValue(fields()[7]);
-        record.ticket_price = fieldSetFlags()[8] ? this.ticket_price : (java.nio.ByteBuffer) defaultValue(fields()[8]);
-        record.aircraft = fieldSetFlags()[9] ? this.aircraft : (java.lang.String) defaultValue(fields()[9]);
-        record.booking_agency_email = fieldSetFlags()[10] ? this.booking_agency_email : (java.lang.String) defaultValue(fields()[10]);
+        record.flight_number = fieldSetFlags()[5] ? this.flight_number : (java.lang.String) defaultValue(fields()[5]);
+        record.confirmation_code = fieldSetFlags()[6] ? this.confirmation_code : (java.lang.String) defaultValue(fields()[6]);
+        record.airline = fieldSetFlags()[7] ? this.airline : (java.lang.String) defaultValue(fields()[7]);
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;
@@ -1002,8 +763,8 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
   }
 
   @SuppressWarnings("unchecked")
-  private static final org.apache.avro.io.DatumWriter<AirlineAvroData>
-    WRITER$ = (org.apache.avro.io.DatumWriter<AirlineAvroData>)MODEL$.createDatumWriter(SCHEMA$);
+  private static final org.apache.avro.io.DatumWriter<FlightAvroData>
+    WRITER$ = (org.apache.avro.io.DatumWriter<FlightAvroData>)MODEL$.createDatumWriter(SCHEMA$);
 
   @Override public void writeExternal(java.io.ObjectOutput out)
     throws java.io.IOException {
@@ -1011,14 +772,99 @@ public class AirlineAvroData extends org.apache.avro.specific.SpecificRecordBase
   }
 
   @SuppressWarnings("unchecked")
-  private static final org.apache.avro.io.DatumReader<AirlineAvroData>
-    READER$ = (org.apache.avro.io.DatumReader<AirlineAvroData>)MODEL$.createDatumReader(SCHEMA$);
+  private static final org.apache.avro.io.DatumReader<FlightAvroData>
+    READER$ = (org.apache.avro.io.DatumReader<FlightAvroData>)MODEL$.createDatumReader(SCHEMA$);
 
   @Override public void readExternal(java.io.ObjectInput in)
     throws java.io.IOException {
     READER$.read(this, SpecificData.getDecoder(in));
   }
 
+  @Override protected boolean hasCustomCoders() { return true; }
+
+  @Override public void customEncode(org.apache.avro.io.Encoder out)
+    throws java.io.IOException
+  {
+    out.writeString(this.email_address);
+
+    out.writeString(this.departure_time);
+
+    out.writeString(this.departure_airport_code);
+
+    out.writeString(this.arrival_time);
+
+    out.writeString(this.arrival_airport_code);
+
+    out.writeString(this.flight_number);
+
+    out.writeString(this.confirmation_code);
+
+    out.writeString(this.airline);
+
+  }
+
+  @Override public void customDecode(org.apache.avro.io.ResolvingDecoder in)
+    throws java.io.IOException
+  {
+    org.apache.avro.Schema.Field[] fieldOrder = in.readFieldOrderIfDiff();
+    if (fieldOrder == null) {
+      this.email_address = in.readString();
+
+      this.departure_time = in.readString();
+
+      this.departure_airport_code = in.readString();
+
+      this.arrival_time = in.readString();
+
+      this.arrival_airport_code = in.readString();
+
+      this.flight_number = in.readString();
+
+      this.confirmation_code = in.readString();
+
+      this.airline = in.readString();
+
+    } else {
+      for (int i = 0; i < 8; i++) {
+        switch (fieldOrder[i].pos()) {
+        case 0:
+          this.email_address = in.readString();
+          break;
+
+        case 1:
+          this.departure_time = in.readString();
+          break;
+
+        case 2:
+          this.departure_airport_code = in.readString();
+          break;
+
+        case 3:
+          this.arrival_time = in.readString();
+          break;
+
+        case 4:
+          this.arrival_airport_code = in.readString();
+          break;
+
+        case 5:
+          this.flight_number = in.readString();
+          break;
+
+        case 6:
+          this.confirmation_code = in.readString();
+          break;
+
+        case 7:
+          this.airline = in.readString();
+          break;
+
+        default:
+          throw new java.io.IOException("Corrupt ResolvingDecoder.");
+        }
+      }
+    }
+  }
 }
 
 

@@ -1,4 +1,4 @@
-# Unlocking Schema Registry Access: Granting Confluent Service Account Permissions with Terraform.
+# Unlocking Schema Registry Access: Granting Confluent Service Account Permissions with Terraform
 _Have you ever had that moment when you're deep into a project, complete it, and then a sudden realization hits you like a jolt of caffeine: your code doesn't have the proper resource permissions when you go to do the final test run before the release? Ugh! Right!_ 😉
 
 ![overwhelmed-facepalm](images/overwhelmed-facepalm.gif)

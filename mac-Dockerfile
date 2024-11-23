@@ -1,5 +1,5 @@
 # Base image from https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/deployment/resource-providers/standalone/docker/
-FROM arm64v8/flink:1.19.1-scala_2.12-java17
+FROM arm64v8/flink:1.20.0-scala_2.12-java17
 
 # Build argument(s)
 ARG FLINK_LANGUAGE
@@ -18,14 +18,14 @@ ENV AWS_S3_BUCKET=${AWS_S3_BUCKET}
 ENV AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
 
 # Create/set version number container environment variable(s)
-ENV APACHE_FLINK_VERSION=1.19
-ENV APACHE_FLINK_PATCH=.1
+ENV APACHE_FLINK_VERSION=1.20
+ENV APACHE_FLINK_PATCH=.0
 ENV APACHE_FLINK_VERSION_WITH_PATCH=${APACHE_FLINK_VERSION}${APACHE_FLINK_PATCH}
 ENV PYTHON_VERSION=3.11
 ENV PYTHON_PATCH=.9
 ENV PYTHON_VERSION_WITH_PATCH=${PYTHON_VERSION}${PYTHON_PATCH}
-ENV HADOOP_VERSION=3.4.0
-ENV ICEBERG_VERSION=1.6.1
+ENV HADOOP_VERSION=3.4.1
+ENV ICEBERG_VERSION=1.7.0
 
 # Create/set folder contianer environment variable(s)
 ENV FLINK_CONF_DIR=/opt/flink/conf
@@ -68,7 +68,6 @@ RUN apt-get update && apt-get install -y \
 
 # Download JAR files for Java and Python
 RUN curl -L "${MAVEN_ROOT_URL}flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
-    curl -L "${MAVEN_ROOT_URL}flink/flink-sql-connector-hive-3.1.3_2.12/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-sql-connector-hive-3.1.3_2.12-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-sql-connector-hive-3.1.3_2.12-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
     curl -L "${MAVEN_ROOT_URL}hadoop/hadoop-common/${HADOOP_VERSION}/hadoop-common-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-common-${HADOOP_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}flink/flink-shaded-hadoop-2-uber/2.8.3-10.0/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" -o "${FLINK_LIB_DIR}flink-shaded-hadoop-2-uber-2.8.3-10.0.jar";
 
@@ -76,11 +75,11 @@ RUN curl -L "${MAVEN_ROOT_URL}flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WI
 RUN if [ "$FLINK_LANGUAGE" = "python" ]; then \
     curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-flink-runtime-${APACHE_FLINK_VERSION}/${ICEBERG_VERSION}/iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-flink-runtime-${APACHE_FLINK_VERSION}-${ICEBERG_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-aws-bundle/${ICEBERG_VERSION}/iceberg-aws-bundle-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-aws-bundle-${ICEBERG_VERSION}.jar" && \
-    curl -L "${MAVEN_ROOT_URL}hadoop/hadoop-hdfs-client/3.4.0/hadoop-hdfs-client-3.4.0.jar" -o "${FLINK_LIB_DIR}hadoop-hdfs-client-${HADOOP_VERSION}.jar" && \
-    curl -L "${MAVEN_ROOT_URL}flink/flink-sql-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-sql-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" && \
-    curl -L "${MAVEN_ROOT_URL}flink/flink-connector-kafka/3.2.0-${APACHE_FLINK_VERSION}/flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-connector-kafka-3.2.0-${APACHE_FLINK_VERSION}.jar" && \
+    curl -L "${MAVEN_ROOT_URL}hadoop/hadoop-hdfs-client/${HADOOP_VERSION}/hadoop-hdfs-client-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-hdfs-client-${HADOOP_VERSION}.jar" && \
+    curl -L "${MAVEN_ROOT_URL}flink/flink-sql-connector-kafka/3.3.0-${APACHE_FLINK_VERSION}/flink-sql-connector-kafka-3.3.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-sql-connector-kafka-3.3.0-${APACHE_FLINK_VERSION}.jar" && \
+    curl -L "${MAVEN_ROOT_URL}flink/flink-connector-kafka/3.3.0-${APACHE_FLINK_VERSION}/flink-connector-kafka-3.3.0-${APACHE_FLINK_VERSION}.jar" -o "${FLINK_LIB_DIR}flink-connector-kafka-3.3.0-${APACHE_FLINK_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}flink/flink-json/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
-    curl -L "${MAVEN_ROOT_URL}kafka/kafka-clients/3.7.0/kafka-clients-3.7.0.jar" -o "${FLINK_LIB_DIR}kafka-clients-3.7.0.jar"; \
+    curl -L "${MAVEN_ROOT_URL}kafka/kafka-clients/3.8.0/kafka-clients-3.8.0.jar" -o "${FLINK_LIB_DIR}kafka-clients-3.8.0.jar"; \
 fi
 
 # Install Python from source

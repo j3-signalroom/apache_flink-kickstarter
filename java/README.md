@@ -56,21 +56,30 @@ Finally, to launch one of the **pre-complied** Flink applications, choose your a
 
 Flink App|Flink Run Command
 -|-
-**`DataGeneratorApp`**|`flink run --class kickstarter.DataGeneratorApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER> --aws-region <AWS_REGION_NAME>`
 **`AvroDataGeneratorApp`**|`flink run --class kickstarter.AvroDataGeneratorApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER> --aws-region <AWS_REGION_NAME>`
-**`FlightImporterApp`**|`flink run --class kickstarter.FlightImporterApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
-**`FlyerStatsApp`**|`flink run --class kickstarter.FlyerStatsApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
+**`AvroFlightConsolidatorApp`**|`flink run --class kickstarter.AvroFlightConsolidatorApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
+**`AvroFlyerStatsApp`**|`flink run --class kickstarter.AvroFlyerStatsApp apache_flink-kickstarter-x.xx.xx.xxx.jar --service-account-user <SERVICE_ACCOUNT_USER>`
 
 > Argument placeholder|Replace with
 > -|-
 > `<SERVICE_ACCOUNT_USER>`|specify the name of the service account user, used in the the AWS Secrets and Parameter Store Path name.
 > `<AWS_REGION_NAME>`|specify the AWS Region your AWS Glue infrastructure resides.
 
-### 2.1 `AvroDataGeneratorApp` Flink App Special Consideration
-Whenever the [`AirlineAvroData.avsc`](app/src/main/java/kickstarter/model/avro/AirlineAvroData.avsc) is updated, the [`avro-tools-1.12.0.jar`](https://avro.apache.org/docs/++version++/getting-started-java/#serializing-and-deserializing-with-code-generation) must be used to generate the [`AirlineAvroData.java`](app/src/main/java/kickstarter/model/AirlineAvroData.java) Java class. This is necessary to ensure that the Avro schema is in sync with the Java class. To generate the Java class, run the following command from the [`apache_flink-kickstarter-jobmanager-1`](#20-discover-what-you-can-do-with-these-flink-apps) Docker container:
+### 2.1 Avro Flink App Special Consideration
+Whenever any of the Flink Apps [`Avro models`](app/src/main/java/kickstarter/model/avro/) need to be updated, the [`avro-tools-1.12.0.jar`](https://avro.apache.org/docs/++version++/getting-started-java/#serializing-and-deserializing-with-code-generation) must be used to generate the respective Java class. This is necessary to ensure that the Avro schema is in sync with the Java class. To generate the Java class, run the following command from the [`apache_flink-kickstarter-jobmanager-1`](#20-discover-what-you-can-do-with-these-flink-apps) Docker container:
 
 ```bash 
-java -jar /path/to/avro-tools-1.12.0.jar compile schema app/src/main/java/kickstarter/model/avro/AirlineAvroData.avsc app/src/main/java/kickstarter/model/
+java -jar /path/to/avro-tools-1.12.0.jar compile -string schema app/src/main/java/kickstarter/model/avro/AirlineAvroData.avsc .
+
+java -jar /path/to/avro-tools-1.12.0.jar compile -string schema app/src/main/java/kickstarter/model/avro/FlightAvroData.avsc .
+
+java -jar /path/to/avro-tools-1.12.0.jar compile -string schema app/src/main/java/kickstarter/model/avro/FlyerStatsAvroData.avsc .
+```
+
+Then copy the generated Java class to the `app/src/main/java/kickstarter/model/` directory:
+
+```bash
+cp kickstarter/model/AirlineAvroData.java app/src/main/java/kickstarter/model/
 ```
 
 > You can download the [`avro-tools-1.12.0.jar`](https://avro.apache.org/docs/++version++/getting-started-java/#serializing-and-deserializing-with-code-generation) must be used to generate the [`AirlineAvroData.java`](app/src/main/java/kickstarter/model/AirlineAvroData.java) by clicking [here](https://repo1.maven.org/maven2/org/apache/avro/avro-tools/1.12.0/avro-tools-1.12.0.jar).
