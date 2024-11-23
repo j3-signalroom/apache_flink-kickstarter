@@ -47,9 +47,8 @@ def main(args):
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
-    # Get the Kafka Cluster properties for the Kafka consumer and producer, and the Schema Registry
-    # Cluster properties
-    consumer_properties, schema_registry_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    # Get the Kafka Cluster properties for the Kafka consumer and producer
+    consumer_properties, _ = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
     producer_properties, _ = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
@@ -69,8 +68,13 @@ def main(args):
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
     topic_name = "airline.flyer_stats"
     schema_str = read_schema_file("FlyerStatsAvroData.avsc")
-    flyer_stats_sink = (KafkaSink.builder()
-                        .set_kafka_producer_config(producer_properties)
+    kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
+
+    # Iterate through the producer properties and set each property, skipping 'bootstrap.servers' as it's already set
+    for key, value in producer_properties.items():
+        if key != 'bootstrap.servers':
+            kafka_sink_builder.set_property(key, value)
+    flyer_stats_sink = (kafka_sink_builder
                         .set_record_serializer(KafkaRecordSerializationSchema
                                                 .builder()
                                                 .set_topic(topic_name)
