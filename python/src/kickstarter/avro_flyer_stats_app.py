@@ -47,43 +47,47 @@ def main(args):
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
-    # Get the Kafka Cluster properties for the consumer
-    consumer_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    # Get the Kafka Cluster properties for the Kafka consumer and producer, and the Schema Registry
+    # Cluster properties
+    consumer_properties, schema_registry_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    producer_properties, _ = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
+    topic_name = "airline.flight"
     flight_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
-                                .set_topics("airline.flight")
+                                .set_topics(topic_name)
                                 .set_group_id("flight_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
                                 .set_value_only_deserializer(ConfluentRegistryAvroDeserializationSchema
                                                              .builder()
-                                                             .type_info(FlightData.get_value_type_info())
-                                                             .build())
+                                                             .set_schema_registry_url(schema_registry_properties['schema.registry.url'])
+                                                             .set_registry_config(schema_registry_properties)
+                                                             .set_schema_registry_subject(f"{topic_name}-value")
+                                                             .set_type_info(FlightData.get_value_type_info()
+                                                             .build()))
                                 .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
     flight_data_stream = env.from_source(flight_source, WatermarkStrategy.for_monotonous_timestamps(), "flight_data_source")
 
-    # Get the Kafka Cluster properties for the producer
-    producer_properties = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
-    producer_properties.update({
-        'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
-    })
-
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
-    stats_sink = (KafkaSink.builder()
-                            .set_kafka_producer_config(producer_properties)
-                            .set_record_serializer(KafkaRecordSerializationSchema
-                                                    .builder()
-                                                    .set_topic("airline.flyer_stats")
-                                                    .set_value_serialization_schema(ConfluentRegistryAvroSerializationSchema
-                                                                                    .builder()
-                                                                                    .with_type_info(FlyerStatsData.get_value_type_info())
-                                                                                    .build())
-                                                    .build())
-                            .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                            .build())
+    topic_name = "airline.flyer_stats"
+    flyer_stats_sink = (KafkaSink.builder()
+                        .set_kafka_producer_config(producer_properties)
+                        .set_record_serializer(KafkaRecordSerializationSchema
+                                                .builder()
+                                                .set_topic(topic_name)
+                                                .set_value_serialization_schema(ConfluentRegistryAvroSerializationSchema
+                                                                                .builder()
+                                                                                .set_schema_registry_url(schema_registry_properties['schema.registry.url'])
+                                                                                .set_registry_config(schema_registry_properties)
+                                                                                .set_schema_registry_subject(f"{topic_name}-value")
+                                                                                .set_type_info(FlyerStatsData.get_value_type_info())
+                                                                                .build())
+                                                .build())
+                        .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                        .build())
 
     # --- Load Apache Iceberg catalog
     catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
@@ -132,9 +136,9 @@ def main(args):
             .execute_insert(stats_table_path.get_full_name()))
 
     # Sinks the User Statistics DataStream Kafka topic
-    (stats_datastream.sink_to(stats_sink)
-                     .name("stats_sink")
-                     .uid("stats_sink"))
+    (stats_datastream.sink_to(flyer_stats_sink)
+                     .name("flyer_stats_sink")
+                     .uid("flyer_stats_sink"))
 
     # Execute the Flink job graph (DAG)
     try:
