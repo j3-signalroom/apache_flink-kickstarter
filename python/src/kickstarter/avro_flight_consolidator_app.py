@@ -10,7 +10,7 @@ import argparse
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
 from helper.confluent_properties_udtf import execute_confluent_properties_udtf
-from helper.utilities import parse_isoformat, load_catalog, load_database
+from helper.common import parse_isoformat, load_catalog, load_database
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -54,15 +54,17 @@ def main(args):
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
     # Note: KafkaSource was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
     # you will need to use the FlinkKafkaConsumer class.
+    topic_name = "airline.skyone"
     skyone_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
-                                .set_topics("airline.skyone")
+                                .set_topics(topic_name)
                                 .set_group_id("skyone_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
                                 .set_value_only_deserializer(ConfluentRegistryAvroDeserializationSchema
                                                              .builder()
                                                              .set_schema_registry_url(scheam_registry_properties['schema.registry.url'])
-                                                             .set_schema_registry_subject("airline.skyone-value")
+                                                             .set_registry_config(scheam_registry_properties)
+                                                             .set_schema_registry_subject(f"{topic_name}-value")
                                                              .set_type_info(AirlineFlightData.get_value_type_info())
                                                              .set_value_type_info(AirlineFlightData.get_value_type_info())
                                                              .type_info(AirlineFlightData.get_value_type_info())
