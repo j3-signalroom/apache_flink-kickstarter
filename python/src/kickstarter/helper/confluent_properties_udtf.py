@@ -59,8 +59,10 @@ class ConfluentProperties(TableFunction):
         secret_path_prefix = f"/confluent_cloud_resource/{self._service_account_user}"
 
         properties = self.__get_confluent_properties(
-            f"{secret_path_prefix}/kafka_cluster/python_client",
-            f"{secret_path_prefix}/schema_registry_cluster/python_client",
+            # Using the `java_clent`` configuration instead of the `python_client`` configuration 
+            # because PyFlink converts into Java code and the Java code is what is executed.
+            f"{secret_path_prefix}/kafka_cluster/java_client",
+            f"{secret_path_prefix}/schema_registry_cluster/java_client",
             f"{secret_path_prefix}/consumer_kafka_client" if self._is_consumer else f"{secret_path_prefix}/producer_kafka_client"
         )
         if properties is None:
