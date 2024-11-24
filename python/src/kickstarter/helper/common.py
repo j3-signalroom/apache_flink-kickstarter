@@ -144,5 +144,8 @@ def read_schema_file(schema_filename: str) -> str:
     # Resolve the absolute path to the avro file
     avro_file_path = os.path.realpath(avro_file_path)
 
+    # Read the schema file
     with open(f"{avro_file_path}/{schema_filename}") as schema_file:
-        return schema_file.read()
+        schema_str = schema_file.read()
+    
+    return schema_str
