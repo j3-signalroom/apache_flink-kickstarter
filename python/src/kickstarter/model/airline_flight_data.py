@@ -93,3 +93,9 @@ class AirlineFlightData():
                 Types.STRING(),
             ],
         )
+    
+    @classmethod
+    def _get_object_id(cls):
+        """Return a unique identifier for this class, used for serialization.
+        """
+        return cls.__name__

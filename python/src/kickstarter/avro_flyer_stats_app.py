@@ -29,19 +29,31 @@ def main(args):
     env = StreamExecutionEnvironment.get_execution_environment()
     env.set_stream_time_characteristic(TimeCharacteristic.EventTime)
     
-    # --- Enable checkpointing every 5000 milliseconds (5 seconds)
+    ###
+    # Enable checkpointing every 5000 milliseconds (5 seconds).  Note, consider the
+    # resource cost of checkpointing frequency, as short intervals can lead to higher
+    # I/O and CPU overhead.  Proper tuning of checkpoint intervals depends on the
+    # state size, latency requirements, and resource constraints.
+    ###
     env.enable_checkpointing(5000)
 
-    #
-    # Set timeout to 60 seconds
-    # The maximum amount of time a checkpoint attempt can take before being discarded.
-    #
+    ###
+    # Set checkpoint timeout to 60 seconds, which is the maximum amount of time a
+    # checkpoint attempt can take before being discarded.  Note, setting an appropriate
+    # checkpoint timeout helps maintain a balance between achieving exactly-once semantics
+    # and avoiding excessive delays that can impact real-time stream processing performance.
+    ###
     env.get_checkpoint_config().set_checkpoint_timeout(60000)
 
-    #
+    ###
     # Set the maximum number of concurrent checkpoints to 1 (i.e., only one checkpoint
-    # is created at a time)
-    #
+    # is created at a time).  Note, this is useful for limiting resource usage and
+    # ensuring checkpoints do not interfere with each other, but may impact throughput
+    # if checkpointing is slow.  Adjust this setting based on the nature of your job,
+    # the size of the state, and available resources. If your environment has enough
+    # resources and you want to ensure faster recovery, you could increase the limit
+    # to allow multiple concurrent checkpoints.
+    ###
     env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
     # Create a Table Environment

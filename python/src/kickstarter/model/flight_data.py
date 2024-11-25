@@ -82,6 +82,12 @@ class FlightData():
             data.get_duration(), 
             1)
     
+    @classmethod
+    def _get_object_id(cls):
+        """Return a unique identifier for this class, used for serialization.
+        """
+        return cls.__name__
+    
 @dataclass
 class FlyerStatsData:
     email_address: str
@@ -143,4 +149,10 @@ class FlyerStatsData:
                 Types.INT(),
             ],
         )
+    
+    @classmethod
+    def _get_object_id(cls):
+        """Return a unique identifier for this class, used for serialization.
+        """
+        return cls.__name__
     

@@ -29,72 +29,109 @@ def main(args):
     # --- Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
 
-    # --- Enable checkpointing every 5000 milliseconds (5 seconds)
+    ###
+    # Enable checkpointing every 5000 milliseconds (5 seconds).  Note, consider the
+    # resource cost of checkpointing frequency, as short intervals can lead to higher
+    # I/O and CPU overhead.  Proper tuning of checkpoint intervals depends on the
+    # state size, latency requirements, and resource constraints.
+    ###
     env.enable_checkpointing(5000)
 
-    #
-    # Set timeout to 60 seconds
-    # The maximum amount of time a checkpoint attempt can take before being discarded.
-    #
+    ###
+    # Set checkpoint timeout to 60 seconds, which is the maximum amount of time a
+    # checkpoint attempt can take before being discarded.  Note, setting an appropriate
+    # checkpoint timeout helps maintain a balance between achieving exactly-once semantics
+    # and avoiding excessive delays that can impact real-time stream processing performance.
+    ###
     env.get_checkpoint_config().set_checkpoint_timeout(60000)
 
-    #
+    ###
     # Set the maximum number of concurrent checkpoints to 1 (i.e., only one checkpoint
-    # is created at a time)
-    #
+    # is created at a time).  Note, this is useful for limiting resource usage and
+    # ensuring checkpoints do not interfere with each other, but may impact throughput
+    # if checkpointing is slow.  Adjust this setting based on the nature of your job,
+    # the size of the state, and available resources. If your environment has enough
+    # resources and you want to ensure faster recovery, you could increase the limit
+    # to allow multiple concurrent checkpoints.
+    ###
     env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
-    # Get the Kafka Cluster properties for the Kafka consumer and producer
-    consumer_properties, _ = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    # Retrieve the Kafka Cluster properties for the Kafka consumer and producer, and
+    # the Schema Registry Cluster properties.
+    consumer_properties, schema_registry_ = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
     producer_properties, _ = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
-    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
-    topic_name = "airline.skyone"
-    schema_str = read_schema_file("AirlineAvroData.avsc")
-    skyone_source = (KafkaSource.builder()
-                                .set_properties(consumer_properties)
-                                .set_topics(topic_name)
-                                .set_group_id("skyone_group")
-                                .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(AvroRowDeserializationSchema(avro_schema_string=schema_str))
-                                .build())
+    # Get the AirlineAvroData and FlightAvroData schemas
+    airline_avro_data_schema = read_schema_file("AirlineAvroData.avsc")
+    flight_avro_data_schema = read_schema_file("FlightAvroData.avsc")
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
-    skyone_stream = (env.from_source(skyone_source, WatermarkStrategy.no_watermarks(), "skyone_source")
-                        .uid("skyone_source"))
+    skyone_stream = get_kafka_topic_records(env, consumer_properties, "airline.skyone", airline_avro_data_schema)
+    if skyone_stream is None:
+         # Define a filter function to skip invalid records
+         invalid_stream = env.from_collection([("Invalid record", -1)])
+         invalid_stream.filter(lambda x: x[1] > 0)
 
-    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset`
-    topic_name = "airline.sunset"
-    sunset_source = (KafkaSource.builder()
-                                .set_properties(consumer_properties)
-                                .set_topics("airline.sunset")
-                                .set_group_id(topic_name)
-                                .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(AvroRowDeserializationSchema(avro_schema_string=schema_str))
-                                .build())
+    sunset_stream = get_kafka_topic_records(env, consumer_properties, "airline.sunset", airline_avro_data_schema)
+    if sunset_stream is None:
+        # Define a filter function to skip invalid records
+         invalid_stream = env.from_collection([("Invalid record", -1)])
+         invalid_stream.filter(lambda x: x[1] > 0)
+    
+    
+    table_name = "skyone"
+    # Check if the table exists.  If not, create it
+    try:
+        # Define the table using Flink SQL
+        tbl_env.execute_sql(f"""
+            CREATE TABLE {table_name} (
+                email_address STRING,
+                departure_time STRING,
+                departure_airport_code STRING,
+                arrival_time STRING,
+                arrival_airport_code STRING,
+                flight_number STRING,
+                confirmation STRING,
+                ticket_price DECIMAL
+                aircraft STRING,
+                booking_agency_email STRING
+            ) WITH (
+                'connector' = 'kafka',
+                'topic' = 'user_events_example2',
+                'properties.bootstrap.servers' = '{producer_properties['bootstrap.servers']}',
 
-    # Takes the results of the Kafka source and attaches the unbounded data stream
-    sunset_stream = (env.from_source(sunset_source, WatermarkStrategy.no_watermarks(), "sunset_source")
-                        .uid("sunset_source"))
 
-    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
-    topic_name = "airline.flight"
-    schema_str = read_schema_file("FlightAvroData.avsc")
-    kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
+                -- In this example, we want the Avro types of both the Kafka key and value to contain the field 'id'
+                -- => adding a prefix to the table column associated to the Kafka key field avoids clashes
+                'key.fields-prefix' = 'kafka_key_',
+
+                'value.format' = 'avro-confluent',
+                'value.avro-confluent.url' = 'http://localhost:8082',
+                'value.fields-include' = 'EXCEPT_KEY',
+                
+                -- subjects have a default value since Flink 1.13, though can be overridden:
+                'value.avro-confluent.subject' = 'airline.flight-value'
+            )
+        """)
+    except Exception as e:
+        print(f"A critical error occurred to during the processing of the table because {e}")
+        exit(1)
 
     # Iterate through the producer properties and set each property, skipping 'bootstrap.servers' as it's already set
+    kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
     for key, value in producer_properties.items():
         if key != 'bootstrap.servers':
             kafka_sink_builder.set_property(key, value)
 
+    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
     flight_sink = (kafka_sink_builder
                    .set_record_serializer(KafkaRecordSerializationSchema
                                           .builder()
-                                          .set_topic(topic_name)
-                                          .set_value_serialization_schema(AvroRowSerializationSchema(avro_schema_string=schema_str))
+                                          .set_topic("airline.flight")
+                                          .set_value_serialization_schema(AvroRowSerializationSchema(record_class=FlightData, avro_schema_string=flight_avro_data_schema))
                                          .build())
                    .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
                    .build())
@@ -188,6 +225,58 @@ def combine_datastreams(skyone_stream: DataStream, sunset_stream: DataStream) ->
     
     # Return the union of the two data streams
     return skyone_flight_stream.union(sunset_flight_stream)
+
+
+def get_kafka_topic_records(tbl_env: StreamTableEnvironment, consumer_properties: dict, group_id: str, topic_name: str, database_name: str, table_name: str) -> DataStream:
+    try:
+        tbl_env.execute_sql(f"""
+            CREATE TABLE {database_name}.{table_name} (
+                email_address STRING,
+                departure_time STRING,
+                departure_airport_code STRING,
+                arrival_time STRING,
+                arrival_airport_code STRING,
+                flight_number STRING,
+                confirmation STRING,
+                ticket_price DECIMAL,
+                aircraft STRING,
+                booking_agency_email STRING
+            ) WITH (
+                'connector' = 'kafka',
+                'topic' = '{topic_name}',
+                'properties.bootstrap.servers' = '{consumer_properties['bootstrap.servers']}',
+                'properties.security.protocol' = 'SASL_SSL',
+                'properties.sasl.mechanism' = 'SCRAM-SHA-512',
+                'properties.sasl.jaas.config' = '{consumer_properties['sasl.jaas.config']}',
+                'properties.group.id' = '{group_id}',
+                'scan.startup.mode' = 'earliest-offset',
+                'format' = 'avro-confluent',
+                'value.format' = 'avro-confluent',
+                'value.avro-confluent.url' = 'http://localhost:8082'
+                'avro-confluent.schema-registry.url' = 'http://localhost:8081',
+                'avro-confluent.schema-registry.basic-auth.credentials-source' = 'USER_INFO',
+                'avro-confluent.schema-registry.basic-auth.user-info' = 'user:password'
+            )
+        """)
+    except Exception as e:
+        print(f"A critical error occurred to during the processing of the table because {e}")
+        exit(1)
+    
+    try:
+        kafka_source = (KafkaSource
+                        .builder()
+                        .set_properties(consumer_properties)
+                        .set_topics(topic_name)
+                        .set_group_id(f"{topic_name}-group")
+                        .set_starting_offsets(KafkaOffsetsInitializer.earliest())
+                        .set_value_only_deserializer(AvroRowDeserializationSchema(record_class=AirlineFlightData, avro_schema_string=schema_str))
+                        .build())
+        # Takes the results of the Kafka source and attaches the unbounded data stream
+        return (env.from_source(kafka_source, WatermarkStrategy.no_watermarks(), f"{topic_name}-source").uid(f"{topic_name}-source"))
+    except Exception as e:
+        print(f"An error occurred while setting up the Kafka source for the topic {topic_name} because {e}")
+        return None
+        #exit(1)
 
 
 if __name__ == "__main__":
