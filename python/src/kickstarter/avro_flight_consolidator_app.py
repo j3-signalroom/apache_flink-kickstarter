@@ -1,7 +1,4 @@
-from pyflink.common import WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
-from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
-from pyflink.datastream.formats.avro import AvroRowDeserializationSchema, AvroRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
@@ -10,7 +7,7 @@ import argparse
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
 from helper.confluent_properties_udtf import execute_confluent_properties_udtf
-from helper.common import parse_isoformat, load_catalog, load_database, read_schema_file
+from helper.common import parse_isoformat, load_catalog, load_database
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -61,81 +58,13 @@ def main(args):
 
     # Retrieve the Kafka Cluster properties for the Kafka consumer and producer, and
     # the Schema Registry Cluster properties.
-    consumer_properties, schema_registry_ = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    consumer_properties, registry_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
     producer_properties, _ = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
-    # Get the AirlineAvroData and FlightAvroData schemas
-    airline_avro_data_schema = read_schema_file("AirlineAvroData.avsc")
-    flight_avro_data_schema = read_schema_file("FlightAvroData.avsc")
-
     # Takes the results of the Kafka source and attaches the unbounded data stream
-    skyone_stream = get_kafka_topic_records(env, consumer_properties, "airline.skyone", airline_avro_data_schema)
-    if skyone_stream is None:
-         # Define a filter function to skip invalid records
-         invalid_stream = env.from_collection([("Invalid record", -1)])
-         invalid_stream.filter(lambda x: x[1] > 0)
+    skyone_stream = read_kafka_topic_records(env, consumer_properties, registry_properties, "airline.skyone", "airlines", "skyone")
+    sunset_stream = read_kafka_topic_records(env, consumer_properties, registry_properties, "airline.sunset", "airlines", "sunset")    
 
-    sunset_stream = get_kafka_topic_records(env, consumer_properties, "airline.sunset", airline_avro_data_schema)
-    if sunset_stream is None:
-        # Define a filter function to skip invalid records
-         invalid_stream = env.from_collection([("Invalid record", -1)])
-         invalid_stream.filter(lambda x: x[1] > 0)
-    
-    
-    table_name = "skyone"
-    # Check if the table exists.  If not, create it
-    try:
-        # Define the table using Flink SQL
-        tbl_env.execute_sql(f"""
-            CREATE TABLE {table_name} (
-                email_address STRING,
-                departure_time STRING,
-                departure_airport_code STRING,
-                arrival_time STRING,
-                arrival_airport_code STRING,
-                flight_number STRING,
-                confirmation STRING,
-                ticket_price DECIMAL
-                aircraft STRING,
-                booking_agency_email STRING
-            ) WITH (
-                'connector' = 'kafka',
-                'topic' = 'user_events_example2',
-                'properties.bootstrap.servers' = '{producer_properties['bootstrap.servers']}',
-
-
-                -- In this example, we want the Avro types of both the Kafka key and value to contain the field 'id'
-                -- => adding a prefix to the table column associated to the Kafka key field avoids clashes
-                'key.fields-prefix' = 'kafka_key_',
-
-                'value.format' = 'avro-confluent',
-                'value.avro-confluent.url' = 'http://localhost:8082',
-                'value.fields-include' = 'EXCEPT_KEY',
-                
-                -- subjects have a default value since Flink 1.13, though can be overridden:
-                'value.avro-confluent.subject' = 'airline.flight-value'
-            )
-        """)
-    except Exception as e:
-        print(f"A critical error occurred to during the processing of the table because {e}")
-        exit(1)
-
-    # Iterate through the producer properties and set each property, skipping 'bootstrap.servers' as it's already set
-    kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
-    for key, value in producer_properties.items():
-        if key != 'bootstrap.servers':
-            kafka_sink_builder.set_property(key, value)
-
-    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
-    flight_sink = (kafka_sink_builder
-                   .set_record_serializer(KafkaRecordSerializationSchema
-                                          .builder()
-                                          .set_topic("airline.flight")
-                                          .set_value_serialization_schema(AvroRowSerializationSchema(record_class=FlightData, avro_schema_string=flight_avro_data_schema))
-                                         .build())
-                   .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                   .build())
-    
     # --- Load Apache Iceberg catalog
     catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
 
@@ -179,10 +108,35 @@ def main(args):
                     'format-version' = '2'
                 )
             """)
+
+            # Create the table that is link to Kafka Topic sink
+            tbl_env.execute_sql(f"""
+                CREATE TABLE airline.flight (
+                    email_address STRING,
+                    departure_time STRING,
+                    departure_airport_code STRING,
+                    arrival_time STRING,
+                    arrival_airport_code STRING,
+                    flight_number STRING,
+                    confirmation STRING,
+                    airline STRING
+                ) WITH (
+                    'connector' = 'kafka',
+                    'topic' = 'airline.flight',
+                    'properties.bootstrap.servers' = '{producer_properties.get('bootstrap.servers')}',
+                    'properties.sasl.jaas.config' = '{producer_properties.get('sasl.jaas.config')}',
+                    'format' = 'avro-confluent',
+                    'value.format' = 'avro-confluent',
+                    'value.avro-confluent.url' = '{registry_properties.get('schema.registry.url')}',
+                    'avro-confluent.schema-registry.url' = '{registry_properties.get('schema.registry.url')}',
+                    'avro-confluent.schema-registry.basic-auth.credentials-source' = '{registry_properties.get('schema.registry.basic.auth.credentials.source')}',
+                    'avro-confluent.schema-registry.basic-auth.user-info' = '{registry_properties.get('schema.registry.basic.auth.user.info')}'
+                )
+            """)
     except Exception as e:
         print(f"A critical error occurred to during the processing of the table because {e}")
         exit(1)
-
+       
     # Combine the Airline DataStreams into one DataStream
     flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
 
@@ -190,10 +144,9 @@ def main(args):
     (tbl_env.from_data_stream(flight_datastream)
             .execute_insert(flight_table_path.get_full_name()))
 
-    # Sinks the Flight DataStream into a single Kafka topic
-    (flight_datastream.sink_to(flight_sink)
-                      .name("flight_sink")
-                      .uid("flight_sink"))
+    # Populate the Apache Iceberg Table with the data from the data stream
+    (tbl_env.from_data_stream(flight_datastream)
+            .execute_insert("airline.flight"))
     
     # Execute the Flink job graph (DAG)
     try:
@@ -227,7 +180,9 @@ def combine_datastreams(skyone_stream: DataStream, sunset_stream: DataStream) ->
     return skyone_flight_stream.union(sunset_flight_stream)
 
 
-def get_kafka_topic_records(tbl_env: StreamTableEnvironment, consumer_properties: dict, group_id: str, topic_name: str, database_name: str, table_name: str) -> DataStream:
+def read_kafka_topic_records(tbl_env: StreamTableEnvironment, consumer_properties: dict, registry_properties: dict, group_id: str, topic_name: str, database_name: str, table_name: str) -> DataStream:
+
+    # Check if the table exists.  If not, create it
     try:
         tbl_env.execute_sql(f"""
             CREATE TABLE {database_name}.{table_name} (
@@ -244,39 +199,23 @@ def get_kafka_topic_records(tbl_env: StreamTableEnvironment, consumer_properties
             ) WITH (
                 'connector' = 'kafka',
                 'topic' = '{topic_name}',
-                'properties.bootstrap.servers' = '{consumer_properties['bootstrap.servers']}',
-                'properties.security.protocol' = 'SASL_SSL',
-                'properties.sasl.mechanism' = 'SCRAM-SHA-512',
-                'properties.sasl.jaas.config' = '{consumer_properties['sasl.jaas.config']}',
+                'properties.bootstrap.servers' = '{consumer_properties.get('bootstrap.servers')}',
+                'properties.sasl.jaas.config' = '{consumer_properties.get('sasl.jaas.config')}',
                 'properties.group.id' = '{group_id}',
                 'scan.startup.mode' = 'earliest-offset',
                 'format' = 'avro-confluent',
                 'value.format' = 'avro-confluent',
-                'value.avro-confluent.url' = 'http://localhost:8082'
-                'avro-confluent.schema-registry.url' = 'http://localhost:8081',
-                'avro-confluent.schema-registry.basic-auth.credentials-source' = 'USER_INFO',
-                'avro-confluent.schema-registry.basic-auth.user-info' = 'user:password'
+                'value.avro-confluent.url' = '{registry_properties.get('schema.registry.url')}',
+                'avro-confluent.schema-registry.url' = '{registry_properties.get('schema.registry.url')}',
+                'avro-confluent.schema-registry.basic-auth.credentials-source' = '{registry_properties.get('schema.registry.basic.auth.credentials.source')}',
+                'avro-confluent.schema-registry.basic-auth.user-info' = '{registry_properties.get('schema.registry.basic.auth.user.info')}'
             )
         """)
     except Exception as e:
-        print(f"A critical error occurred to during the processing of the table because {e}")
+        print(f"A critical error occurred during the creation of the {database_name}.{table_name} because {e}.")
         exit(1)
-    
-    try:
-        kafka_source = (KafkaSource
-                        .builder()
-                        .set_properties(consumer_properties)
-                        .set_topics(topic_name)
-                        .set_group_id(f"{topic_name}-group")
-                        .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                        .set_value_only_deserializer(AvroRowDeserializationSchema(record_class=AirlineFlightData, avro_schema_string=schema_str))
-                        .build())
-        # Takes the results of the Kafka source and attaches the unbounded data stream
-        return (env.from_source(kafka_source, WatermarkStrategy.no_watermarks(), f"{topic_name}-source").uid(f"{topic_name}-source"))
-    except Exception as e:
-        print(f"An error occurred while setting up the Kafka source for the topic {topic_name} because {e}")
-        return None
-        #exit(1)
+
+    return tbl_env.to_data_stream(f"{database_name}.{table_name}")
 
 
 if __name__ == "__main__":
