@@ -124,13 +124,19 @@ def main(args):
                     'connector' = 'kafka',
                     'topic' = 'airline.flight',
                     'properties.bootstrap.servers' = '{producer_properties.get('bootstrap.servers')}',
+                    'properties.sasl.mechanism' = '{producer_properties.get('sasl.mechanism')}',
+                    'properties.security.protocol' = '{producer_properties.get('security.protocol')}',
                     'properties.sasl.jaas.config' = '{producer_properties.get('sasl.jaas.config')}',
+                    'properties.client.dns.lookup' = '{producer_properties.get('client.dns.lookup')}',
+                    'properties.acks' = '{producer_properties.get('acks')}',
+                    'properties.transaction.timeout.ms' = '{producer_properties.get('transaction.timeout.ms')}',
                     'format' = 'avro-confluent',
                     'value.format' = 'avro-confluent',
                     'value.avro-confluent.url' = '{registry_properties.get('schema.registry.url')}',
                     'avro-confluent.schema-registry.url' = '{registry_properties.get('schema.registry.url')}',
                     'avro-confluent.schema-registry.basic-auth.credentials-source' = '{registry_properties.get('schema.registry.basic.auth.credentials.source')}',
-                    'avro-confluent.schema-registry.basic-auth.user-info' = '{registry_properties.get('schema.registry.basic.auth.user.info')}'
+                    'avro-confluent.schema-registry.basic-auth.user-info' = '{registry_properties.get('schema.registry.basic.auth.user.info')}',
+                    'sink.partitioner' = 'round-robin'                    
                 )
             """)
     except Exception as e:
