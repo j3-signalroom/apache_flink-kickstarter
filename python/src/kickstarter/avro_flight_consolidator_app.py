@@ -1,5 +1,5 @@
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
-from pyflink.table import StreamTableEnvironment
+from pyflink.table import StreamTableEnvironment, EnvironmentSettings
 from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
 import argparse
@@ -53,8 +53,11 @@ def main(args):
     ###
     env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
+    # --- [Default]   Set up the Streaming Mode environment.
+    env_settings = EnvironmentSettings.new_instance().in_streaming_mode().build()
+
     # --- Create a Table Environment.
-    tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
+    tbl_env = StreamTableEnvironment.create(stream_execution_environment=env, environment_settings=env_settings)
 
     # --- Load AWS Glue managed Apache Iceberg catalog.
     iceberg_catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
@@ -148,8 +151,9 @@ def main(args):
             .execute_insert(flight_table_path.get_full_name()))
 
     # --- Populate the Apache Iceberg Table with the data from the data stream.
+    flight_datastream.print()
     (tbl_env.from_data_stream(flight_datastream)
-            .execute_insert("airlines.flight_kafka"))
+            .execute_insert("default_catalog.default.airlines.flight_kafka"))
     
     # --- Execute the Flink job graph (DAG).
     try:
