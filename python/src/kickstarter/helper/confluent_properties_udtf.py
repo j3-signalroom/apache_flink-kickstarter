@@ -83,7 +83,7 @@ class ConfluentProperties(TableFunction):
             Parameter Store.
 
         Returns:
-            properties (tuple[str, str]): the Kafka Cluster properties collection if successful, otherwise None.
+            Dict[str, str]: the Kafka Cluster properties collection if successful, otherwise None.
         """
         confluent_properties = {}
         
