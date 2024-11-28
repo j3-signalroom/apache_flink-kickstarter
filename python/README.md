@@ -95,3 +95,5 @@ Curious to learn more about [Astral](https://astral.sh/)'s `uv`? Check these out
 [Apache Iceberg in Action with Apache Flink using Python](../.blog/apache-iceberg-in-action-with-apache-flink-using-python.md)
 
 [Confluent Avro Format](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/formats/avro-confluent/)
+
+[Data Type Mappings in Confluent Cloud for Apache Flink -- Avro schemas](https://docs.confluent.io/cloud/current/flink/reference/serialization.html#flink-sql-types-to-avro-types)

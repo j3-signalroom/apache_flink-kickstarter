@@ -90,19 +90,19 @@ class ConfluentProperties(TableFunction):
         # Retrieve the Kafka Cluster properties from the AWS Secrets Manager
         kafka_cluster_properties = self.__get_secrets(kafka_cluster_secrets_path)
         if not kafka_cluster_properties:
-            return None
+            return {}
         confluent_properties.update(kafka_cluster_properties)
 
         # Retrieve the Schema Registry Cluster properties from the AWS Secrets Manager
         schema_registry_cluster_properties = self.__get_secrets(schema_registry_cluster_secrets_path)
         if not schema_registry_cluster_properties:
-            return None
+            return {}
         confluent_properties.update(schema_registry_cluster_properties)
 
         # Retrieve the parameters from the AWS Systems Manager Parameter Store
         parameters = self.__get_parameters(client_parameters_path)
         if not parameters:
-            return None
+            return {}
         confluent_properties.update(parameters)
 
         return confluent_properties

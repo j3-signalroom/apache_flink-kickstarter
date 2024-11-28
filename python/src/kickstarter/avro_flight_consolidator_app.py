@@ -95,7 +95,7 @@ def main(args):
             arrival_time STRING,
             arrival_airport_code STRING,
             flight_number STRING,
-            confirmation STRING,
+            confirmation_code STRING,
             airline STRING
         ) WITH (
             'write.format.default' = 'parquet',
@@ -109,19 +109,25 @@ def main(args):
     bootstrap_servers = producer_properties.get("bootstrap.servers")
     sasl_jaas_config = producer_properties.get("sasl.jaas.config").replace("'", "\\\"")
     schema_registry_url = registry_properties.get("schema.registry.url")
+    schema_registry_url = registry_properties.get("schema.registry.url")
+    basic_auth_credentials_source = registry_properties.get("schema.registry.basic.auth.credentials.source")
+    basic_auth_user_info = registry_properties.get("schema.registry.basic.auth.user.info")
+
+    topic_name = "airline.flight"
+    kafka_sink_table_path = ObjectPath(tbl_env.get_current_database(), "flight_kafka_sink")
     tbl_env.execute_sql(f"""
-        CREATE TABLE IF NOT EXISTS airlines.flight_kafka (
+        CREATE TABLE IF NOT EXISTS {kafka_sink_table_path} (
             email_address STRING,
             departure_time STRING,
             departure_airport_code STRING,
             arrival_time STRING,
             arrival_airport_code STRING,
             flight_number STRING,
-            confirmation STRING,
+            confirmation_code STRING,
             airline STRING
         ) WITH (
             'connector' = 'kafka',
-            'topic' = 'airline.flight',
+            'topic' = '{topic_name}',
             'properties.bootstrap.servers' = '{bootstrap_servers}',
             'properties.sasl.jaas.config' = '{sasl_jaas_config}',
             'properties.sasl.mechanism' = '{producer_properties.get("sasl.mechanism")}',
@@ -129,31 +135,27 @@ def main(args):
             'properties.client.dns.lookup' = '{producer_properties.get("client.dns.lookup")}',
             'properties.acks' = '{producer_properties.get("acks")}',
             'properties.transaction.timeout.ms' = '{producer_properties.get("transaction.timeout.ms")}',
-            'format' = 'avro-confluent',
+            'sink.partitioner' = 'round-robin',
+            'avro-confluent.basic-auth.credentials-source' = '{basic_auth_credentials_source}',
+            'avro-confluent.basic-auth.user-info' = '{basic_auth_user_info}',
             'value.format' = 'avro-confluent',
             'value.avro-confluent.url' = '{schema_registry_url}',
-            'avro-confluent.schema-registry.url' = '{schema_registry_url}',
-            'avro-confluent.schema-registry.basic-auth.credentials-source' = '{registry_properties.get("schema.registry.basic.auth.credentials.source")}',
-            'avro-confluent.schema-registry.basic-auth.user-info' = '{registry_properties.get("schema.registry.basic.auth.user.info")}',
-            'sink.partitioner' = 'round-robin'                    
+            'value.avro-confluent.subject' = '{topic_name}-value'                    
         )
     """)
 
-    # --- Takes the results of the Kafka source and attaches the unbounded data stream.
+    # --- Takes the results of the Kafka source and attaches the unbounded datastream.
     skyone_stream = read_kafka_topic_records(tbl_env, consumer_properties, registry_properties, "skyone_group", "airline.skyone", "airlines", "skyone")
     sunset_stream = read_kafka_topic_records(tbl_env, consumer_properties, registry_properties, "sunset_group", "airline.sunset", "airlines", "sunset")
 
-    # --- Combine the Airline DataStreams into one DataStream.
+    # --- Combine the Airline datastreams into one datastream.
     flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
 
-    # --- Populate the Apache Iceberg Table with the data from the data stream.
-    (tbl_env.from_data_stream(flight_datastream)
-            .execute_insert(flight_table_path.get_full_name()))
+    # --- Populate the Apache Iceberg Table with the data from the datastream.
+    tbl_env.from_data_stream(flight_datastream).execute_insert(flight_table_path.get_full_name())
 
-    # --- Populate the Apache Iceberg Table with the data from the data stream.
-    flight_datastream.print()
-    (tbl_env.from_data_stream(flight_datastream)
-            .execute_insert("default_catalog.default.airlines.flight_kafka"))
+    # --- Populate the Apache Kafka Sink Topic with the data from the datastream.
+    tbl_env.from_data_stream(flight_datastream).execute_insert(kafka_sink_table_path.get_full_name())
     
     # --- Execute the Flink job graph (DAG).
     try:
@@ -192,19 +194,22 @@ def read_kafka_topic_records(tbl_env: StreamTableEnvironment, consumer_propertie
     bootstrap_servers = consumer_properties.get("bootstrap.servers")
     sasl_jaas_config = consumer_properties.get("sasl.jaas.config").replace("'", "\\\"")
     schema_registry_url = registry_properties.get("schema.registry.url")
+    basic_auth_credentials_source = registry_properties.get("schema.registry.basic.auth.credentials.source")
+    basic_auth_user_info = registry_properties.get("schema.registry.basic.auth.user.info")
 
     # --- Check if the table exists.  If not, create it.
+    kafka_source_table_path = ObjectPath(tbl_env.get_current_database(), f"{table_name}_kafka_source")
     try:
         tbl_env.execute_sql(f"""
-            CREATE TABLE IF NOT EXISTS {database_name}.{table_name} (
+            CREATE TABLE IF NOT EXISTS {kafka_source_table_path.get_full_name()} (
                 email_address STRING,
                 departure_time STRING,
                 departure_airport_code STRING,
                 arrival_time STRING,
                 arrival_airport_code STRING,
                 flight_number STRING,
-                confirmation STRING,
-                ticket_price DECIMAL,
+                confirmation_code STRING,
+                ticket_price DECIMAL(10, 2),
                 aircraft STRING,
                 booking_agency_email STRING
             ) WITH (
@@ -213,17 +218,19 @@ def read_kafka_topic_records(tbl_env: StreamTableEnvironment, consumer_propertie
                 'properties.bootstrap.servers' = '{bootstrap_servers}',
                 'properties.sasl.jaas.config' = '{sasl_jaas_config}',
                 'properties.group.id' = '{group_id}',
+                'properties.auto.offset.reset' = 'earliest',
                 'scan.startup.mode' = 'earliest-offset',
-                'format' = 'avro-confluent',
+                'properties.sasl.mechanism' = '{consumer_properties.get("sasl.mechanism")}',
+                'properties.security.protocol' = '{consumer_properties.get("security.protocol")}',                
+                'avro-confluent.basic-auth.credentials-source' = '{basic_auth_credentials_source}',
+                'avro-confluent.basic-auth.user-info' = '{basic_auth_user_info}',
                 'value.format' = 'avro-confluent',
                 'value.avro-confluent.url' = '{schema_registry_url}',
-                'avro-confluent.schema-registry.url' = '{schema_registry_url}',
-                'avro-confluent.schema-registry.basic-auth.credentials-source' = '{registry_properties.get("schema.registry.basic.auth.credentials.source")}',
-                'avro-confluent.schema-registry.basic-auth.user-info' = '{registry_properties.get("schema.registry.basic.auth.user.info")}'
+                'value.avro-confluent.subject' = '{topic_name}-value'
             )
         """)
     except Exception as e:
-        print(f"A critical error occurred during the creation of the {database_name}.{table_name} because {e}.")
+        print(f"A critical error occurred during the creation of the {kafka_source_table_path.get_full_name()} because {e}.")
         exit(1)
 
     # --- Query the table.
@@ -231,9 +238,9 @@ def read_kafka_topic_records(tbl_env: StreamTableEnvironment, consumer_propertie
                                         SELECT 
                                             * 
                                         FROM 
-                                            {database_name}.{table_name}
+                                            {kafka_source_table_path.get_full_name()}
                                      """)
-    
+
     # --- Convert the Table to a DataStream of append-only data.
     return tbl_env.to_data_stream(source_table)
 
