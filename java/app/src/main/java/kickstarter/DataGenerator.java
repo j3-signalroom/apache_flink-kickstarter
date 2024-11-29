@@ -67,7 +67,33 @@ public class DataGenerator {
     }
 
     /**
-     * Generate an AirlineFlightData object.
+     * Generate an AirlineJsonData object.
+     * 
+     * @param airlinePrefix The prefix for the airline.
+     * @return An AirlineJsonData object.
+     */
+    public static AirlineJsonData generateAirlineJsonData(final String airlinePrefix) {
+        AirlineJsonData airlineData = new AirlineJsonData();
+        final LocalDateTime localDepartureTime = generateDepartureTime();
+        final LocalDateTime localArrivalTime = generateArrivalTime(localDepartureTime);
+
+        airlineData.setEmailAddress(generateEmail());
+        airlineData.setDepartureTime(localDepartureTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        airlineData.setDepartureAirportCode(generateAirportCode());
+        airlineData.setArrivalTime(localArrivalTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        airlineData.setArrivalAirportCode(generateAirportCode());
+        airlineData.setFlightDuration(Duration.between(localDepartureTime, localArrivalTime).toMinutes());
+        airlineData.setFlightNumber(airlinePrefix + random.nextInt(1000));
+        airlineData.setConfirmationCode(airlinePrefix + generateString(6));
+        airlineData.setTicketPrice(BigDecimal.valueOf(500L + (long)random.nextInt(1000)));
+        airlineData.setAircraft("Aircraft" + generateString(3));
+        airlineData.setBookingAgencyEmail(generateEmail());
+
+        return airlineData;
+    }
+
+    /**
+     * Generate an AirlineAvroData object.
      * 
      * @param airlinePrefix The prefix for the airline.
      * @return An AirlineFlightData object.

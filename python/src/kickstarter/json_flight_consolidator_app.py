@@ -1,15 +1,16 @@
 from pyflink.common import WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
-from pyflink.datastream.formats.avro import AvroRowDeserializationSchema, AvroRowSerializationSchema
+from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
 import argparse
 
+from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
 from helper.confluent_properties_udtf import execute_confluent_properties_udtf
-from helper.common import load_catalog, load_database, read_schema_file
+from helper.common import load_catalog, load_database
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -25,8 +26,6 @@ def main(args):
     Args:
         args (str): is the arguments passed to the script.
     """
-    from model.flight_data import FlightData  # Local import to avoid circular dependency
-
     # --- Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
 
@@ -64,15 +63,18 @@ def main(args):
     consumer_properties, _ = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
     producer_properties, _ = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
-    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
-    topic_name = "airline.skyone"
-    schema_str = read_schema_file("AirlineAvroData.avsc")
+     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
+    # Note: KafkaSource was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
+    # you will need to use the FlinkKafkaConsumer class.
     skyone_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
-                                .set_topics(topic_name)
+                                .set_topics("airline.skyone")
                                 .set_group_id("skyone_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(AvroRowDeserializationSchema(avro_schema_string=schema_str))
+                                .set_value_only_deserializer(JsonRowDeserializationSchema
+                                                             .builder()
+                                                             .type_info(AirlineFlightData.get_value_type_info())
+                                                             .build())
                                 .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
@@ -80,37 +82,43 @@ def main(args):
                         .uid("skyone_source"))
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset`
-    topic_name = "airline.sunset"
     sunset_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
                                 .set_topics("airline.sunset")
-                                .set_group_id(topic_name)
+                                .set_group_id("sunset_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(AvroRowDeserializationSchema(avro_schema_string=schema_str))
+                                .set_value_only_deserializer(JsonRowDeserializationSchema
+                                                             .builder()
+                                                             .type_info(AirlineFlightData.get_value_type_info())
+                                                             .build())
                                 .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
     sunset_stream = (env.from_source(sunset_source, WatermarkStrategy.no_watermarks(), "sunset_source")
                         .uid("sunset_source"))
 
-    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
-    topic_name = "airline.flight"
-    schema_str = read_schema_file("FlightAvroData.avsc")
+    # Note: KafkaSink was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
+    # you will need to use the FlinkKafkaProducer class.
+    # Initialize the KafkaSink builder
     kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
 
-    # Iterate through the producer properties and set each property, skipping 'bootstrap.servers' as it's already set
+    # Loop through the producer properties and set each property
     for key, value in producer_properties.items():
-        if key != 'bootstrap.servers':
+        if key != 'bootstrap.servers':  # Skip the bootstrap.servers as it is already set
             kafka_sink_builder.set_property(key, value)
 
-    flight_sink = (kafka_sink_builder
+    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
+    flight_sink = (kafka_sink_builder                            
                    .set_record_serializer(KafkaRecordSerializationSchema
                                           .builder()
-                                          .set_topic(topic_name)
-                                          .set_value_serialization_schema(AvroRowSerializationSchema(avro_schema_string=schema_str))
+                                          .set_topic("airline.flight")
+                                          .set_value_serialization_schema(JsonRowSerializationSchema
+                                                                          .builder()
+                                                                          .with_type_info(FlightData.get_value_type_info())
+                                                                          .build())
                                           .build())
-                   .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                   .build())
+                    .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                    .build())
     
     # --- Load Apache Iceberg catalog
     catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
@@ -158,6 +166,24 @@ def main(args):
     except Exception as e:
         print(f"A critical error occurred to during the processing of the table because {e}")
         exit(1)
+
+    # Combine the Airline DataStreams into one DataStream
+    flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
+
+    # Populate the Apache Iceberg Table with the data from the data stream
+    (tbl_env.from_data_stream(flight_datastream)
+            .execute_insert(flight_table_path.get_full_name()))
+
+    # Sinks the Flight DataStream into a single Kafka topic
+    (flight_datastream.sink_to(flight_sink)
+                      .name("flightdata_sink")
+                      .uid("flightdata_sink"))
+    
+    # Execute the Flink job graph (DAG)
+    try:
+        env.execute("FlightImporterApp")
+    except Exception as e:
+        print(f"The App stopped early due to the following: {e}.")
 
     # Combine the Airline DataStreams into one DataStream
     flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())

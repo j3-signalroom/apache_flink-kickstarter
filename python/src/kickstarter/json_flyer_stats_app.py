@@ -2,7 +2,7 @@ from pyflink.common import WatermarkStrategy
 from pyflink.datastream.window import TumblingEventTimeWindows, Time
 from pyflink.datastream import StreamExecutionEnvironment, DataStream, TimeCharacteristic
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
-from pyflink.datastream.formats.avro import AvroRowDeserializationSchema, AvroRowSerializationSchema
+from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 import logging
@@ -11,7 +11,7 @@ import argparse
 from model.flight_data import FlightData, FlyerStatsData
 from helper.confluent_properties_udtf import execute_confluent_properties_udtf
 from helper.flyer_stats_process_window_function import FlyerStatsProcessWindowFunction
-from helper.common import load_catalog, load_database, read_schema_file
+from helper.common import load_catalog, load_database
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -64,36 +64,42 @@ def main(args):
     producer_properties, _ = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
-    topic_name = "airline.flight"
-    schema_str = read_schema_file("FlightAvroData.avsc")
     flight_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
-                                .set_topics(topic_name)
+                                .set_topics("airline.flight")
                                 .set_group_id("flight_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(AvroRowDeserializationSchema(avro_schema_string=schema_str))
+                                .set_value_only_deserializer(JsonRowDeserializationSchema
+                                                             .builder()
+                                                             .type_info(FlightData.get_value_type_info())
+                                                             .build())
                                 .build())
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
     flight_data_stream = env.from_source(flight_source, WatermarkStrategy.for_monotonous_timestamps(), "flight_data_source")
 
-    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
-    topic_name = "airline.flyer_stats"
-    schema_str = read_schema_file("FlyerStatsAvroData.avsc")
+    # Note: KafkaSink was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
+    # you will need to use the FlinkKafkaProducer class.
+    # Initialize the KafkaSink builder
     kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
 
-    # Iterate through the producer properties and set each property, skipping 'bootstrap.servers' as it's already set
+    # Loop through the producer properties and set each property
     for key, value in producer_properties.items():
-        if key != 'bootstrap.servers':
+        if key != 'bootstrap.servers':  # Skip the bootstrap.servers as it is already set
             kafka_sink_builder.set_property(key, value)
-    flyer_stats_sink = (kafka_sink_builder
-                        .set_record_serializer(KafkaRecordSerializationSchema
-                                                .builder()
-                                                .set_topic(topic_name)
-                                                .set_value_serialization_schema(AvroRowSerializationSchema(avro_schema_string=schema_str))
+
+    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
+    stats_sink = (kafka_sink_builder
+                  .set_record_serializer(KafkaRecordSerializationSchema
+                                         .builder()
+                                         .set_topic("airline.flyer_stats")
+                                         .set_value_serialization_schema(JsonRowSerializationSchema
+                                                                         .builder()
+                                                                         .with_type_info(FlyerStatsData.get_value_type_info())
+                                                                         .build())
                                          .build())
-                   .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                   .build())
+                  .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                  .build())
 
     # --- Load Apache Iceberg catalog
     catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
@@ -142,13 +148,13 @@ def main(args):
             .execute_insert(stats_table_path.get_full_name()))
 
     # Sinks the User Statistics DataStream Kafka topic
-    (stats_datastream.sink_to(flyer_stats_sink)
-                     .name("flyer_stats_sink")
-                     .uid("flyer_stats_sink"))
+    (stats_datastream.sink_to(stats_sink)
+                     .name("stats_sink")
+                     .uid("stats_sink"))
 
     # Execute the Flink job graph (DAG)
     try:
-        env.execute("avro_flyer_stats_app")
+        env.execute("FlyerStatsApp")
     except Exception as e:
         logger.error("The App stopped early due to the following: %s", e)
 

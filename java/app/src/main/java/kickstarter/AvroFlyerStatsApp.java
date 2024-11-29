@@ -18,7 +18,6 @@ import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsIni
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -55,19 +54,17 @@ public class AvroFlyerStatsApp {
         Properties consumerProperties = Common.collectConfluentProperties(env, serviceAccountUser, true);
         Properties producerProperties = Common.collectConfluentProperties(env, serviceAccountUser, false);
 
-        producerProperties.setProperty(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, "60000");
-
         // --- Retrieve the schema registry properties and store it in a map.
         Map<String, String> registryConfigs = Common.extractRegistryConfigs(producerProperties);
 
         /*
-         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight` with the
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight_avro` with the
          * specified deserializer
          */
         KafkaSource<FlightAvroData> flightDataSource = 
             KafkaSource.<FlightAvroData>builder()
                 .setProperties(consumerProperties)
-                .setTopics("airline.flight")
+                .setTopics("airline.flight_avro")
                 .setGroupId("flight_group")
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(ConfluentRegistryAvroDeserializationSchema.forSpecific(FlightAvroData.class, producerProperties.getProperty("schema.registry.url"), registryConfigs))
@@ -84,7 +81,7 @@ public class AvroFlyerStatsApp {
          * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats` with the
          * specified serializer
          */
-        final String topicName = "airline.flyer_stats";
+        final String topicName = "airline.flyer_stats_avro";
         KafkaRecordSerializationSchema<FlyerStatsAvroData> flyerStatsSerializer = 
             KafkaRecordSerializationSchema
                 .<FlyerStatsAvroData>builder()
@@ -126,7 +123,7 @@ public class AvroFlyerStatsApp {
                 flyerStats1.setNumberOfFlights(flyerStats1.getNumberOfFlights() + flyerStats2.getNumberOfFlights());
 
                 return flyerStats1;
-            }), new FlyerStatsProcessWindowFunction())
+            }), new FlyerStatsAvroDataProcessWindowFunction())
             .sinkTo(flyerStatsSink)
             .name("flyer_stats_sink")
             .uid("flyer_stats_sink");

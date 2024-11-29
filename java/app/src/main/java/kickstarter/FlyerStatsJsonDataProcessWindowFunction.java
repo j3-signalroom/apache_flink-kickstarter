@@ -16,8 +16,8 @@ import org.apache.flink.util.*;
 import kickstarter.model.*;
 
 
-class FlyerStatsProcessWindowFunction extends ProcessWindowFunction<FlyerStatsAvroData, FlyerStatsAvroData, String, TimeWindow> {
-    private ValueStateDescriptor<FlyerStatsAvroData> stateDescriptor;
+class FlyerStatsJsonDataProcessWindowFunction extends ProcessWindowFunction<FlyerStatsJsonData, FlyerStatsJsonData, String, TimeWindow> {
+    private ValueStateDescriptor<FlyerStatsJsonData> stateDescriptor;
 
     /**
      * The open method is called when the function is first initialized.  It instantiates a new ValueStateDescriptor
@@ -30,7 +30,7 @@ class FlyerStatsProcessWindowFunction extends ProcessWindowFunction<FlyerStatsAv
      */
     @Override
     public void open(Configuration parameters) throws Exception {
-        stateDescriptor = new ValueStateDescriptor<>("User Statistics", FlyerStatsAvroData.class);
+        stateDescriptor = new ValueStateDescriptor<>("User Statistics", FlyerStatsJsonData.class);
         super.open(parameters);
     }
 
@@ -44,18 +44,18 @@ class FlyerStatsProcessWindowFunction extends ProcessWindowFunction<FlyerStatsAv
      * @throws Exception - Implementations may forward exceptions, which are caught
      */
     @Override
-    public void process(String emailAddress, ProcessWindowFunction<FlyerStatsAvroData, FlyerStatsAvroData, String, TimeWindow>.Context context, Iterable<FlyerStatsAvroData> statsList, Collector<FlyerStatsAvroData> collector) throws Exception {
+    public void process(String emailAddress, ProcessWindowFunction<FlyerStatsJsonData, FlyerStatsJsonData, String, TimeWindow>.Context context, Iterable<FlyerStatsJsonData> statsList, Collector<FlyerStatsJsonData> collector) throws Exception {
         // --- Retrieve the state that is persisted across windows
-        ValueState<FlyerStatsAvroData> state = 
+        ValueState<FlyerStatsJsonData> state = 
             context
                 .globalState()
                 .getState(stateDescriptor);
 
         // --- Get the accumulated stats
-        FlyerStatsAvroData accumulatedStats = state.value();
+        FlyerStatsJsonData accumulatedStats = state.value();
 
         // --- Merge the stats
-        for (FlyerStatsAvroData newStats: statsList) {
+        for (FlyerStatsJsonData newStats: statsList) {
             if(accumulatedStats == null)
                 // --- This is the first time we've seen this flyer stats
                 accumulatedStats = newStats;
@@ -71,14 +71,14 @@ class FlyerStatsProcessWindowFunction extends ProcessWindowFunction<FlyerStatsAv
     }
 
     /**
-     * The merge method is called to merge two FlyerStatsAvroData objects.
+     * The merge method is called to merge two FlyerStatsJsonData objects.
      * 
-     * @param flyerStatsAvroData1 The first FlyerStatsAvroData object. 
-     * @param flyerStatsAvroData2 The second FlyerStatsAvroData object.
+     * @param flyerStatsAvroData1 The first FlyerStatsJsonData object. 
+     * @param flyerStatsAvroData2 The second FlyerStatsJsonData object.
      * 
-     * @return The merged FlyerStatsAvroData object.
+     * @return The merged FlyerStatsJsonData object.
      */
-    private FlyerStatsAvroData merge(FlyerStatsAvroData flyerStatsAvroData1, FlyerStatsAvroData flyerStatsAvroData2) {
+    private FlyerStatsJsonData merge(FlyerStatsJsonData flyerStatsAvroData1, FlyerStatsJsonData flyerStatsAvroData2) {
         flyerStatsAvroData1.setTotalFlightDuration(flyerStatsAvroData1.getTotalFlightDuration() + flyerStatsAvroData2.getTotalFlightDuration());
         flyerStatsAvroData1.setNumberOfFlights(flyerStatsAvroData1.getNumberOfFlights() + flyerStatsAvroData2.getNumberOfFlights());
 
