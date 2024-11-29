@@ -1,7 +1,6 @@
 from pyflink.common import Row, Types
 from dataclasses import dataclass
 
-from helper.common import serialize_date, parse_isoformat
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -24,9 +23,11 @@ class FlightData():
 
 
     def get_duration(self):
+        from helper.common import parse_isoformat
         return int((parse_isoformat(self.arrival_time) - parse_isoformat(self.departure_time)).seconds / 60)
     
     def to_row(self):
+        from helper.common import serialize_date
         return Row(email_address=self.email_address,
                    departure_time=serialize_date(self.departure_time),
                    departure_airport_code=self.departure_airport_code,
