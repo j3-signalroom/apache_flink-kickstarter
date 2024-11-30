@@ -21,7 +21,6 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.Ja
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import java.time.*;
 import java.util.*;
 import org.slf4j.*;
@@ -53,69 +52,9 @@ public class JsonFlyerStatsApp {
         // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        /*
-		 * --- Kafka Consumer Config
-		 * Retrieve the properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
-		 * Then ingest properties into the Flink app
-		 */
-        DataStream<Properties> dataStreamConsumerProperties = 
-			env.fromData(new Properties())
-			   .map(new ConfluentClientConfigurationMapFunction(true, serviceAccountUser))
-			   .name("kafka_consumer_properties");
-		Properties consumerProperties = new Properties();
-
-        /*
-         * Execute the data stream and collect the properties.
-         * 
-         * Note, the try-with-resources block ensures that the close() method of the CloseableIterator is
-         * called automatically at the end, even if an exception occurs during iteration.
-         */
-        try {
-            dataStreamConsumerProperties
-                .executeAndCollect()
-                .forEachRemaining(typeValue -> {
-                    consumerProperties.putAll(typeValue);
-                });
-        } catch (final Exception e) {
-            System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-        }
-		dataStreamConsumerProperties.executeAndCollect()
-                                    .forEachRemaining(typeValue -> {
-                                        consumerProperties.putAll(typeValue);
-                                    });
-
-        /*
-		 * --- Kafka Producer Config
-		 * Retrieve the properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
-		 * Then ingest properties into the Flink app
-		 */
-        DataStream<Properties> dataStreamProducerProperties = 
-			env.fromData(new Properties())
-			   .map(new ConfluentClientConfigurationMapFunction(false, serviceAccountUser))
-			   .name("kafka_producer_properties");
-		Properties producerProperties = new Properties();
-
-        /*
-		 * Execute the data stream and collect the properties.
-		 * 
-		 * Note, the try-with-resources block ensures that the close() method of the CloseableIterator is
-		 * called automatically at the end, even if an exception occurs during iteration.
-		 */
-		try {
-		    dataStreamProducerProperties
-                .executeAndCollect()
-                .forEachRemaining(typeValue -> {
-                    producerProperties.putAll(typeValue);
-                });
-        } catch (final Exception e) {
-            System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-		}
-
-        producerProperties.setProperty(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, "60000");
+        // --- Kafka Consumer and Producer Client Properties
+        Properties consumerProperties = Common.collectConfluentProperties(env, serviceAccountUser, true);
+        Properties producerProperties = Common.collectConfluentProperties(env, serviceAccountUser, false);
 
         // ---Configure ObjectMapper to ignore unknown properties
         ObjectMapper objectMapper = new ObjectMapper();
@@ -175,7 +114,7 @@ public class JsonFlyerStatsApp {
 
         try {
             // --- Execute the Flink job graph (DAG)
-            env.execute("FlyerStatsApp");
+            env.execute("JsonFlyerStatsApp");
         } catch (Exception e) {
             logger.error("The App stopped early due to the following: {}", e.getMessage());
         }        

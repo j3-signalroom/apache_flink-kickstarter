@@ -7,8 +7,6 @@
  */
 package kickstarter.model;
 
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.*;
-
 import java.io.*;
 import java.time.*;
 import java.time.format.*;
@@ -16,47 +14,42 @@ import java.util.*;
 
 
 public class FlyerStatsJsonData implements Serializable {
-    @JsonProperty("email_address")
-    private String email_address;
-
-    @JsonProperty("total_flight_duration")
-    private long total_flight_duration;
-
-    @JsonProperty("number_of_flights")
-    private long number_of_flights;
+    private String emailAddress;
+    private long totalFlightDuration;
+    private long numberOfFlights;
 
     public FlyerStatsJsonData() {
     }
 
     public FlyerStatsJsonData(FlightJsonData flightJsonData) {
-        this.email_address = flightJsonData.getEmailAddress();
-        this.total_flight_duration = Duration.between(LocalDateTime.parse(flightJsonData.getDepartureTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), 
-                                                      LocalDateTime.parse(flightJsonData.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).toMinutes();
-        this.number_of_flights = 1;
+        this.emailAddress = flightJsonData.getEmailAddress();
+        this.totalFlightDuration = Duration.between(LocalDateTime.parse(flightJsonData.getDepartureTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), 
+                                                    LocalDateTime.parse(flightJsonData.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).toMinutes();
+        this.numberOfFlights = 1;
     }
 
     public String getEmailAddress() {
-        return this.email_address;
+        return this.emailAddress;
     }
 
     public void setEmailAddress(String emailAddress) {
-        this.email_address = emailAddress;
+        this.emailAddress = emailAddress;
     }
 
     public long getTotalFlightDuration() {
-        return this.total_flight_duration;
+        return this.totalFlightDuration;
     }
 
     public void setTotalFlightDuration(long totalFlightDuration) {
-        this.total_flight_duration = totalFlightDuration;
+        this.totalFlightDuration = totalFlightDuration;
     }
 
     public long getNumberOfFlights() {
-        return this.number_of_flights;
+        return this.numberOfFlights;
     }
 
     public void setNumberOfFlights(long numberOfFlights) {
-        this.number_of_flights = numberOfFlights;
+        this.numberOfFlights = numberOfFlights;
     }
 
     
@@ -97,9 +90,9 @@ public class FlyerStatsJsonData implements Serializable {
     @Override
     public String toString() {
         return "FlyerStatsJsonData{" +
-                "email_address='" + this.getEmailAddress() + "'" +
+                "emailAddress='" + this.getEmailAddress() + "'" +
                 ", totalFlightDuration=" + this.getTotalFlightDuration() +
-                ", number_of_flights=" + this.getNumberOfFlights() +
+                ", numberOfFlights=" + this.getNumberOfFlights() +
                 '}';
     }
 

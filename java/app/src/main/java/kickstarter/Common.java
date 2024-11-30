@@ -18,6 +18,7 @@ import org.apache.flink.util.CloseableIterator;
 import org.slf4j.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.PropertyNamingStrategies;
 
 
 public class Common {
@@ -32,7 +33,7 @@ public class Common {
      * registered.
      */
 	public static ObjectMapper getMapper() {
-		return new ObjectMapper().registerModule(new JavaTimeModule());
+		return new ObjectMapper().registerModule(new JavaTimeModule()).setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 	}
 
     /**

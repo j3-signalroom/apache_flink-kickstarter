@@ -137,6 +137,7 @@ public class JsonTestHelpers {
         private String arrivalAirportCode;
         private String flightNumber;
         private String confirmationCode;
+        private String airline;
 
         public FlightDataBuilder() {
             LocalDateTime localDepartureTime = generateDepartureTime();
@@ -149,6 +150,7 @@ public class JsonTestHelpers {
             this.arrivalAirportCode = generateAirportCode();
             this.flightNumber = "Flight" + random.nextInt(1000);
             this.confirmationCode = "Confirmation" + generateString(5);
+            this.airline = "SkyOne";
         }
 
         public FlightDataBuilder setEmailAddress(String emailAddress) {
@@ -186,6 +188,11 @@ public class JsonTestHelpers {
             return this;
         }
 
+        public FlightDataBuilder setAirline(String airline) {
+            this.airline = airline;
+            return this;
+        }
+
         public FlightJsonData build() {
             FlightJsonData flightJsonData = new FlightJsonData();
 
@@ -196,6 +203,7 @@ public class JsonTestHelpers {
             flightJsonData.setArrivalAirportCode(this.arrivalAirportCode);
             flightJsonData.setFlightNumber(this.flightNumber);
             flightJsonData.setConfirmationCode(this.confirmationCode);
+            flightJsonData.setAirline(this.airline);
 
             return flightJsonData;
         }

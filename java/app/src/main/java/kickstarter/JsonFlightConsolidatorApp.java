@@ -33,6 +33,7 @@ import java.time.*;
 import java.time.format.*;
 import org.slf4j.*;
 
+import kickstarter.helper.SnakeCaseJsonDeserializationSchema;
 import kickstarter.model.*;
 
 
@@ -61,73 +62,19 @@ public class JsonFlightConsolidatorApp {
         // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         
-        /*
-		 * --- Kafka Consumer Config
-		 * Retrieve the properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
-		 * Then ingest properties into the Flink app
-		 */
-        DataStream<Properties> dataStreamConsumerProperties = 
-			env.fromData(new Properties())
-			   .map(new ConfluentClientConfigurationMapFunction(true, serviceAccountUser))
-			   .name("kafka_consumer_properties");
-		Properties consumerProperties = new Properties();
-
-        /*
-		 * Execute the data stream and collect the properties.
-		 * 
-		 * Note, the try-with-resources block ensures that the close() method of the CloseableIterator is
-		 * called automatically at the end, even if an exception occurs during iteration.
-		 */
-		try {
-		    dataStreamConsumerProperties
-                .executeAndCollect()
-                .forEachRemaining(typeValue -> {
-                    consumerProperties.putAll(typeValue);
-                });
-        } catch (final Exception e) {
-            System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-		}
-
-        /*
-		 * --- Kafka Producer Config
-		 * Retrieve the properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
-		 * Then ingest properties into the Flink app
-		 */
-        DataStream<Properties> dataStreamProducerProperties = 
-			env.fromData(new Properties())
-			   .map(new ConfluentClientConfigurationMapFunction(false, serviceAccountUser))
-			   .name("kafka_producer_properties");
-		Properties producerProperties = new Properties();
-
-        /*
-         * Execute the data stream and collect the properties.
-         * 
-         * Note, the try-with-resources block ensures that the close() method of the CloseableIterator is
-         * called automatically at the end, even if an exception occurs during iteration.
-         */
-        try{
-            dataStreamProducerProperties.executeAndCollect()
-                                        .forEachRemaining(typeValue -> {
-                                            producerProperties.putAll(typeValue);
-                                        });
-        } catch (final Exception e) {
-            System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-        }
+        // --- Kafka Consumer and Producer Client Properties
+        Properties consumerProperties = Common.collectConfluentProperties(env, serviceAccountUser, true);
+        Properties producerProperties = Common.collectConfluentProperties(env, serviceAccountUser, false);
         
         /*
          * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
          */
-        @SuppressWarnings("unchecked")
         KafkaSource<AirlineJsonData> skyOneSource = KafkaSource.<AirlineJsonData>builder()
             .setProperties(consumerProperties)
             .setTopics("airline.skyone")
             .setGroupId("skyone_group")
             .setStartingOffsets(OffsetsInitializer.earliest())
-            .setValueOnlyDeserializer(new JsonDeserializationSchema(AirlineJsonData.class))
+            .setValueOnlyDeserializer((new SnakeCaseJsonDeserializationSchema<>(AirlineJsonData.class)))
             .build();
 
         /*
@@ -146,7 +93,7 @@ public class JsonFlightConsolidatorApp {
             .setTopics("airline.sunset")
             .setGroupId("sunset_group")
             .setStartingOffsets(OffsetsInitializer.earliest())
-            .setValueOnlyDeserializer(new JsonDeserializationSchema(AirlineJsonData.class))
+            .setValueOnlyDeserializer(new SnakeCaseJsonDeserializationSchema(AirlineJsonData.class))
             .build();
 
         /*
@@ -184,7 +131,7 @@ public class JsonFlightConsolidatorApp {
 
         try {
             // --- Execute the Flink job graph (DAG)
-            env.execute("FlightImporterApp");
+            env.execute("JsonFlightConsolidatorApp");
         } catch (Exception e) {
             logger.error("The App stopped early due to the following: {}", e.getMessage());
         }

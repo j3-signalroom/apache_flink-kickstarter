@@ -77,15 +77,14 @@ class FlightJsonDataTest {
         FlightJsonData flightJsonData = new JsonTestHelpers.FlightDataBuilder().build();
 
         String expected = "FlightJsonData{" +
-                "email_address='" + flightJsonData.getEmailAddress() + '\'' +
-                ", departure_time=" + flightJsonData.getDepartureTime() +
-                ", departure_airport_code='" + flightJsonData.getDepartureAirportCode() + '\'' +
-                ", arrival_time=" + flightJsonData.getArrivalTime() +
-                ", arrival_airport_code='" + flightJsonData.getArrivalAirportCode() + '\'' +
-                ", flight_number='" + flightJsonData.getFlightNumber() + '\'' +
-                ", confirmation_code='" + flightJsonData.getConfirmationCode() + '\'' +
-                ", airline='" + flightJsonData.getAirline() + '\'' +
-                '}';
+                "emailAddress='" + flightJsonData.getEmailAddress() + "'" +
+                ", departureTime=" + flightJsonData.getDepartureTime() +
+                ", departureAirportCode='" + flightJsonData.getDepartureAirportCode() + "'}" +
+                ", arrivalTime=" + flightJsonData.getArrivalTime() +
+                ", arrivalAirportCode='" + flightJsonData.getArrivalAirportCode() + "'" +
+                ", flightNumber='" + flightJsonData.getFlightNumber() + "'" +
+                ", confirmationCode='" + flightJsonData.getConfirmationCode() + "'" +
+                ", airline='" + flightJsonData.getAirline() + "'}";
 
         System.out.println(flightJsonData.toString());
 

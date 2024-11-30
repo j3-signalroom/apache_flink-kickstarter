@@ -89,9 +89,6 @@ class FlyerStatsJsonDataTest {
     void merge_shouldFailIfTheEmailAddressesAreDifferent() {
         FlyerStatsJsonData stats1 = new JsonTestHelpers.FlyerStatsDataBuilder().build();
         FlyerStatsJsonData stats2 = new JsonTestHelpers.FlyerStatsDataBuilder().setEmailAddress("notthesame@email.com").build();
-
         assertNotEquals(stats1.getEmailAddress(), stats2.getEmailAddress());
-
-        //assertThrows(AssertionError.class, () -> stats1.merge(stats2));
     }
 }
