@@ -9,9 +9,15 @@ import logging
 import argparse
 
 from model.flight_data import FlightData, FlyerStatsData
-from helper.confluent_properties_udtf import execute_confluent_properties_udtf
 from helper.flyer_stats_process_window_function import FlyerStatsProcessWindowFunction
 from helper.common import load_catalog, load_database
+
+# Ensure the kafka_properties_udtf module is available
+try:
+    from helper.kafka_properties_udtf import execute_kafka_properties_udtf
+except ImportError as e:
+    logging.error(f"Failed to import kafka_properties_udtf: {e}")
+    raise
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -60,8 +66,8 @@ def main(args):
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Get the Kafka Cluster properties for the Kafka consumer and producer
-    consumer_properties, _ = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
-    producer_properties, _ = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
+    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
     flight_source = (KafkaSource.builder()
@@ -148,9 +154,7 @@ def main(args):
             .execute_insert(stats_table_path.get_full_name()))
 
     # Sinks the User Statistics DataStream Kafka topic
-    (stats_datastream.sink_to(stats_sink)
-                     .name("stats_sink")
-                     .uid("stats_sink"))
+    stats_datastream.sink_to(stats_sink).name("json_flyer_stats_sink").uid("json_flyer_stats_sink")
 
     # Execute the Flink job graph (DAG)
     try:

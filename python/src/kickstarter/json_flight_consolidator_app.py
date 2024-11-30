@@ -9,8 +9,16 @@ import argparse
 
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
-from helper.confluent_properties_udtf import execute_confluent_properties_udtf
 from helper.common import load_catalog, load_database
+
+
+# Ensure the kafka_properties_udtf module is available
+try:
+    from helper.kafka_properties_udtf import execute_kafka_properties_udtf
+except ImportError as e:
+    print(f"Failed to import kafka_properties_udtf: {e}")
+    raise
+
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -60,8 +68,10 @@ def main(args):
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Get the Kafka Cluster properties for the Kafka consumer and producer
-    consumer_properties, _ = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
-    producer_properties, _ = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
+    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
+
+    producer_properties['compression.type'] = 'gzip'
 
      # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
     # Note: KafkaSource was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
@@ -97,8 +107,6 @@ def main(args):
     sunset_stream = (env.from_source(sunset_source, WatermarkStrategy.no_watermarks(), "sunset_source")
                         .uid("sunset_source"))
 
-    # Note: KafkaSink was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
-    # you will need to use the FlinkKafkaProducer class.
     # Initialize the KafkaSink builder
     kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
 
@@ -175,13 +183,11 @@ def main(args):
             .execute_insert(flight_table_path.get_full_name()))
 
     # Sinks the Flight DataStream into a single Kafka topic
-    (flight_datastream.sink_to(flight_sink)
-                      .name("flightdata_sink")
-                      .uid("flightdata_sink"))
+    flight_datastream.sink_to(flight_sink).name("json_flight_data_sink").uid("json_flight_data_sink")
     
     # Execute the Flink job graph (DAG)
     try:
-        env.execute("FlightImporterApp")
+        env.execute("json_flight_consolidator_app")
     except Exception as e:
         print(f"The App stopped early due to the following: {e}.")
 
