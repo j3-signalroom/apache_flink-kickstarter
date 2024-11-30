@@ -154,7 +154,7 @@ def main(args):
 
     # Execute the Flink job graph (DAG)
     try:
-        env.execute("FlyerStatsApp")
+        env.execute("json_flyer_stats_app")
     except Exception as e:
         logger.error("The App stopped early due to the following: %s", e)
 

@@ -15,8 +15,7 @@ import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.formats.json.*;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.DeserializationFeature;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.*;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -25,6 +24,7 @@ import java.time.*;
 import java.util.*;
 import org.slf4j.*;
 
+import kickstarter.helper.SnakeCaseJsonDeserializationSchema;
 import kickstarter.model.*;
 
 
@@ -71,7 +71,7 @@ public class JsonFlyerStatsApp {
                 .setTopics("airline.flight")
                 .setGroupId("flight_group")
                 .setStartingOffsets(OffsetsInitializer.earliest())
-                .setValueOnlyDeserializer(new JsonDeserializationSchema<>(FlightJsonData.class))
+                .setValueOnlyDeserializer(new SnakeCaseJsonDeserializationSchema<>(FlightJsonData.class))
                 .build();
 
         /*
@@ -89,7 +89,7 @@ public class JsonFlyerStatsApp {
             KafkaRecordSerializationSchema
                 .<FlyerStatsJsonData>builder()
                 .setTopic("airline.flyer_stats")
-                .setValueSerializationSchema(new JsonSerializationSchema<>(() -> new ObjectMapper().registerModule(new JavaTimeModule())))
+                .setValueSerializationSchema(new JsonSerializationSchema<FlyerStatsJsonData>(Common::getMapper))
                 .build();
 
         /*

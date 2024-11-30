@@ -1,11 +1,17 @@
+/**
+ * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * 
+ * @author Jeffrey Jonathan Jennings (J3)
+ * 
+ * 
+ */
 package kickstarter.helper;
 
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-
+import com.fasterxml.jackson.databind.*;
 import java.io.IOException;
+
 
 public class SnakeCaseJsonDeserializationSchema<T> implements DeserializationSchema<T> {
     private final Class<T> targetType;

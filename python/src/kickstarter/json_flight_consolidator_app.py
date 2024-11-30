@@ -199,7 +199,7 @@ def main(args):
     
     # Execute the Flink job graph (DAG)
     try:
-        env.execute("avro_flight_consolidator_app")
+        env.execute("json_flight_consolidator_app")
     except Exception as e:
         print(f"The App stopped early due to the following: {e}.")
 
