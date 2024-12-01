@@ -18,10 +18,10 @@ repositories {
 // --- Dependency version numbers
 val flinkVersion: String = "1.20"
 val flinkVersionWithPatch: String = flinkVersion + ".0"
-val hadoopVersion: String = "3.4.1"
-val kafkaVersion: String = "3.8.1"
+val hadoopVersion: String = "3.3.6"
+val kafkaVersion: String = "3.7.0"
 val junitVersion: String = "5.10.0"
-val awssdkVersion: String = "2.29.23"
+val awssdkVersion: String = "2.26.29"
 var icebergVersion: String = "1.7.0"
 var confluentKafkaVersion: String = "7.7.1"
 var jacksonVersion: String = "2.18.1"
@@ -85,7 +85,7 @@ java {
 application {
     // --- If the main class is not provided, use the default
     if (appMainClass.isNullOrEmpty()) {
-        mainClass.set("kickstarter.DataGeneratorApp")
+        mainClass.set("kickstarter.JsonDataGeneratorApp")
     } else {
         mainClass.set("kickstarter." + appMainClass)
     }    
