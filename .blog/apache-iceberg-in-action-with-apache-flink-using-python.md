@@ -127,17 +127,16 @@ The [`flight_importer_app`](https://github.com/j3-signalroom/apache_flink-kickst
 
 ### Step 1 of 14. The required JARs for the Flink app
 ```bash
-curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.19.1/flink-s3-fs-hadoop-1.19.1.jar" -o "/opt/flink/lib/flink-s3-fs-hadoop-1.19.1.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/1.19.1/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar" -o "/opt/flink/lib/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.4.0/hadoop-common-3.4.0.jar" -o "/opt/flink/lib/hadoop-common-3.4.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.20.0/flink-s3-fs-hadoop-1.20.0.jar" -o "/opt/flink/lib/flink-s3-fs-hadoop-1.20.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.4.1/hadoop-common-3.4.1.jar" -o "/opt/flink/lib/hadoop-common-3.4.1.jar"
 curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-shaded-hadoop-2-uber/2.8.3-10.0/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" -o "/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.19/1.6.1/iceberg-flink-runtime-1.19-1.6.1.jar" -o "/opt/flink/lib/iceberg-flink-runtime-1.19-1.6.1.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws-bundle/1.6.1/iceberg-aws-bundle-1.6.1.jar" -o "/opt/flink/lib/iceberg-aws-bundle-1.6.1.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-hdfs-client/3.4.0/hadoop-hdfs-client-3.4.0.jar" -o "/opt/flink/lib/hadoop-hdfs-client-3.4.0.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.2.0-1.19/flink-sql-connector-kafka-3.2.0-1.19.jar" -o "/opt/flink/lib/flink-sql-connector-kafka-3.2.0-1.19.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-connector-kafka/3.2.0-1.19/flink-connector-kafka-3.2.0-1.19.jar" -o "/opt/flink/lib/flink-connector-kafka-3.2.0-1.19.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-json/1.19.1/flink-json-1.19.1.jar" -o "/opt/flink/lib/flink-json-1.19.1.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.7.0/kafka-clients-3.7.0.jar" -o "/opt/flink/lib/kafka-clients-3.7.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.20/1.7.0/iceberg-flink-runtime-1.20-1.7.0.jar" -o "/opt/flink/lib/iceberg-flink-runtime-1.20-1.7.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws-bundle/1.7.0/iceberg-aws-bundle-1.7.0.jar" -o "/opt/flink/lib/iceberg-aws-bundle-1.7.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-hdfs-client/3.4.1/hadoop-hdfs-client-3.4.1.jar" -o "/opt/flink/lib/hadoop-hdfs-client-3.4.1.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.3.0-1.20/flink-sql-connector-kafka-3.3.0-1.20.jar" -o "/opt/flink/lib/flink-sql-connector-kafka-3.3.0-1.20.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-connector-kafka/3.3.0-1.20/flink-connector-kafka-3.3.0-1.20.jar" -o "/opt/flink/lib/flink-connector-kafka-3.3.0-1.20.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-json/1.20.0/flink-json-1.20.0.jar" -o "/opt/flink/lib/flink-json-1.20.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.8.0/kafka-clients-3.8.0.jar" -o "/opt/flink/lib/kafka-clients-3.8.0.jar"
 ```
 
 - The code example above is the list of JARs I used to run the Flink app successfully. These JARs include the Flink S3 connector, Flink Hive connector, Hadoop, Iceberg, Kafka, and JSON connectors. These dependencies are essential for integrating Flink with Apache Iceberg, Kafka, and other services required for the streaming analytics pipeline.
@@ -150,7 +149,7 @@ description = "Apache Flink Kickstarter"
 readme = "README.md"
 requires-python = "~=3.11.9"
 dependencies = [
-    "apache-flink==1.19.1",
+    "apache-flink==1.20.0",
     "boto3>=1.35.36",
     "botocore>=1.35.36",
     "confluent-kafka==2.5.3",
@@ -182,7 +181,7 @@ import argparse
 
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
-from helper.kafka_properties_udtf import execute_kafka_properties_udtf
+from helper.kafka_properties_udtf import execute_confluent_properties_udtf
 from helper.utilities import parse_isoformat, load_catalog, load_database
 ```
 
@@ -246,9 +245,9 @@ if __name__ == "__main__":
 ### Step 4 of 14.  Get Kafka Consumer Client Kafka Cluster properties
 ```python
     # Get Kafka Consumer Client Kafka Cluster properties
-    consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    consumer_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
 ```
-- The function `execute_kafka_properties_udtf()` is designed to retrieve Kafka cluster properties by triggering the KafkaProperties User-Defined Table Function (UDTF).
+- The function `execute_confluent_properties_udtf()` is designed to retrieve Kafka cluster properties by triggering the ConfluentProperties User-Defined Table Function (UDTF).
 
 ### Step 5 of 14.  Consumer the `airline.skyone` and `airline.sunset` Kafka topics
 ```python
@@ -291,7 +290,7 @@ sunset_stream = (env.from_source(sunset_source, WatermarkStrategy.no_watermarks(
 ```python
 # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
 # Get the Kafka Cluster properties for the producer
-producer_properties = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
+producer_properties = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
 producer_properties.update({
     'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
 })
@@ -468,13 +467,13 @@ except Exception as e:
 ### Step 11 of 14.  Combine the `skyone` and `sunset` Airline DataStreams into one DataStream
 ```python
 # Combine the Airline DataStreams into one DataStream
-flight_datastream = combine_datestreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
+flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
 ```
 
-- The `combine_datestreams()` function is used to merge the `skyone` and `sunset` airline DataStreams into a single DataStream. This function is essential for combining the two streams and mapping the data to the `FlightData` schema.
+- The `combine_datastreams()` function is used to merge the `skyone` and `sunset` airline DataStreams into a single DataStream. This function is essential for combining the two streams and mapping the data to the `FlightData` schema.
 
 ```python
-def combine_datestreams(skyone_stream: DataStream, sunset_stream: DataStream) -> DataStream:
+def combine_datastreams(skyone_stream: DataStream, sunset_stream: DataStream) -> DataStream:
     """This method defines the workflow for the Flink job graph (DAG) by connecting the data streams.
 
     Args:
@@ -584,4 +583,4 @@ This code example embodies the principles of modern data architectures, such as 
 - Jeffrey Jonathan Jennings.  [Apache Iceberg in Action with Apache Flink using Java](https://thej3.com/apache-iceberg-in-action-with-apache-flink-using-java-158500688ead).  Medium, 2024.
 - Tomer Shiran, Jason Hughes & Alex Merced.  [Apache Iceberg — The Definitive Guide](https://www.dremio.com/wp-content/uploads/2023/02/apache-iceberg-TDG_ER1.pdf).  O’Reilly, 2024.
 - Jeffrey Jonathan Jennings. [Apache Flink Kickstarter](https://github.com/j3-signalroom/apache_flink-kickstarter/tree/main).  GitHub, 2024.
-- Apache Iceberg Community.  [Apache Iceberg v1.6.1 Documentation](https://iceberg.apache.org/docs/1.6.1/). The Apache Software Foundation, 2024.
+- Apache Iceberg Community.  [Apache Iceberg v1.7.0 Documentation](https://iceberg.apache.org/docs/1.7.0/). The Apache Software Foundation, 2024.

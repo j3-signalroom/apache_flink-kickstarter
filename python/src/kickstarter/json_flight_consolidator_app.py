@@ -9,8 +9,16 @@ import argparse
 
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
-from helper.kafka_properties_udtf import execute_kafka_properties_udtf
-from helper.utilities import parse_isoformat, load_catalog, load_database
+from helper.common import load_catalog, load_database
+
+
+# Ensure the kafka_properties_udtf module is available
+try:
+    from helper.kafka_properties_udtf import execute_kafka_properties_udtf
+except ImportError as e:
+    print(f"Failed to import kafka_properties_udtf: {e}")
+    raise
+
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -29,28 +37,43 @@ def main(args):
     # --- Create a blank Flink execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
 
-    # --- Enable checkpointing every 5000 milliseconds (5 seconds)
+    ###
+    # Enable checkpointing every 5000 milliseconds (5 seconds).  Note, consider the
+    # resource cost of checkpointing frequency, as short intervals can lead to higher
+    # I/O and CPU overhead.  Proper tuning of checkpoint intervals depends on the
+    # state size, latency requirements, and resource constraints.
+    ###
     env.enable_checkpointing(5000)
 
-    #
-    # Set timeout to 60 seconds
-    # The maximum amount of time a checkpoint attempt can take before being discarded.
-    #
+    ###
+    # Set checkpoint timeout to 60 seconds, which is the maximum amount of time a
+    # checkpoint attempt can take before being discarded.  Note, setting an appropriate
+    # checkpoint timeout helps maintain a balance between achieving exactly-once semantics
+    # and avoiding excessive delays that can impact real-time stream processing performance.
+    ###
     env.get_checkpoint_config().set_checkpoint_timeout(60000)
 
-    #
+    ###
     # Set the maximum number of concurrent checkpoints to 1 (i.e., only one checkpoint
-    # is created at a time)
-    #
+    # is created at a time).  Note, this is useful for limiting resource usage and
+    # ensuring checkpoints do not interfere with each other, but may impact throughput
+    # if checkpointing is slow.  Adjust this setting based on the nature of your job,
+    # the size of the state, and available resources. If your environment has enough
+    # resources and you want to ensure faster recovery, you could increase the limit
+    # to allow multiple concurrent checkpoints.
+    ###
     env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
-    # Get the Kafka Cluster properties for the Kafka consumer client
-    consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    # Get the Kafka Cluster properties for the Kafka consumer and producer
+    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
-    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
+    producer_properties['compression.type'] = 'gzip'
+
+     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
     # Note: KafkaSource was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
     # you will need to use the FlinkKafkaConsumer class.
     skyone_source = (KafkaSource.builder()
@@ -84,15 +107,6 @@ def main(args):
     sunset_stream = (env.from_source(sunset_source, WatermarkStrategy.no_watermarks(), "sunset_source")
                         .uid("sunset_source"))
 
-    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
-    # Get the Kafka Cluster properties for the producer
-    producer_properties = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
-    producer_properties.update({
-        'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
-    })
-
-    # Note: KafkaSink was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
-    # you will need to use the FlinkKafkaProducer class.
     # Initialize the KafkaSink builder
     kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
 
@@ -162,7 +176,23 @@ def main(args):
         exit(1)
 
     # Combine the Airline DataStreams into one DataStream
-    flight_datastream = combine_datestreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
+    flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
+
+    # Populate the Apache Iceberg Table with the data from the data stream
+    (tbl_env.from_data_stream(flight_datastream)
+            .execute_insert(flight_table_path.get_full_name()))
+
+    # Sinks the Flight DataStream into a single Kafka topic
+    flight_datastream.sink_to(flight_sink).name("json_flight_data_sink").uid("json_flight_data_sink")
+    
+    # Execute the Flink job graph (DAG)
+    try:
+        env.execute("json_flight_consolidator_app")
+    except Exception as e:
+        print(f"The App stopped early due to the following: {e}.")
+
+    # Combine the Airline DataStreams into one DataStream
+    flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
 
     # Populate the Apache Iceberg Table with the data from the data stream
     (tbl_env.from_data_stream(flight_datastream)
@@ -170,18 +200,19 @@ def main(args):
 
     # Sinks the Flight DataStream into a single Kafka topic
     (flight_datastream.sink_to(flight_sink)
-                      .name("flightdata_sink")
-                      .uid("flightdata_sink"))
+                      .name("flight_sink")
+                      .uid("flight_sink"))
     
     # Execute the Flink job graph (DAG)
     try:
-        env.execute("FlightImporterApp")
+        env.execute("json_flight_consolidator_app")
     except Exception as e:
         print(f"The App stopped early due to the following: {e}.")
 
 
-def combine_datestreams(skyone_stream: DataStream, sunset_stream: DataStream) -> DataStream:
-    """This method defines the workflow for the Flink job graph (DAG) by connecting the data streams.
+def combine_datastreams(skyone_stream: DataStream, sunset_stream: DataStream) -> DataStream:
+    """This function combines the SkyOne Airlines and Sunset Air flight data streams into
+    a single data stream.
 
     Args:
         skyone_stream (DataStream): is the source of the SkyOne Airlines flight data.
@@ -190,6 +221,8 @@ def combine_datestreams(skyone_stream: DataStream, sunset_stream: DataStream) ->
     Returns:
         DataStream: the union of the SkyOne Airlines and Sunset Air flight data streams.
     """
+    from helper.common import parse_isoformat
+
     # Map the data streams to the FlightData model and filter out Skyone flights that have already arrived
     skyone_flight_stream = (skyone_stream
                             .map(lambda flight: AirlineFlightData.to_flight_data("SkyOne", flight))

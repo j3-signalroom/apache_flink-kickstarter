@@ -7,56 +7,49 @@
  */
 package kickstarter.model;
 
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.*;
-
 import java.io.*;
 import java.time.*;
 import java.time.format.*;
 import java.util.*;
 
 
-public class FlyerStatsData implements Serializable {
-    @JsonProperty("email_address")
-    private String email_address;
+public class FlyerStatsJsonData implements Serializable {
+    private String emailAddress;
+    private long totalFlightDuration;
+    private long numberOfFlights;
 
-    @JsonProperty("total_flight_duration")
-    private long total_flight_duration;
-
-    @JsonProperty("number_of_flights")
-    private long number_of_flights;
-
-    public FlyerStatsData() {
+    public FlyerStatsJsonData() {
     }
 
-    public FlyerStatsData(FlightData flightData) {
-        this.email_address = flightData.getEmailAddress();
-        this.total_flight_duration = Duration.between(LocalDateTime.parse(flightData.getDepartureTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), 
-                                                      LocalDateTime.parse(flightData.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).toMinutes();
-        this.number_of_flights = 1;
+    public FlyerStatsJsonData(FlightJsonData flightJsonData) {
+        this.emailAddress = flightJsonData.getEmailAddress();
+        this.totalFlightDuration = Duration.between(LocalDateTime.parse(flightJsonData.getDepartureTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), 
+                                                    LocalDateTime.parse(flightJsonData.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).toMinutes();
+        this.numberOfFlights = 1;
     }
 
     public String getEmailAddress() {
-        return this.email_address;
+        return this.emailAddress;
     }
 
     public void setEmailAddress(String emailAddress) {
-        this.email_address = emailAddress;
+        this.emailAddress = emailAddress;
     }
 
     public long getTotalFlightDuration() {
-        return this.total_flight_duration;
+        return this.totalFlightDuration;
     }
 
     public void setTotalFlightDuration(long totalFlightDuration) {
-        this.total_flight_duration = totalFlightDuration;
+        this.totalFlightDuration = totalFlightDuration;
     }
 
     public long getNumberOfFlights() {
-        return this.number_of_flights;
+        return this.numberOfFlights;
     }
 
     public void setNumberOfFlights(long numberOfFlights) {
-        this.number_of_flights = numberOfFlights;
+        this.numberOfFlights = numberOfFlights;
     }
 
     
@@ -73,7 +66,7 @@ public class FlyerStatsData implements Serializable {
             return true;
         if (o == null || getClass() != o.getClass()) 
             return false;
-        FlyerStatsData that = (FlyerStatsData) o;
+        FlyerStatsJsonData that = (FlyerStatsJsonData) o;
 
         return this.getNumberOfFlights() == that.getNumberOfFlights() && 
                 Objects.equals(this.getEmailAddress(), that.getEmailAddress()) &&
@@ -96,16 +89,16 @@ public class FlyerStatsData implements Serializable {
      */
     @Override
     public String toString() {
-        return "FlyerStatsData{" +
-                "email_address='" + this.getEmailAddress() + "'" +
+        return "FlyerStatsJsonData{" +
+                "emailAddress='" + this.getEmailAddress() + "'" +
                 ", totalFlightDuration=" + this.getTotalFlightDuration() +
-                ", number_of_flights=" + this.getNumberOfFlights() +
+                ", numberOfFlights=" + this.getNumberOfFlights() +
                 '}';
     }
 
-    public FlyerStatsData merge(FlyerStatsData that) {
+    public FlyerStatsJsonData merge(FlyerStatsJsonData that) {
         if(this.getEmailAddress().equals(that.getEmailAddress())) {
-            FlyerStatsData merged = new FlyerStatsData();
+            FlyerStatsJsonData merged = new FlyerStatsJsonData();
 
             merged.setEmailAddress(this.getEmailAddress());
             merged.setTotalFlightDuration(this.getTotalFlightDuration() + that.getTotalFlightDuration());
@@ -113,7 +106,7 @@ public class FlyerStatsData implements Serializable {
 
             return merged;
         } else {
-            throw new IllegalArgumentException("Cannot merge FlyerStatsData for different email addresses");
+            throw new IllegalArgumentException("Cannot merge FlyerStatsJsonData for different email addresses");
         }
     }
 }

@@ -12,7 +12,7 @@ __email__      = "j3@thej3.com"
 __status__     = "dev"
 
 
-class ProcessFlyerStatsDataFunction(ProcessWindowFunction):
+class FlyerStatsProcessWindowFunction(ProcessWindowFunction):
     """This class is a custom implementation of a ProcessWindowFunction in Apache Flink.
     This class is designed to process elements within a window, manage state, and yield
     accumulated statistics for user data.

@@ -86,52 +86,18 @@ public class AvroDataGeneratorApp {
          */
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
 
-        // --- Create a StreamTableEnvironment
+        // --- Create a StreamTableEnvironment.
         EnvironmentSettings settings = 
             EnvironmentSettings.newInstance()
                                .inStreamingMode()
                                .build();
         StreamTableEnvironment tblEnv = StreamTableEnvironment.create(env, settings);
 
-		/*
-		 * --- Kafka Producer Config
-		 * Retrieve the properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
-		 * Then ingest properties into the Flink app's data stream.
-		 */
-        DataStream<Properties> dataStreamProducerProperties = 
-			env.fromData(new Properties())
-			   .map(new ConfluentClientConfigurationMapFunction(false, serviceAccountUser))
-			   .name("kafka_producer_properties");
-		Properties producerProperties = new Properties();
+		// --- Kafka Producer Client Properties.
+        Properties producerProperties = Common.collectConfluentProperties(env, serviceAccountUser, false);
 
-		/*
-		 * Execute the data stream and collect the properties.
-		 * 
-		 * Note, the try-with-resources block ensures that the close() method of the CloseableIterator is
-		 * called automatically at the end, even if an exception occurs during iteration.
-		 */
-		try {
-			dataStreamProducerProperties
-				.executeAndCollect()
-                .forEachRemaining(typeValue -> {
-                    producerProperties.putAll(typeValue);
-                });
-		} catch (final Exception e) {
-            System.out.println("The Flink App stopped during the reading of the custom data source stream because of the following: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-		}
-
-        /*
-         * Retrieve the schema registry properties from the producer properties 
-         * and store them in a map.
-         */
-        Map<String, String> registryConfigs = new HashMap<String, String>();
-        for (String key : producerProperties.stringPropertyNames()) {
-            if (key.startsWith("schema.registry.")) {
-                registryConfigs.put(key, producerProperties.getProperty(key));
-            }
-        }
+        // --- Retrieve the schema registry properties and store it in a map.
+        Map<String, String> registryConfigs = Common.extractRegistryConfigs(producerProperties);
 
         // --- Create the data streams for the two airlines.
         DataStream<AirlineAvroData> skyOneDataStream = SinToKafkaTopic(env, "SKY1", "skyone", producerProperties, registryConfigs);

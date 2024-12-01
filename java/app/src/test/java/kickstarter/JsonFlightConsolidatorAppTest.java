@@ -21,10 +21,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import kickstarter.model.*;
 
 
-class FlightImporterAppTest {
+class JsonFlightConsolidatorAppTest {
 
     StreamExecutionEnvironment env;
-    DataStream.Collector<FlightData> collector;
+    DataStream.Collector<FlightJsonData> collector;
 
     static final MiniClusterResourceConfiguration miniClusterConfig = new MiniClusterResourceConfiguration.Builder()
             .setNumberSlotsPerTaskManager(2)
@@ -34,8 +34,8 @@ class FlightImporterAppTest {
     @RegisterExtension
     static final MiniClusterExtension FLINK = new MiniClusterExtension(miniClusterConfig);
 
-    private void assertContains(DataStream.Collector<FlightData> collector, List<FlightData> expected) {
-        List<FlightData> actual = new ArrayList<>();
+    private void assertContains(DataStream.Collector<FlightJsonData> collector, List<FlightJsonData> expected) {
+        List<FlightJsonData> actual = new ArrayList<>();
         collector.getOutput().forEachRemaining(actual::add);
 
         assertEquals(expected.size(), actual.size());
@@ -51,13 +51,13 @@ class FlightImporterAppTest {
 
     @Test
     void defineWorkflow_shouldConvertDataFromTwoStreams() throws Exception {
-        AirlineData skyOneFlight = new TestHelpers.AirlineFlightDataBuilder().build();
-        AirlineData sunsetFlight = new TestHelpers.AirlineFlightDataBuilder().build();
+        AirlineJsonData skyOneFlight = new JsonTestHelpers.AirlineFlightDataBuilder().build();
+        AirlineJsonData sunsetFlight = new JsonTestHelpers.AirlineFlightDataBuilder().build();
 
-        DataStreamSource<AirlineData> skyOneStream = env.fromData(skyOneFlight);
-        DataStreamSource<AirlineData> sunsetStream = env.fromData(sunsetFlight);
+        DataStreamSource<AirlineJsonData> skyOneStream = env.fromData(skyOneFlight);
+        DataStreamSource<AirlineJsonData> sunsetStream = env.fromData(sunsetFlight);
 
-        FlightImporterApp.defineWorkflow(skyOneStream, sunsetStream).collectAsync(collector);
+        JsonFlightConsolidatorApp.defineWorkflow(skyOneStream, sunsetStream).collectAsync(collector);
         env.executeAsync();
         assertContains(collector, Arrays.asList(skyOneFlight.toFlightData("SkyOne"), sunsetFlight.toFlightData("Sunset")));
     }
@@ -67,15 +67,15 @@ class FlightImporterAppTest {
         final String addMinuteToNow = LocalDateTime.now().plusMinutes(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         final String subtractSecondToNow = LocalDateTime.now().minusSeconds(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-        AirlineData newSkyOneFlight = new TestHelpers.AirlineFlightDataBuilder().setArrivalTime(addMinuteToNow).build();
-        AirlineData oldSkyOneFlight = new TestHelpers.AirlineFlightDataBuilder().setArrivalTime(subtractSecondToNow).build();
-        AirlineData newSunsetFlight = new TestHelpers.AirlineFlightDataBuilder().setArrivalTime(addMinuteToNow).build();
-        AirlineData oldSunsetFlight = new TestHelpers.AirlineFlightDataBuilder().setArrivalTime(subtractSecondToNow).build();
+        AirlineJsonData newSkyOneFlight = new JsonTestHelpers.AirlineFlightDataBuilder().setArrivalTime(addMinuteToNow).build();
+        AirlineJsonData oldSkyOneFlight = new JsonTestHelpers.AirlineFlightDataBuilder().setArrivalTime(subtractSecondToNow).build();
+        AirlineJsonData newSunsetFlight = new JsonTestHelpers.AirlineFlightDataBuilder().setArrivalTime(addMinuteToNow).build();
+        AirlineJsonData oldSunsetFlight = new JsonTestHelpers.AirlineFlightDataBuilder().setArrivalTime(subtractSecondToNow).build();
 
-        DataStreamSource<AirlineData> skyOneStream = env.fromData(newSkyOneFlight, oldSkyOneFlight);
-        DataStreamSource<AirlineData> sunsetStream = env.fromData(newSunsetFlight, oldSunsetFlight);
+        DataStreamSource<AirlineJsonData> skyOneStream = env.fromData(newSkyOneFlight, oldSkyOneFlight);
+        DataStreamSource<AirlineJsonData> sunsetStream = env.fromData(newSunsetFlight, oldSunsetFlight);
 
-        FlightImporterApp.defineWorkflow(skyOneStream, sunsetStream).collectAsync(collector);
+        JsonFlightConsolidatorApp.defineWorkflow(skyOneStream, sunsetStream).collectAsync(collector);
 
         env.executeAsync();
 

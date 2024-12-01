@@ -7,137 +7,101 @@
  */
 package kickstarter.model;
 
-import com.fasterxml.jackson.annotation.*;
 import java.io.Serializable;
 import java.math.*;
 import java.util.*;
 
 
-public class AirlineData implements Serializable {
-    // --- The field names of the class object
-    public static final String FIELD_EMAIL_ADDRESS = "email_address";
-    public static final String FIELD_DEPARTURE_TIME = "departure_time";
-    public static final String FIELD_DEPARTURE_AIRPORT_CODE = "departure_airport_code";
-	public static final String FIELD_ARRIVAL_TIME = "arrival_time";
-    public static final String FIELD_ARRIVAL_AIRPORT_CODE = "arrival_airport_code";
-    public static final String FIELD_FLIGHT_DURATION = "flight_duration";
-    public static final String FIELD_FLIGHT_NUMBER = "flight_number";
-    public static final String FIELD_CONFIRMATION_CODE = "confirmation_code";
-    public static final String FIELD_TICKET_PRICE = "ticket_price";
-    public static final String FIELD_AIRCRAFT = "aircraft";
-    public static final String FIELD_BOOKING_AGENCY_EMAIL = "booking_agency_email";
-
-
-    @JsonProperty(FIELD_EMAIL_ADDRESS)
-    private String email_address;
-
-    @JsonProperty(FIELD_DEPARTURE_TIME)
-    private String departure_time;
-
-    @JsonProperty(FIELD_DEPARTURE_AIRPORT_CODE)
-    private String departure_airport_code;
-
-    @JsonProperty(FIELD_ARRIVAL_TIME)
-    private String arrival_time;
-
-    @JsonProperty(FIELD_ARRIVAL_AIRPORT_CODE)
-    private String arrival_airport_code;
-
-    @JsonProperty(FIELD_FLIGHT_DURATION)
-    private long flight_duration;
-
-    @JsonProperty(FIELD_FLIGHT_NUMBER)
-    private String flight_number;
-
-    @JsonProperty(FIELD_CONFIRMATION_CODE)
-    private String confirmation_code;
-
-    @JsonProperty(FIELD_TICKET_PRICE)
-    private BigDecimal ticket_price;
-
-    @JsonProperty(FIELD_AIRCRAFT)
+public class AirlineJsonData implements Serializable {
+    private String emailAddress;
+    private String departureTime;
+    private String departureAirportCode;
+    private String arrivalTime;
+    private String arrivalAirportCode;
+    private long flightDuration;
+    private String flightNumber;
+    private String confirmationCode;
+    private BigDecimal ticketPrice;
     private String aircraft;
-
-    @JsonProperty(FIELD_BOOKING_AGENCY_EMAIL)
-    private String booking_agency_email;
+    private String bookingAgencyEmail;
 
 
     /**
      * Default constructor.
      */
-	public AirlineData() {}
+	public AirlineJsonData() {}
 
 
     public String getEmailAddress() {
-        return this.email_address;
+        return this.emailAddress;
     }
 
     public void setEmailAddress(String emailAddress) {
-        this.email_address = emailAddress;
+        this.emailAddress = emailAddress;
     }
 
     public String getDepartureTime() {
-        return this.departure_time;
+        return this.departureTime;
     }
 
     public void setDepartureTime(String departureTime) {
-        this.departure_time = departureTime;
+        this.departureTime = departureTime;
     }
 
     public String getDepartureAirportCode() {
-        return this.departure_airport_code;
+        return this.departureAirportCode;
     }
 
-    public void setDepartureAirportCode(String departureAirport) {
-        this.departure_airport_code = departureAirport;
+    public void setDepartureAirportCode(String departureAirportCode) {
+        this.departureAirportCode = departureAirportCode;
     }
 
     public String getArrivalTime() {
-        return this.arrival_time;
+        return this.arrivalTime;
     }
 
     public void setArrivalTime(String arrivalTime) {
-        this.arrival_time = arrivalTime;
+        this.arrivalTime = arrivalTime;
     }
 
     public String getArrivalAirportCode() {
-        return this.arrival_airport_code;
+        return this.arrivalAirportCode;
     }
 
-    public void setArrivalAirportCode(String arrivalAirport) {
-        this.arrival_airport_code = arrivalAirport;
+    public void setArrivalAirportCode(String arrivalAirportCode) {
+        this.arrivalAirportCode = arrivalAirportCode;
     }
 
     public long getFlightDuration() {
-        return this.flight_duration;
+        return this.flightDuration;
     }
 
     public void setFlightDuration(long flightDuration) {
-        this.flight_duration = flightDuration;
+        this.flightDuration = flightDuration;
     }
 
     public String getFlightNumber() {
-        return this.flight_number;
+        return this.flightNumber;
     }
 
     public void setFlightNumber(String flightNumber) {
-        this.flight_number = flightNumber;
+        this.flightNumber = flightNumber;
     }
 
     public String getConfirmationCode() {
-        return this.confirmation_code;
+        return this.confirmationCode;
     }
 
     public void setConfirmationCode(String confirmationCode) {
-        this.confirmation_code = confirmationCode;
+        this.confirmationCode = confirmationCode;
     }
 
     public BigDecimal getTicketPrice() {
-        return this.ticket_price;
+        return this.ticketPrice;
     }
 
-    public void setTicketPrice(BigDecimal totalPrice) {
-        this.ticket_price = totalPrice;
+    public void setTicketPrice(BigDecimal ticketPrice) {
+        this.ticketPrice = ticketPrice;
     }
 
     public String getAircraft() {
@@ -149,11 +113,11 @@ public class AirlineData implements Serializable {
     }
 
     public String getBookingAgencyEmail() {
-        return this.booking_agency_email;
+        return this.bookingAgencyEmail;
     }
 
     public void setBookingAgencyEmail(String bookingAgencyEmail) {
-        this.booking_agency_email = bookingAgencyEmail;
+        this.bookingAgencyEmail = bookingAgencyEmail;
     }
 
     
@@ -170,7 +134,7 @@ public class AirlineData implements Serializable {
             return true;
         if (o == null || getClass() != o.getClass()) 
             return false;
-        AirlineData that = (AirlineData) o;
+        AirlineJsonData that = (AirlineJsonData) o;
 
         return Objects.equals(getEmailAddress(), that.getEmailAddress()) && 
                 Objects.equals(getDepartureTime(), that.getDepartureTime()) && 
@@ -211,23 +175,23 @@ public class AirlineData implements Serializable {
      */
     @Override
     public String toString() {
-        return "AirlineData{" +
-            "email_address='" + getEmailAddress() + "'" +
-            ", departure_time=" + getDepartureTime() +
-            ", departure_airport_code='" + getDepartureAirportCode() + "'" +
-            ", arrival_time=" + getArrivalTime() +
-            ", arrival_airport_code='" + getArrivalAirportCode() + "'" +
-            ", flight_duration=" + getFlightDuration() +
-            ", flight_number='" + getFlightNumber() + "'" +
-            ", confirmation_code='" + getConfirmationCode() + "'" +
-            ", ticket_price=" + getTicketPrice() +
+        return "AirlineJsonData{" +
+            "emailAddress='" + getEmailAddress() + "'" +
+            ", departureTime=" + getDepartureTime() +
+            ", departureAirportCode='" + getDepartureAirportCode() + "'" +
+            ", arrivalTime=" + getArrivalTime() +
+            ", arrivalAirportCode='" + getArrivalAirportCode() + "'" +
+            ", flightDuration=" + getFlightDuration() +
+            ", flightNumber='" + getFlightNumber() + "'" +
+            ", confirmationCode='" + getConfirmationCode() + "'" +
+            ", ticketPrice=" + getTicketPrice() +
             ", aircraft='" + getAircraft() + "'" +
-            ", booking_agency_email='" + getBookingAgencyEmail() + "'" +
+            ", bookingAgencyEmail='" + getBookingAgencyEmail() + "'" +
             '}';
     }
 
-    public FlightData toFlightData(final String airline) {
-        FlightData flightData = new FlightData();
+    public FlightJsonData toFlightData(final String airline) {
+        FlightJsonData flightData = new FlightJsonData();
 
         flightData.setEmailAddress(getEmailAddress());
         flightData.setDepartureTime(getDepartureTime());

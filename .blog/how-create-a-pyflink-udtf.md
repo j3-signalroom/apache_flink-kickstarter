@@ -19,39 +19,39 @@ And guess what? After much trial and error, I cracked the code! You can check it
 
 This article is here to share the solution, step-by-step, with you!
 
-The magic happens in the `kafka_properties_udtf.py module`, which contains the User-Defined Table Function (UDTF) `KafkaProperties` class, along with the `execute_kafka_properties_udtf()` method that kicks it off. Let's dive in and unravel it all together!
+The magic happens in the `kafka_properties_udtf.py module`, which contains the User-Defined Table Function (UDTF) `ConfluentProperties` class, along with the `execute_confluent_properties_udtf()` method that kicks it off. Let's dive in and unravel it all together!
 
-## The Class (`KafkaProperties`)
+## The Class (`ConfluentProperties`)
 The class is a User-Defined Table Function (UDTF), used to retrieve the Kafka Cluster properties from the AWS Secrets Manager and Parameter Store.  Below is a step-by-step breakdown of the class:
 
 ### Step 1 of 5 --- Class declaration
 ```python
-class KafkaProperties(TableFunction):
+class ConfluentProperties(TableFunction):
     """This User-Defined Table Function (UDTF) is used to retrieve the Kafka Cluster properties
     from the AWS Secrets Manager and Parameter Store.
     """
     ...
 ```
-The `KafkaProperties` class, which is the User-Defined Table Function (UDTF), retrieves the Kafka Cluster properties from the AWS Secrets Manager and Parameter Store, which inherits from the PyFlink [TableFunction](https://nightlies.apache.org/flink/flink-docs-release-1.20/api/python/reference/pyflink.table/api/pyflink.table.udf.TableFunction.html?highlight=tablefunction), a base interface for a user-defined table function that creates zero or more row values.
+The `ConfluentProperties` class, which is the User-Defined Table Function (UDTF), retrieves the Kafka Cluster properties from the AWS Secrets Manager and Parameter Store, which inherits from the PyFlink [TableFunction](https://nightlies.apache.org/flink/flink-docs-release-1.20/api/python/reference/pyflink.table/api/pyflink.table.udf.TableFunction.html?highlight=tablefunction), a base interface for a user-defined table function that creates zero or more row values.
 
 ### Step 2 of 5 --- Constructor(`__init__()`)
 ```python
-def __init__(self, for_consumer: bool, service_account_user: str):
+def __init__(self, is_consumer: bool, service_account_user: str):
     """Initializes the UDTF with the necessary parameters.
 
     Args:
-        for_consumer (bool): determines if the Kafka Client is a consumer or producer.
+        is_consumer (bool): determines if the Kafka Client is a consumer or producer.
         service_account_user (str): is the name of the service account user.  It is used in
         the prefix to the path of the Kafka Cluster secrets in the AWS Secrets Manager and
         the Kafka Client parameters in the AWS Systems Manager Parameter Store.
     """
-    self._for_consumer = for_consumer
+    self._is_consumer = is_consumer
     self._service_account_user = service_account_user
     self._aws_region_name = os.environ['AWS_REGION']
 ```
 
 The Constructor initializes the class with two parameters, which then set the:
-- `for_consumer` (`bool`):  Indicates whether the Kafka client is a consumer or a producer.
+- `is_consumer` (`bool`):  Indicates whether the Kafka client is a consumer or a producer.
 - `service_account_user` (`str`):  Used in the prefix for constructing paths to secrets and configurations.
 - `aws_region_name` (`str`):  Is obtained from the environment variable, `AWS_REGION`, which is needed for interacting with AWS Services.
 
@@ -75,7 +75,7 @@ def eval(self, kakfa_properties: Row) -> Iterator[Row]:
 
     properties = self.get_kafka_properties(
         f"{secret_path_prefix}/kafka_cluster/java_client",
-        f"{secret_path_prefix}/consumer_kafka_client" if self._for_consumer else f"{secret_path_prefix}/producer_kafka_client"
+        f"{secret_path_prefix}/consumer_kafka_client" if self._is_consumer else f"{secret_path_prefix}/producer_kafka_client"
     )
     if properties is None:
         raise RuntimeError(f"Failed to retrieve the Kafka Client properties from '{secret_path_prefix}' secrets because {properties.get_error_message_code()}:{properties.get_error_message()}")
@@ -240,11 +240,11 @@ Method argument:
 This helper method retrieves the parameters from the AWS System Manager Parameter Store. Converts the parameter values to their appropriate data types (e.g., `int`, `float`, or `str`). (It does this because AWS only stores parameter values as a `string` data type.) If successful, the parameters are returned as a dictionary.
 
 
-## The method (`execute_kafka_properties_udtf()`)
-The function `execute_kafka_properties_udtf()` is designed to retrieve Kafka cluster properties by triggering the `KafkaProperties` User-Defined Table Function (UDTF) in a PyFlink environment. 
+## The method (`execute_confluent_properties_udtf()`)
+The function `execute_confluent_properties_udtf()` is designed to retrieve Kafka cluster properties by triggering the `ConfluentProperties` User-Defined Table Function (UDTF) in a PyFlink environment. 
 
 ```python
-def execute_kafka_properties_udtf(tbl_env: StreamTableEnvironment, for_consumer: bool, service_account_user: str) -> dict:
+def execute_confluent_properties_udtf(tbl_env: StreamTableEnvironment, is_consumer: bool, service_account_user: str) -> dict:
     """This method retrieves the Kafka Cluster properties from the AWS Secrets Manager 
     and AWS Systems Manager.
 
@@ -253,7 +253,7 @@ def execute_kafka_properties_udtf(tbl_env: StreamTableEnvironment, for_consumer:
         Environment is a unified entry point for creating Table and SQL API programs.  It
         is used to convert a DataStream into a Table or vice versa.  It is also used to
         register a Table in a catalog.
-        for_consumer (bool): determines if the Kafka Client is a consumer or producer.
+        is_consumer (bool): determines if the Kafka Client is a consumer or producer.
         service_account_user (str): is the name of the service account user.  It is used in
         the prefix to the path of the Kafka Cluster secrets in the AWS Secrets Manager and
         the Kafka Client parameters in the AWS Systems Manager Parameter Store.
@@ -271,7 +271,7 @@ def execute_kafka_properties_udtf(tbl_env: StreamTableEnvironment, for_consumer:
     kafka_property_table = tbl_env.from_elements([('','')], schema)
 
     # Define the table name based on the type of Kafka client
-    table_name = "kafka_property_table_" + ("consumer" if for_consumer else "producer")
+    table_name = "kafka_property_table_" + ("consumer" if is_consumer else "producer")
 
     # Register the table as a temporary view
     tbl_env.create_temporary_view(table_name, kafka_property_table)
@@ -280,7 +280,7 @@ def execute_kafka_properties_udtf(tbl_env: StreamTableEnvironment, for_consumer:
     kafka_property_table = tbl_env.from_path(table_name)
 
     # Register the Python function as a PyFlink UDTF (User-Defined Table Function)
-    kafka_properties_udtf = udtf(f=KafkaProperties(for_consumer, service_account_user), 
+    kafka_properties_udtf = udtf(f=ConfluentProperties(is_consumer, service_account_user), 
                                  result_types=schema)
 
     # Join the Kafka Property Table with the UDTF
@@ -300,7 +300,7 @@ def execute_kafka_properties_udtf(tbl_env: StreamTableEnvironment, for_consumer:
 
 Method argument(s):
 - `tbl_env` (`StreamTableEnvironment`):  Represents the Flink Table Environment, which serves as an entry point for working with tables and SQL queries in PyFlink, which is specifically used to create and register tables and to execute SQL-like operations.
-- `for_consumer` (`bool`):  Indicates whether the Kafka client is a consumer or producer. This flag determines which properties to retrieve (consumer-specific or producer-specific).
+- `is_consumer` (`bool`):  Indicates whether the Kafka client is a consumer or producer. This flag determines which properties to retrieve (consumer-specific or producer-specific).
 - `service_account_user` (`str`):  The name of the service account user used in the prefix to determine paths to secrets and parameters.
 
 Below is a step-by-step breakdown of the method:
@@ -324,7 +324,7 @@ This creates an empty table with the defined schema in the Flink environment. To
 
 ### Step 3 of 8 --- Define the Table Name and Register it as a Temporary View
 ```python
-table_name = "kafka_property_table_" + ("consumer" if for_consumer else "producer")
+table_name = "kafka_property_table_" + ("consumer" if is_consumer else "producer")
 tbl_env.create_temporary_view(table_name, kafka_property_table)
 ```
 
@@ -337,12 +337,12 @@ kafka_property_table = tbl_env.from_path(table_name)
 
 This line retrieves the table registered earlier as a temporary view, allowing further operations to be performed.
 
-### Step 5 of 8 --- Register and Apply the UDTF (`KafkaProperties`)
+### Step 5 of 8 --- Register and Apply the UDTF (`ConfluentProperties`)
 ```python
-kafka_properties_udtf = udtf(f=KafkaProperties(for_consumer, service_account_user), result_types=schema)
+kafka_properties_udtf = udtf(f=ConfluentProperties(is_consumer, service_account_user), result_types=schema)
 ```
 
-The `KafkaProperties` UDTF is instantiated with the appropriate parameters (`for_consumer` and `service_account_user`).  The udtf() function registers the UDTF with the output schema defined earlier.
+The `ConfluentProperties` UDTF is instantiated with the appropriate parameters (`is_consumer` and `service_account_user`).  The udtf() function registers the UDTF with the output schema defined earlier.
 
 ### Step 6 of 8 --- Join the Table with the UDTF
 ```python
@@ -384,7 +384,7 @@ def main(args):
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Get the Kafka Cluster properties for the Kafka consumer client
-    consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    consumer_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
     skyone_source = (KafkaSource.builder()
@@ -401,7 +401,7 @@ def main(args):
     ...
 
 ```
-In the snippet above, the `execute_kafka_properties_udtf()` method plays a pivotal role in your Flink application.  It seamlessly retrieves Kafka Consumer Client properties and channels them into the `KafkaSource` operator.  This approach ensures that properties are handled securely, paving the way for effortless scalability while maintaining data integrity.  By streamlining the integration of Kafka client configuration with Flink, you're building a robust, scalable, and future-proof data pipeline that empowers real-time processing.
+In the snippet above, the `execute_confluent_properties_udtf()` method plays a pivotal role in your Flink application.  It seamlessly retrieves Kafka Consumer Client properties and channels them into the `KafkaSource` operator.  This approach ensures that properties are handled securely, paving the way for effortless scalability while maintaining data integrity.  By streamlining the integration of Kafka client configuration with Flink, you're building a robust, scalable, and future-proof data pipeline that empowers real-time processing.
 
 ## Summary
-The `KafkaProperties` class and `execute_kafka_properties_udtf()` method forms a practical solution for dynamically retrieving Kafka configuration properties in a PyFlink streaming environment.  By integrating AWS Secrets Manager and AWS Systems Manager Parameter Store, this architecture ensures that Kafka client configurations are managed with both scalability and security in mind—enabling seamless, real-time adjustments while safeguarding sensitive information.  This approach exemplifies a modern, cloud-native way of handling configuration management, perfectly tailored for robust and adaptive data streaming workflows.
+The `ConfluentProperties` class and `execute_confluent_properties_udtf()` method forms a practical solution for dynamically retrieving Kafka configuration properties in a PyFlink streaming environment.  By integrating AWS Secrets Manager and AWS Systems Manager Parameter Store, this architecture ensures that Kafka client configurations are managed with both scalability and security in mind—enabling seamless, real-time adjustments while safeguarding sensitive information.  This approach exemplifies a modern, cloud-native way of handling configuration management, perfectly tailored for robust and adaptive data streaming workflows.

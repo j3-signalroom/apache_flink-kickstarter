@@ -1,7 +1,7 @@
 from pyflink.common import Row, Types
 from dataclasses import dataclass
 
-from helper.utilities import serialize_date, parse_isoformat
+from helper.common import serialize_date, parse_isoformat
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]

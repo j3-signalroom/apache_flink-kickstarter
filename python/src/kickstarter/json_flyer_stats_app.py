@@ -9,9 +9,15 @@ import logging
 import argparse
 
 from model.flight_data import FlightData, FlyerStatsData
-from helper.kafka_properties_udtf import execute_kafka_properties_udtf
-from helper.process_flyer_stats_data_function import ProcessFlyerStatsDataFunction
-from helper.utilities import load_catalog, load_database
+from helper.flyer_stats_process_window_function import FlyerStatsProcessWindowFunction
+from helper.common import load_catalog, load_database
+
+# Ensure the kafka_properties_udtf module is available
+try:
+    from helper.kafka_properties_udtf import execute_kafka_properties_udtf
+except ImportError as e:
+    logging.error(f"Failed to import kafka_properties_udtf: {e}")
+    raise
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -29,26 +35,39 @@ def main(args):
     env = StreamExecutionEnvironment.get_execution_environment()
     env.set_stream_time_characteristic(TimeCharacteristic.EventTime)
     
-    # --- Enable checkpointing every 5000 milliseconds (5 seconds)
+    ###
+    # Enable checkpointing every 5000 milliseconds (5 seconds).  Note, consider the
+    # resource cost of checkpointing frequency, as short intervals can lead to higher
+    # I/O and CPU overhead.  Proper tuning of checkpoint intervals depends on the
+    # state size, latency requirements, and resource constraints.
+    ###
     env.enable_checkpointing(5000)
 
-    #
-    # Set timeout to 60 seconds
-    # The maximum amount of time a checkpoint attempt can take before being discarded.
-    #
+    ###
+    # Set checkpoint timeout to 60 seconds, which is the maximum amount of time a
+    # checkpoint attempt can take before being discarded.  Note, setting an appropriate
+    # checkpoint timeout helps maintain a balance between achieving exactly-once semantics
+    # and avoiding excessive delays that can impact real-time stream processing performance.
+    ###
     env.get_checkpoint_config().set_checkpoint_timeout(60000)
 
-    #
+    ###
     # Set the maximum number of concurrent checkpoints to 1 (i.e., only one checkpoint
-    # is created at a time)
-    #
+    # is created at a time).  Note, this is useful for limiting resource usage and
+    # ensuring checkpoints do not interfere with each other, but may impact throughput
+    # if checkpointing is slow.  Adjust this setting based on the nature of your job,
+    # the size of the state, and available resources. If your environment has enough
+    # resources and you want to ensure faster recovery, you could increase the limit
+    # to allow multiple concurrent checkpoints.
+    ###
     env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
-    # Get the Kafka Cluster properties for the consumer
-    consumer_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    # Get the Kafka Cluster properties for the Kafka consumer and producer
+    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
     flight_source = (KafkaSource.builder()
@@ -64,12 +83,6 @@ def main(args):
 
     # Takes the results of the Kafka source and attaches the unbounded data stream
     flight_data_stream = env.from_source(flight_source, WatermarkStrategy.for_monotonous_timestamps(), "flight_data_source")
-
-    # Get the Kafka Cluster properties for the producer
-    producer_properties = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
-    producer_properties.update({
-        'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
-    })
 
     # Note: KafkaSink was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
     # you will need to use the FlinkKafkaProducer class.
@@ -141,13 +154,11 @@ def main(args):
             .execute_insert(stats_table_path.get_full_name()))
 
     # Sinks the User Statistics DataStream Kafka topic
-    (stats_datastream.sink_to(stats_sink)
-                     .name("stats_sink")
-                     .uid("stats_sink"))
+    stats_datastream.sink_to(stats_sink).name("json_flyer_stats_sink").uid("json_flyer_stats_sink")
 
     # Execute the Flink job graph (DAG)
     try:
-        env.execute("FlyerStatsApp")
+        env.execute("json_flyer_stats_app")
     except Exception as e:
         logger.error("The App stopped early due to the following: %s", e)
 
@@ -167,7 +178,7 @@ def define_workflow(flight_data_stream: DataStream) -> DataStream:
             .map(FlightData.to_flyer_stats_data)    # Transforms each element in the datastream to a FlyerStatsData object
             .key_by(lambda s: s.email_address)          # Groups the data by email address
             .window(TumblingEventTimeWindows.of(Time.minutes(1)))   # Each window will contain all events that occur within that 1-minute period
-            .reduce(FlyerStatsData.merge, window_function=ProcessFlyerStatsDataFunction())) # Applies a reduce function to each window
+            .reduce(FlyerStatsData.merge, window_function=FlyerStatsProcessWindowFunction())) # Applies a reduce function to each window
 
 
 if __name__ == "__main__":

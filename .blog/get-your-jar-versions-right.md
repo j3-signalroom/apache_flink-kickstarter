@@ -34,13 +34,13 @@ repositories {
 }
 
 // --- Dependency version numbers
-val flinkVersion: String = "1.19"
-val flinkVersionWithPatch: String = flinkVersion + ".1"
-val hadoopVersion: String = "3.3.6"
-val kafkaVersion: String = "3.7.0"
+val flinkVersion: String = "1.20"
+val flinkVersionWithPatch: String = flinkVersion + ".0"
+val hadoopVersion: String = "3.4.1"
+val kafkaVersion: String = "3.8.0"
 val junitVersion: String = "5.10.0"
 val awssdkVersion: String = "2.26.29"
-var icebergVersion: String = "1.6.1"
+var icebergVersion: String = "1.7.0"
 
 dependencies {
     implementation("org.apache.hadoop:hadoop-common:${hadoopVersion}")
@@ -52,7 +52,7 @@ dependencies {
     compileOnly("org.apache.flink:flink-table-api-java-bridge:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-clients:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-connector-base:${flinkVersionWithPatch}")
-    implementation("org.apache.flink:flink-connector-kafka:3.2.0-${flinkVersion}")
+    implementation("org.apache.flink:flink-connector-kafka:3.3.0-${flinkVersion}")
     implementation("org.apache.flink:flink-connector-datagen:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-json:${flinkVersionWithPatch}")
     implementation("org.slf4j:slf4j-log4j12:2.0.7")
@@ -138,19 +138,19 @@ tasks.named<Test>("test") {
  > Replace `<FLINK_HOME>` with your Apache Flink installation home directory, e.g., `/opt/flink`.
 
  ```bash
-curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.19.1/flink-s3-fs-hadoop-1.19.1.jar" -o "<FLINK_HOME>/lib/flink-s3-fs-hadoop-1.19.1.jar"
-curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/1.19.1/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar" -o "<FLINK_HOME>/lib/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.20.0/flink-s3-fs-hadoop-1.20.0.jar" -o "<FLINK_HOME>/lib/flink-s3-fs-hadoop-1.20.0.jar"
+curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/1.20.0/flink-sql-connector-hive-3.1.3_2.12-1.20.0.jar" -o "<FLINK_HOME>/lib/flink-sql-connector-hive-3.1.3_2.12-1.20.0.jar"
 curl -L "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.4.0/hadoop-common-3.4.0.jar" -o "<FLINK_HOME>/lib/hadoop-common-3.4.0.jar"
 curl -L "https://repo1.maven.org/maven2/org/apache/flink/flink-shaded-hadoop-2-uber/2.8.3-10.0/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" -o "<FLINK_HOME>/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar"
 ```
 
 My goal was to run Flink apps using the latest compatible versions of Apache Flink and Apache Iceberg, with AWS Glue serving as the Iceberg metastore. To achieve this, I need the latest version of AWS Glue that seamlessly integrates with both Flink and Iceberg, ensuring maximum compatibility and performance. I accomplished this using the Gradle script along with installing the necessary JARs in the Flink home library directory!
 
-> Some of you might be wondering, "Wait a minute, as of October 21, 2024 Apache Flink 1.20 it's already been released, so what's going on?" Well, it turns out that when I visited the Apache Iceberg Releases page and checked the list, I clicked on the [1.6.1 Flink 1.20 runtime Jar](https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.20/1.6.1/iceberg-flink-runtime-1.20-1.6.1.jar) and came across this:
+> Some of you might be wondering, "Wait a minute, as of October 21, 2024 Apache Flink 1.20 it's already been released, so what's going on?" Well, it turns out that when I visited the Apache Iceberg Releases page and checked the list, I clicked on the [1.7.0 Flink 1.20 runtime Jar](https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.20/1.7.0/iceberg-flink-runtime-1.20-1.7.0.jar) and came across this:
 > 
 > ![iceberg-runtime-is-missing](images/iceberg-runtime-is-missing.png)
 >
-> So, it is missing, and therefore, I made the call to use the prior release, `Apache Flink 1.19.1`.
+> So, it is missing, and therefore, I made the call to use the prior release, `Apache Flink 1.20.0`.
 
 ## I'll stop here for now
 It took some effort to figure out the right combination of JARs and dependencies, so I'll let this sit for a bit - especially for those needing the specific JAR setup. In Part II, I'll show you how, with these JARs in place, you can build some powerful Flink apps using Java.

@@ -67,13 +67,13 @@ public class DataGenerator {
     }
 
     /**
-     * Generate an AirlineFlightData object.
+     * Generate an AirlineJsonData object.
      * 
      * @param airlinePrefix The prefix for the airline.
-     * @return An AirlineFlightData object.
+     * @return An AirlineJsonData object.
      */
-    public static AirlineData generateAirlineFlightData(final String airlinePrefix) {
-        AirlineData airlineData = new AirlineData();
+    public static AirlineJsonData generateAirlineJsonData(final String airlinePrefix) {
+        AirlineJsonData airlineData = new AirlineJsonData();
         final LocalDateTime localDepartureTime = generateDepartureTime();
         final LocalDateTime localArrivalTime = generateArrivalTime(localDepartureTime);
 
@@ -93,7 +93,7 @@ public class DataGenerator {
     }
 
     /**
-     * Generate an AirlineFlightData object.
+     * Generate an AirlineAvroData object.
      * 
      * @param airlinePrefix The prefix for the airline.
      * @return An AirlineFlightData object.

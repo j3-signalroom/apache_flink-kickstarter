@@ -10,12 +10,20 @@ package kickstarter;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
+import org.apache.flink.util.CloseableIterator;
+import org.slf4j.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.PropertyNamingStrategies;
 
 
 public class Common {
+    private static final Logger logger = LoggerFactory.getLogger(Common.class);
+    
     public static final String ARG_SERVICE_ACCOUNT_USER = "--service-account-user";
     public static final String ARG_AWS_REGION = "--aws-region";
     
@@ -25,7 +33,7 @@ public class Common {
      * registered.
      */
 	public static ObjectMapper getMapper() {
-		return new ObjectMapper().registerModule(new JavaTimeModule());
+		return new ObjectMapper().registerModule(new JavaTimeModule()).setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 	}
 
     /**
@@ -68,5 +76,48 @@ public class Common {
         }
 
         return (catalog != null) ? true : false;
+    }
+
+    /**
+     * This method collects the Confluent Kafka properties.  Moreover, because it is a static 
+     * method it is called without creating an instance of the class.  In effect caching the
+     * properties for the application.
+     * 
+     * @param env
+     * @param serviceAccountUser
+     * @param isConsumer
+     * @return
+     * @throws Exception
+     */
+    public static Properties collectConfluentProperties(StreamExecutionEnvironment env, String serviceAccountUser, boolean isConsumer) throws Exception {
+        DataStream<Properties> dataStreamProperties =    
+            env.fromData(new Properties())
+                .map(new ConfluentClientConfigurationMapFunction(isConsumer, serviceAccountUser))
+                .name(isConsumer ? "consumer_properties" : "producer_properties");
+
+        Properties properties = new Properties();
+
+        try (CloseableIterator<Properties> iterator = dataStreamProperties.executeAndCollect()) {
+            iterator.forEachRemaining(properties::putAll);
+        } catch (Exception e) {
+            logger.error("Error collecting Kafka properties: {}", e.getMessage());
+            System.exit(1);
+        }
+        return properties;
+    }
+
+    /**
+     * This method extracts the registry configurations from the properties.
+     * 
+     * @param properties the properties to extract the registry configurations from.
+     * 
+     * @return a map of the registry configurations.
+     */
+    public static Map<String, String> extractRegistryConfigs(Properties properties) {
+        return properties
+                    .stringPropertyNames()
+                    .stream()
+                    .filter(key -> key.startsWith("schema.registry."))
+                    .collect(Collectors.toMap(key -> key, properties::getProperty));
     }
 }

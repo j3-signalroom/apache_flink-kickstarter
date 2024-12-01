@@ -31,52 +31,50 @@ import kickstarter.helper.*;
  */
 public class ConfluentClientConfigurationMapFunction extends RichMapFunction<Properties, Properties>{
     private transient AtomicReference<Properties> _properties;
-    private volatile boolean _consumerKafkaClient;
+    private volatile boolean _isConsumer;
     private volatile String _serviceAccountUser;
 
 
     /**
-     * Default constructor.
+     * This constrcutor initializes the class properties.
      * 
-     * @param consumerKafkaClient
-     * @param serviceAccountUser
+     * @param isConsumer - A boolean value that indicates if the Kafka client is a consumer.
+     * @param serviceAccountUser - The service account user name plays a role in the path name
+     * that is used to construct the secrets path for the AWS Secrets Manager secrets, and AWS
+     * Systems Manager Parameter Store path.
      * @throws Exception - Exception occurs when the service account user is empty.
      */
-    public ConfluentClientConfigurationMapFunction(boolean consumerKafkaClient, String serviceAccountUser) throws Exception {
+    public ConfluentClientConfigurationMapFunction(boolean isConsumer, String serviceAccountUser) throws Exception {
         // --- Check if the service account user is empty
         if(serviceAccountUser.isEmpty()) {
             throw new Exception("The service account user must be provided.");
         }
 
         // ---  Set the class properties
-        this._consumerKafkaClient = consumerKafkaClient;
+        this._isConsumer = isConsumer;
         this._serviceAccountUser = serviceAccountUser;
     }
 
     /**
-     * This method is called once per parallel task instance when the job starts.
-     * In which, it gets the Kafka Client properties from AWS Secrets Manager and
-     * AWS Systems Manager Parameter Store.  Then the properties are stored in the
-     * class properties.
+     * This method is called once per parallel task instance when the job starts. It
+     * retrieves the Kafka Cluster and Schema Registry Cluster properties from the
+     * AWS Secrets Manager, and the Kafka Client properties from the AWS Systems Manager. 
+     * Then the properties are stored in the class properties.
      * 
-     * @parameters The configuration containing the parameters attached to the
-     * contract.
+     * @param configuration - The configuration object that is used to pass the parameters.
+     *
      * @throws Exception - Implementations may forward exceptions, which are caught
      * by the runtime.  When the runtime catches an exception, it aborts the task and 
      * lets the fail-over logic decide whether to retry the task execution.
      */
     @Override
     public void open(Configuration configuration) throws Exception {
-        /* 
-         * Get the Kafka Client properties from AWS Secrets Manager and AWS Systems
-         * Manager Parameter Store.
-         */
         final String secretPathPrefix = "/confluent_cloud_resource/" + this._serviceAccountUser;
         final ConfluentClientConfiguration confluentClientConfiguration = 
             new ConfluentClientConfiguration(
                 secretPathPrefix + "/kafka_cluster/java_client", 
                 secretPathPrefix + "/schema_registry_cluster/java_client",
-                secretPathPrefix + (this._consumerKafkaClient ? "/consumer_kafka_client" : "/producer_kafka_client"));
+                secretPathPrefix + (this._isConsumer ? "/consumer_kafka_client" : "/producer_kafka_client"));
         ObjectResult<Properties> properties = confluentClientConfiguration.getConfluentPropertiesFromAws();
 
 		if(!properties.isSuccessful()) { 

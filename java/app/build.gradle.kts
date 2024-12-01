@@ -16,13 +16,13 @@ repositories {
 }
 
 // --- Dependency version numbers
-val flinkVersion: String = "1.19"
-val flinkVersionWithPatch: String = flinkVersion + ".1"
+val flinkVersion: String = "1.20"
+val flinkVersionWithPatch: String = flinkVersion + ".0"
 val hadoopVersion: String = "3.3.6"
 val kafkaVersion: String = "3.7.0"
 val junitVersion: String = "5.10.0"
 val awssdkVersion: String = "2.26.29"
-var icebergVersion: String = "1.6.1"
+var icebergVersion: String = "1.7.0"
 var confluentKafkaVersion: String = "7.7.1"
 var jacksonVersion: String = "2.18.1"
 
@@ -43,7 +43,7 @@ dependencies {
     compileOnly("org.apache.flink:flink-table-api-java-bridge:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-clients:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-connector-base:${flinkVersionWithPatch}")
-    implementation("org.apache.flink:flink-connector-kafka:3.2.0-${flinkVersion}")
+    implementation("org.apache.flink:flink-connector-kafka:3.3.0-${flinkVersion}")
     implementation("org.apache.flink:flink-connector-datagen:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-avro:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-avro-confluent-registry:${flinkVersionWithPatch}")
@@ -85,7 +85,7 @@ java {
 application {
     // --- If the main class is not provided, use the default
     if (appMainClass.isNullOrEmpty()) {
-        mainClass.set("kickstarter.DataGeneratorApp")
+        mainClass.set("kickstarter.JsonDataGeneratorApp")
     } else {
         mainClass.set("kickstarter." + appMainClass)
     }    

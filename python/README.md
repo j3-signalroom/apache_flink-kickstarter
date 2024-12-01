@@ -60,8 +60,8 @@ Ready to launch one of those cool Java-to-Python Flink apps? Just use the [`flin
 
 Flink App|Flink Run Command
 -|-
-**`FlightImporterApp`**|`uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/flight_importer_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>`
-**`FlyerStatsApp`**|`uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/flyer_stats_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>`
+**`json_flight_consolidator_app`**|`uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/json_flight_consolidator_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>`
+**`json_flyer_stats_app`**|`uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/json_flyer_stats_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>`
 
 > Argument placeholder|Replace with
 > -|-
@@ -93,3 +93,7 @@ Curious to learn more about [Astral](https://astral.sh/)'s `uv`? Check these out
 [How to create a User-Defined Table Function (UDTF) in PyFlink to fetch data from an external source for your Flink App?](../.blog/how-create-a-pyflink-udtf.md)
 
 [Apache Iceberg in Action with Apache Flink using Python](../.blog/apache-iceberg-in-action-with-apache-flink-using-python.md)
+
+[Confluent Avro Format](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/formats/avro-confluent/)
+
+[Data Type Mappings in Confluent Cloud for Apache Flink -- Avro schemas](https://docs.confluent.io/cloud/current/flink/reference/serialization.html#flink-sql-types-to-avro-types)

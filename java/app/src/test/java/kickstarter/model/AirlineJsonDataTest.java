@@ -8,23 +8,24 @@
 package kickstarter.model;
 
 import org.junit.jupiter.api.Test;
+import static org.apache.flink.types.PojoTestUtils.assertSerializedAsPojo;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.apache.flink.types.PojoTestUtils.*;
 
 import kickstarter.*;
 
 
-class FlightDataTest {
+
+class AirlineJsonDataTest {
 
     @Test
     void theClass_shouldBeSerializableAsAPOJO() {
-        assertSerializedAsPojo(FlightData.class);
+        assertSerializedAsPojo(AirlineJsonData.class);
     }
 
     @Test
     void setters_shouldPopulateExpectedFields() {
-        FlightData expected = new TestHelpers.FlightDataBuilder().build();
-        FlightData actual = new FlightData();
+        AirlineJsonData expected = new JsonTestHelpers.AirlineFlightDataBuilder().build();
+        AirlineJsonData actual = new AirlineJsonData();
         actual.setEmailAddress(expected.getEmailAddress());
         actual.setDepartureTime(expected.getDepartureTime());
         actual.setDepartureAirportCode(expected.getDepartureAirportCode());
@@ -32,7 +33,6 @@ class FlightDataTest {
         actual.setArrivalAirportCode(expected.getArrivalAirportCode());
         actual.setFlightNumber(expected.getFlightNumber());
         actual.setConfirmationCode(expected.getConfirmationCode());
-        actual.setAirline(expected.getAirline());
 
         assertEquals(expected.getEmailAddress(), actual.getEmailAddress());
         assertEquals(expected.getDepartureTime(), actual.getDepartureTime());
@@ -41,13 +41,12 @@ class FlightDataTest {
         assertEquals(expected.getArrivalAirportCode(), actual.getArrivalAirportCode());
         assertEquals(expected.getFlightNumber(), actual.getFlightNumber());
         assertEquals(expected.getConfirmationCode(), actual.getConfirmationCode());
-        assertEquals(expected.getAirline(), actual.getAirline());
     }
 
     @Test
     void equals_shouldReturnTrue_forTwoEquivalentFlights() {
-        FlightData flight1 = new TestHelpers.FlightDataBuilder().build();
-        FlightData flight2 = new FlightData();
+        AirlineJsonData flight1 = new JsonTestHelpers.AirlineFlightDataBuilder().build();
+        AirlineJsonData flight2 = new AirlineJsonData();
         flight2.setEmailAddress(flight1.getEmailAddress());
         flight2.setDepartureTime(flight1.getDepartureTime());
         flight2.setDepartureAirportCode(flight1.getDepartureAirportCode());
@@ -55,7 +54,6 @@ class FlightDataTest {
         flight2.setArrivalAirportCode(flight1.getArrivalAirportCode());
         flight2.setFlightNumber(flight1.getFlightNumber());
         flight2.setConfirmationCode(flight1.getConfirmationCode());
-        flight2.setAirline(flight1.getAirline());
 
         assertNotSame(flight1, flight2);
         assertEquals(flight1, flight2);
@@ -64,8 +62,8 @@ class FlightDataTest {
 
     @Test
     void equals_shouldReturnFalse_forTwoDifferentFlights() {
-        FlightData flight1 = new TestHelpers.FlightDataBuilder().build();
-        FlightData flight2 = new TestHelpers.FlightDataBuilder().build();
+        AirlineJsonData flight1 = new JsonTestHelpers.AirlineFlightDataBuilder().build();
+        AirlineJsonData flight2 = new JsonTestHelpers.AirlineFlightDataBuilder().build();
 
         assertNotSame(flight1, flight2);
         assertNotEquals(flight1, flight2);
@@ -74,21 +72,36 @@ class FlightDataTest {
 
     @Test
     void toString_shouldReturnTheExpectedResults() {
-        FlightData flightData = new TestHelpers.FlightDataBuilder().build();
+        AirlineJsonData flightJsonData = new JsonTestHelpers.AirlineFlightDataBuilder().build();
 
-        String expected = "FlightData{" +
-                "email_address='" + flightData.getEmailAddress() + '\'' +
-                ", departure_time=" + flightData.getDepartureTime() +
-                ", departure_airport_code='" + flightData.getDepartureAirportCode() + '\'' +
-                ", arrival_time=" + flightData.getArrivalTime() +
-                ", arrival_airport_code='" + flightData.getArrivalAirportCode() + '\'' +
-                ", flight_number='" + flightData.getFlightNumber() + '\'' +
-                ", confirmation_code='" + flightData.getConfirmationCode() + '\'' +
-                ", airline='" + flightData.getAirline() + '\'' +
+        String expected = "AirlineJsonData{" +
+                "email_address='" + flightJsonData.getEmailAddress() + '\'' +
+                ", departure_time=" + flightJsonData.getDepartureTime() +
+                ", departure_airport_code='" + flightJsonData.getDepartureAirportCode() + '\'' +
+                ", arrival_time=" + flightJsonData.getArrivalTime() +
+                ", arrival_airport_code='" + flightJsonData.getArrivalAirportCode() + '\'' +
+                ", flight_number='" + flightJsonData.getFlightNumber() + '\'' +
+                ", confirmation_code='" + flightJsonData.getConfirmationCode() + '\'' +
                 '}';
+        assertNotEquals(expected, flightJsonData.toString());
+    }
 
-        System.out.println(flightData.toString());
+    @Test
+    void toFlightData_shouldConvertToAFlightDataObject() {
+        AirlineJsonData skyOne = new JsonTestHelpers.AirlineFlightDataBuilder().build();
+        FlightJsonData expected = new FlightJsonData();
+        expected.setEmailAddress(skyOne.getEmailAddress());
+        expected.setDepartureTime(skyOne.getDepartureTime());
+        expected.setDepartureAirportCode(skyOne.getDepartureAirportCode());
+        expected.setArrivalTime(skyOne.getArrivalTime());
+        expected.setArrivalAirportCode(skyOne.getArrivalAirportCode());
+        expected.setFlightNumber(skyOne.getFlightNumber());
+        expected.setConfirmationCode(skyOne.getConfirmationCode());
+        expected.setAirline("SkyOne");
 
-        assertEquals(expected, flightData.toString());
+
+        FlightJsonData actual = skyOne.toFlightData("SkyOne");
+
+        assertEquals(expected, actual);
     }
 }

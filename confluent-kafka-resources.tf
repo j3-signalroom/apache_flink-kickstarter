@@ -103,6 +103,52 @@ resource "confluent_kafka_topic" "airline_sunset" {
   ]
 }
 
+# Create the `airline.flight` Kafka topic
+resource "confluent_kafka_topic" "airline_flight" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.kafka_cluster.id
+  }
+  topic_name         = "airline.flight"
+  partitions_count   = 1
+  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
+  credentials {
+    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
+    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
+  }
+
+  depends_on = [ 
+    confluent_kafka_cluster.kafka_cluster 
+  ]
+}
+
+# Create the `airline.flyer_stats` Kafka topic
+resource "confluent_kafka_topic" "airline_flyer_stats" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.kafka_cluster.id
+  }
+  topic_name         = "airline.flyer_stats"
+  partitions_count   = 1
+  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
+
+  config = {
+    "retention.bytes" = "-1"
+    "retention.ms"    = "-1"
+  }
+  credentials {
+    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
+    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
+  }
+
+  depends_on = [ 
+    confluent_kafka_cluster.kafka_cluster 
+  ]
+}
+
 # Create the `airline.skyone_avro` Kafka topic
 resource "confluent_kafka_topic" "airline_skyone_avro" {
   kafka_cluster {
@@ -150,11 +196,11 @@ resource "confluent_kafka_topic" "airline_sunset_avro" {
 }
 
 # Create the `airline.flight` Kafka topic
-resource "confluent_kafka_topic" "airline_flight" {
+resource "confluent_kafka_topic" "airline_flight_avro" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
-  topic_name         = "airline.flight"
+  topic_name         = "airline.flight_avro"
   partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
 
@@ -172,12 +218,12 @@ resource "confluent_kafka_topic" "airline_flight" {
   ]
 }
 
-# Create the `airline.flyer_stats` Kafka topic
-resource "confluent_kafka_topic" "airline_flyer_stats" {
+# Create the `airline.flyer_stats_avro` Kafka topic
+resource "confluent_kafka_topic" "airline_flyer_stats_avro" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
-  topic_name         = "airline.flyer_stats"
+  topic_name         = "airline.flyer_stats_avro"
   partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
 

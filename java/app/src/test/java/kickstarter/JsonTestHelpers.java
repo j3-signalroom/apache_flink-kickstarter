@@ -14,7 +14,7 @@ import java.util.*;
 import kickstarter.model.*;
 
 
-public class TestHelpers {
+public class JsonTestHelpers {
     private static Random random = new Random(System.currentTimeMillis());
 
     public static String generateAirportCode() {
@@ -114,18 +114,18 @@ public class TestHelpers {
             return this;
         }
 
-        public AirlineData build() {
-            AirlineData airlineData = new AirlineData();
+        public AirlineJsonData build() {
+            AirlineJsonData airlineJsonData = new AirlineJsonData();
 
-            airlineData.setEmailAddress(this.emailAddress);
-            airlineData.setDepartureTime(this.departureTime);
-            airlineData.setDepartureAirportCode(this.airportDepartureCode);
-            airlineData.setArrivalTime(this.arrivalTime);
-            airlineData.setArrivalAirportCode(this.airportArrivalCode);
-            airlineData.setFlightNumber(this.flightNumber);
-            airlineData.setConfirmationCode(this.confirmation);
+            airlineJsonData.setEmailAddress(this.emailAddress);
+            airlineJsonData.setDepartureTime(this.departureTime);
+            airlineJsonData.setDepartureAirportCode(this.airportDepartureCode);
+            airlineJsonData.setArrivalTime(this.arrivalTime);
+            airlineJsonData.setArrivalAirportCode(this.airportArrivalCode);
+            airlineJsonData.setFlightNumber(this.flightNumber);
+            airlineJsonData.setConfirmationCode(this.confirmation);
 
-            return airlineData;
+            return airlineJsonData;
         }
     }
 
@@ -137,6 +137,7 @@ public class TestHelpers {
         private String arrivalAirportCode;
         private String flightNumber;
         private String confirmationCode;
+        private String airline;
 
         public FlightDataBuilder() {
             LocalDateTime localDepartureTime = generateDepartureTime();
@@ -149,6 +150,7 @@ public class TestHelpers {
             this.arrivalAirportCode = generateAirportCode();
             this.flightNumber = "Flight" + random.nextInt(1000);
             this.confirmationCode = "Confirmation" + generateString(5);
+            this.airline = "SkyOne";
         }
 
         public FlightDataBuilder setEmailAddress(String emailAddress) {
@@ -186,18 +188,24 @@ public class TestHelpers {
             return this;
         }
 
-        public FlightData build() {
-            FlightData flightData = new FlightData();
+        public FlightDataBuilder setAirline(String airline) {
+            this.airline = airline;
+            return this;
+        }
 
-            flightData.setEmailAddress(this.emailAddress);
-            flightData.setDepartureTime(this.departureTime);
-            flightData.setDepartureAirportCode(this.departureAirportCode);
-            flightData.setArrivalTime(this.arrivalTime);
-            flightData.setArrivalAirportCode(this.arrivalAirportCode);
-            flightData.setFlightNumber(this.flightNumber);
-            flightData.setConfirmationCode(this.confirmationCode);
+        public FlightJsonData build() {
+            FlightJsonData flightJsonData = new FlightJsonData();
 
-            return flightData;
+            flightJsonData.setEmailAddress(this.emailAddress);
+            flightJsonData.setDepartureTime(this.departureTime);
+            flightJsonData.setDepartureAirportCode(this.departureAirportCode);
+            flightJsonData.setArrivalTime(this.arrivalTime);
+            flightJsonData.setArrivalAirportCode(this.arrivalAirportCode);
+            flightJsonData.setFlightNumber(this.flightNumber);
+            flightJsonData.setConfirmationCode(this.confirmationCode);
+            flightJsonData.setAirline(this.airline);
+
+            return flightJsonData;
         }
     }
 
@@ -230,14 +238,14 @@ public class TestHelpers {
             return this;
         }
 
-        public FlyerStatsData build() {
-            FlyerStatsData flyerStatsData = new FlyerStatsData();
+        public FlyerStatsJsonData build() {
+            FlyerStatsJsonData flyerStatsJsonData = new FlyerStatsJsonData();
 
-            flyerStatsData.setEmailAddress(this.emailAddress);
-            flyerStatsData.setTotalFlightDuration(this.totalFlightDuration);
-            flyerStatsData.setNumberOfFlights(this.numberOfFlights);
+            flyerStatsJsonData.setEmailAddress(this.emailAddress);
+            flyerStatsJsonData.setTotalFlightDuration(this.totalFlightDuration);
+            flyerStatsJsonData.setNumberOfFlights(this.numberOfFlights);
 
-            return flyerStatsData;
+            return flyerStatsJsonData;
         }
     }
 }
