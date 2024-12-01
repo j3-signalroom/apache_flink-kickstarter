@@ -7,7 +7,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 ### Added
 - Upgraded the Apache Flink to `1.20.0`.
 - Upgraded the Apache Iceberg to `1.7.0`.
-- Split out the Java code into both Java and Python.
+- Now have Avro and JSON formatted data version of the Jave Flink App.
 
 ## [0.53.00.000] - 2024-11-19
 ### Added
