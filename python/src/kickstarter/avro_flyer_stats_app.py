@@ -1,8 +1,5 @@
-from pyflink.common import WatermarkStrategy
 from pyflink.datastream.window import TumblingEventTimeWindows, Time
 from pyflink.datastream import StreamExecutionEnvironment, DataStream, TimeCharacteristic
-from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
-from pyflink.datastream.formats.avro import AvroRowDeserializationSchema, AvroRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 import logging
@@ -11,7 +8,7 @@ import argparse
 from model.flight_data import FlightData, FlyerStatsData
 from helper.kafka_properties_udtf import execute_kafka_properties_udtf
 from helper.flyer_stats_process_window_function import FlyerStatsProcessWindowFunction
-from helper.common import load_catalog, load_database, read_schema_file
+from helper.common import load_catalog, load_database
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -60,40 +57,90 @@ def main(args):
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Get the Kafka Cluster properties for the Kafka consumer and producer
-    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    consumer_properties, registry_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
     producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
-    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
+    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight_avro`
+    table_name = "flight"
     topic_name = "airline.flight_avro"
-    schema_str = read_schema_file("FlightAvroData.avsc")
-    flight_source = (KafkaSource.builder()
-                                .set_properties(consumer_properties)
-                                .set_topics(topic_name)
-                                .set_group_id("flight_group")
-                                .set_starting_offsets(KafkaOffsetsInitializer.earliest())
-                                .set_value_only_deserializer(AvroRowDeserializationSchema(avro_schema_string=schema_str))
-                                .build())
+    bootstrap_servers = consumer_properties.get("bootstrap.servers")
+    sasl_jaas_config = consumer_properties.get("sasl.jaas.config").replace("'", "\\\"")
+    schema_registry_url = registry_properties.get("schema.registry.url")
+    basic_auth_credentials_source = registry_properties.get("schema.registry.basic.auth.credentials.source")
+    basic_auth_user_info = registry_properties.get("schema.registry.basic.auth.user.info")
 
-    # Takes the results of the Kafka source and attaches the unbounded data stream
-    flight_data_stream = env.from_source(flight_source, WatermarkStrategy.for_monotonous_timestamps(), "flight_data_source")
+    # --- Check if the table exists.  If not, create it.
+    kafka_source_table_path = ObjectPath(tbl_env.get_current_database(), f"{table_name}_kafka_source")
+    try:
+        tbl_env.execute_sql(f"""
+            CREATE TABLE IF NOT EXISTS {kafka_source_table_path.get_full_name()} (
+                email_address STRING,
+                departure_time STRING,
+                departure_airport_code STRING,
+                arrival_time STRING,
+                arrival_airport_code STRING,
+                flight_number STRING,
+                confirmation_code STRING,
+                airline STRING
+            ) WITH (
+                'connector' = 'kafka',
+                'topic' = '{topic_name}',
+                'properties.bootstrap.servers' = '{bootstrap_servers}',
+                'properties.sasl.jaas.config' = '{sasl_jaas_config}',
+                'properties.group.id' = 'flight_avro_group',
+                'properties.auto.offset.reset' = 'earliest',
+                'scan.startup.mode' = 'earliest-offset',
+                'properties.sasl.mechanism' = '{consumer_properties.get("sasl.mechanism")}',
+                'properties.security.protocol' = '{consumer_properties.get("security.protocol")}',                
+                'avro-confluent.basic-auth.credentials-source' = '{basic_auth_credentials_source}',
+                'avro-confluent.basic-auth.user-info' = '{basic_auth_user_info}',
+                'value.format' = 'avro-confluent',
+                'value.avro-confluent.url' = '{schema_registry_url}',
+                'value.avro-confluent.subject' = '{topic_name}-value'
+            )
+        """)
+    except Exception as e:
+        print(f"A critical error occurred during the creation of the {kafka_source_table_path.get_full_name()} because {e}.")
+        exit(1)
+
+    # --- Query the table.
+    source_table = tbl_env.sql_query(f"""
+                                        SELECT 
+                                            * 
+                                        FROM 
+                                            {kafka_source_table_path.get_full_name()}
+                                     """)
+
+    # --- Convert the Table to a DataStream of append-only data.
+    flight_avro_stream = tbl_env.to_data_stream(source_table)
 
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
     topic_name = "airline.flyer_stats_avro"
-    schema_str = read_schema_file("FlyerStatsAvroData.avsc")
-    kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
+    kafka_sink_table_path = ObjectPath(tbl_env.get_current_database(), "flyer_stats_kafka_sink")
+    tbl_env.execute_sql(f"""
+        CREATE TABLE IF NOT EXISTS {kafka_sink_table_path} (
+            email_address STRING,
+            total_flight_duration INT,
+            number_of_flights INT
+        ) WITH (
+            'connector' = 'kafka',
+            'topic' = '{topic_name}',
+            'properties.bootstrap.servers' = '{bootstrap_servers}',
+            'properties.sasl.jaas.config' = '{sasl_jaas_config}',
+            'properties.sasl.mechanism' = '{producer_properties.get("sasl.mechanism")}',
+            'properties.security.protocol' = '{producer_properties.get("security.protocol")}',
+            'properties.client.dns.lookup' = '{producer_properties.get("client.dns.lookup")}',
+            'properties.acks' = '{producer_properties.get("acks")}',
+            'properties.transaction.timeout.ms' = '{producer_properties.get("transaction.timeout.ms")}',
+            'sink.partitioner' = 'round-robin',
+            'avro-confluent.basic-auth.credentials-source' = '{basic_auth_credentials_source}',
+            'avro-confluent.basic-auth.user-info' = '{basic_auth_user_info}',
+            'value.format' = 'avro-confluent',
+            'value.avro-confluent.url' = '{schema_registry_url}',
+            'value.avro-confluent.subject' = '{topic_name}-value'                    
+        )
+    """)
 
-    # Iterate through the producer properties and set each property, skipping 'bootstrap.servers' as it's already set
-    for key, value in producer_properties.items():
-        if key != 'bootstrap.servers':
-            kafka_sink_builder.set_property(key, value)
-    flyer_stats_sink = (kafka_sink_builder
-                        .set_record_serializer(KafkaRecordSerializationSchema
-                                                .builder()
-                                                .set_topic(topic_name)
-                                                .set_value_serialization_schema(AvroRowSerializationSchema(avro_schema_string=schema_str))
-                                         .build())
-                   .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                   .build())
 
     # --- Load Apache Iceberg catalog
     catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
@@ -135,13 +182,13 @@ def main(args):
         exit(1)
 
     # Define the workflow for the Flink job graph (DAG)
-    stats_datastream = define_workflow(flight_data_stream).map(lambda d: d.to_row(), output_type=FlyerStatsData.get_value_type_info())
+    flyer_stats_datastream = define_workflow(flight_avro_stream).map(lambda d: d.to_row(), output_type=FlyerStatsData.get_value_type_info())
 
     # Populate the table with the data from the data stream
-    tbl_env.from_data_stream(stats_datastream).execute_insert(stats_table_path.get_full_name())
+    tbl_env.from_data_stream(flyer_stats_datastream).execute_insert(stats_table_path.get_full_name())
 
-    # Sinks the User Statistics DataStream Kafka topic
-    stats_datastream.sink_to(flyer_stats_sink).name("flyer_stats_sink").uid("flyer_stats_sink")
+    # --- Populate the Apache Kafka Sink Topic with the data from the datastream.
+    tbl_env.from_data_stream(flyer_stats_datastream).execute_insert(kafka_sink_table_path.get_full_name())
 
     # Execute the Flink job graph (DAG)
     try:
