@@ -56,6 +56,18 @@ def main(args):
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
+    # --- Load AWS Glue managed Apache Iceberg catalog.
+    iceberg_catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
+
+    # --- Print the current catalog name.
+    print(f"Current catalog: {tbl_env.get_current_catalog()}")
+
+    # --- Load Iceberg database.
+    load_database(tbl_env, iceberg_catalog, "airlines")
+
+    # Print the current database name.
+    print(f"Current database: {tbl_env.get_current_database()}")
+
     # Get the Kafka Cluster properties for the Kafka consumer and producer
     consumer_properties, registry_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
     producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
@@ -94,6 +106,7 @@ def main(args):
                 'properties.security.protocol' = '{consumer_properties.get("security.protocol")}',                
                 'avro-confluent.basic-auth.credentials-source' = '{basic_auth_credentials_source}',
                 'avro-confluent.basic-auth.user-info' = '{basic_auth_user_info}',
+                'format' = 'avro-confluent',
                 'value.format' = 'avro-confluent',
                 'value.avro-confluent.url' = '{schema_registry_url}',
                 'value.avro-confluent.subject' = '{topic_name}-value'
@@ -135,24 +148,12 @@ def main(args):
             'sink.partitioner' = 'round-robin',
             'avro-confluent.basic-auth.credentials-source' = '{basic_auth_credentials_source}',
             'avro-confluent.basic-auth.user-info' = '{basic_auth_user_info}',
+            'format' = 'avro-confluent',
             'value.format' = 'avro-confluent',
             'value.avro-confluent.url' = '{schema_registry_url}',
             'value.avro-confluent.subject' = '{topic_name}-value'                    
         )
     """)
-
-
-    # --- Load Apache Iceberg catalog
-    catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
-
-    # --- Print the current catalog name
-    print(f"Current catalog: {tbl_env.get_current_catalog()}")
-
-    # --- Load database
-    load_database(tbl_env, catalog, "airlines")
-    
-    # Print the current database name
-    print(f"Current database: {tbl_env.get_current_database()}")
 
     # An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
     # catalog object, such as a table, view, or function.  It uniquely identifies an object
@@ -163,7 +164,7 @@ def main(args):
 
     # Check if the table exists.  If not, create it
     try:
-        if not catalog.table_exists(stats_table_path):
+        if not iceberg_catalog.table_exists(stats_table_path):
             # Define the table using Flink SQL
             tbl_env.execute_sql(f"""
                 CREATE TABLE {stats_table_path.get_full_name()} (
