@@ -9,7 +9,7 @@ import logging
 import argparse
 
 from model.flight_data import FlightData, FlyerStatsData
-from helper.kafka_properties_udtf import execute_confluent_properties_udtf
+from helper.kafka_properties_udtf import execute_kafka_properties_udtf
 from helper.flyer_stats_process_window_function import FlyerStatsProcessWindowFunction
 from helper.common import load_catalog, load_database, read_schema_file
 
@@ -60,8 +60,8 @@ def main(args):
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Get the Kafka Cluster properties for the Kafka consumer and producer
-    consumer_properties, _ = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
-    producer_properties, _ = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
+    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
     topic_name = "airline.flight_avro"
@@ -138,13 +138,10 @@ def main(args):
     stats_datastream = define_workflow(flight_data_stream).map(lambda d: d.to_row(), output_type=FlyerStatsData.get_value_type_info())
 
     # Populate the table with the data from the data stream
-    (tbl_env.from_data_stream(stats_datastream)
-            .execute_insert(stats_table_path.get_full_name()))
+    tbl_env.from_data_stream(stats_datastream).execute_insert(stats_table_path.get_full_name())
 
     # Sinks the User Statistics DataStream Kafka topic
-    (stats_datastream.sink_to(flyer_stats_sink)
-                     .name("flyer_stats_sink")
-                     .uid("flyer_stats_sink"))
+    stats_datastream.sink_to(flyer_stats_sink).name("flyer_stats_sink").uid("flyer_stats_sink")
 
     # Execute the Flink job graph (DAG)
     try:

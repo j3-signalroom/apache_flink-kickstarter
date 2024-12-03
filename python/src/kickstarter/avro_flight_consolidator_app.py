@@ -6,7 +6,7 @@ import argparse
 
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
-from helper.kafka_properties_udtf import execute_confluent_properties_udtf
+from helper.kafka_properties_udtf import execute_kafka_properties_udtf
 from helper.common import parse_isoformat, load_catalog, load_database
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
@@ -83,8 +83,8 @@ def main(args):
 
     # Retrieve the Kafka Cluster properties for the Kafka consumer and producer, and
     # the Schema Registry Cluster properties.
-    consumer_properties, registry_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
-    producer_properties, _ = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
+    consumer_properties, registry_properties = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
+    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
 
     # --- Create the Flink Iceberg Table.
     tbl_env.execute_sql(f"""
