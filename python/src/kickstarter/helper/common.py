@@ -1,7 +1,6 @@
 from pyflink.datastream import StreamExecutionEnvironment
 from datetime import datetime, timezone
 from pyflink.table.catalog import Catalog
-import os
 
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
