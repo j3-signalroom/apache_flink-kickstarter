@@ -53,7 +53,7 @@ def main(args):
     ###
     env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
-    # --- [Default]   Set up the Streaming Mode environment.
+    # --- [Default]  Set up the Streaming Mode environment.
     env_settings = EnvironmentSettings.new_instance().in_streaming_mode().build()
 
     # --- Create a Table Environment.
@@ -140,7 +140,8 @@ def main(args):
             'avro-confluent.basic-auth.user-info' = '{basic_auth_user_info}',
             'value.format' = 'avro-confluent',
             'value.avro-confluent.url' = '{schema_registry_url}',
-            'value.avro-confluent.subject' = '{topic_name}-value'                    
+            'value.avro-confluent.subject' = '{topic_name}-value',
+            'value.fields-include' = 'EXCEPT_KEY'                    
         )
     """)
 
@@ -155,7 +156,7 @@ def main(args):
     tbl_env.from_data_stream(flight_datastream).execute_insert(flight_table_path.get_full_name())
 
     # --- Populate the Apache Kafka Sink Topic with the data from the datastream.
-    tbl_env.from_data_stream(flight_datastream).execute_insert(kafka_sink_table_path.get_full_name())
+    tbl_env.from_data_stream(flight_datastream).execute_insert(kafka_sink_table_path.get_full_name()).print()
     
     # --- Execute the Flink job graph (DAG).
     try:
@@ -226,7 +227,8 @@ def read_kafka_topic_records(tbl_env: StreamTableEnvironment, consumer_propertie
                 'avro-confluent.basic-auth.user-info' = '{basic_auth_user_info}',
                 'value.format' = 'avro-confluent',
                 'value.avro-confluent.url' = '{schema_registry_url}',
-                'value.avro-confluent.subject' = '{topic_name}-value'
+                'value.avro-confluent.subject' = '{topic_name}-value',
+                'value.fields-include' = 'EXCEPT_KEY'
             )
         """)
     except Exception as e:
@@ -242,6 +244,7 @@ def read_kafka_topic_records(tbl_env: StreamTableEnvironment, consumer_propertie
                                      """)
 
     # --- Convert the Table to a DataStream of append-only data.
+    tbl_env.to_data_stream(source_table).print()
     return tbl_env.to_data_stream(source_table)
 
 

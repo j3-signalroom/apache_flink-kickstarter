@@ -73,9 +73,7 @@ def main(args):
 
     producer_properties['compression.type'] = 'gzip'
 
-     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
-    # Note: KafkaSource was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
-    # you will need to use the FlinkKafkaConsumer class.
+    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
     skyone_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
                                 .set_topics("airline.skyone")
