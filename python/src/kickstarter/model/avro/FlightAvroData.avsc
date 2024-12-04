@@ -1,0 +1,63 @@
+{
+  "fields": [
+    {
+      "name": "email_address",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "departure_time",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "departure_airport_code",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "arrival_time",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "arrival_airport_code",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "flight_number",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "confirmation_code",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "airline",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "FlightAvroData",
+  "namespace": "kickstarter.model",
+  "type": "record"
+}

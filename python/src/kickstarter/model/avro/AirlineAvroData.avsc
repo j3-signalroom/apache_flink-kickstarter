@@ -1,0 +1,83 @@
+{
+  "fields": [
+    {
+      "name": "email_address",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "departure_time",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "departure_airport_code",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "arrival_time",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "arrival_airport_code",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "flight_duration",
+      "type": "long"
+    },
+    {
+      "name": "flight_number",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "confirmation_code",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "ticket_price",
+      "type": {
+        "logicalType": "decimal",
+        "precision": 10,
+        "scale": 2,
+        "type": "bytes"
+      }
+    },
+    {
+      "name": "aircraft",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    },
+    {
+      "name": "booking_agency_email",
+      "type": {
+        "avro.java.string": "String",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "AirlineAvroData",
+  "namespace": "kickstarter.model",
+  "type": "record"
+}
