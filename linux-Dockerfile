@@ -114,7 +114,7 @@ RUN ./gradlew app:clean
 RUN ./gradlew app:build
 
 # Copy the JAR file to the Flink lib directory
-RUN cp app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar /opt/flink/lib/apache_flink-kickstarter-x.xx.xx.xxx.jar
+RUN cp /opt/flink/java_apps/app/build/libs/apache_flink-kickstarter-x.xx.xx.xxx.jar /opt/flink/lib/apache_flink-kickstarter-x.xx.xx.xxx.jar
 
 # Upgrade pip
 RUN python${PYTHON_VERSION} -m pip install --upgrade pip
