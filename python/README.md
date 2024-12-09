@@ -9,9 +9,8 @@ Curious about the differences between the DataStream API and Table API? Click [h
 + [1.0 Important Note(s)](#10-important-notes)
 + [2.0 Power up the Apache Flink Docker containers](#20-power-up-the-apache-flink-docker-containers)
 + [3.0 Discover What You Can Do with These Flink Apps](#30-discover-what-you-can-do-with-these-flink-apps)
-    - [3.1 Avro formatted data](#31-avro-formatted-data)
-    - [3.2 JSON formatted data](#32-json-formatted-data)
-    - [3.3 Did you notice we prepended `uv run` to `flink run`?](#33-did-you-notice-we-prepended-uv-run-to-flink-run)
+    - [3.1 JSON formatted data](#31-json-formatted-data)
+    - [3.2 Did you notice we prepended `uv run` to `flink run`?](#32-did-you-notice-we-prepended-uv-run-to-flink-run)
 + [4.0 Resources](#40-resources)
 <!-- tocstop -->
 
@@ -60,18 +59,7 @@ Jump right into the container and take charge! You’ll have full control to run
 
 Ready to launch one of those cool Java-to-Python Flink apps? Just use the [`flink run`](https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/cli/) command with the correct options, and kick off the Python Flink app script with its corresponding parameters below. Adventure awaits!
 
-### 3.1 Avro formatted data
-Flink App|Flink Run Command
--|-
-**`avro_flight_consolidator_app`**|`uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/avro_flight_consolidator_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>`
-**`avro_flyer_stats_app`**|`uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/avro_flyer_stats_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>`
-
-> Argument placeholder|Replace with
-> -|-
-> `<AWS_S3_BUCKET>`|specify name of the AWS S3 bucket you chosen during the Terraform creation or created yourself separately.  The AWS S3 bucket is used to store the Apache Iceberg files (i.e., data files, manifest files, manifest list file, and metadata files).
-> `<AWS_REGION_NAME>`|specify the AWS Region your AWS Glue infrastructure resides.
-
-### 3.2 JSON formatted data
+### 3.1 JSON formatted data
 Flink App|Flink Run Command
 -|-
 **`json_flight_consolidator_app`**|`uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/json_flight_consolidator_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>`
@@ -82,7 +70,7 @@ Flink App|Flink Run Command
 > `<AWS_S3_BUCKET>`|specify name of the AWS S3 bucket you chosen during the Terraform creation or created yourself separately.  The AWS S3 bucket is used to store the Apache Iceberg files (i.e., data files, manifest files, manifest list file, and metadata files).
 > `<AWS_REGION_NAME>`|specify the AWS Region your AWS Glue infrastructure resides.
 
-### 3.3 Did you notice we prepended `uv run` to `flink run`?
+### 3.2 Did you notice we prepended `uv run` to `flink run`?
 You maybe asking yourself why.  Well, `uv` is an incredibly fast Python package installer and dependency resolver, written in [**Rust**](https://github.blog/developer-skills/programming-languages-and-frameworks/why-rust-is-the-most-admired-language-among-developers/), and designed to seamlessly replace `pip`, `pipx`, `poetry`, `pyenv`, `twine`, `virtualenv`, and more in your workflows. By prefixing `uv run` to a command, you're ensuring that the command runs in an optimal Python environment.
 
 Now, let's go a little deeper into the magic behind `uv run`:
@@ -107,7 +95,3 @@ Curious to learn more about [Astral](https://astral.sh/)'s `uv`? Check these out
 [How to create a User-Defined Table Function (UDTF) in PyFlink to fetch data from an external source for your Flink App?](../.blog/how-create-a-pyflink-udtf.md)
 
 [Apache Iceberg in Action with Apache Flink using Python](../.blog/apache-iceberg-in-action-with-apache-flink-using-python.md)
-
-[Confluent Avro Format](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/table/formats/avro-confluent/)
-
-[Data Type Mappings in Confluent Cloud for Apache Flink -- Avro schemas](https://docs.confluent.io/cloud/current/flink/reference/serialization.html#flink-sql-types-to-avro-types)
