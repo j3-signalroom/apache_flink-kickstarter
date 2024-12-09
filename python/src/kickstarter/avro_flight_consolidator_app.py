@@ -1,7 +1,6 @@
 from pyflink.common import WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
-from pyflink.datastream.formats.avro import AvroRowSerializationSchema
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
@@ -10,7 +9,8 @@ import argparse
 from model.airline_flight_data import AirlineFlightData
 from helper.kafka_properties_udtf import execute_kafka_properties_udtf
 from helper.custom_avro_deserialization_schema import CustomAvroDeserializationSchema
-from helper.common import load_catalog, load_database, read_schema_file
+from helper.custom_avro_serialization_schema import CustomAvroSerializationSchema
+from helper.common import load_catalog, load_database
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -70,7 +70,7 @@ def main(args):
     skyone_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
                                 .set_topics(topic_name)
-                                .set_group_id("skyone_group")
+                                .set_group_id("flight_consolidator_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
                                 .set_value_only_deserializer(CustomAvroDeserializationSchema(schema_registry_properties, topic_name, "kickstarter.model.AirlineAvroData"))
                                 .build())
@@ -78,13 +78,15 @@ def main(args):
     # Takes the results of the Kafka source and attaches the unbounded data stream
     skyone_stream = (env.from_source(skyone_source, WatermarkStrategy.no_watermarks(), "skyone_source")
                         .uid("skyone_source"))
+    
+    skyone_stream.print()
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset`
     topic_name = "airline.sunset_avro"
     sunset_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
-                                .set_topics("airline.sunset")
-                                .set_group_id(topic_name)
+                                .set_topics(topic_name)
+                                .set_group_id("flight_consolidator_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
                                 .set_value_only_deserializer(CustomAvroDeserializationSchema(schema_registry_properties, topic_name, "kickstarter.model.AirlineAvroData"))
                                 .build())
@@ -95,7 +97,6 @@ def main(args):
 
     # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
     topic_name = "airline.flight_avro"
-    schema_str = read_schema_file("FlightAvroData.avsc")
     kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
 
     # Iterate through the producer properties and set each property, skipping 'bootstrap.servers' as it's already set
@@ -107,7 +108,7 @@ def main(args):
                    .set_record_serializer(KafkaRecordSerializationSchema
                                           .builder()
                                           .set_topic(topic_name)
-                                          .set_value_serialization_schema(AvroRowSerializationSchema(avro_schema_string=schema_str))
+                                          .set_value_serialization_schema(CustomAvroSerializationSchema("kickstarter.model.FlightAvroData"))
                                           .build())
                    .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
                    .build())
@@ -163,8 +164,8 @@ def main(args):
     flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
 
     # Populate the Apache Iceberg Table with the data from the data stream
-    (tbl_env.from_data_stream(flight_datastream)
-            .execute_insert(flight_table_path.get_full_name()))
+    #(tbl_env.from_data_stream(flight_datastream)
+    #        .execute_insert(flight_table_path.get_full_name()))
 
     # Sinks the Flight DataStream into a single Kafka topic
     (flight_datastream.sink_to(flight_sink)
