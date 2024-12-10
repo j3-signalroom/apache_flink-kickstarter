@@ -3,7 +3,8 @@ resource "snowflake_storage_integration" "aws_s3_integration" {
   storage_allowed_locations = ["s3://flink-kickstarter/warehouse/airlines.db/"]
   storage_provider          = "S3"
   storage_aws_object_acl    = "bucket-owner-full-control"
-  enabled = true
+  storage_aws_role_arn      = aws_iam_policy.glue_s3_access_policy.arn
+  enabled                   = true
 }
 
 resource "snowflake_file_format" "parquet_format" {
@@ -26,7 +27,7 @@ resource "snowflake_external_table" "skyone_airline_table" {
   database    = "flink_kickstarter"
   schema      = "flink_kickstarter"
   name        = "SKYONE_AIRLINE_STAGE_EXTERNAL_TABLE"
-  file_format = snowflake_file_format.csv_format.name
+  file_format = snowflake_file_format.parquet_format.name
   location    = snowflake_stage.skyone_airline_stage.name 
 
   column {
@@ -102,7 +103,7 @@ resource "snowflake_external_table" "sunset_airline_table" {
   database    = "flink_kickstarter"
   schema      = "flink_kickstarter"
   name        = "SUNSET_AIRLINE_STAGE_EXTERNAL_TABLE"
-  file_format = snowflake_file_format.csv_format.name
+  file_format = snowflake_file_format.parquet_format.name
   location    = snowflake_stage.sunset_airline_stage.name 
 
   column {

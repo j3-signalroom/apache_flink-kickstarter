@@ -114,7 +114,7 @@ resource "confluent_api_key" "flink_app_manager_api_key" {
 }
 
 # Create Airline Flights Table
-resource "confluent_flink_statement" "create_airline_flights_table" {
+resource "confluent_flink_statement" "create_flight_avro_ccaf_table" {
   organization {
     id = data.confluent_organization.env.id
   }
@@ -131,7 +131,7 @@ resource "confluent_flink_statement" "create_airline_flights_table" {
     id = confluent_service_account.flink_sql_statements_runner.id
   }
 
-  statement = file("flink_sql_statements/create_airline_flights_table.fql")
+  statement = file("flink_sql_statements/create_flight_avro_ccaf_table.fql")
 
   rest_endpoint = data.confluent_flink_region.env.rest_endpoint
 
