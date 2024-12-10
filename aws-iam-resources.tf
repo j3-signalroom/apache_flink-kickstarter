@@ -41,3 +41,20 @@ resource "aws_iam_role_policy_attachment" "glue_policy_attachment" {
   role       = aws_iam_role.glue_role.name
   policy_arn = aws_iam_policy.glue_s3_access_policy.arn
 }
+
+resource "aws_iam_role" "snowflake_role" {
+  name = "snowflake_role"
+
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": "sts:AssumeRole",
+        "Principal": {
+          "AWS": "${var.aws_account_id}"        
+        }
+      }
+    ]
+  })
+}
