@@ -1,11 +1,11 @@
-CREATE TABLE airline.flight_avro_ccaf (
+CREATE TABLE flight_avro_ccaf (
     departure_airport_code STRING,
+    flight_number STRING,
     email_address STRING,
     departure_time STRING,    
     arrival_time STRING,
     arrival_airport_code STRING,
-    flight_number STRING,
-    confirmation STRING,
+    confirmation_code STRING,
     airline STRING,
     PRIMARY KEY(departure_airport_code, flight_number) NOT ENFORCED
 )
