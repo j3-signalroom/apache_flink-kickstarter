@@ -1,6 +1,6 @@
 provider "snowflake" {
-  alias         = "account_admin"
-  role          = "ACCOUNTADMIN"
+  alias = "integration_account_admin"
+  role  = "ACCOUNTADMIN"
 
   # The most recently version of Snowflake Terraform Provider requires the 
   # `organization_name` and `account_name` to be set, whereas the previous 

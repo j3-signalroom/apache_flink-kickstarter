@@ -1,5 +1,6 @@
 provider "snowflake" {
-  role          = "SYSADMIN"
+  alias = "iceberg_sysadmin"
+  role  = "SYSADMIN"
 
   # The most recently version of Snowflake Terraform Provider requires the 
   # `organization_name` and `account_name` to be set, whereas the previous 
