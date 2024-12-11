@@ -19,11 +19,11 @@ resource "snowflake_account_role" "account_admin_role" {
 }
 
 resource "snowflake_grant_privileges_to_account_role" "integration_grant" {
-  provider          = snowflake.securiaccount_adminty_admin
+  provider          = snowflake.account_admin
   privileges        = ["USAGE"]
-  account_role_name = snowflake_account_role.account_admin.name
+  account_role_name = snowflake_account_role.account_admin_role.name
   on_account_object {
-    object_type = "INTEHGRATION"
+    object_type = "INTEGRATION"
     object_name = snowflake_storage_integration.aws_s3_integration.name
   }
 }
