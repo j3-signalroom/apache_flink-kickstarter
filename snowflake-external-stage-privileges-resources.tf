@@ -28,17 +28,23 @@ resource "snowflake_grant_privileges_to_account_role" "integration_grant" {
   }
 }
 
-resource "snowflake_storage_integration" "aws_s3_integration" {
-  provider                  = snowflake.account_admin
-  name                      = "AWS_S3_STORAGE_INTEGRATION"
-  storage_allowed_locations = ["s3://flink-kickstarter/warehouse/airlines.db/"]
-  storage_provider          = "S3"
-  storage_aws_object_acl    = "bucket-owner-full-control"
-  storage_aws_role_arn      = aws_iam_role.snowflake_role.arn
-  enabled                   = true
-  type                      = "EXTERNAL_STAGE"
-
-  depends_on = [ 
-    aws_iam_role.snowflake_role
-  ]
+resource "snowflake_grant_privileges_to_account_role" "skyone_airline_stage_grant" {
+  provider          = snowflake.account_admin
+  privileges        = ["USAGE"]
+  account_role_name = snowflake_account_role.account_admin_role.name
+  on_schema_object {
+    object_type = "STAGE"
+    object_name = snowflake_stage.skyone_airline_stage.name
+  }
 }
+
+resource "snowflake_grant_privileges_to_account_role" "sunset_airline_stage_grant" {
+  provider          = snowflake.account_admin
+  privileges        = ["USAGE"]
+  account_role_name = snowflake_account_role.account_admin_role.name
+  on_schema_object {
+    object_type = "STAGE"
+    object_name = snowflake_stage.sunset_airline_stage.name
+  }
+}
+

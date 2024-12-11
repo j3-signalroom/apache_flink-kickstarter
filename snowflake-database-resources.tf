@@ -27,6 +27,21 @@ resource "snowflake_schema" "schema" {
   name       = local.secrets_insert
 }
 
+resource "snowflake_storage_integration" "aws_s3_integration" {
+  provider                  = snowflake.account_admin
+  name                      = "AWS_S3_STORAGE_INTEGRATION"
+  storage_allowed_locations = ["s3://flink-kickstarter/warehouse/airlines.db/"]
+  storage_provider          = "S3"
+  storage_aws_object_acl    = "bucket-owner-full-control"
+  storage_aws_role_arn      = aws_iam_role.snowflake_role.arn
+  enabled                   = true
+  type                      = "EXTERNAL_STAGE"
+
+  depends_on = [ 
+    aws_iam_role.snowflake_role
+  ]
+}
+
 resource "snowflake_file_format" "parquet_format" {
   name        = "APACHE_ICEBERG_TABLE_PARQUET_FORMAT"
   database    = "flink_kickstarter"
