@@ -33,7 +33,7 @@ resource "snowflake_grant_privileges_to_account_role" "schema_grant" {
   privileges        = ["USAGE"]
   account_role_name = snowflake_account_role.security_admin_role.name
   on_schema {
-    schema_name = "\"${snowflake_database.apache_flink.name}\".\"${snowflake_schema.schema.name}\""
+    schema_name = "${snowflake_database.apache_flink.name}.${snowflake_schema.schema.name}"
   }
 }
 
