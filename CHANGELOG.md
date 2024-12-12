@@ -3,10 +3,19 @@ All notable changes to this project will be documented in this file.
 
 The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.55.00.000] - TBD
+### Added
+- Issue [#521](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/521).
+
+### Changed
+- Upgraded the Snowflake Terraform Provider to version `0.99.0`.
+- Upgraded the AWS Terraform Provider to version `5.80.0`.
+- Upgraded the Confluent Terraform Provider to version `2.12.0`.
+
 ## [0.54.00.000] - 2024-11-30
 ### Added
-- Upgraded the Apache Flink to `1.20.0`.
-- Upgraded the Apache Iceberg to `1.7.0`.
+- Upgraded the Apache Flink to version `1.20.0`.
+- Upgraded the Apache Iceberg to version `1.7.0`.
 - Now have Avro and JSON formatted data version of the Jave Flink App.
 
 ## [0.53.00.000] - 2024-11-19
@@ -21,9 +30,9 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 - Issue [#476](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/476).
 
 ### Changed
-- Updated the AWS Terrafom Provider to `5.75.0`.
-- Updated the Confluent Terrafom Provider to `2.9.0`.
-- Updated the Snowflake Terrafom Provider to `0.97.0`.
+- Updated the AWS Terrafom Provider to version `5.75.0`.
+- Updated the Confluent Terrafom Provider to version `2.9.0`.
+- Updated the Snowflake Terrafom Provider to version `0.97.0`.
 - Issue [#444](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/444).
 - Issue [#449](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/449).
 - Issue [#455](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/455).
