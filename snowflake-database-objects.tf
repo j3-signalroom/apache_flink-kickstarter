@@ -56,6 +56,7 @@ resource "snowflake_stage" "skyone_airline_stage" {
   database            = "flink_kickstarter"
   schema              = "flink_kickstarter"
   storage_integration = snowflake_storage_integration.aws_s3_integration.name
+  provider            = snowflake.account_admin
 
   depends_on = [ snowflake_storage_integration.aws_s3_integration ]
 }
@@ -136,6 +137,7 @@ resource "snowflake_stage" "sunset_airline_stage" {
   database            = "flink_kickstarter"
   schema              = "flink_kickstarter"
   storage_integration = snowflake_storage_integration.aws_s3_integration.name
+  provider            = snowflake.account_admin
 
   depends_on = [ snowflake_storage_integration.aws_s3_integration ]
 }

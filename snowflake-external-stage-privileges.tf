@@ -34,7 +34,7 @@ resource "snowflake_grant_privileges_to_account_role" "skyone_airline_stage_gran
   account_role_name = snowflake_account_role.account_admin_role.name
   on_schema_object {
     object_type = "STAGE"
-    object_name = snowflake_stage.skyone_airline_stage.name
+    object_name = "\"${snowflake_database.apache_flink.name}\".\"${snowflake_schema.schema.name}\".\"${snowflake_stage.skyone_airline_stage.name}\""
   }
 }
 
@@ -44,7 +44,7 @@ resource "snowflake_grant_privileges_to_account_role" "sunset_airline_stage_gran
   account_role_name = snowflake_account_role.account_admin_role.name
   on_schema_object {
     object_type = "STAGE"
-    object_name = snowflake_stage.sunset_airline_stage.name
+    object_name = "\"${snowflake_database.apache_flink.name}\".\"${snowflake_schema.schema.name}\".\"${snowflake_stage.sunset_airline_stage.name}\""
   }
 }
 
