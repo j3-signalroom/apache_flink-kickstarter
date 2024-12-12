@@ -71,7 +71,7 @@ resource "snowflake_grant_privileges_to_account_role" "user_grant" {
   }
 }
 
-resource "snowflake_grant_account_role" "grants" {
+resource "snowflake_grant_account_role" "user_security_admin_grants" {
   provider  = snowflake.security_admin
   role_name = snowflake_account_role.security_admin_role.name
   user_name = snowflake_user.user.name

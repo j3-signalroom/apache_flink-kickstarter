@@ -48,3 +48,9 @@ resource "snowflake_grant_privileges_to_account_role" "sunset_airline_stage_gran
   }
 }
 
+resource "snowflake_grant_account_role" "user_account_admin_grants" {
+  provider  = snowflake.account_admin
+  role_name = snowflake_account_role.account_admin_role.name
+  user_name = snowflake_user.user.name
+}
+
