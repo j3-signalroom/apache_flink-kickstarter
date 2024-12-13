@@ -18,7 +18,7 @@ resource "snowflake_account_role" "security_admin_role" {
   name     = "${local.secrets_insert}_role"
 }
 
-resource "snowflake_grant_privileges_to_account_role" "database_grant" {
+resource "snowflake_grant_privileges_to_account_role" "database" {
   provider          = snowflake.security_admin
   privileges        = ["USAGE"]
   account_role_name = snowflake_account_role.security_admin_role.name
@@ -28,16 +28,16 @@ resource "snowflake_grant_privileges_to_account_role" "database_grant" {
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "schema_grant" {
+resource "snowflake_grant_privileges_to_account_role" "schema" {
   provider          = snowflake.security_admin
   privileges        = ["USAGE"]
   account_role_name = snowflake_account_role.security_admin_role.name
   on_schema {
-    schema_name = "\"${snowflake_database.apache_flink.name}\".\"${snowflake_schema.schema.name}\""
+    schema_name = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}"
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "warehouse_grant" {
+resource "snowflake_grant_privileges_to_account_role" "warehouse" {
   provider          = snowflake.security_admin
   privileges        = ["USAGE"]
   account_role_name = snowflake_account_role.security_admin_role.name
@@ -52,7 +52,7 @@ resource "snowflake_user" "user" {
   name              = upper(var.service_account_user)
   default_warehouse = snowflake_warehouse.apache_flink.name
   default_role      = snowflake_account_role.security_admin_role.name
-  default_namespace = "${snowflake_database.apache_flink.name}.${snowflake_schema.schema.name}"
+  default_namespace = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}"
 
   # Setting the attributes to `null`, effectively unsets the attribute
   # Refer to this link `https://docs.snowflake.com/en/user-guide/key-pair-auth#configuring-key-pair-rotation`
@@ -61,7 +61,7 @@ resource "snowflake_user" "user" {
   rsa_public_key_2  = module.snowflake_user_rsa_key_pairs_rotation.active_rsa_public_key_number == 2 ? jsondecode(data.aws_secretsmanager_secret_version.svc_public_keys.secret_string)["rsa_public_key_2"] : null
 }
 
-resource "snowflake_grant_privileges_to_account_role" "user_grant" {
+resource "snowflake_grant_privileges_to_account_role" "user" {
   provider          = snowflake.security_admin
   privileges        = ["MONITOR"]
   account_role_name = snowflake_account_role.security_admin_role.name  
@@ -71,7 +71,7 @@ resource "snowflake_grant_privileges_to_account_role" "user_grant" {
   }
 }
 
-resource "snowflake_grant_account_role" "user_security_admin_grants" {
+resource "snowflake_grant_account_role" "user_security_admin" {
   provider  = snowflake.security_admin
   role_name = snowflake_account_role.security_admin_role.name
   user_name = snowflake_user.user.name
