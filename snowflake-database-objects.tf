@@ -22,7 +22,7 @@ resource "snowflake_database" "apache_flink" {
   name = local.secrets_insert
 }
 
-resource "snowflake_schema" "schema" {
+resource "snowflake_schema" "apache_flink_schema" {
   database   = snowflake_database.apache_flink.name
   name       = local.secrets_insert
 }
@@ -43,30 +43,39 @@ resource "snowflake_storage_integration" "aws_s3_integration" {
 }
 
 resource "snowflake_file_format" "parquet_format" {
+  provider    = snowflake.account_admin
   name        = "APACHE_ICEBERG_TABLE_PARQUET_FORMAT"
-  database    = "flink_kickstarter"
-  schema      = "flink_kickstarter"
+  database    = snowflake_database.apache_flink.name
+  schema      = snowflake_schema.apache_flink_schema.name
   format_type = "PARQUET"
   comment     = "Parquet file format"
+
+  depends_on = [
+    snowflake_database.apache_flink,
+    snowflake_schema.apache_flink_schema
+  ]
 }
 
-resource "snowflake_stage" "skyone_airline_stage" {
+resource "snowflake_stage" "skyone_airline" {
   name                = "skyone_airline_stage"
   url                 = "s3://flink-kickstarter/warehouse/airlines.db/skyone_airline/"
-  database            = "flink_kickstarter"
-  schema              = "flink_kickstarter"
+  database            = snowflake_database.apache_flink.name
+  schema              = snowflake_schema.apache_flink_schema.name
   storage_integration = snowflake_storage_integration.aws_s3_integration.name
   provider            = snowflake.account_admin
 
-  depends_on = [ snowflake_storage_integration.aws_s3_integration ]
+  depends_on = [ 
+    snowflake_storage_integration.aws_s3_integration 
+  ]
 }
 
-resource "snowflake_external_table" "skyone_airline_table" {
-  database    = "flink_kickstarter"
-  schema      = "flink_kickstarter"
-  name        = "skyone_airline_stage_external_table"
-  file_format = snowflake_file_format.parquet_format.name
-  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.schema.name}.${snowflake_stage.skyone_airline_stage.name}/"
+resource "snowflake_external_table" "skyone_airline" {
+  provider    = snowflake.account_admin
+  database    = snowflake_database.apache_flink.name
+  schema      = snowflake_schema.apache_flink_schema.name
+  name        = "skyone_airline"
+  file_format = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_file_format.parquet_format.name}"
+  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.skyone_airline.name}/"
 
   column {
     as   = "EMAIL_ADDRESS"
@@ -128,26 +137,31 @@ resource "snowflake_external_table" "skyone_airline_table" {
     type = "STRING"
   }
 
-  depends_on = [ snowflake_stage.skyone_airline_stage ]
+  depends_on = [ 
+    snowflake_stage.skyone_airline
+  ]
 }
 
-resource "snowflake_stage" "sunset_airline_stage" {
+resource "snowflake_stage" "sunset_airline" {
   name                = "sunset_airline_stage"
   url                 = "s3://flink-kickstarter/warehouse/airlines.db/sunset_airline/"
-  database            = "flink_kickstarter"
-  schema              = "flink_kickstarter"
+  database            = snowflake_database.apache_flink.name
+  schema              = snowflake_schema.apache_flink_schema.name
   storage_integration = snowflake_storage_integration.aws_s3_integration.name
   provider            = snowflake.account_admin
 
-  depends_on = [ snowflake_storage_integration.aws_s3_integration ]
+  depends_on = [ 
+    snowflake_storage_integration.aws_s3_integration
+  ]
 }
 
-resource "snowflake_external_table" "sunset_airline_table" {
-  database    = "flink_kickstarter"
-  schema      = "flink_kickstarter"
-  name        = "sunset_airline_stage_external_table"
-  file_format = snowflake_file_format.parquet_format.name
-  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.schema.name}.${snowflake_stage.sunset_airline_stage.name}/"
+resource "snowflake_external_table" "sunset_airline" {
+  provider    = snowflake.account_admin
+  database    = snowflake_database.apache_flink.name
+  schema      = snowflake_schema.apache_flink_schema.name
+  name        = "sunset_airline"
+  file_format = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_file_format.parquet_format.name}"
+  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.sunset_airline.name}/"
 
   column {
     as   = "EMAIL_ADDRESS"
@@ -209,5 +223,7 @@ resource "snowflake_external_table" "sunset_airline_table" {
     type = "STRING"
   }
 
-  depends_on = [ snowflake_stage.sunset_airline_stage ]
+  depends_on = [ 
+    snowflake_stage.sunset_airline
+  ]
 }

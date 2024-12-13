@@ -28,27 +28,52 @@ resource "snowflake_grant_privileges_to_account_role" "integration_grant" {
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "skyone_airline_stage_grant" {
+resource "snowflake_grant_privileges_to_account_role" "file_format" {
+  provider          = snowflake.account_admin
+  privileges        = ["USAGE"]
+  account_role_name = snowflake_account_role.account_admin.name
+  on_schema_object {
+    object_type = "FILE FORMAT"
+    object_name = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}"
+  }
+
+  depends_on = [ 
+    snowflake_database.apache_flink,
+    snowflake_schema.apache_flink_schema
+  ]
+}
+
+resource "snowflake_grant_privileges_to_account_role" "skyone_airline_external_table" {
   provider          = snowflake.account_admin
   privileges        = ["USAGE"]
   account_role_name = snowflake_account_role.account_admin_role.name
   on_schema_object {
-    object_type = "STAGE"
-    object_name = "${snowflake_database.apache_flink.name}.${snowflake_schema.schema.name}.${snowflake_stage.skyone_airline_stage.name}"
+    object_type = "EXTERNAL TABLE"
+    object_name = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_external_table.skyone_airline.name}"
   }
+
+  depends_on = [ 
+    snowflake_account_role.account_admin_role,
+    snowflake_external_table.skyone_airline
+  ]
 }
 
-resource "snowflake_grant_privileges_to_account_role" "sunset_airline_stage_grant" {
+resource "snowflake_grant_privileges_to_account_role" "sunset_airline_external_table" {
   provider          = snowflake.account_admin
   privileges        = ["USAGE"]
   account_role_name = snowflake_account_role.account_admin_role.name
   on_schema_object {
-    object_type = "STAGE"
-    object_name = "${snowflake_database.apache_flink.name}.${snowflake_schema.schema.name}.${snowflake_stage.sunset_airline_stage.name}"
+    object_type = "EXTERNAL TABLE"
+    object_name = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_external_table.sunset_airline.name}"
   }
+
+  depends_on = [ 
+    snowflake_account_role.account_admin_role,
+    snowflake_external_table.sunset_airline
+  ]
 }
 
-resource "snowflake_grant_account_role" "user_account_admin_grants" {
+resource "snowflake_grant_account_role" "user_account_admin" {
   provider  = snowflake.account_admin
   role_name = snowflake_account_role.account_admin_role.name
   user_name = snowflake_user.user.name
