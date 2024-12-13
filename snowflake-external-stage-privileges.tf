@@ -11,6 +11,12 @@ provider "snowflake" {
   user              = jsondecode(data.aws_secretsmanager_secret_version.admin_public_keys.secret_string)["admin_user"]
   authenticator     = "SNOWFLAKE_JWT"
   private_key       = jsondecode(data.aws_secretsmanager_secret_version.admin_public_keys.secret_string)["active_rsa_public_key_number"] == 1 ? data.aws_secretsmanager_secret_version.admin_private_key_1.secret_string : data.aws_secretsmanager_secret_version.admin_private_key_2.secret_string
+
+  # Enable preview features
+  preview_features_enabled = [
+    "snowflake_storage_integration_resource",
+    "snowflake_file_format_resource"
+  ]
 }
 
 resource "snowflake_account_role" "account_admin_role" {
@@ -26,21 +32,6 @@ resource "snowflake_grant_privileges_to_account_role" "integration_grant" {
     object_type = "INTEGRATION"
     object_name = snowflake_storage_integration.aws_s3_integration.name
   }
-}
-
-resource "snowflake_grant_privileges_to_account_role" "file_format" {
-  provider          = snowflake.account_admin
-  privileges        = ["USAGE"]
-  account_role_name = snowflake_account_role.account_admin.name
-  on_schema_object {
-    object_type = "FILE FORMAT"
-    object_name = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}"
-  }
-
-  depends_on = [ 
-    snowflake_database.apache_flink,
-    snowflake_schema.apache_flink_schema
-  ]
 }
 
 resource "snowflake_grant_privileges_to_account_role" "skyone_airline_external_table" {
