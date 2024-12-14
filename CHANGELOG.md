@@ -13,6 +13,9 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 - Upgraded the Confluent Terraform Provider to version `2.12.0`.
 - Issue [#543](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/543).
 
+### Fixed
+- Issue [#545](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/545).
+
 ## [0.54.00.000] - 2024-11-30
 ### Added
 - Upgraded the Apache Flink to version `1.20.0`.

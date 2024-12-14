@@ -13,17 +13,17 @@ provider "snowflake" {
 }
 
 resource "snowflake_warehouse" "apache_flink" {
-  name           = local.secrets_insert
+  name           = upper(local.secrets_insert)
   warehouse_size = "xsmall"
   auto_suspend   = 60
 }
 
 resource "snowflake_database" "apache_flink" {
-  name = local.secrets_insert
+  name = upper(local.secrets_insert)
 }
 
 resource "snowflake_schema" "apache_flink_schema" {
-  name       = local.secrets_insert
+  name       = upper(local.secrets_insert)
   database   = snowflake_database.apache_flink.name
 
   depends_on = [
@@ -61,7 +61,7 @@ resource "snowflake_file_format" "parquet_format" {
 }
 
 resource "snowflake_stage" "skyone_airline" {
-  name                = "skyone_airline_stage"
+  name                = upper("skyone_airline_stage")
   url                 = "s3://flink-kickstarter/warehouse/airlines.db/skyone_airline/"
   database            = snowflake_database.apache_flink.name
   schema              = snowflake_schema.apache_flink_schema.name
@@ -77,9 +77,9 @@ resource "snowflake_external_table" "skyone_airline" {
   provider    = snowflake.account_admin
   database    = snowflake_database.apache_flink.name
   schema      = snowflake_schema.apache_flink_schema.name
-  name        = "skyone_airline"
+  name        = upper("skyone_airline")
   file_format = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_file_format.parquet_format.name}"
-  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.skyone_airline.name}/"
+  location    = lower("@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.skyone_airline.name}/data/")
 
   column {
     as   = "EMAIL_ADDRESS"
@@ -147,7 +147,7 @@ resource "snowflake_external_table" "skyone_airline" {
 }
 
 resource "snowflake_stage" "sunset_airline" {
-  name                = "sunset_airline_stage"
+  name                = upper("sunset_airline_stage")
   url                 = "s3://flink-kickstarter/warehouse/airlines.db/sunset_airline/"
   database            = snowflake_database.apache_flink.name
   schema              = snowflake_schema.apache_flink_schema.name
@@ -163,9 +163,9 @@ resource "snowflake_external_table" "sunset_airline" {
   provider    = snowflake.account_admin
   database    = snowflake_database.apache_flink.name
   schema      = snowflake_schema.apache_flink_schema.name
-  name        = "sunset_airline"
+  name        = upper("sunset_airline")
   file_format = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_file_format.parquet_format.name}"
-  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.sunset_airline.name}/"
+  location    = lower("@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.sunset_airline.name}/data/")
 
   column {
     as   = "EMAIL_ADDRESS"
