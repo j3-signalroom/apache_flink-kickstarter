@@ -62,7 +62,7 @@ resource "snowflake_file_format" "parquet_format" {
 
 resource "snowflake_stage" "skyone_airline" {
   name                = upper("skyone_airline_stage")
-  url                 = "s3://flink-kickstarter/warehouse/airlines.db/skyone_airline/"
+  url                 = "s3://flink-kickstarter/warehouse/airlines.db/skyone_airline/data/"
   database            = snowflake_database.apache_flink.name
   schema              = snowflake_schema.apache_flink_schema.name
   storage_integration = snowflake_storage_integration.aws_s3_integration.name
@@ -79,7 +79,7 @@ resource "snowflake_external_table" "skyone_airline" {
   schema      = snowflake_schema.apache_flink_schema.name
   name        = upper("skyone_airline")
   file_format = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_file_format.parquet_format.name}"
-  location    = lower("@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.skyone_airline.name}/data/")
+  location    = lower("@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.skyone_airline.name}/")
 
   column {
     as   = "EMAIL_ADDRESS"
@@ -148,7 +148,7 @@ resource "snowflake_external_table" "skyone_airline" {
 
 resource "snowflake_stage" "sunset_airline" {
   name                = upper("sunset_airline_stage")
-  url                 = "s3://flink-kickstarter/warehouse/airlines.db/sunset_airline/"
+  url                 = "s3://flink-kickstarter/warehouse/airlines.db/sunset_airline/data/"
   database            = snowflake_database.apache_flink.name
   schema              = snowflake_schema.apache_flink_schema.name
   storage_integration = snowflake_storage_integration.aws_s3_integration.name
@@ -165,7 +165,7 @@ resource "snowflake_external_table" "sunset_airline" {
   schema      = snowflake_schema.apache_flink_schema.name
   name        = upper("sunset_airline")
   file_format = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_file_format.parquet_format.name}"
-  location    = lower("@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.sunset_airline.name}/data/")
+  location    = lower("@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.sunset_airline.name}/")
 
   column {
     as   = "EMAIL_ADDRESS"
