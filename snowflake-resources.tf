@@ -77,7 +77,7 @@ resource "snowflake_external_table" "skyone_airline" {
   schema      = snowflake_schema.apache_flink_schema.name
   name        = upper("skyone_airline")
   file_format = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_file_format.parquet_format.name}"
-  location    = lower("@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.skyone_airline.name}")
+  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.skyone_airline.name}"
 
   column {
     as   = "EMAIL_ADDRESS"
@@ -163,7 +163,7 @@ resource "snowflake_external_table" "sunset_airline" {
   schema      = snowflake_schema.apache_flink_schema.name
   name        = upper("sunset_airline")
   file_format = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_file_format.parquet_format.name}"
-  location    = lower("@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.sunset_airline.name}")
+  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.sunset_airline.name}"
 
   column {
     as   = "EMAIL_ADDRESS"
