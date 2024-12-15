@@ -22,3 +22,13 @@ Externally managed catalogs like AWS Glue or you can use Apache Iceberg metadata
 
 ## Non-Managed Apache Iceberg Tables in Snowflake
 Non-Managed Apache Iceberg tables in Snowflake are read-only tables that are created using the Apache Iceberg metadata files stored in object storage. These tables are useful for scenarios where you want to query data that is stored in Apache Iceberg format without having to write the data into Snowflake.
+
+
+### Snowflake Storage Integration to access Amazon S3
+Integrations are named, first-class Snowflake objects that avoid the need for passing explicit cloud provider credentials such as secret keys or access tokens. Integration objects store an AWS identity and access management (IAM) user ID. An administrator in your organization grants the integration IAM user permissions in the AWS account.
+
+## References
+[Configuring a Snowflake storage integration to access Amazon S3](https://docs.snowflake.com/en/user-guide/data-load-s3-config-storage-integration.html)
+[SYSTEM$VALIDATE_STORAGE_INTEGRATION](https://docs.snowflake.com/en/sql-reference/functions/system_validate_storage_integration)
+
+

@@ -34,16 +34,14 @@ resource "snowflake_schema" "apache_flink_schema" {
 resource "snowflake_storage_integration" "aws_s3_integration" {
   provider                  = snowflake.account_admin
   name                      = "AWS_S3_STORAGE_INTEGRATION"
-  storage_allowed_locations = ["s3://flink-kickstarter/warehouse/airlines.db/"]
+  storage_allowed_locations = [
+    "s3://flink-kickstarter/warehouse/"
+  ]
   storage_provider          = "S3"
   storage_aws_object_acl    = "bucket-owner-full-control"
-  storage_aws_role_arn      = aws_iam_role.snowflake_role.arn
+  storage_aws_role_arn      = local.snowflake_aws_role_arn
   enabled                   = true
   type                      = "EXTERNAL_STAGE"
-
-  depends_on = [ 
-    aws_iam_role.snowflake_role
-  ]
 }
 
 resource "snowflake_file_format" "parquet_format" {
@@ -79,7 +77,7 @@ resource "snowflake_external_table" "skyone_airline" {
   schema      = snowflake_schema.apache_flink_schema.name
   name        = upper("skyone_airline")
   file_format = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_file_format.parquet_format.name}"
-  location    = lower("@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.skyone_airline.name}/")
+  location    = lower("@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.skyone_airline.name}")
 
   column {
     as   = "EMAIL_ADDRESS"
@@ -165,7 +163,7 @@ resource "snowflake_external_table" "sunset_airline" {
   schema      = snowflake_schema.apache_flink_schema.name
   name        = upper("sunset_airline")
   file_format = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_file_format.parquet_format.name}"
-  location    = lower("@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.sunset_airline.name}/")
+  location    = lower("@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.sunset_airline.name}")
 
   column {
     as   = "EMAIL_ADDRESS"
