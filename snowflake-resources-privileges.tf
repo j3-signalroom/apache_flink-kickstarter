@@ -115,36 +115,6 @@ resource "snowflake_grant_privileges_to_account_role" "integration_grant" {
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "skyone_airline_external_table" {
-  provider          = snowflake.account_admin
-  privileges        = ["USAGE"]
-  account_role_name = snowflake_account_role.account_admin_role.name
-  on_schema_object {
-    object_type = "EXTERNAL TABLE"
-    object_name = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_external_table.skyone_airline.name}"
-  }
-
-  depends_on = [ 
-    snowflake_account_role.account_admin_role,
-    snowflake_external_table.skyone_airline
-  ]
-}
-
-resource "snowflake_grant_privileges_to_account_role" "sunset_airline_external_table" {
-  provider          = snowflake.account_admin
-  privileges        = ["USAGE"]
-  account_role_name = snowflake_account_role.account_admin_role.name
-  on_schema_object {
-    object_type = "EXTERNAL TABLE"
-    object_name = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_external_table.sunset_airline.name}"
-  }
-
-  depends_on = [ 
-    snowflake_account_role.account_admin_role,
-    snowflake_external_table.sunset_airline
-  ]
-}
-
 resource "snowflake_grant_account_role" "user_account_admin" {
   provider  = snowflake.account_admin
   role_name = snowflake_account_role.account_admin_role.name

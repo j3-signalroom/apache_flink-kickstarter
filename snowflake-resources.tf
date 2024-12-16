@@ -44,21 +44,6 @@ resource "snowflake_storage_integration" "aws_s3_integration" {
   type                      = "EXTERNAL_STAGE"
 }
 
-resource "snowflake_file_format" "parquet_format" {
-  provider    = snowflake.account_admin
-  name        = "APACHE_ICEBERG_TABLE_PARQUET_FORMAT"
-  database    = snowflake_database.apache_flink.name
-  schema      = snowflake_schema.apache_flink_schema.name
-  format_type = "PARQUET"
-  compression = "AUTO"
-  comment     = "Parquet file format"
-
-  depends_on = [
-    snowflake_database.apache_flink,
-    snowflake_schema.apache_flink_schema
-  ]
-}
-
 resource "snowflake_stage" "skyone_airline" {
   name                = upper("skyone_airline_stage")
   url                 = "s3://flink-kickstarter/warehouse/airlines.db/skyone_airline/data/"
@@ -77,65 +62,65 @@ resource "snowflake_external_table" "skyone_airline" {
   database    = snowflake_database.apache_flink.name
   schema      = snowflake_schema.apache_flink_schema.name
   name        = upper("skyone_airline")
-  file_format = snowflake_file_format.parquet_format.name
-  location    = "@${snowflake_stage.skyone_airline.name}"
+  file_format = "TYPE = 'PARQUET'"
+  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.skyone_airline.name}"
 
   column {
-    as   = "value:email_address::string"
+    as   = "(value:email_address::string)"
     name = "email_address"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:departure_time::string"
+    as   = "(value:departure_time::string)"
     name = "departure_time"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:departure_airport_code::string"
+    as   = "(value:departure_airport_code::string)"
     name = "departure_airport_code"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:arrival_time::string"
+    as   = "(value:arrival_time::string)"
     name = "arrival_time"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:arrival_airport_code::string"
+    as   = "(value:arrival_airport_code::string)"
     name = "arrival_airport_code"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:flight_duration::bigint"
+    as   = "(value:flight_duration::bigint)"
     name = "flight_duration"
     type = "BIGINT"
   }
 
   column {
-    as   = "value:flight_number::string"
+    as   = "(value:flight_number::string)"
     name = "flight_number"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:confirmation_code::string"
+    as   = "(value:confirmation_code::string)"
     name = "confirmation_code"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:ticket_price::decimal(10, 2)"
+    as   = "(value:ticket_price::decimal(10, 2))"
     name = "ticket_price"
     type = "NUMBER"
   }
 
   column {
-    as   = "value:booking_agency_email::string"
+    as   = "(value:booking_agency_email::string)"
     name = "booking_agency_email"
     type = "VARCHAR"
   }
@@ -163,65 +148,65 @@ resource "snowflake_external_table" "sunset_airline" {
   database    = snowflake_database.apache_flink.name
   schema      = snowflake_schema.apache_flink_schema.name
   name        = upper("sunset_airline")
-  file_format = snowflake_file_format.parquet_format.name
-  location    = "@${snowflake_stage.skyone_airline.name}"
+  file_format = "TYPE = 'PARQUET'"
+  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.sunset_airline.name}"
 
   column {
-    as   = "value:email_address::string"
+    as   = "(value:email_address::string)"
     name = "email_address"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:departure_time::string"
+    as   = "(value:departure_time::string)"
     name = "departure_time"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:departure_airport_code::string"
+    as   = "(value:departure_airport_code::string)"
     name = "departure_airport_code"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:arrival_time::string"
+    as   = "(value:arrival_time::string)"
     name = "arrival_time"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:arrival_airport_code::string"
+    as   = "(value:arrival_airport_code::string)"
     name = "arrival_airport_code"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:flight_duration::bigint"
+    as   = "(value:flight_duration::bigint)"
     name = "flight_duration"
     type = "BIGINT"
   }
 
   column {
-    as   = "value:flight_number::string"
+    as   = "(value:flight_number::string)"
     name = "flight_number"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:confirmation_code::string"
+    as   = "(value:confirmation_code::string)"
     name = "confirmation_code"
     type = "VARCHAR"
   }
 
   column {
-    as   = "value:ticket_price::decimal(10, 2)"
+    as   = "(value:ticket_price::decimal(10, 2))"
     name = "ticket_price"
     type = "NUMBER"
   }
 
   column {
-    as   = "value:booking_agency_email::string"
+    as   = "(value:booking_agency_email::string)"
     name = "booking_agency_email"
     type = "VARCHAR"
   }
