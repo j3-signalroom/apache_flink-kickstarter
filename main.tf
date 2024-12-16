@@ -3,7 +3,7 @@ terraform {
       organization = "signalroom"
 
         workspaces {
-            name = "apache-flink-kickstarter-0012"
+            name = "apache-flink-kickstarter-0013"
         }
   }
 
@@ -18,7 +18,7 @@ terraform {
         }
         aws = {
             source  = "hashicorp/aws"
-            version = "~> 5.80.0"
+            version = "~> 5.81.0"
         }
         snowflake = {
             source = "Snowflake-Labs/snowflake"
@@ -32,6 +32,8 @@ locals {
   secrets_insert                = lower(var.service_account_user)
   confluent_secrets_path_prefix = "/confluent_cloud_resource/${local.secrets_insert}"
   snowflake_secrets_path_prefix = "/snowflake_resource/${local.secrets_insert}"
+  snowflake_aws_role_name       = "snowflake_role"
+  snowflake_aws_role_arn        = "arn:aws:iam::${var.aws_account_id}:role/${local.snowflake_aws_role_name}"
 }
 
 

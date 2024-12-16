@@ -9,12 +9,13 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 
 ### Changed
 - Upgraded the Snowflake Terraform Provider to version `1.0.0`.
-- Upgraded the AWS Terraform Provider to version `5.80.0`.
+- Upgraded the AWS Terraform Provider to version `5.81.0`.
 - Upgraded the Confluent Terraform Provider to version `2.12.0`.
 - Issue [#543](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/543).
 
 ### Fixed
 - Issue [#545](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/545).
+- Issue [#547](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/547).
 
 ## [0.54.00.000] - 2024-11-30
 ### Added
