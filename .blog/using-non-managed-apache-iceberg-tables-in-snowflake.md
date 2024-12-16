@@ -1,34 +1,63 @@
 # Using Non-Managed Apache Iceberg Tables in Snowflake
-Apache Iceberg is a table format that is designed to be used with big data processing engines like Apache Spark and Presto. It provides a way to manage large datasets in a way that is efficient and scalable. Snowflake is a cloud-based data warehousing platform that is designed to be fast, flexible, and easy to use. In this article, I will show you how to connect Apache Iceberg tables to a Snowflake schema.
+When working with Apache Iceberg tables in Snowflake, you generally have two key options for how these tables are administered: **managed** and **non-managed**. Each approach offers distinct trade-offs, operational characteristics, and integration patterns.
 
-## Snowflake Managed Apache Iceberg Tables
-Snowflake supports Apache Iceberg in two ways: an Internal Catalog (Snowflake-managed catalog) or an externally managed catalog (AWS Glue or Objectstore).
+### Managed Iceberg Tables
+**Overview:**  
+Managed Iceberg tables are those whose metadata and file operations are fully orchestrated and maintained by Snowflake. In other words, Snowflake takes on the role of the table’s “catalog,” ensuring that all Iceberg-related components—metadata files, data files, snapshots, and manifests—are organized and optimized by Snowflake’s internal engine.
 
-### Apache Iceberg Tables: Snowflake-managed catalog
-A Snowflake-managed catalog is nearly identical performance as a regular Snowflake table and has the following characteristics:
+**Characteristics and Benefits:**
 
-- Snowflake reads/writes
-- Apache Iceberg interoperability
-- Full platform support
-- Performance optimized
+1. **Full Metadata Control by Snowflake:**  
+   Snowflake stores and manages all Iceberg metadata files. This centralizes the location and governance of table structure, schema evolution, snapshots, and transaction history. As a result, you don’t have to worry about manually maintaining metadata files, directories, or catalogs externally.
 
-### Apache Iceberg Tables: Externally managed catalog
-Externally managed catalogs like AWS Glue or you can use Apache Iceberg metadata files stored in object storage to create a table and have the following characteristics:
+2. **Automated Table Maintenance:**  
+   Because Snowflake integrates directly with the Iceberg table structures, tasks such as compaction, snapshot retention, and cleanup are handled internally. Snowflake can transparently optimize data layout and purge expired snapshots, reducing administrative overhead.
 
-- Flexible sources
-- Efficient onboarding
-- Simplified operations
-- Performance optimized
+3. **High Performance and Seamless Concurrency:**  
+   Snowflake’s concurrency, scaling, and optimization capabilities extend to managed Iceberg tables. Query performance often benefits from Snowflake’s built-in optimizations and its transactional guarantees. Multiple users can concurrently read and write without worrying about corrupting metadata or dealing with complex lock mechanisms outside Snowflake.
 
-## Non-Managed Apache Iceberg Tables in Snowflake
-Non-Managed Apache Iceberg tables in Snowflake are read-only tables that are created using the Apache Iceberg metadata files stored in object storage. These tables are useful for scenarios where you want to query data that is stored in Apache Iceberg format without having to write the data into Snowflake.
+4. **Single Source of Truth:**  
+   Since Snowflake is the system of record for both the data and its metadata, it offers a unified interface. You don’t need external systems (like a Hive Metastore, AWS Glue Catalog, or a separate Iceberg catalog) for maintaining the data. Everything resides under Snowflake’s governance and security model.
+
+**Considerations:**
+- Managed tables may come with a higher degree of vendor lock-in since Snowflake is the authoritative source for the metadata.
+- You rely on Snowflake’s roadmap for Iceberg-related enhancements and features.
 
 
-### Snowflake Storage Integration to access Amazon S3
-Integrations are named, first-class Snowflake objects that avoid the need for passing explicit cloud provider credentials such as secret keys or access tokens. Integration objects store an AWS identity and access management (IAM) user ID. An administrator in your organization grants the integration IAM user permissions in the AWS account.
+### Non-Managed Iceberg Tables
+**Overview:**  
+Non-managed Iceberg tables, sometimes known as “external Iceberg tables,” rely on an external metadata store and a file system that you control. Snowflake acts as a query engine over data defined and managed outside of its domain. In essence, the Iceberg table’s “catalog” and metadata are stored elsewhere (e.g., in an external metastore, cloud storage bucket with Iceberg metadata files, or a third-party cataloging system), and Snowflake simply queries the data.
 
-## References
-[Configuring a Snowflake storage integration to access Amazon S3](https://docs.snowflake.com/en/user-guide/data-load-s3-config-storage-integration.html)
-[SYSTEM$VALIDATE_STORAGE_INTEGRATION](https://docs.snowflake.com/en/sql-reference/functions/system_validate_storage_integration)
+**Characteristics and Benefits:**
 
+1. **External Metadata and Catalog:**  
+   You already have a catalog, perhaps a Hive Metastore, AWS Glue Data Catalog, or another standalone Iceberg catalog. Snowflake connects to this external metadata source to understand table schemas, snapshots, and file locations. You can maintain Iceberg metadata where you prefer, possibly alongside other engines and tools.
+
+2. **Greater Flexibility and Interoperability:**  
+   Since non-managed tables aren’t tied exclusively to Snowflake’s metadata management, it’s easier to integrate your data lake ecosystem. You can run Spark, Presto, Trino, or other engines on the same underlying Iceberg data, using the same metadata store, giving you a multi-engine, multi-tool environment.
+
+3. **Reduced Vendor Lock-In:**  
+   Your data and its metadata are not solely under Snowflake’s control, making it simpler to migrate or share data among different analytics platforms. If you prefer a “bring your own catalog” approach, this can be ideal.
+
+**Considerations:**
+- You must handle many operational aspects yourself, such as snapshot cleanup, schema evolution policies, and performance tuning related to Iceberg metadata.  
+- Achieving optimal concurrency control or ensuring consistent table states might be more complex, as Snowflake does not automatically handle metadata concurrency or optimization tasks.  
+- Query performance may be somewhat dependent on how efficiently Snowflake can access external metadata and how well-maintained your external catalog is.
+
+---
+
+### Choosing Between Managed and Non-Managed
+**Managed Tables:**  
+- Ideal if you want a “hands-off” approach with simpler maintenance, automatic optimizations, and integration with Snowflake’s existing transactional and governance features.  
+- Best for organizations that want to consolidate their data management layer within Snowflake.
+
+**Non-Managed Tables:**  
+- Ideal for environments with existing data lake ecosystems and catalogs, where interoperability and flexibility are top priorities.  
+- Best for teams comfortable with maintaining Iceberg metadata outside Snowflake and who value the ability to use multiple engines against the same data.
+
+By weighing these considerations, you can determine the right Iceberg table management approach—fully managed by Snowflake for simplicity and performance, or non-managed for ultimate flexibility and ecosystem interoperability.
+
+---
+
+In this project, I use non-managed Apache Iceberg tables in Snowflake. The projects the Apache Iceberg tables in Snowflake using the Iceberg metadata files stored in an Amazon S3 bucket. Which can be queried like any other tables Snowflake.
 
