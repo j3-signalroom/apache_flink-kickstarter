@@ -30,8 +30,9 @@ Explore the repo, run the Docker containers (compatible with both Mac M chips an
 + [3.0 Hands-On Kickoff: Practical Examples for Rapid Learning](#30-hands-on-kickoff-practical-examples-for-rapid-learning)
     - [3.1 Flink Applications Powered by Java](#31-flink-applications-powered-by-java)
     - [3.2 Flink Applications Powered by Python](#32-flink-applications-powered-by-python)
-+ [4.0 Resources](#40-resources)
-+ [5.0 Important Note(s)](#50-important-notes)
++ [4.0 Powering Analytics with Apache Iceberg Tables in Snowflake](#40-powering-analytics-with-apache-iceberg-tables-in-snowflake)
++ [5.0 Resources](#50-resources)
++ [6.0 Important Note(s)](#60-important-notes)
 <!-- tocstop -->
 
 ## 1.0 Are these examples better described as Flink Jobs or Flink Applications-—and why does the distinction matter?
@@ -172,7 +173,14 @@ terraform graph | dot -Tpng > .blog/images/terraform-visualization.png
 ### 3.2 Flink Applications Powered by Python
 [Let's go!](python/README.md)
 
-## 4.0 Resources
+## 4.0 Powering Analytics with Apache Iceberg Tables in Snowflake
+After running the Flink applications, you can now leverage the data stored in the Apache Iceberg tables in Snowflake for analytics.  Click [here](.blog/using-non-managed-apache-iceberg-tables-in-snowflake.md) to learn more about using Non-Managed Apache Iceberg Tables in Snowflake.  This blog post will help you understand the trade-offs, operational characteristics, and integration patterns of using Apache Iceberg tables in Snowflake.  These terraform configurations:
+
+- [aws-iam-resources](aws-iam-resources.tf) - creates the necessary IAM roles and policies in AWS to get started.
+- [snowflake-resources-privileges](snowflake-resources-privileges.tf) - grants the necessary privileges to the Snowflake resources to get started.
+- [snowflake-resources](snowflake-resources.tf) - creates the necessary resources in Snowflake to get started.
+
+## 5.0 Resources
 
 [Apache Flink's Core is Dataflow Programming](https://en.wikipedia.org/wiki/Dataflow_programming)
 
@@ -186,5 +194,5 @@ terraform graph | dot -Tpng > .blog/images/terraform-visualization.png
 
 [Unlocking Schema Registry Access: Granting Confluent Service Account Permissions with Terraform.](.blog/unlocking-schema-registry-access.md)
 
-## 5.0 Important Note(s)
+## 6.0 Important Note(s)
 [Known Issue(s)](KNOWNISSUES.md)
