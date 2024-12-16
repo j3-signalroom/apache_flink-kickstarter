@@ -6,6 +6,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 ## [0.55.00.000] - TBD
 ### Added
 - Issue [#521](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/521).
+- Issue [#550](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/550).
 
 ### Changed
 - Upgraded the Snowflake Terraform Provider to version `1.0.0`.
