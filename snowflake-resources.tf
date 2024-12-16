@@ -64,6 +64,7 @@ resource "snowflake_external_table" "skyone_airline" {
   name        = upper("skyone_airline")
   file_format = "TYPE = 'PARQUET'"
   location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.skyone_airline.name}"
+  auto_refresh = true
 
   column {
     as   = "(value:email_address::string)"
@@ -150,6 +151,7 @@ resource "snowflake_external_table" "sunset_airline" {
   name        = upper("sunset_airline")
   file_format = "TYPE = 'PARQUET'"
   location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.sunset_airline.name}"
+  auto_refresh = true
 
   column {
     as   = "(value:email_address::string)"
@@ -236,6 +238,7 @@ resource "snowflake_external_table" "flight" {
   name        = upper("flight")
   file_format = "TYPE = 'PARQUET'"
   location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.flight.name}"
+  auto_refresh = true
 
   column {
     as   = "(value:email_address::string)"
@@ -310,6 +313,7 @@ resource "snowflake_external_table" "flyer_stats" {
   name        = upper("flyer_stats")
   file_format = "TYPE = 'PARQUET'"
   location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.flyer_stats.name}"
+  auto_refresh = true
 
   column {
     as   = "(value:email_address::string)"
