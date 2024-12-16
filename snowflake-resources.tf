@@ -215,3 +215,121 @@ resource "snowflake_external_table" "sunset_airline" {
     snowflake_stage.sunset_airline
   ]
 }
+
+resource "snowflake_stage" "flight" {
+  name                = upper("flight_stage")
+  url                 = "s3://flink-kickstarter/warehouse/airlines.db/flight/data/"
+  database            = snowflake_database.apache_flink.name
+  schema              = snowflake_schema.apache_flink_schema.name
+  storage_integration = snowflake_storage_integration.aws_s3_integration.name
+  provider            = snowflake.account_admin
+
+  depends_on = [ 
+    snowflake_storage_integration.aws_s3_integration 
+  ]
+}
+
+resource "snowflake_external_table" "flight" {
+  provider    = snowflake.account_admin
+  database    = snowflake_database.apache_flink.name
+  schema      = snowflake_schema.apache_flink_schema.name
+  name        = upper("flight")
+  file_format = "TYPE = 'PARQUET'"
+  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.flight.name}"
+
+  column {
+    as   = "(value:email_address::string)"
+    name = "email_address"
+    type = "VARCHAR"
+  }
+
+  column {
+    as   = "(value:departure_time::string)"
+    name = "departure_time"
+    type = "VARCHAR"
+  }
+
+  column {
+    as   = "(value:departure_airport_code::string)"
+    name = "departure_airport_code"
+    type = "VARCHAR"
+  }
+
+  column {
+    as   = "(value:arrival_time::string)"
+    name = "arrival_time"
+    type = "VARCHAR"
+  }
+
+  column {
+    as   = "(value:arrival_airport_code::string)"
+    name = "arrival_airport_code"
+    type = "VARCHAR"
+  }
+
+  column {
+    as   = "(value:flight_number::string)"
+    name = "flight_number"
+    type = "VARCHAR"
+  }
+
+  column {
+    as   = "(value:confirmation_code::string)"
+    name = "confirmation_code"
+    type = "VARCHAR"
+  }
+
+  column {
+    as   = "(value:airline::string)"
+    name = "airline"
+    type = "VARCHAR"
+  }
+
+  depends_on = [ 
+    snowflake_stage.flight
+  ]
+}
+
+resource "snowflake_stage" "flyer_stats" {
+  name                = upper("flight_stage")
+  url                 = "s3://flink-kickstarter/warehouse/airlines.db/flyer_stats/data/"
+  database            = snowflake_database.apache_flink.name
+  schema              = snowflake_schema.apache_flink_schema.name
+  storage_integration = snowflake_storage_integration.aws_s3_integration.name
+  provider            = snowflake.account_admin
+
+  depends_on = [ 
+    snowflake_storage_integration.aws_s3_integration 
+  ]
+}
+
+resource "snowflake_external_table" "flyer_stats" {
+  provider    = snowflake.account_admin
+  database    = snowflake_database.apache_flink.name
+  schema      = snowflake_schema.apache_flink_schema.name
+  name        = upper("flyer_stats")
+  file_format = "TYPE = 'PARQUET'"
+  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.flyer_stats.name}"
+
+  column {
+    as   = "(value:email_address::string)"
+    name = "email_address"
+    type = "VARCHAR"
+  }
+
+  column {
+    as   = "(value:total_flight_duration::bigint)"
+    name = "total_flight_duration"
+    type = "BIGINT"
+  }
+
+  column {
+    as   = "(value:number_of_flights::bigint)"
+    name = "number_of_flights"
+    type = "BIGINT"
+  }
+
+  depends_on = [ 
+    snowflake_stage.flyer_stats
+  ]
+}
