@@ -291,7 +291,7 @@ resource "snowflake_external_table" "flight" {
 }
 
 resource "snowflake_stage" "flyer_stats" {
-  name                = upper("flight_stage")
+  name                = upper("flyer_stats_stage")
   url                 = "s3://flink-kickstarter/warehouse/airlines.db/flyer_stats/data/"
   database            = snowflake_database.apache_flink.name
   schema              = snowflake_schema.apache_flink_schema.name
