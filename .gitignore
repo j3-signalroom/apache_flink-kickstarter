@@ -2,6 +2,7 @@
 .env
 .vscode/
 scratchpad.md
+working.sql
 
 # Local .terraform directories
 **/.terraform/*
