@@ -192,7 +192,7 @@ After running the Flink applications, you can now leverage the data stored in th
 
 [J3's techStack Lexicon](https://github.com/j3-signalroom/j3-techstack-lexicon/blob/main/README.md)
 
-[Unlocking Schema Registry Access: Granting Confluent Service Account Permissions with Terraform.](.blog/unlocking-schema-registry-access.md)
+[Unlocking Schema Registry Access: Granting Confluent Service Account Permissions with Terraform](.blog/unlocking-schema-registry-access.md)
 
 ## 6.0 Important Note(s)
 [Known Issue(s)](KNOWNISSUES.md)

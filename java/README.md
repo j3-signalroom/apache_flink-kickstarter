@@ -103,3 +103,5 @@ Flink App|Flink Run Command
 [Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!](../.blog/get-your-jar-versions-right.md)
 
 [Apache Iceberg in Action with Apache Flink using Java](../.blog/apache-iceberg-in-action-with-apache-flink-using-java.md)
+
+[Apache Flink® Table API on Confluent Cloud - Examples](https://github.com/confluentinc/flink-table-api-java-examples)
