@@ -3,6 +3,7 @@
 .vscode/
 scratchpad.md
 working.sql
+working.fql
 
 # Local .terraform directories
 **/.terraform/*
