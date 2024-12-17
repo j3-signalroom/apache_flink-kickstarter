@@ -30,7 +30,7 @@ Explore the repo, run the Docker containers (compatible with both Mac M chips an
 + [3.0 Hands-On Kickoff: Practical Examples for Rapid Learning](#30-hands-on-kickoff-practical-examples-for-rapid-learning)
     - [3.1 Flink Applications Powered by Java](#31-flink-applications-powered-by-java)
     - [3.2 Flink Applications Powered by Python](#32-flink-applications-powered-by-python)
-+ [4.0 Powering Analytics with Apache Iceberg Tables in Snowflake](#40-powering-analytics-with-apache-iceberg-tables-in-snowflake)
++ [4.0 Powering Analytics with Apache Iceberg tables in Snowflake](#40-powering-analytics-with-apache-iceberg-tables-in-snowflake)
 + [5.0 Resources](#50-resources)
 + [6.0 Important Note(s)](#60-important-notes)
 <!-- tocstop -->
@@ -173,8 +173,8 @@ terraform graph | dot -Tpng > .blog/images/terraform-visualization.png
 ### 3.2 Flink Applications Powered by Python
 [Let's go!](python/README.md)
 
-## 4.0 Powering Analytics with Apache Iceberg Tables in Snowflake
-After running the Flink applications, you can now leverage the data stored in the Apache Iceberg tables in Snowflake for analytics.  Click [here](.blog/using-non-managed-apache-iceberg-tables-in-snowflake.md) to learn more about using Non-Managed Apache Iceberg Tables in Snowflake.  This blog post will help you understand the trade-offs, operational characteristics, and integration patterns of using Apache Iceberg tables in Snowflake.  These terraform configurations:
+## 4.0 Powering Analytics with Apache Iceberg tables in Snowflake
+After running the Flink applications, you can now leverage the data stored in the Apache Iceberg tables in Snowflake for analytics.  Click [here](.blog/using-non-managed-apache-iceberg-tables-in-snowflake.md) to learn more about using **Non-Managed Apache Iceberg tables** in Snowflake.  This blog post will help you understand the trade-offs, operational characteristics, and integration patterns of using Apache Iceberg tables in Snowflake.  These terraform configurations:
 
 - [aws-iam-snowflake-setup](aws-iam-snowflake-setup.tf) - creates the necessary Snowflake IAM roles and policies in AWS to get started.
 - [snowflake-non-managed-apache-iceberg-table-privileges-setup](snowflake-non-managed-apache-iceberg-table-privileges-setup.tf) - grants the necessary privileges to the Snowflake resources to get started.
