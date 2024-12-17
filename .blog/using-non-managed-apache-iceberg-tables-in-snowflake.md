@@ -59,5 +59,5 @@ By weighing these considerations, you can determine the right Iceberg table mana
 
 ---
 
-In this project, I use non-managed Apache Iceberg tables in Snowflake. The projects the Apache Iceberg tables in Snowflake using the Iceberg metadata files stored in an Amazon S3 bucket. Which can be queried like any other tables Snowflake.
+In this project, we use non-managed Apache Iceberg tables in Snowflake. The Apache Iceberg tables are created and managed in Apache Flink, and Snowflake queries the data from these tables. This approach allows us to leverage the best of both worlds: Apache Iceberg for data processing and Apache Iceberg table management, and Snowflake for querying and analytics.
 
