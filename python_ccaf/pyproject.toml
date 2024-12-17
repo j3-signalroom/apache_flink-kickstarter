@@ -1,0 +1,7 @@
+[project]
+name = "kickstarter"
+version = "0.56.00.000"
+description = "Confluent Cloud Apache Flink Kickstarter"
+readme = "README.md"
+requires-python = "~=3.11.9"
+dependencies = []
