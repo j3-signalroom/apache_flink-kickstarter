@@ -4,8 +4,8 @@
  * @author Jeffrey Jonathan Jennings (J3)
  * 
  * 
- * This class processes data from the `airline.flight` Kafka topic to aggregate user
- * statistics in the `airline.flyer_stats` Kafka topic.
+ * This class processes data from the `flight` Kafka topic to aggregate user
+ * statistics in the `flyer_stats` Kafka topic.
  */
 package kickstarter;
 
@@ -62,13 +62,13 @@ public class JsonFlyerStatsApp {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         /*
-         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight` with the
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `flight` with the
          * specified deserializer
          */
         KafkaSource<FlightJsonData> flightDataSource = 
             KafkaSource.<FlightJsonData>builder()
                 .setProperties(consumerProperties)
-                .setTopics("airline.flight")
+                .setTopics("flight")
                 .setGroupId("flight_group")
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SnakeCaseJsonDeserializationSchema<>(FlightJsonData.class))
@@ -82,13 +82,13 @@ public class JsonFlyerStatsApp {
             env.fromSource(flightDataSource, WatermarkStrategy.forMonotonousTimestamps(), "flightdata_source");
 
         /*
-         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats` with the
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `flyer_stats` with the
          * specified serializer
          */
         KafkaRecordSerializationSchema<FlyerStatsJsonData> flyerStatsSerializer = 
             KafkaRecordSerializationSchema
                 .<FlyerStatsJsonData>builder()
-                .setTopic("airline.flyer_stats")
+                .setTopic("flyer_stats")
                 .setValueSerializationSchema(new JsonSerializationSchema<FlyerStatsJsonData>(Common::getMapper))
                 .build();
 
@@ -122,10 +122,10 @@ public class JsonFlyerStatsApp {
 
     /**
      * This method defines the workflow for the Flink application.  It maps the data from the
-     * `airline.flight` Kafka topic to the `airline.flyer_stats` Kafka topic.
+     * `flight` Kafka topic to the `flyer_stats` Kafka topic.
      * 
-     * @param flightDataSource the data stream from the `airline.flight` Kafka topic.
-     * @return the data stream to the `airline.flyer_stats` Kafka topic.
+     * @param flightDataSource the data stream from the `flight` Kafka topic.
+     * @return the data stream to the `flyer_stats` Kafka topic.
      */
     public static DataStream<FlyerStatsJsonData> defineWorkflow(DataStream<FlightJsonData> flightDataSource) {
         return flightDataSource

@@ -4,8 +4,8 @@
  * @author Jeffrey Jonathan Jennings (J3)
  * 
  * 
- * This class imports flight data from `airline.sunset` and `airline.skyone` Kafka topics
- * and converts it to a unified format for the `airline.flight` Kafka topic.
+ * This class imports flight data from `sunset` and `skyone` Kafka topics
+ * and converts it to a unified format for the `flight` Kafka topic.
  * 
  * ------------------------------------------------------------------------------------------
  * I had a question, can you combine the Flink DataStream API and Table API in the same DAG?
@@ -68,11 +68,11 @@ public class AvroFlightConsolidatorApp {
         Map<String, String> registryConfigs = Common.extractRegistryConfigs(producerProperties);
         
         /*
-         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone_avro`
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `skyone_avro`
          */
         KafkaSource<AirlineAvroData> skyOneSource = KafkaSource.<AirlineAvroData>builder()
             .setProperties(consumerProperties)
-            .setTopics("airline.skyone_avro")
+            .setTopics("skyone_avro")
             .setGroupId("skyone_group")
             .setStartingOffsets(OffsetsInitializer.earliest())
             .setValueOnlyDeserializer(ConfluentRegistryAvroDeserializationSchema.forSpecific(AirlineAvroData.class, producerProperties.getProperty("schema.registry.url"), registryConfigs))
@@ -86,11 +86,11 @@ public class AvroFlightConsolidatorApp {
             .fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
         /*
-         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset_avro`
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `sunset_avro`
          */
         KafkaSource<AirlineAvroData> sunsetSource = KafkaSource.<AirlineAvroData>builder()
             .setProperties(consumerProperties)
-            .setTopics("airline.sunset_avro")
+            .setTopics("sunset_avro")
             .setGroupId("sunset_group")
             .setStartingOffsets(OffsetsInitializer.earliest())
             .setValueOnlyDeserializer(ConfluentRegistryAvroDeserializationSchema.forSpecific(AirlineAvroData.class, producerProperties.getProperty("schema.registry.url"), registryConfigs))
@@ -104,10 +104,10 @@ public class AvroFlightConsolidatorApp {
             .fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
         /*
-         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight_avro` with the
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `flight_avro` with the
          * specified serializer
          */
-        final String topicName = "airline.flight_avro";
+        final String topicName = "flight_avro";
 		KafkaRecordSerializationSchema<FlightAvroData> flightSerializer = KafkaRecordSerializationSchema.<FlightAvroData>builder()
             .setTopic(topicName)
             .setValueSerializationSchema(ConfluentRegistryAvroSerializationSchema.forSpecific(FlightAvroData.class, topicName + "-value", producerProperties.getProperty("schema.registry.url"), registryConfigs))
@@ -141,8 +141,8 @@ public class AvroFlightConsolidatorApp {
     /**
      * This method consolidates the flight data from the two airlines.
      * 
-     * @param skyOneSource - The datastream source for the `airline.skyone_avro` Kafka topic
-     * @param sunsetSource - The datastream source for the `airline.sunset_avro` Kafka topic
+     * @param skyOneSource - The datastream source for the `skyone_avro` Kafka topic
+     * @param sunsetSource - The datastream source for the `sunset_avro` Kafka topic
      * @return the consolidate flight data into one datastream.
      */
 	public static DataStream<FlightAvroData> consolidatesFlightData(DataStream<AirlineAvroData> skyOneSource, DataStream<AirlineAvroData> sunsetSource) {

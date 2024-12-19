@@ -112,12 +112,12 @@ public class JsonDataGeneratorApp {
             env.fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
         /*
-         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.skyone` with the
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `skyone` with the
          * specified serializer.
          */
         KafkaRecordSerializationSchema<AirlineJsonData> skyOneSerializer = 
             KafkaRecordSerializationSchema.<AirlineJsonData>builder()
-                .setTopic("airline.skyone")
+                .setTopic("skyone")
                 .setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
                 .build();
 
@@ -151,12 +151,12 @@ public class JsonDataGeneratorApp {
             env.fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
         /*
-         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.sunset` with the
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `sunset` with the
          * specified serializer.
          */
         KafkaRecordSerializationSchema<AirlineJsonData> sunsetSerializer = 
             KafkaRecordSerializationSchema.<AirlineJsonData>builder()
-                .setTopic("airline.sunset")
+                .setTopic("sunset")
                 .setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
                 .build();
 

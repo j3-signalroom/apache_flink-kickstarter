@@ -222,7 +222,7 @@ public class AvroDataGeneratorApp {
         DataStream<AirlineAvroData> airlineDataStream = env.fromSource(airlineSource, WatermarkStrategy.noWatermarks(), airline + "_source");
 
         // --- Sets up a Flink Kafka sink to produce data to the Kafka topic with the specified serializer.
-        final String topicName = "airline." + airline + "_avro";
+        final String topicName = airline + "_avro";
         KafkaRecordSerializationSchema<AirlineAvroData> airlineSerializer = 
             KafkaRecordSerializationSchema.<AirlineAvroData>builder()
                 .setTopic(topicName)
