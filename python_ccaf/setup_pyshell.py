@@ -1,6 +1,9 @@
-from pyflink.table.confluent import *
-from pyflink.table import *
+from pyflink.table import TableEnvironment
+from pyflink.table.confluent import ConfluentSettings
 from pyflink.table.expressions import *
+
+from src.kickstarter.helper.settings import CC_PROPERTIES_PATHNAME
+
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -10,7 +13,7 @@ __email__      = "j3@thej3.com"
 __status__     = "dev"
 
 
-settings = ConfluentSettings.from_global_variables()
+settings = ConfluentSettings.from_file(CC_PROPERTIES_PATHNAME)
 tbl_env = TableEnvironment.create(settings)
 
 print()

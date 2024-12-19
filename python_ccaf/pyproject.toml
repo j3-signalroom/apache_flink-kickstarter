@@ -2,7 +2,7 @@
 name = "Apache Flink Kickstarter"
 version = "0.56.00.000"
 description = "Confluent Cloud Apache Flink"
-authors = ["Jeffrey Jonathan Jennings (J3)"]
+authors = ["Jeffrey Jonathan Jennings"]
 readme = "README.md"
 
 [tool.poetry.scripts]
