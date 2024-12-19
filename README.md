@@ -174,7 +174,7 @@ terraform graph | dot -Tpng > .blog/images/terraform-visualization.png
 ### 3.2 Flink Applications Powered by Python on a locally running Apache Flink Cluster in Docker
 [Let's go!](python/README.md)
 
-### 3.3 Flink Applications Powered by Python on Confluent Cloud Apache Flink
+### 3.3 Flink Applications Powered by Python on Confluent Cloud for Apache Flink
 [Let's go!](python_ccaf/README.md)
 
 ## 4.0 Powering Analytics with Apache Iceberg tables in Snowflake

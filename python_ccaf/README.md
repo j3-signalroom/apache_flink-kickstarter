@@ -10,13 +10,23 @@
 
 ## 1.0 Interact with the CCAF Table API locally
 
-1. Run `poetry shell` to start a shell within the poetry virtualenv.
+1. To interact with the CCAF Table API locally, start a shell within the poetry virtualenv:
 
-2. Start python with `python -i setup_pyshell.py`.
+    ```bash
+    poetry shell
+    ```
 
-4. The `TableEnvironment` is pre-initialized from environment variables and available under `tbl_env`.
+2. Then start Python in interactive mode with CCAF Table API:
+
+    ```bash
+    python -i setup_pyshell.py
+    ```
+
+3. The `TableEnvironment` is pre-initialized from environment variables and available under `tbl_env`.
 
 ## 2.0 Resources
 [Table API on Confluent Cloud for Apache Flink](https://docs.confluent.io/cloud/current/flink/reference/table-api.html#table-api-on-af-long)
+
+[Table API in Confluent Cloud for Apache Flink API Function](https://docs.confluent.io/cloud/current/flink/reference/functions/table-api-functions.html#flink-table-api-functions)
 
 [Information Schema in Confluent Cloud for Apache Flink](https://docs.confluent.io/cloud/current/flink/reference/flink-sql-information-schema.html)
