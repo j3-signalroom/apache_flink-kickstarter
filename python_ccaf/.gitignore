@@ -1,6 +1,5 @@
 .venv/
 .DS_Store
-__pycache__
-.pytest_cache
-python_files.zip
-tf_snowflake_user
+**/__pycache__
+**/pytest_cache
+config/
