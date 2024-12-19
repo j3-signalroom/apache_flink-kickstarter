@@ -138,28 +138,28 @@ files = [
 
 [[package]]
 name = "confluent-flink-jars"
-version = "1.20.42"
+version = "1.20.38"
 description = "Confluent Apache Flink Jars"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "confluent-flink-jars-1.20.42.tar.gz", hash = "sha256:c491e0d406ab62c02c0528f718d7779cb3b31397c4ce99ff1fd085c393d6e998"},
+    {file = "confluent-flink-jars-1.20.38.tar.gz", hash = "sha256:87fa5b2fdb0ec43848cc8677a0c0dabba10c148a3af0b31cf13a439621cacd68"},
 ]
 
 [[package]]
 name = "confluent-flink-table-api-python-plugin"
-version = "1.20.42"
+version = "1.20.38"
 description = "Confluent Apache Flink Table API Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "confluent-flink-table-api-python-plugin-1.20.42.tar.gz", hash = "sha256:e9d87c7d1cbfcdae6a6221754b7a35990904389d6e0864d5d9dcd8a3fa6e2d1f"},
-    {file = "confluent_flink_table_api_python_plugin-1.20.42-py2.py3-none-any.whl", hash = "sha256:3fdb747bb1c30ae34d34db4270c26eef420b896ebcf3da32036d11743f8500c0"},
+    {file = "confluent-flink-table-api-python-plugin-1.20.38.tar.gz", hash = "sha256:065a38c121044bf8147295ca82818bbd9ffd802d04c1c99271f1bec1087ad55a"},
+    {file = "confluent_flink_table_api_python_plugin-1.20.38-py2.py3-none-any.whl", hash = "sha256:2a5e4bc63c1f5f9c5ef8f4794f39c2c7f58d30ae5d4ef899a04be97a238b7a71"},
 ]
 
 [package.dependencies]
 cloudpickle = ">=2.2.0"
-confluent-flink-jars = ">=1.20.42,<1.20.43"
+confluent-flink-jars = ">=1.20.38,<1.20.39"
 httplib2 = ">=0.19.0"
 pemja = {version = "0.4.1", markers = "platform_system != \"Windows\""}
 py4j = "0.10.9.7"
@@ -406,5 +406,5 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">= 3.11, < 3.12"
-content-hash = "a870b408442e3cac8c0af1cd2e30129423fe27fe712b88ecbf4398cfabe9e50c"
+python-versions = ">= 3.9, < 3.12"
+content-hash = "e7318a11f2030a04254efb53ac1a85d89336d4852ca9264ea8bfe3d56259f472"
