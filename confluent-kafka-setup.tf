@@ -1,6 +1,6 @@
 # Create the Kafka cluster
 resource "confluent_kafka_cluster" "kafka_cluster" {
-    display_name = local.secrets_insert
+    display_name = "${local.secrets_insert}-kafka_cluster"
     availability = "SINGLE_ZONE"
     cloud        = local.cloud
     region       = var.aws_region
