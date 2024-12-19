@@ -60,7 +60,7 @@ data "confluent_organization" "env" {}
 
 # Create the Confluent Cloud Environment
 resource "confluent_environment" "env" {
-  display_name = "${local.secrets_insert}"
+  display_name = "${local.secrets_insert}-env"
 
   stream_governance {
     package = "ESSENTIALS"
