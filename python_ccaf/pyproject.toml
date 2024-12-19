@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "Apache Flink Kickstarter"
+version = "0.56.00.000"
+description = "Confluent Cloud Apache Flink"
+authors = ["Jeffrey Jonathan Jennings (J3)"]
+readme = "README.md"
+
+[tool.poetry.scripts]
+avro_flight_consolidator_app = "src.kickstarter.avro_flight_consolidator_app:run"
+
+[tool.poetry.dependencies]
+python = ">= 3.9, < 3.12"
+confluent_flink_table_api_python_plugin = "1.20.38"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
