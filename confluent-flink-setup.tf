@@ -10,30 +10,6 @@ resource "confluent_role_binding" "flink_sql_statements_runner_env_admin" {
   crn_pattern = confluent_environment.env.resource_name
 }
 
-# Service account that owns Flink API Key
-resource "confluent_service_account" "flink_app_manager" {
-  display_name = "flink_app_manager"
-  description  = "Service account that has got full access to Flink resources in an environment"
-}
-
-# https://docs.confluent.io/cloud/current/access-management/access-control/rbac/predefined-rbac-roles.html#flinkadmin
-resource "confluent_role_binding" "flink_app_manager_developer_rbac" {
-  principal   = "User:${confluent_service_account.flink_app_manager.id}"
-  role_name   = "FlinkAdmin"
-  crn_pattern = confluent_environment.env.resource_name
-}
-
-/*
-  https://docs.confluent.io/cloud/current/access-management/access-control/rbac/predefined-rbac-roles.html#assigner
-  https://docs.confluent.io/cloud/current/flink/operate-and-deploy/flink-rbac.html#submit-long-running-statements
-*/
-resource "confluent_role_binding" "flink_app_manager_assigner" {
-  principal   = "User:${confluent_service_account.flink_app_manager.id}"
-  role_name   = "Assigner"
-  crn_pattern = "${data.confluent_organization.env.resource_name}/service-account=${confluent_service_account.flink_sql_statements_runner.id}"
-}
-
-
 data "confluent_flink_region" "env" {
   cloud        = local.cloud
   region       = var.aws_region
@@ -50,9 +26,7 @@ resource "confluent_flink_compute_pool" "env" {
   }
   depends_on = [
     confluent_role_binding.flink_sql_statements_runner_env_admin,
-    confluent_role_binding.flink_app_manager_assigner,
-    confluent_role_binding.flink_app_manager_developer_rbac,
-    confluent_api_key.flink_app_manager_api_key,
+    confluent_api_key.flink_sql_statements_runner_api_key,
   ]
 }
 
@@ -64,9 +38,9 @@ module "flink_api_key_rotation" {
 
     # Required Input(s)
     owner = {
-        id          = confluent_service_account.flink_app_manager.id
-        api_version = confluent_service_account.flink_app_manager.api_version
-        kind        = confluent_service_account.flink_app_manager.kind
+        id          = confluent_service_account.flink_sql_statements_runner.id
+        api_version = confluent_service_account.flink_sql_statements_runner.api_version
+        kind        = confluent_service_account.flink_sql_statements_runner.kind
     }
 
     resource = {
@@ -89,13 +63,13 @@ module "flink_api_key_rotation" {
 }
 
 # Create the Flink-specific API key that will be used to submit statements.
-resource "confluent_api_key" "flink_app_manager_api_key" {
-  display_name = "app-manager-flink-api-key"
-  description  = "Flink API Key that is owned by 'flink_app_manager' service account"
+resource "confluent_api_key" "flink_sql_statements_runner_api_key" {
+  display_name = "flink-sql-statements-runner-api-key"
+  description  = "Flink API Key that is owned by 'flink_sql_statements_runner' service account"
   owner {
-    id          = confluent_service_account.flink_app_manager.id
-    api_version = confluent_service_account.flink_app_manager.api_version
-    kind        = confluent_service_account.flink_app_manager.kind
+    id          = confluent_service_account.flink_sql_statements_runner.id
+    api_version = confluent_service_account.flink_sql_statements_runner.api_version
+    kind        = confluent_service_account.flink_sql_statements_runner.kind
   }
   managed_resource {
     id          = data.confluent_flink_region.env.id
@@ -142,12 +116,12 @@ resource "confluent_flink_statement" "create_flight_avro_ccaf_table" {
   }
 
   credentials {
-    key    = confluent_api_key.flink_app_manager_api_key.id
-    secret = confluent_api_key.flink_app_manager_api_key.secret
+    key    = confluent_api_key.flink_sql_statements_runner_api_key.id
+    secret = confluent_api_key.flink_sql_statements_runner_api_key.secret
   }
 
   depends_on = [
-    confluent_api_key.flink_app_manager_api_key,
+    confluent_api_key.flink_sql_statements_runner_api_key,
     confluent_kafka_cluster.kafka_cluster
   ]
 }
