@@ -115,6 +115,7 @@ resource "confluent_api_key" "flink_app_manager_api_key" {
 
 # Create Airline Flights Table
 resource "confluent_flink_statement" "create_flight_avro_ccaf_table" {
+
   organization {
     id = data.confluent_organization.env.id
   }
