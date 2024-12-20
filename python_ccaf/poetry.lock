@@ -2,17 +2,17 @@
 
 [[package]]
 name = "boto3"
-version = "1.35.85"
+version = "1.35.86"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3-1.35.85-py3-none-any.whl", hash = "sha256:f22678bdbdc91ca6022a45696284d236e1fbafa84ca3a69d108d4a155cdd823e"},
-    {file = "boto3-1.35.85.tar.gz", hash = "sha256:6257cad97d92c2b5597aec6e5484b9cfed8c0c785297942ed37cfaf2dd0ec23c"},
+    {file = "boto3-1.35.86-py3-none-any.whl", hash = "sha256:ed59fb4883da167464a5dfbc96e76d571db75e1a7a27d8e7b790c3008b02fcc7"},
+    {file = "boto3-1.35.86.tar.gz", hash = "sha256:d61476fdd5a5388503b72c897083310d2329ce088593c4332b571a860be5d155"},
 ]
 
 [package.dependencies]
-botocore = ">=1.35.85,<1.36.0"
+botocore = ">=1.35.86,<1.36.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.10.0,<0.11.0"
 
@@ -21,22 +21,19 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.35.85"
+version = "1.35.86"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore-1.35.85-py3-none-any.whl", hash = "sha256:04c196905b0eebcb29f7594a9e4588772a5222deed1b381f54cab78d0f30e239"},
-    {file = "botocore-1.35.85.tar.gz", hash = "sha256:5e7e8075e85427c9e0e6d15dcb7d13b3c843011b25d43981571fe1bfb3fd6985"},
+    {file = "botocore-1.35.86-py3-none-any.whl", hash = "sha256:77cb4b445e4f424f956c68c688bd3ad527f4d214d51d67ffc8e245f4476d7de0"},
+    {file = "botocore-1.35.86.tar.gz", hash = "sha256:951e944eb30284b4593d4da98f70f7b5292ea237e4de0c5a2852946a549b8347"},
 ]
 
 [package.dependencies]
 jmespath = ">=0.7.1,<2.0.0"
 python-dateutil = ">=2.1,<3.0.0"
-urllib3 = [
-    {version = ">=1.25.4,<1.27", markers = "python_version < \"3.10\""},
-    {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""},
-]
+urllib3 = {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""}
 
 [package.extras]
 crt = ["awscrt (==0.22.0)"]
@@ -179,28 +176,28 @@ files = [
 
 [[package]]
 name = "confluent-flink-jars"
-version = "1.20.38"
+version = "1.20.42"
 description = "Confluent Apache Flink Jars"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "confluent-flink-jars-1.20.38.tar.gz", hash = "sha256:87fa5b2fdb0ec43848cc8677a0c0dabba10c148a3af0b31cf13a439621cacd68"},
+    {file = "confluent-flink-jars-1.20.42.tar.gz", hash = "sha256:c491e0d406ab62c02c0528f718d7779cb3b31397c4ce99ff1fd085c393d6e998"},
 ]
 
 [[package]]
 name = "confluent-flink-table-api-python-plugin"
-version = "1.20.38"
+version = "1.20.42"
 description = "Confluent Apache Flink Table API Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "confluent-flink-table-api-python-plugin-1.20.38.tar.gz", hash = "sha256:065a38c121044bf8147295ca82818bbd9ffd802d04c1c99271f1bec1087ad55a"},
-    {file = "confluent_flink_table_api_python_plugin-1.20.38-py2.py3-none-any.whl", hash = "sha256:2a5e4bc63c1f5f9c5ef8f4794f39c2c7f58d30ae5d4ef899a04be97a238b7a71"},
+    {file = "confluent-flink-table-api-python-plugin-1.20.42.tar.gz", hash = "sha256:e9d87c7d1cbfcdae6a6221754b7a35990904389d6e0864d5d9dcd8a3fa6e2d1f"},
+    {file = "confluent_flink_table_api_python_plugin-1.20.42-py2.py3-none-any.whl", hash = "sha256:3fdb747bb1c30ae34d34db4270c26eef420b896ebcf3da32036d11743f8500c0"},
 ]
 
 [package.dependencies]
 cloudpickle = ">=2.2.0"
-confluent-flink-jars = ">=1.20.38,<1.20.39"
+confluent-flink-jars = ">=1.20.42,<1.20.43"
 httplib2 = ">=0.19.0"
 pemja = {version = "0.4.1", markers = "platform_system != \"Windows\""}
 py4j = "0.10.9.7"
@@ -458,22 +455,6 @@ files = [
 
 [[package]]
 name = "urllib3"
-version = "1.26.20"
-description = "HTTP library with thread-safe connection pooling, file post, and more."
-optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
-files = [
-    {file = "urllib3-1.26.20-py2.py3-none-any.whl", hash = "sha256:0ed14ccfbf1c30a9072c7ca157e4319b70d65f623e91e7b32fadb2853431016e"},
-    {file = "urllib3-1.26.20.tar.gz", hash = "sha256:40c2dc0c681e47eb8f90e7e27bf6ff7df2e677421fd46756da1161c39ca70d32"},
-]
-
-[package.extras]
-brotli = ["brotli (==1.0.9)", "brotli (>=1.0.9)", "brotlicffi (>=0.8.0)", "brotlipy (>=0.6.0)"]
-secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "ipaddress", "pyOpenSSL (>=0.14)", "urllib3-secure-extra"]
-socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
-
-[[package]]
-name = "urllib3"
 version = "2.2.3"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
@@ -491,5 +472,5 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">= 3.9, < 3.12"
-content-hash = "d54b4573b10457fa2b1e9fdb94155dd14d1042deda637b08ca76b858bbdbe450"
+python-versions = ">= 3.11, < 3.12"
+content-hash = "6c63619262e0a8777f6d554a02f60f30c47de89b7bab43bde78c2916e3f812e3"

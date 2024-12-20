@@ -47,7 +47,5 @@ eval $(aws2-wrap $AWS_PROFILE --export)
 export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
 
 cd python_ccaf
-pwd
-poetry install
 poetry shell
 poetry run avro_flight_consolidator_ccaf_app --service-account-user $SERVICE_ACCOUNT_USER
