@@ -7,7 +7,7 @@ license = "Apache-2.0"
 readme = "README.md"
 
 [tool.poetry.scripts]
-avro_flight_consolidator_app = "src.kickstarter.avro_flight_consolidator_app:run"
+avro_flight_consolidator_ccaf_app = "src.kickstarter.avro_flight_consolidator_ccaf_app:run"
 
 [tool.poetry.dependencies]
 python = ">= 3.9, < 3.12"

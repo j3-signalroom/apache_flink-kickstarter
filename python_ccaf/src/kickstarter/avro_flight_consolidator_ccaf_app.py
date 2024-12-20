@@ -2,7 +2,7 @@ from pyflink.table import (TableEnvironment, Schema, DataTypes, FormatDescriptor
 from pyflink.table.confluent import ConfluentSettings, ConfluentTableDescriptor
 from pyflink.table.expressions import col
 
-from src.kickstarter.helper.settings import CC_PROPERTIES_PATHNAME
+from src.kickstarter.helper.settings import get_secrets, FLINK_CLOUD, FLINK_REGION, FLINK_COMPUTE_POOL_ID, FLINK_API_KEY, FLINK_API_SECRET, ORGANIZATION_ID, ENVIRONMENT_ID 
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -13,9 +13,21 @@ __status__     = "dev"
 
 
 def run(args=None):
-    settings = ConfluentSettings.from_file(CC_PROPERTIES_PATHNAME)
+    service_account_user = "flink_kickstarter"
+    secret_name = f"/confluent_cloud_resource/{service_account_user}/flink_compute_pool"
+    settings = get_secrets("us-east-1", secret_name)
 
-    tbl_env = TableEnvironment.create(settings)
+    confluent_settings = ConfluentSettings.new_builder() \
+        .set_cloud(settings[FLINK_CLOUD]) \
+        .set_region(settings[FLINK_REGION]) \
+        .set_flink_api_key(settings[FLINK_API_KEY]) \
+        .set_flink_api_secret(settings[FLINK_API_SECRET]) \
+        .set_organization_id(settings[ORGANIZATION_ID]) \
+        .set_environment_id(settings[ENVIRONMENT_ID]) \
+        .set_compute_pool_id(settings[FLINK_COMPUTE_POOL_ID]) \
+        .build()
+
+    tbl_env = TableEnvironment.create(confluent_settings)
 
     catalog_name = "flink_kickstarter-env"
     database_name = "flink_kickstarter-kafka_cluster"

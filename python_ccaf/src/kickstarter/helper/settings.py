@@ -15,7 +15,18 @@ __status__     = "dev"
 
 CC_PROPERTIES_PATHNAME = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../../config/cc.properties")
 
-def get_secrets(self, aws_region_name: str, secrets_name: str) -> Dict[str, str]:
+# Confluent Cloud for Apache Flink Secrets Keys
+ENVIRONMENT_ID = "environment.id"
+FLINK_API_KEY = "flink.api.key"
+FLINK_API_SECRET = "flink.api.secret"
+FLINK_CLOUD = "flink.cloud"
+FLINK_COMPUTE_POOL_ID = "flink.compute.pool.id"
+FLINK_PRINCIPAL_ID = "flink.principal.id"
+FLINK_REGION = "flink.region"
+ORGANIZATION_ID = "organization.id"
+
+
+def get_secrets(aws_region_name: str, secrets_name: str) -> Dict[str, str]:
     """This method retrieve secrets from the AWS Secrets Manager.
     
     Arg(s):
@@ -25,7 +36,8 @@ def get_secrets(self, aws_region_name: str, secrets_name: str) -> Dict[str, str]
     Return(s):
         If successful, the secrets in a dict.  Otherwise, returns an empty dict.
     """
-    client = self._session.client(service_name='secretsmanager', region_name=aws_region_name)        
+    session = boto3.session.Session()
+    client = session.client(service_name='secretsmanager', region_name=aws_region_name)        
     try:
         get_secret_value_response = client.get_secret_value(SecretId=secrets_name)
         return json.loads(get_secret_value_response['SecretString'])
