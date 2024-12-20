@@ -4,8 +4,8 @@
  * @author Jeffrey Jonathan Jennings (J3)
  * 
  * 
- * This class imports flight data from `airline.sunset` and `airline.skyone` Kafka topics
- * and converts it to a unified format for the `airline.flight` Kafka topic.
+ * This class imports flight data from `sunset` and `skyone` Kafka topics
+ * and converts it to a unified format for the `flight` Kafka topic.
  * 
  * ------------------------------------------------------------------------------------------
  * I had a question, can you combine the Flink DataStream API and Table API in the same DAG?
@@ -67,11 +67,11 @@ public class JsonFlightConsolidatorApp {
         Properties producerProperties = Common.collectConfluentProperties(env, serviceAccountUser, false);
         
         /*
-         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `skyone`
          */
         KafkaSource<AirlineJsonData> skyOneSource = KafkaSource.<AirlineJsonData>builder()
             .setProperties(consumerProperties)
-            .setTopics("airline.skyone")
+            .setTopics("skyone")
             .setGroupId("skyone_group")
             .setStartingOffsets(OffsetsInitializer.earliest())
             .setValueOnlyDeserializer((new SnakeCaseJsonDeserializationSchema<>(AirlineJsonData.class)))
@@ -85,12 +85,12 @@ public class JsonFlightConsolidatorApp {
             .fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
         /*
-         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset`
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `sunset`
          */
 		@SuppressWarnings("unchecked")
         KafkaSource<AirlineJsonData> sunsetSource = KafkaSource.<AirlineJsonData>builder()
             .setProperties(consumerProperties)
-            .setTopics("airline.sunset")
+            .setTopics("sunset")
             .setGroupId("sunset_group")
             .setStartingOffsets(OffsetsInitializer.earliest())
             .setValueOnlyDeserializer(new SnakeCaseJsonDeserializationSchema(AirlineJsonData.class))
@@ -104,11 +104,11 @@ public class JsonFlightConsolidatorApp {
             .fromSource(sunsetSource, WatermarkStrategy.noWatermarks(), "sunset_source");
 
         /*
-         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight` with the
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `flight` with the
          * specified serializer
          */
 		KafkaRecordSerializationSchema<FlightJsonData> flightSerializer = KafkaRecordSerializationSchema.<FlightJsonData>builder()
-            .setTopic("airline.flight")
+            .setTopic("flight")
 			.setValueSerializationSchema(new JsonSerializationSchema<FlightJsonData>(Common::getMapper))
             .build();
 
@@ -141,8 +141,8 @@ public class JsonFlightConsolidatorApp {
      * This method defines the workflow for the Flink job graph (DAG) by connecting the 
      * data streams and applying transformations to the data streams.
      * 
-     * @param skyOneSource - The data stream source for the `airline.skyone` Kafka topic
-     * @param sunsetSource - The data stream source for the `airline.sunset` Kafka topic
+     * @param skyOneSource - The data stream source for the `skyone` Kafka topic
+     * @param sunsetSource - The data stream source for the `sunset` Kafka topic
      * @return The data stream that is the result of the transformations
      */
 	public static DataStream<FlightJsonData> defineWorkflow(DataStream<AirlineJsonData> skyOneSource, DataStream<AirlineJsonData> sunsetSource) {

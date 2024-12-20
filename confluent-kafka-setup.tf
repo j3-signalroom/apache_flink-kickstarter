@@ -57,12 +57,12 @@ module "kafka_cluster_api_key_rotation" {
     day_count = var.day_count
 }
 
-# Create the `airline.skyone` Kafka topic
+# Create the `skyone` Kafka topic
 resource "confluent_kafka_topic" "airline_skyone" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
-  topic_name         = "airline.skyone"
+  topic_name         = "skyone"
   partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
 
@@ -80,12 +80,12 @@ resource "confluent_kafka_topic" "airline_skyone" {
   ]
 }
 
-# Create the `airline.sunset` Kafka topic
+# Create the `sunset` Kafka topic
 resource "confluent_kafka_topic" "airline_sunset" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
-  topic_name         = "airline.sunset"
+  topic_name         = "sunset"
   partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
 
@@ -103,12 +103,12 @@ resource "confluent_kafka_topic" "airline_sunset" {
   ]
 }
 
-# Create the `airline.flight` Kafka topic
+# Create the `flight` Kafka topic
 resource "confluent_kafka_topic" "airline_flight" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
-  topic_name         = "airline.flight"
+  topic_name         = "flight"
   partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
 
@@ -126,12 +126,12 @@ resource "confluent_kafka_topic" "airline_flight" {
   ]
 }
 
-# Create the `airline.flyer_stats` Kafka topic
+# Create the `flyer_stats` Kafka topic
 resource "confluent_kafka_topic" "airline_flyer_stats" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
-  topic_name         = "airline.flyer_stats"
+  topic_name         = "flyer_stats"
   partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
 
@@ -149,12 +149,12 @@ resource "confluent_kafka_topic" "airline_flyer_stats" {
   ]
 }
 
-# Create the `airline.skyone_avro` Kafka topic
+# Create the `skyone_avro` Kafka topic
 resource "confluent_kafka_topic" "airline_skyone_avro" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
-  topic_name         = "airline.skyone_avro"
+  topic_name         = "skyone_avro"
   partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
 
@@ -172,12 +172,12 @@ resource "confluent_kafka_topic" "airline_skyone_avro" {
   ]
 }
 
-# Create the `airline.sunset_avro` Kafka topic
+# Create the `sunset_avro` Kafka topic
 resource "confluent_kafka_topic" "airline_sunset_avro" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
-  topic_name         = "airline.sunset_avro"
+  topic_name         = "sunset_avro"
   partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
 
@@ -195,12 +195,12 @@ resource "confluent_kafka_topic" "airline_sunset_avro" {
   ]
 }
 
-# Create the `airline.flight` Kafka topic
+# Create the `flight` Kafka topic
 resource "confluent_kafka_topic" "airline_flight_avro" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
-  topic_name         = "airline.flight_avro"
+  topic_name         = "flight_avro"
   partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
 
@@ -218,12 +218,12 @@ resource "confluent_kafka_topic" "airline_flight_avro" {
   ]
 }
 
-# Create the `airline.flyer_stats_avro` Kafka topic
+# Create the `flyer_stats_avro` Kafka topic
 resource "confluent_kafka_topic" "airline_flyer_stats_avro" {
   kafka_cluster {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
-  topic_name         = "airline.flyer_stats_avro"
+  topic_name         = "flyer_stats_avro"
   partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
 

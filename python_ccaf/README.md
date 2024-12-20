@@ -1,5 +1,9 @@
 # Flink Applications Powered by Python on Confluent Cloud for Apache Flink (CCAF)
 
+**STILL IN DEVELOPMENT***
+**STILL IN DEVELOPMENT***
+**STILL IN DEVELOPMENT***
+
 **Table of Contents**
 
 <!-- toc -->
@@ -30,3 +34,8 @@
 [Table API in Confluent Cloud for Apache Flink API Function](https://docs.confluent.io/cloud/current/flink/reference/functions/table-api-functions.html#flink-table-api-functions)
 
 [Information Schema in Confluent Cloud for Apache Flink](https://docs.confluent.io/cloud/current/flink/reference/flink-sql-information-schema.html)
+
+
+```bash
+poetry run avro_flight_consolidator_app flink_kickstarter-env flink_kickstarter-kafka_cluster
+```

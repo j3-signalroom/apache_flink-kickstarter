@@ -4,8 +4,8 @@
  * @author Jeffrey Jonathan Jennings (J3)
  * 
  * 
- * This class processes data from the `airline.flight` Kafka topic to aggregate user
- * statistics in the `airline.flyer_stats` Kafka topic.
+ * This class processes data from the `flight` Kafka topic to aggregate user
+ * statistics in the `flyer_stats` Kafka topic.
  */
 package kickstarter;
 
@@ -58,13 +58,13 @@ public class AvroFlyerStatsApp {
         Map<String, String> registryConfigs = Common.extractRegistryConfigs(producerProperties);
 
         /*
-         * Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight_avro` with the
+         * Sets up a Flink Kafka source to consume data from the Kafka topic `flight_avro` with the
          * specified deserializer
          */
         KafkaSource<FlightAvroData> flightDataSource = 
             KafkaSource.<FlightAvroData>builder()
                 .setProperties(consumerProperties)
-                .setTopics("airline.flight_avro")
+                .setTopics("flight_avro")
                 .setGroupId("flight_group")
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(ConfluentRegistryAvroDeserializationSchema.forSpecific(FlightAvroData.class, producerProperties.getProperty("schema.registry.url"), registryConfigs))
@@ -78,10 +78,10 @@ public class AvroFlyerStatsApp {
             env.fromSource(flightDataSource, WatermarkStrategy.forMonotonousTimestamps(), "flightdata_source");
 
         /*
-         * Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats` with the
+         * Sets up a Flink Kafka sink to produce data to the Kafka topic `flyer_stats` with the
          * specified serializer
          */
-        final String topicName = "airline.flyer_stats_avro";
+        final String topicName = "flyer_stats_avro";
         KafkaRecordSerializationSchema<FlyerStatsAvroData> flyerStatsSerializer = 
             KafkaRecordSerializationSchema
                 .<FlyerStatsAvroData>builder()
