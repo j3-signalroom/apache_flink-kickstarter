@@ -47,29 +47,32 @@ def run(args=None):
     # key and value composed in the Avro data format.  The table is created with the create_table()
     # method.  If an exception occurs, the error is printed and the program exits.  The name of the
     # table is also the Kafka topic name.
+    flight_avro_table_descriptor = (
+        ConfluentTableDescriptor
+            .for_managed()
+            .schema(
+                Schema.new_builder()
+                .column("departure_airport_code", DataTypes.STRING())
+                .column("flight_number", DataTypes.STRING())
+                .column("email_address", DataTypes.STRING())
+                .column("departure_time", DataTypes.STRING())
+                .column("arrival_time", DataTypes.STRING())
+                .column("arrival_airport_code", DataTypes.STRING())
+                .column("confirmation_code", DataTypes.STRING())
+                .column("airline", DataTypes.STRING())
+                .build())
+            .distributed_by_into_buckets(1, "departure_airport_code", "flight_number")
+            .key_format(FormatDescriptor.for_format("avro-registry").build())
+            .value_format(FormatDescriptor.for_format("avro-registry").build())
+            .build()
+    )
     try:
         table_name = "flight_avro"
         flight_table_path = ObjectPath(tbl_env.get_current_database(), table_name)
         if not catalog.table_exists(flight_table_path):
             tbl_env.create_table(
                 table_name,
-                ConfluentTableDescriptor
-                    .for_managed()
-                    .schema(
-                        Schema.new_builder()
-                        .column("departure_airport_code", DataTypes.STRING())
-                        .column("flight_number", DataTypes.STRING())
-                        .column("email_address", DataTypes.STRING())
-                        .column("departure_time", DataTypes.STRING())
-                        .column("arrival_time", DataTypes.STRING())
-                        .column("arrival_airport_code", DataTypes.STRING())
-                        .column("confirmation_code", DataTypes.STRING())
-                        .column("airline", DataTypes.STRING())
-                        .build())
-                    .distributed_by_into_buckets(1, "departure_airport_code", "flight_number")
-                    .key_format(FormatDescriptor.for_format("avro-registry").build())
-                    .value_format(FormatDescriptor.for_format("avro-registry").build())
-                    .build()
+                flight_avro_table_descriptor
             )
     except Exception as e:
         print(f"A critical error occurred to during the processing of the table because {e}")
@@ -94,4 +97,4 @@ def run(args=None):
     # The two tables are unioned together and the result is written to the flight_avro table.
     skyone_airline.union_all(sunset_airline).alias("email_address", "departure_time", "departure_airport_code",
                                                    "arrival_time", "arrival_airport_code", "flight_number",
-                                                   "confirmation_code", "airline").execute()
+                                                   "confirmation_code", "airline").execute_insert(flight_avro_table_descriptor)
