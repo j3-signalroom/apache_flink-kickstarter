@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kickstarter"
-version = "0.1.0"
+version = "0.56.00.000"
 description = "Examples for using Python Table API with Confluent Cloud"
 authors = ["Confluent"]
 license = "Apache-2.0"
@@ -10,8 +10,8 @@ readme = "README.md"
 avro_flight_consolidator_ccaf_app = "src.kickstarter.avro_flight_consolidator_ccaf_app:run"
 
 [tool.poetry.dependencies]
-python = ">= 3.9, < 3.12"
-confluent_flink_table_api_python_plugin = "1.20.38"
+python = ">= 3.11.9, < 3.12"
+confluent_flink_table_api_python_plugin = "^1.20.42"
 boto3 = "^1.35.85"
 
 [build-system]
