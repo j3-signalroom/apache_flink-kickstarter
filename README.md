@@ -175,6 +175,7 @@ terraform graph | dot -Tpng > .blog/images/terraform-visualization.png
 [Let's go!](python/README.md)
 
 ### 3.3 Flink Applications Powered by Python on Confluent Cloud for Apache Flink
+**STILL IN DEVELOPMENT***
 [Let's go!](python_ccaf/README.md)
 
 ## 4.0 Powering Analytics with Apache Iceberg tables in Snowflake
