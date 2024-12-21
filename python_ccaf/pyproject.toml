@@ -8,6 +8,7 @@ readme = "README.md"
 
 [tool.poetry.scripts]
 avro_flight_consolidator_ccaf_app = "src.kickstarter.avro_flight_consolidator_ccaf_app:run"
+avro_flyer_stats_ccaf_app = "src.kickstarter.avro_flyer_stats_ccaf_app:run"
 
 [tool.poetry.dependencies]
 python = ">= 3.11, < 3.12"

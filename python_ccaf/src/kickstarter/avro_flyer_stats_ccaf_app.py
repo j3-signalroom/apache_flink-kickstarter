@@ -64,98 +64,32 @@ def run():
     catalog = tbl_env.get_catalog(catalog_name)
 
     # The Kafka sink table Confluent Cloud environment Table Descriptor with Avro serialization.
-    flight_avro_table_descriptor = (
+    flyer_stats_avro_table_descriptor = (
         ConfluentTableDescriptor
             .for_managed()
             .schema(
                 Schema
                     .new_builder()
-                    .column("departure_airport_code", DataTypes.STRING())
-                    .column("flight_number", DataTypes.STRING())
                     .column("email_address", DataTypes.STRING())
-                    .column("departure_time", DataTypes.STRING())
-                    .column("arrival_time", DataTypes.STRING())
-                    .column("arrival_airport_code", DataTypes.STRING())
-                    .column("confirmation_code", DataTypes.STRING())
-                    .column("airline", DataTypes.STRING())
+                    .column("total_flight_duration", DataTypes.INT())
+                    .column("number_of_flights", DataTypes.INT())
                     .build())
-            .distributed_by_into_buckets(1, "departure_airport_code", "flight_number")
+            .distributed_by_into_buckets(1, "email_address")
             .key_format(FormatDescriptor.for_format("avro-registry").build())
             .value_format(FormatDescriptor.for_format("avro-registry").build())
             .build()
     )
     try:
         # Checks if the table exists.  If it does not, it will be created.
-        flight_avro_table_path = ObjectPath(tbl_env.get_current_database(), "flight_avro")
-        if not catalog.table_exists(flight_avro_table_path):
+        flyer_stats_avro_table_path = ObjectPath(tbl_env.get_current_database(), "flyer_stats_avro")
+        if not catalog.table_exists(flyer_stats_avro_table_path):
             tbl_env.create_table(
-                flight_avro_table_path.get_full_name(),
-                flight_avro_table_descriptor
+                flyer_stats_avro_table_path.get_full_name(),
+                flyer_stats_avro_table_descriptor
             )
-            print(f"Sink table '{flight_avro_table_path.get_full_name()}' created successfully.")
+            print(f"Sink table '{flyer_stats_avro_table_path.get_full_name()}' created successfully.")
         else:
-            print(f"Sink table '{flight_avro_table_path.get_full_name()}' already exists.")
+            print(f"Sink table '{flyer_stats_avro_table_path.get_full_name()}' already exists.")
     except Exception as e:
         print(f"A critical error occurred during the processing of the table because {e}")
-        exit(1)
-
-    # The first table is the SkyOne table that is read in.
-    skyone_airline = (
-        tbl_env.from_path(f"{catalog_name}.{database_name}.skyone_avro")
-            .select(
-                col("email_address"), 
-                col("departure_time"), 
-                col("departure_airport_code"),
-                col("arrival_time"), 
-                col("arrival_airport_code"), 
-                col("flight_number"),
-                col("confirmation_code"),
-                lit("SkyOne")
-            )
-    )
-
-    # The second table is the Sunset table that is read in.
-    sunset_airline = (
-        tbl_env.from_path(f"{catalog_name}.{database_name}.sunset_avro")
-            .select(
-                col("email_address"), 
-                col("departure_time"), 
-                col("departure_airport_code"),
-                col("arrival_time"), 
-                col("arrival_airport_code"), 
-                col("flight_number"),
-                col("confirmation_code"),
-                lit("Sunset")
-            )
-    )
-
-    # Combine the two tables.
-    combined_airlines = (
-        skyone_airline.union_all(sunset_airline)
-        .alias(
-            "departure_airport_code", 
-            "flight_number",
-            "email_address", 
-            "departure_time",
-            "arrival_time",
-            "arrival_airport_code",
-            "confirmation_code", 
-            "airline"
-        )
-        .filter(
-            col("email_address").is_not_null & 
-            col("departure_time").is_not_null & 
-            col("departure_airport_code").is_not_null &
-            col("arrival_time").is_not_null &  
-            col("arrival_airport_code").is_not_null &  
-            col("flight_number").is_not_null & 
-            col("confirmation_code").is_not_null
-        )
-    )
-
-    # Insert the combined record into the sink table.
-    try:
-        combined_airlines.execute_insert(flight_avro_table_path.get_full_name()).wait()
-    except Exception as e:
-        print(f"An error occurred during data insertion: {e}")
         exit(1)
