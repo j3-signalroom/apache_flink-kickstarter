@@ -5,7 +5,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 
 ## [0.56.00.000] - TBD
 ### Added
-- Issue [#537](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/537).
+- Use Confluent Cloud for Apache Flink to handle Avro Flight Consolidator App.
 
 ## [0.55.00.000] - 2024-12-16
 ### Added
