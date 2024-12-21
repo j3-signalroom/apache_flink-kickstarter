@@ -86,15 +86,15 @@ def run():
     )
     try:
         # Checks if the table exists.  If it does not, it will be created.
-        flight_table_path = ObjectPath(tbl_env.get_current_database(), "flight_avro")
-        if not catalog.table_exists(flight_table_path):
+        flight_avro_table_path = ObjectPath(tbl_env.get_current_database(), "flight_avro")
+        if not catalog.table_exists(flight_avro_table_path):
             tbl_env.create_table(
-                flight_table_path.get_full_name(),
+                flight_avro_table_path.get_full_name(),
                 flight_avro_table_descriptor
             )
-            print(f"Sink table '{flight_table_path}' created successfully.")
+            print(f"Sink table '{flight_avro_table_path.get_full_name()}' created successfully.")
         else:
-            print(f"Sink table '{flight_table_path}' already exists.")
+            print(f"Sink table '{flight_avro_table_path.get_full_name()}' already exists.")
     except Exception as e:
         print(f"A critical error occurred during the processing of the table because {e}")
         exit(1)
@@ -155,7 +155,7 @@ def run():
 
     # Insert the combined record into the sink table.
     try:
-        combined_airlines.execute_insert(flight_table_path.get_full_name()).wait()
+        combined_airlines.execute_insert(flight_avro_table_path.get_full_name()).wait()
     except Exception as e:
         print(f"An error occurred during data insertion: {e}")
         exit(1)
