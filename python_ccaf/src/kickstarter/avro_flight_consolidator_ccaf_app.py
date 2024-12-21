@@ -33,12 +33,15 @@ def run():
                         required=True,
                         help='The Service Account User.')
     known_args, _ = parser.parse_known_args()
+    service_account_user = known_args.service_account_user.lower()
 
     # The service account user is used to retrieve the Confluent Cloud settings from AWS Secrets 
     # Manager.  The Confluent Cloud settings are used to create the ConfluentSettings object.  The 
     # ConfluentSettings object is used to create the TableEnvironment object.  The TableEnvironment
-    # object is used to create the tables that are used in the application.
-    secret_name = f"/confluent_cloud_resource/{known_args.service_account_user.lower()}/flink_compute_pool"
+    # object is used to create the tables that are used in the application. The tables are the SkyOne
+    # table, the Sunset table, and the flight_avro table.  The SkyOne and Sunset tables are read in,
+    # unioned together, and written to the flight_avro table.
+    secret_name = f"/confluent_cloud_resource/{service_account_user}/flink_compute_pool"
     settings = get_secrets("us-east-1", secret_name)
     confluent_settings = (
         ConfluentSettings
@@ -52,12 +55,11 @@ def run():
             .set_compute_pool_id(settings[FLINK_COMPUTE_POOL_ID])
             .build()
     )
-
     tbl_env = TableEnvironment.create(confluent_settings)
 
     # The catalog name and database name are used to set the current catalog and database.
-    catalog_name = "flink_kickstarter-env"
-    database_name = "flink_kickstarter-kafka_cluster"
+    catalog_name = f"{service_account_user}_env"
+    database_name = f"{service_account_user}_kafka_cluster"
     tbl_env.use_catalog(catalog_name)
     tbl_env.use_database(database_name)
     catalog = tbl_env.get_catalog(catalog_name)
@@ -92,11 +94,10 @@ def run():
             .build()
     )
     try:
-        table_name = "flight_avro"
-        flight_table_path = ObjectPath(tbl_env.get_current_database(), table_name)
+        flight_table_path = ObjectPath(tbl_env.get_current_database(), "flight_avro")
         if not catalog.table_exists(flight_table_path):
             tbl_env.create_table(
-                table_name,
+                flight_table_path.get_full_name(),
                 flight_avro_table_descriptor
             )
     except Exception as e:
@@ -105,7 +106,7 @@ def run():
 
     # The first table is the SkyOne table that is read in.
     skyone_airline = (
-        tbl_env.from_path(f"`{catalog_name}`.`{database_name}`.`skyone_avro`")
+        tbl_env.from_path(f"{catalog_name}.{database_name}.skyone_avro")
             .select(
                 col("email_address"), 
                 col("departure_time"), 
@@ -114,22 +115,13 @@ def run():
                 col("arrival_airport_code"), 
                 col("flight_number"),
                 col("confirmation_code"),
-                lit("Sunset")
-            )
-            .filter(
-                col("email_address").is_not_null & 
-                col("departure_time").is_not_null & 
-                col("departure_airport_code").is_not_null &
-                col("arrival_time").is_not_null &  
-                col("arrival_airport_code").is_not_null &  
-                col("flight_number").is_not_null & 
-                col("confirmation_code").is_not_null
+                lit("SkyOne")
             )
     )
 
     # The second table is the Sunset table that is read in.
     sunset_airline = (
-        tbl_env.from_path(f"`{catalog_name}`.`{database_name}`.`sunset_avro`")
+        tbl_env.from_path(f"{catalog_name}.{database_name}.sunset_avro")
             .select(
                 col("email_address"), 
                 col("departure_time"), 
@@ -140,19 +132,31 @@ def run():
                 col("confirmation_code"),
                 lit("Sunset")
             )
-            .filter(
-                col("email_address").is_not_null & 
-                col("departure_time").is_not_null & 
-                col("departure_airport_code").is_not_null &
-                col("arrival_time").is_not_null &  
-                col("arrival_airport_code").is_not_null &  
-                col("flight_number").is_not_null & 
-                col("confirmation_code").is_not_null
-            )
     )
 
-    # The two tables are unioned together and the result is written to the flight_avro table.
-    # tbl_env.create_temporary_table("flight_avro_sink", flight_avro_table_descriptor)
-    skyone_airline.union_all(sunset_airline).alias("email_address", "departure_time", "departure_airport_code",
-                                                   "arrival_time", "arrival_airport_code", "flight_number",
-                                                   "confirmation_code", "airline").execute().print()
+    # Combine the two tables.
+    combined_airlines = (
+        skyone_airline.union_all(sunset_airline)
+        .alias(
+            "departure_airport_code", 
+            "flight_number",
+            "email_address", 
+            "departure_time",
+            "arrival_time",
+            "arrival_airport_code",
+            "confirmation_code", 
+            "airline"
+        )
+        .filter(
+            col("email_address").is_not_null & 
+            col("departure_time").is_not_null & 
+            col("departure_airport_code").is_not_null &
+            col("arrival_time").is_not_null &  
+            col("arrival_airport_code").is_not_null &  
+            col("flight_number").is_not_null & 
+            col("confirmation_code").is_not_null
+        )
+    )
+
+    # Write the combined table to the flight_avro table.
+    combined_airlines.execute_insert(flight_table_path.get_full_name())
