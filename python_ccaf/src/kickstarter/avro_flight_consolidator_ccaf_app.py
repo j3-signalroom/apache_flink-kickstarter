@@ -2,6 +2,7 @@ from pyflink.table import (TableEnvironment, Schema, DataTypes, FormatDescriptor
 from pyflink.table.catalog import ObjectPath
 from pyflink.table.confluent import ConfluentSettings, ConfluentTableDescriptor
 from pyflink.table.expressions import col, lit
+import argparse
 
 from src.kickstarter.helper.settings import get_secrets, FLINK_CLOUD, FLINK_REGION, FLINK_COMPUTE_POOL_ID, FLINK_API_KEY, FLINK_API_SECRET, ORGANIZATION_ID, ENVIRONMENT_ID 
 
@@ -14,11 +15,31 @@ __email__      = "j3@thej3.com"
 __status__     = "dev"
 
 
-def run(args=None):
-    service_account_user = "flink_kickstarter"
-    secret_name = f"/confluent_cloud_resource/{service_account_user}/flink_compute_pool"
-    settings = get_secrets("us-east-1", secret_name)
+def run():
+    """
+    The run() method is the main entry point for the application.  The run() method is called
+    when the application is executed.  The run() method is responsible for creating the
+    ConfluentSettings object, creating the TableEnvironment object, and creating the tables
+    that are used in the application.  The run() method is also responsible for reading the
+    SkyOne and Sunset tables, unioning the two tables together, and writing the result to the
+    flight_avro table.
 
+    :return: None
+    """
+    # The service account user is passed in as a command line argument.  
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--service-account-user',
+                        dest='service_account_user',
+                        required=True,
+                        help='The Service Account User.')
+    known_args, _ = parser.parse_known_args()
+
+    # The service account user is used to retrieve the Confluent Cloud settings from AWS Secrets 
+    # Manager.  The Confluent Cloud settings are used to create the ConfluentSettings object.  The 
+    # ConfluentSettings object is used to create the TableEnvironment object.  The TableEnvironment
+    # object is used to create the tables that are used in the application.
+    secret_name = f"/confluent_cloud_resource/{known_args.service_account_user.lower()}/flink_compute_pool"
+    settings = get_secrets("us-east-1", secret_name)
     confluent_settings = ConfluentSettings.new_builder() \
         .set_cloud(settings[FLINK_CLOUD]) \
         .set_region(settings[FLINK_REGION]) \
@@ -28,12 +49,11 @@ def run(args=None):
         .set_environment_id(settings[ENVIRONMENT_ID]) \
         .set_compute_pool_id(settings[FLINK_COMPUTE_POOL_ID]) \
         .build()
-
     tbl_env = TableEnvironment.create(confluent_settings)
 
+    # The catalog name and database name are used to set the current catalog and database.
     catalog_name = "flink_kickstarter-env"
     database_name = "flink_kickstarter-kafka_cluster"
-
     tbl_env.use_catalog(catalog_name)
     tbl_env.use_database(database_name)
     catalog = tbl_env.get_catalog(catalog_name)
@@ -81,20 +101,53 @@ def run(args=None):
     # The first table is the SkyOne table that is read in.
     skyone_airline = (
         tbl_env.from_path(f"`{catalog_name}`.`{database_name}`.`skyone_avro`")
-            .select(col("email_address"), col("departure_time"), col("departure_airport_code"),
-                    col("arrival_time"), col("arrival_airport_code"), col("flight_number"),
-                    col("confirmation_code"), lit("SkyOne"))
+            .select(
+                col("email_address"), 
+                col("departure_time"), 
+                col("departure_airport_code"),
+                col("arrival_time"), 
+                col("arrival_airport_code"), 
+                col("flight_number"),
+                col("confirmation_code"),
+                lit("Sunset")
+            )
+            .filter(
+                col("email_address").is_not_null & 
+                col("departure_time").is_not_null & 
+                col("departure_airport_code").is_not_null &
+                col("arrival_time").is_not_null &  
+                col("arrival_airport_code").is_not_null &  
+                col("flight_number").is_not_null & 
+                col("confirmation_code").is_not_null
+            )
     )
 
     # The second table is the Sunset table that is read in.
     sunset_airline = (
         tbl_env.from_path(f"`{catalog_name}`.`{database_name}`.`sunset_avro`")
-            .select(col("email_address"), col("departure_time"), col("departure_airport_code"),
-                    col("arrival_time"), col("arrival_airport_code"), col("flight_number"),
-                    col("confirmation_code"), lit("Sunset"))
+            .select(
+                col("email_address"), 
+                col("departure_time"), 
+                col("departure_airport_code"),
+                col("arrival_time"), 
+                col("arrival_airport_code"), 
+                col("flight_number"),
+                col("confirmation_code"),
+                lit("Sunset")
+            )
+            .filter(
+                col("email_address").is_not_null & 
+                col("departure_time").is_not_null & 
+                col("departure_airport_code").is_not_null &
+                col("arrival_time").is_not_null &  
+                col("arrival_airport_code").is_not_null &  
+                col("flight_number").is_not_null & 
+                col("confirmation_code").is_not_null
+            )
     )
 
     # The two tables are unioned together and the result is written to the flight_avro table.
+    # tbl_env.create_temporary_table("flight_avro_sink", flight_avro_table_descriptor)
     skyone_airline.union_all(sunset_airline).alias("email_address", "departure_time", "departure_airport_code",
                                                    "arrival_time", "arrival_airport_code", "flight_number",
-                                                   "confirmation_code", "airline").execute_insert(flight_avro_table_descriptor)
+                                                   "confirmation_code", "airline").execute().print()
