@@ -40,15 +40,19 @@ def run():
     # object is used to create the tables that are used in the application.
     secret_name = f"/confluent_cloud_resource/{known_args.service_account_user.lower()}/flink_compute_pool"
     settings = get_secrets("us-east-1", secret_name)
-    confluent_settings = ConfluentSettings.new_builder() \
-        .set_cloud(settings[FLINK_CLOUD]) \
-        .set_region(settings[FLINK_REGION]) \
-        .set_flink_api_key(settings[FLINK_API_KEY]) \
-        .set_flink_api_secret(settings[FLINK_API_SECRET]) \
-        .set_organization_id(settings[ORGANIZATION_ID]) \
-        .set_environment_id(settings[ENVIRONMENT_ID]) \
-        .set_compute_pool_id(settings[FLINK_COMPUTE_POOL_ID]) \
-        .build()
+    confluent_settings = (
+        ConfluentSettings
+            .new_builder()
+            .set_cloud(settings[FLINK_CLOUD])
+            .set_region(settings[FLINK_REGION])
+            .set_flink_api_key(settings[FLINK_API_KEY])
+            .set_flink_api_secret(settings[FLINK_API_SECRET])
+            .set_organization_id(settings[ORGANIZATION_ID])
+            .set_environment_id(settings[ENVIRONMENT_ID])
+            .set_compute_pool_id(settings[FLINK_COMPUTE_POOL_ID])
+            .build()
+    )
+
     tbl_env = TableEnvironment.create(confluent_settings)
 
     # The catalog name and database name are used to set the current catalog and database.
@@ -71,16 +75,17 @@ def run():
         ConfluentTableDescriptor
             .for_managed()
             .schema(
-                Schema.new_builder()
-                .column("departure_airport_code", DataTypes.STRING())
-                .column("flight_number", DataTypes.STRING())
-                .column("email_address", DataTypes.STRING())
-                .column("departure_time", DataTypes.STRING())
-                .column("arrival_time", DataTypes.STRING())
-                .column("arrival_airport_code", DataTypes.STRING())
-                .column("confirmation_code", DataTypes.STRING())
-                .column("airline", DataTypes.STRING())
-                .build())
+                Schema
+                    .new_builder()
+                    .column("departure_airport_code", DataTypes.STRING())
+                    .column("flight_number", DataTypes.STRING())
+                    .column("email_address", DataTypes.STRING())
+                    .column("departure_time", DataTypes.STRING())
+                    .column("arrival_time", DataTypes.STRING())
+                    .column("arrival_airport_code", DataTypes.STRING())
+                    .column("confirmation_code", DataTypes.STRING())
+                    .column("airline", DataTypes.STRING())
+                    .build())
             .distributed_by_into_buckets(1, "departure_airport_code", "flight_number")
             .key_format(FormatDescriptor.for_format("avro-registry").build())
             .value_format(FormatDescriptor.for_format("avro-registry").build())
