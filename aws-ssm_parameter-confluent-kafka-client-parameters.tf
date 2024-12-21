@@ -110,3 +110,10 @@ resource "aws_ssm_parameter" "producer_kafka_client_compression_type" {
   type        = "String"
   value       = "gzip"
 }
+
+resource "aws_ssm_parameter" "producer_kafka_client_auto_create_topics_enable" {
+  name        = "${local.confluent_secrets_path_prefix}/producer_kafka_client/auto.create.topics.enable"
+  description = "This property is a broker-level configuration in Apache Kafka that determines whether the Kafka broker should automatically create a topic when a producer or consumer attempts to access a non-existent topic."
+  type        = "String"
+  value       = "true"
+}
