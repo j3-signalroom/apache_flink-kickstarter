@@ -48,4 +48,4 @@ export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
 
 cd python_ccaf
 poetry shell
-poetry run avro_flight_consolidator_ccaf_app --service-account-user $SERVICE_ACCOUNT_USER
+poetry run avro_flight_consolidator_ccaf_app --service-account-user $SERVICE_ACCOUNT_USER --aws-region $AWS_REGION

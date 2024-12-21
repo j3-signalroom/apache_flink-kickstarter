@@ -17,12 +17,9 @@ __status__     = "dev"
 
 def run():
     """
-    The run() method is the main entry point for the application.  The run() method is called
-    when the application is executed.  The run() method is responsible for creating the
-    ConfluentSettings object, creating the TableEnvironment object, and creating the tables
-    that are used in the application.  The run() method is also responsible for reading the
-    SkyOne and Sunset tables, unioning the two tables together, and writing the result to the
-    flight_avro table.
+    The run() method is the main entry point for the application.  It sets up
+    the TableEnvironment, defines the Kafka sink table, reads from source tables,
+    transforms the data, and writes to the sink.
 
     :return: None
     """
@@ -32,17 +29,19 @@ def run():
                         dest='service_account_user',
                         required=True,
                         help='The Service Account User.')
+    parser.add_argument('--aws-region',
+                        dest='aws_region',
+                        required=True,
+                        help='The AWS Region.')
     known_args, _ = parser.parse_known_args()
     service_account_user = known_args.service_account_user.lower()
+    aws_region = known_args.aws_region.lower()
 
-    # The service account user is used to retrieve the Confluent Cloud settings from AWS Secrets 
-    # Manager.  The Confluent Cloud settings are used to create the ConfluentSettings object.  The 
-    # ConfluentSettings object is used to create the TableEnvironment object.  The TableEnvironment
-    # object is used to create the tables that are used in the application. The tables are the SkyOne
-    # table, the Sunset table, and the flight_avro table.  The SkyOne and Sunset tables are read in,
-    # unioned together, and written to the flight_avro table.
+    # Retrieve the Confluent Cloud settings from AWS Secrets Manager.
     secret_name = f"/confluent_cloud_resource/{service_account_user}/flink_compute_pool"
-    settings = get_secrets("us-east-1", secret_name)
+    settings = get_secrets(aws_region, secret_name)
+
+    # Build the ConfluentSettings object.
     confluent_settings = (
         ConfluentSettings
             .new_builder()
@@ -64,15 +63,7 @@ def run():
     tbl_env.use_database(database_name)
     catalog = tbl_env.get_catalog(catalog_name)
 
-    # Checks if the table exists.  If it does not, it will be created.  The attributes of the table
-    # are defined in the ConfluentTableDescriptor.for_managed() method.  The schema of the table is
-    # defined in the Schema.new_builder() method.  The columns of the schema are defined in the
-    # column() method.  The distributed_by_into_buckets() method is used to distribute the table
-    # across 1 Kafka partitions based on the Kafka composite message key.  The key_format() and
-    # value_format() methods are used to reference two Schema Registry subjects for Kafka message
-    # key and value composed in the Avro data format.  The table is created with the create_table()
-    # method.  If an exception occurs, the error is printed and the program exits.  The name of the
-    # table is also the Kafka topic name.
+    # The Kafka sink table Confluent Cloud environment Table Descriptor with Avro serialization.
     flight_avro_table_descriptor = (
         ConfluentTableDescriptor
             .for_managed()
@@ -94,14 +85,18 @@ def run():
             .build()
     )
     try:
+        # Checks if the table exists.  If it does not, it will be created.
         flight_table_path = ObjectPath(tbl_env.get_current_database(), "flight_avro")
         if not catalog.table_exists(flight_table_path):
             tbl_env.create_table(
                 flight_table_path.get_full_name(),
                 flight_avro_table_descriptor
             )
+            print(f"Sink table '{flight_table_path}' created successfully.")
+        else:
+            print(f"Sink table '{flight_table_path}' already exists.")
     except Exception as e:
-        print(f"A critical error occurred to during the processing of the table because {e}")
+        print(f"A critical error occurred during the processing of the table because {e}")
         exit(1)
 
     # The first table is the SkyOne table that is read in.
@@ -158,5 +153,9 @@ def run():
         )
     )
 
-    # Write the combined table to the flight_avro table.
-    combined_airlines.execute_insert(flight_table_path.get_full_name())
+    # Insert the combined record into the sink table.
+    try:
+        combined_airlines.execute_insert(flight_table_path.get_full_name()).wait()
+    except Exception as e:
+        print(f"An error occurred during data insertion: {e}")
+        exit(1)
