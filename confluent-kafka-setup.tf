@@ -1,6 +1,6 @@
 # Create the Kafka cluster
 resource "confluent_kafka_cluster" "kafka_cluster" {
-    display_name = "${local.secrets_insert}-kafka_cluster"
+    display_name = "${local.secrets_insert}_kafka_cluster"
     availability = "SINGLE_ZONE"
     cloud        = local.cloud
     region       = var.aws_region
@@ -13,7 +13,7 @@ resource "confluent_kafka_cluster" "kafka_cluster" {
 
 # Create the Service Account for the Kafka Cluster API
 resource "confluent_service_account" "kafka_cluster_api" {
-    display_name = "${local.secrets_insert}-kafka_cluster-api"
+    display_name = "${local.secrets_insert}_kafka_cluster_api"
     description  = "Kafka Cluster API Service Account"
 }
 
@@ -178,52 +178,6 @@ resource "confluent_kafka_topic" "airline_sunset_avro" {
     id = confluent_kafka_cluster.kafka_cluster.id
   }
   topic_name         = "sunset_avro"
-  partitions_count   = 1
-  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
-
-  config = {
-    "retention.bytes" = "-1"
-    "retention.ms"    = "-1"
-  }
-  credentials {
-    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
-    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
-  }
-
-  depends_on = [ 
-    confluent_kafka_cluster.kafka_cluster 
-  ]
-}
-
-# Create the `flight` Kafka topic
-resource "confluent_kafka_topic" "airline_flight_avro" {
-  kafka_cluster {
-    id = confluent_kafka_cluster.kafka_cluster.id
-  }
-  topic_name         = "flight_avro"
-  partitions_count   = 1
-  rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
-
-  config = {
-    "retention.bytes" = "-1"
-    "retention.ms"    = "-1"
-  }
-  credentials {
-    key    = module.kafka_cluster_api_key_rotation.active_api_key.id
-    secret = module.kafka_cluster_api_key_rotation.active_api_key.secret
-  }
-
-  depends_on = [ 
-    confluent_kafka_cluster.kafka_cluster 
-  ]
-}
-
-# Create the `flyer_stats_avro` Kafka topic
-resource "confluent_kafka_topic" "airline_flyer_stats_avro" {
-  kafka_cluster {
-    id = confluent_kafka_cluster.kafka_cluster.id
-  }
-  topic_name         = "flyer_stats_avro"
   partitions_count   = 1
   rest_endpoint      = confluent_kafka_cluster.kafka_cluster.rest_endpoint
 
