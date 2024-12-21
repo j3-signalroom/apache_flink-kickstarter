@@ -32,6 +32,7 @@
 Flink App|Flink Run Command
 -|-
 **`avro_flight_consolidator_app`**|`../scripts/run-avro-flight-consolidator-ccaf-app-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --service-account-user=<SERVICE_ACCOUNT_USER>`
+**`avro_flyer_stats_ccaf_app`**|`../scripts/run-avro-flyer-stats-ccaf-app-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --service-account-user=<SERVICE_ACCOUNT_USER>`
 
 > Argument placeholder|Replace with
 > -|-
