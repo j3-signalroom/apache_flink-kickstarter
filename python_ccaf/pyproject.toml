@@ -10,7 +10,7 @@ readme = "README.md"
 avro_flight_consolidator_ccaf_app = "src.kickstarter.avro_flight_consolidator_ccaf_app:run"
 
 [tool.poetry.dependencies]
-python = ">= 3.11.9, < 3.12"
+python = ">= 3.11, < 3.12"
 confluent_flink_table_api_python_plugin = "^1.20.42"
 boto3 = "^1.35.85"
 
