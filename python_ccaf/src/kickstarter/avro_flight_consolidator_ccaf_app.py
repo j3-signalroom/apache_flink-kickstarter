@@ -152,7 +152,6 @@ def run():
     )
 
     # The two tables are unioned together and the result is written to the flight_avro table.
-    # tbl_env.create_temporary_table("flight_avro_sink", flight_avro_table_descriptor)
     skyone_airline.union_all(sunset_airline).alias("email_address", "departure_time", "departure_airport_code",
                                                    "arrival_time", "arrival_airport_code", "flight_number",
-                                                   "confirmation_code", "airline").execute().print()
+                                                   "confirmation_code", "airline").execute_insert(f"`{catalog_name}`.`{database_name}`.`flight_avro`")
