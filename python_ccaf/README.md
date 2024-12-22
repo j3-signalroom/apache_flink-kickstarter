@@ -26,13 +26,12 @@
 
 3. The `TableEnvironment` is pre-initialized from environment variables and available under `tbl_env`.
 
-## 2.0 Discover What You Can Do with These Flink Apps
+## 2.0 Discover What You Can Do
 
 ### 2.1 Avro formatted data
-Flink App|Flink Run Command
+Flink App|Run Script
 -|-
 **`avro_flight_consolidator_app`**|`../scripts/run-avro-flight-consolidator-ccaf-app-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --service-account-user=<SERVICE_ACCOUNT_USER>`
-**IN DEVELOPMENT >>>** **`avro_flyer_stats_ccaf_app`**|`../scripts/run-avro-flyer-stats-ccaf-app-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --service-account-user=<SERVICE_ACCOUNT_USER>`
 
 > Argument placeholder|Replace with
 > -|-
