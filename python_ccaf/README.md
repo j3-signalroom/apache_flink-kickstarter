@@ -4,7 +4,7 @@
 
 <!-- toc -->
 + [1.0 Interact with the CCAF Table API locally](#10-interact-with-the-ccaf-table-api-locally)
-+ [2.0 Discover What You Can Do with These Flink Apps](#20-discover-what-you-can-do-with-these-flink-apps)
++ [2.0 Deploying Apache Flink Applications on Confluent Cloud’s Fully Managed Platform](#20-deploying-apache-flink-applications-on-confluent-clouds-fully-managed-platform)
   * [2.1 Avro formatted data](#21-avro-formatted-data)
 + [3.0 Resources](#30-resources)
 <!-- tocstop -->
@@ -12,21 +12,27 @@
 
 ## 1.0 Interact with the CCAF Table API locally
 
-1. To interact with the CCAF Table API locally, start a shell within the poetry virtualenv:
+1. Change to the `python_ccaf` directory:
+
+    ```bash
+    cd python_ccaf
+    ```
+
+2. To interact with the CCAF Table API locally, start a shell within the poetry virtualenv:
 
     ```bash
     poetry shell
     ```
 
-2. Then start Python in interactive mode with CCAF Table API:
+3. Then start Python in interactive mode with CCAF Table API:
 
     ```bash
     python -i setup_pyshell.py
     ```
 
-3. The `TableEnvironment` is pre-initialized from environment variables and available under `tbl_env`.
+4. The `TableEnvironment` is pre-initialized from environment variables and available under `tbl_env`.
 
-## 2.0 Discover What You Can Do
+## 2.0 Deploying Apache Flink Applications on Confluent Cloud’s Fully Managed Platform
 
 ### 2.1 Avro formatted data
 Flink App|Run Script
