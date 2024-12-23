@@ -33,6 +33,11 @@
 4. The `TableEnvironment` is pre-initialized from environment variables and available under `tbl_env`.
 
 ## 2.0 Deploying Apache Flink Applications on Confluent Cloud’s Fully Managed Platform
+[Confluent Cloud for Apache Flink (CCAF)](https://docs.confluent.io/cloud/current/flink/overview.html) provides a cloud-native, serverless service for Flink that enables simple, scalable, and secure stream processing that integrates seamlessly with Apache Kafka®. Your Kafka topics appear automatically as queryable Flink tables, with schemas and metadata attached by Confluent Cloud.
+
+![flink-kafka-ecosystem](../.blog/images/flink-kafka-ecosystem.png)
+
+Confluent Cloud for Apache Flink supports creating stream-processing applications by using Flink SQL, the [Flink Table API](https://docs.confluent.io/cloud/current/flink/reference/table-api.html#flink-table-api) (Java and Python), and custom [user-defined functions](https://docs.confluent.io/cloud/current/flink/concepts/user-defined-functions.html#flink-sql-udfs).
 
 ### 2.1 Avro formatted data
 Flink App|Run Script
