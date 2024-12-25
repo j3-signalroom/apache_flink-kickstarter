@@ -29,7 +29,7 @@ then
     exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
 fi
 
-# Check required --profile argument was supplied
+# Check required --service-account-user argument was supplied
 if [ -z $SERVICE_ACCOUNT_USER ]
 then
     echo
