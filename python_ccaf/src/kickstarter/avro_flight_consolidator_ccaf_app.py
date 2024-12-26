@@ -26,20 +26,25 @@ def run():
     """
     # The service account user is passed in as a command line argument.  
     parser = argparse.ArgumentParser()
-    parser.add_argument('--service-account-user',
-                        dest='service_account_user',
+    parser.add_argument('--catalog-name',
+                        dest='catalog_name',
                         required=True,
-                        help='The Service Account User.')
+                        help='The Catalog Name.')
+    parser.add_argument('--database-name',
+                        dest='database_name',
+                        required=True,
+                        help='The Database Name.')
     parser.add_argument('--aws-region',
                         dest='aws_region',
                         required=True,
                         help='The AWS Region.')
     known_args, _ = parser.parse_known_args()
-    service_account_user = known_args.service_account_user.lower()
+    catalog_name = known_args.catalog_name.lower()
+    database_name = known_args.database_name.lower()
     aws_region = known_args.aws_region.lower()
 
     # Retrieve the Confluent Cloud settings from AWS Secrets Manager.
-    secret_name = f"/confluent_cloud_resource/{service_account_user}/flink_compute_pool"
+    secret_name = f"/confluent_cloud_resource/{catalog_name}/flink_compute_pool"
     settings = get_secrets(aws_region, secret_name)
 
     # Build the ConfluentSettings object.
@@ -58,8 +63,6 @@ def run():
     tbl_env = TableEnvironment.create(confluent_settings)
 
     # The catalog name and database name are used to set the current catalog and database.
-    catalog_name = f"{service_account_user}_env"
-    database_name = f"{service_account_user}_kafka_cluster"
     tbl_env.use_catalog(catalog_name)
     tbl_env.use_database(database_name)
     catalog = tbl_env.get_catalog(catalog_name)
