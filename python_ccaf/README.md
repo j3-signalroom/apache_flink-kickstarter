@@ -1,5 +1,5 @@
 # Flink Applications Powered by Python on Confluent Cloud for Apache Flink (CCAF)
-[Confluent Cloud for Apache Flink (CCAF)](https://docs.confluent.io/cloud/current/flink/overview.html) provides a cloud-native, serverless service for Flink that enables simple, scalable, and secure stream processing that integrates seamlessly with Apache Kafka®. Your Kafka topics appear automatically as queryable Flink tables, with schemas and metadata attached by Confluent Cloud.
+[Confluent Cloud for Apache Flink (CCAF)](https://docs.confluent.io/cloud/current/flink/overview.html) integrates Confluent Cloud, a fully managed Apache Kafka service, with Apache Flink, a powerful stream processing framework. This integration enables real-time data processing, analytics, and complex event processing on data streams managed by Confluent Cloud.  Your Kafka topics appear automatically as queryable Flink tables, with schemas and metadata attached by Confluent Cloud.
 
 ![flink-kafka-ecosystem](../.blog/images/flink-kafka-ecosystem.png)
 
