@@ -112,7 +112,7 @@ def run():
     # The columns that are not needed in the table the represents general airline flight data.
     exclude_airline_columns = ["key", "flight_duration", "ticket_price", "aircraft", "booking_agency_email", "$rowtime"]
     
-    # Get only the columns that are not in the exclude_columns list.
+    # Get only the columns that are not in the excluded columns list.
     flight_expressions = [col(field) for field in schema.get_field_names() if field not in exclude_airline_columns]
     flight_columns = [field for field in schema.get_field_names() if field not in exclude_airline_columns]
 
