@@ -1,4 +1,4 @@
-from pyflink.table import (TableEnvironment, Schema, DataTypes, FormatDescriptor)
+from pyflink.table import TableEnvironment, Schema, DataTypes, FormatDescriptor
 from pyflink.table.catalog import ObjectPath
 from pyflink.table.confluent import ConfluentSettings, ConfluentTableDescriptor
 from pyflink.table.expressions import col, lit
