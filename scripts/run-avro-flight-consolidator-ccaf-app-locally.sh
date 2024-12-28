@@ -60,6 +60,5 @@ aws sso login $AWS_PROFILE
 eval $(aws2-wrap $AWS_PROFILE --export)
 export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
 
-cd python_ccaf
-poetry shell
-poetry run avro_flight_consolidator_ccaf_app --catalog-name $CATALOG_NAME --database-name $DATABASE_NAME --aws-region $AWS_REGION
+cd ccaf
+uv run flight_consolidator --catalog-name $CATALOG_NAME --database-name $DATABASE_NAME --aws-region $AWS_REGION

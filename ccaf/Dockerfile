@@ -1,5 +1,11 @@
 # Use a Python base image
-FROM python:3-11-slim
+FROM python:3.11.11-bookworm
+
+# Install OpenJDK
+RUN apt-get update && apt-get install -y openjdk-17-jdk
+
+# Set JAVA_HOME
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
  
 # Container metadata
 LABEL maintainer=j3@thej3.com \
@@ -9,30 +15,29 @@ LABEL maintainer=j3@thej3.com \
 WORKDIR /app
  
 # Install Poetry
-RUN pip install -- upgrade pip && pip install poetry
+RUN pip install --upgrade pip && pip install poetry
  
 # Copy only the necessary file to optimize the build
-COPY pyproject install.toml poetry.lock ./
+COPY pyproject.toml poetry.lock ./
  
-# Install dependencies (without dev dependencies)
-RUN poetry config virtualenvs.create false && poetry install --no-root --no-interaction --without-dev
+# Install dependencies
+RUN poetry config virtualenvs.create false && poetry install --no-root --no-interaction
  
 # Copy the rest of the application code
 COPY . .
- 
+
+# Set the environment variables for the AWS credentials
+RUN --mount=type=secret,id=AWS_ACCESS_KEY_ID,env=AWS_ACCESS_KEY_ID \
+    --mount=type=secret,id=AWS_SECRET_ACCESS_KEY,env=AWS_SECRET_ACCESS_KEY \
+    --mount=type=secret,id=AWS_SESSION_TOKEN,env=AWS_SESSION_TOKEN
+
 # Fetch deployment arguments, and default values if none were passed
 ARG AWS_REGION
 ENV AWS_REGION=${AWS_REGION:-us-east-1}
 ARG CATALOG_NAME
-ENV CATALOG_NAME=${CATALOG_NAME:-kickstarter}
+ENV CATALOG_NAME=${CATALOG_NAME:-flink_kickstarter}
 ARG DATABASE_NAME
-ENV DATABASE_NAME=${DATABASE_NAME:-kickstarter}
-ARG AWS_ACCESS_KEY_ID
-ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-ARG AWS_SECRET_ACCESS_KEY
-ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-ARG AWS_SESSION_TOKEN
-ENV AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+ENV DATABASE_NAME=${DATABASE_NAME:-flink_kickstarter}
  
 # Create the entrypoint.sh script
 # --- This identifies the default executable for the container.  The script will run a
@@ -40,8 +45,8 @@ ENV AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
 RUN if [[ -z "$AWS_ACCESS_KEY_ID" ]] ; \
 then \
 printf "#!/usr/bin/env sh \
-\ncd app \
-\npoetry shell \
+\ncd /app \
+\npoetry install \
 \npoetry run avro_flight_consolidator_ccaf_app --catalog_name '${CATALOG_NAME}' --database-name '${DATABASE_NAME}' --aws-region '${AWS_REGION}' \
 \n" > scripts/entrypoint.sh ; \
 else \
@@ -50,9 +55,9 @@ printf "#!/usr/bin/env sh \
 \nexport AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
 \nexport AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
 \nexport AWS_REGION=${AWS_REGION} \
-\ncd app \
-\npoetry shell \
-\npoetry run avro_flight_consolidator_ccaf_app --catalog_name '${CATALOG_NAME}' --database-name '${DATABASE_NAME}' --aws-region '${AWS_REGION}' \
+\ncd /app \
+\npoetry install \
+\npoetry run avro_flight_consolidator_ccaf_app --catalog_name \"flink_kickstarter\" --database-name \"flink_kickstarter\" --aws-region \"us-east-1\" \
 \n" > scripts/entrypoint.sh ; \
 fi
  

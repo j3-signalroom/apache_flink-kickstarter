@@ -5,7 +5,7 @@ from pyflink.table.expressions import col, lit
 import argparse
 from functools import reduce
 
-from src.kickstarter.helper.settings import get_secrets, FLINK_CLOUD, FLINK_REGION, FLINK_COMPUTE_POOL_ID, FLINK_API_KEY, FLINK_API_SECRET, ORGANIZATION_ID, ENVIRONMENT_ID 
+from ccaf.helper.settings import get_secrets, FLINK_CLOUD, FLINK_REGION, FLINK_COMPUTE_POOL_ID, FLINK_API_KEY, FLINK_API_SECRET, ORGANIZATION_ID, ENVIRONMENT_ID 
 
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
@@ -22,7 +22,8 @@ def run():
     the TableEnvironment, defines the Kafka sink table, reads from source tables,
     transforms the data, and writes to the sink.
 
-    :return: None
+    Returns:
+        None
     """
     # The service account user is passed in as a command line argument.  
     parser = argparse.ArgumentParser()
