@@ -30,7 +30,7 @@ Explore the repo, run the Docker containers (compatible with both Mac M chips an
 + [3.0 Hands-On Kickoff: Practical Examples for Rapid Learning](#30-hands-on-kickoff-practical-examples-for-rapid-learning)
     - [3.1 Flink Applications Powered by Java on a locally running Apache Flink Cluster in Docker](#31-flink-applications-powered-by-java-on-a-locally-running-apache-flink-cluster-in-docker)
     - [3.2 Flink Applications Powered by Python on a locally running Apache Flink Cluster in Docker](#32-flink-applications-powered-by-python-on-a-locally-running-apache-flink-cluster-in-docker)
-    - [3.3 Flink Applications Powered by Python on Confluent Cloud Apache Flink](#33-flink-applications-powered-by-python-on-confluent-cloud-apache-flink)
+    - [3.3 Flink Applications Powered by Python on Confluent Cloud for Apache Flink](#33-flink-applications-powered-by-python-on-confluent-cloud-for-apache-flink)
 + [4.0 Powering Analytics with Apache Iceberg tables in Snowflake](#40-powering-analytics-with-apache-iceberg-tables-in-snowflake)
 + [5.0 Resources](#50-resources)
 + [6.0 Important Note(s)](#60-important-notes)
@@ -175,7 +175,7 @@ terraform graph | dot -Tpng > .blog/images/terraform-visualization.png
 [Let's go!](python/README.md)
 
 ### 3.3 Flink Applications Powered by Python on Confluent Cloud for Apache Flink
-[Let's go!](python_ccaf/README.md)
+[Let's go!](ccaf/README.md)
 
 ## 4.0 Powering Analytics with Apache Iceberg tables in Snowflake
 After running the Flink applications, you can now leverage the data stored in the Apache Iceberg tables in Snowflake for analytics.  Click [here](.blog/using-non-managed-apache-iceberg-tables-in-snowflake.md) to learn more about using **Non-Managed Apache Iceberg tables** in Snowflake.  This blog post will help you understand the trade-offs, operational characteristics, and integration patterns of using Apache Iceberg tables in Snowflake.  These terraform configurations:

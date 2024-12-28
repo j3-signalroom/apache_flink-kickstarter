@@ -2,9 +2,9 @@
 
 #
 # *** Script Syntax ***
-# scripts/run-python-ccaf-docker-locally.sh --profile=<AWS_SSO_PROFILE_NAME>
-#                                           --catalog-name=<CATALOG_NAME>
-#                                           --database-name=<DATABASE_NAME>
+# scripts/run-ccaf-docker-locally.sh --profile=<AWS_SSO_PROFILE_NAME>
+#                                    --catalog-name=<CATALOG_NAME>
+#                                    --database-name=<DATABASE_NAME>
 #
 
 for arg in "$@" # $@ sees arguments as separate words
@@ -63,13 +63,12 @@ export AWS_REGION=$(aws configure get sso_region $AWS_PROFILE)
 # Build local docker container image showing detail progress of build
 docker build \
        -t ccaf_app \
-       --secret type=env,id=AWS_ACCESS_KEY_ID \
-       --secret type=env,id=AWS_SECRET_ACCESS_KEY \
-       --secret type=env,id=AWS_SESSION_TOKEN \
+       --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+       --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+       --build-arg AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
        --build-arg AWS_REGION=$AWS_REGION \
        --build-arg CATALOG_NAME=$CATALOG_NAME \
        --build-arg DATABASE_NAME=$DATABASE_NAME \
-       --progress=plain \
        .
 
 # Run the image
