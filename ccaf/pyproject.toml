@@ -1,0 +1,20 @@
+[project]
+name = "ccaf"
+version = "0.56.00.000"
+description = "Confluent Cloud for Apache Flink (CCAF) Python Table API examples"
+readme = "README.md"
+authors = [
+    { name = "Jeffrey Jonathan Jennings (J3)", email = "j3@thej3.com" }
+]
+requires-python = "~=3.11.9"
+dependencies = [
+    "boto3>=1.35.90",
+    "confluent-flink-table-api-python-plugin>=1.20.42",
+]
+
+[project.scripts]
+flight_consolidator = "ccaf.flight_consolidator_app:run"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
