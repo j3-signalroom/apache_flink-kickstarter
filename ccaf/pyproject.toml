@@ -1,6 +1,6 @@
 [project]
 name = "ccaf"
-version = "0.56.00.000"
+version = "0.57.00.000"
 description = "Confluent Cloud for Apache Flink (CCAF) Python Table API examples"
 readme = "README.md"
 authors = [

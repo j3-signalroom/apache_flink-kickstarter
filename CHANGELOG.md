@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.57.00.000] - 2024-12-28
+### Added
+- Issue [#622](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/622).
+- Issue [#629](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/629).
+
+### Changed
+- Issue [#615](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/615).
+- Issue [#619](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/619).
+
 ## [0.56.00.000] - 2024-12-21
 ### Added
 - Use Confluent Cloud for Apache Flink to handle the Avro Flight Consolidator App.
