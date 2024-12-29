@@ -9,17 +9,29 @@ Confluent Cloud for Apache Flink supports creating stream-processing application
 
 <!-- toc -->
 + [1.0 Deploying Apache Flink Applications on Confluent Cloud’s Fully Managed Platform](#10-deploying-apache-flink-applications-on-confluent-clouds-fully-managed-platform)
-  * [1.1 Avro formatted data](#11-avro-formatted-data)
+  * [1.1 Running the app locally using a script](#11-running-the-app-locally-using-a-script)
+  * [1.2 Running the app locally in a Docker container](#12-running-the-app-locally-in-a-docker-container)
 + [2.0 Resources](#20-resources)
 <!-- tocstop -->
 
 
 ## 1.0 Deploying Apache Flink Applications on Confluent Cloud’s Fully Managed Platform
 
-### 1.1 Avro formatted data
+### 1.1 Running the app locally using a script
 Flink App|Run Script
 -|-
-**`avro_flight_consolidator_app`**|`scripts/run-flight-consolidator-ccaf-app-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --catalog-name=<CATALOG_NAME> --database-name=<DATABASE_NAME>`
+**`avro_flight_consolidator_app`**|`../scripts/run-flight-consolidator-ccaf-app-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --catalog-name=<CATALOG_NAME> --database-name=<DATABASE_NAME>`
+
+> Argument placeholder|Replace with
+> -|-
+> `<AWS_SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
+> `<CATALOG_NAME>`|the Environment name of the Kafka Cluster.
+> `<DATABASE_NAME>`|the Database name of the Kafka Cluster.
+
+### 1.2 Running the app locally in a Docker container
+Flink App|Run Script
+-|-
+**`avro_flight_consolidator_app`**|`scripts/run-flight-consolidator-ccaf-docker-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --catalog-name=<CATALOG_NAME> --database-name=<DATABASE_NAME>`
 
 > Argument placeholder|Replace with
 > -|-

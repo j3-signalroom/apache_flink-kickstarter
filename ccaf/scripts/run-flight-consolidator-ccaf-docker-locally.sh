@@ -2,9 +2,9 @@
 
 #
 # *** Script Syntax ***
-# scripts/run-ccaf-docker-locally.sh --profile=<AWS_SSO_PROFILE_NAME>
-#                                    --catalog-name=<CATALOG_NAME>
-#                                    --database-name=<DATABASE_NAME>
+# scripts/run-flight-consolidator-ccaf-docker-locally.sh --profile=<AWS_SSO_PROFILE_NAME>
+#                                                        --catalog-name=<CATALOG_NAME>
+#                                                        --database-name=<DATABASE_NAME>
 #
 
 for arg in "$@" # $@ sees arguments as separate words
