@@ -125,7 +125,7 @@ def run():
     try:
         statement_name = "combined-flight-data-" + str(uuid.uuid4())
         tbl_env.get_config().set("client.statement-name", statement_name)
-        combined_airlines.execute_insert(flight_avro_table_path.get_full_name()).wait()
+        combined_airlines.execute_insert(flight_avro_table_path.get_full_name())
     except Exception as e:
         print(f"An error occurred during data insertion: {e}")
         exit(1)
