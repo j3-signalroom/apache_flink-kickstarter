@@ -1,8 +1,9 @@
 from pyflink.table import TableEnvironment, Schema, DataTypes, FormatDescriptor
 from pyflink.table.catalog import ObjectPath
-from pyflink.table.confluent import ConfluentSettings, ConfluentTableDescriptor
+from pyflink.table.confluent import ConfluentSettings, ConfluentTableDescriptor, ConfluentTools
 from pyflink.table.expressions import col, lit
 import argparse
+import uuid
 from functools import reduce
 
 from ccaf.helper.settings import get_secrets, FLINK_CLOUD, FLINK_REGION, FLINK_COMPUTE_POOL_ID, FLINK_API_KEY, FLINK_API_SECRET, ORGANIZATION_ID, ENVIRONMENT_ID 
@@ -137,6 +138,8 @@ def run():
 
     # Insert the combined record into the sink table.
     try:
+        statement_name = "combined-flight-data-" + str(uuid.uuid4())
+        tbl_env.get_config().set("client.statement-name", statement_name)
         combined_airlines.execute_insert(flight_avro_table_path.get_full_name()).wait()
     except Exception as e:
         print(f"An error occurred during data insertion: {e}")
