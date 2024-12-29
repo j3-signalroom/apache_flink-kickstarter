@@ -19,7 +19,7 @@ Confluent Cloud for Apache Flink supports creating stream-processing application
 ### 1.1 Avro formatted data
 Flink App|Run Script
 -|-
-**`avro_flight_consolidator_app`**|`../scripts/run-flight-consolidator-ccaf-app-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --catalog-name=<CATALOG_NAME> --database-name=<DATABASE_NAME>`
+**`avro_flight_consolidator_app`**|`scripts/run-flight-consolidator-ccaf-app-locally.sh --profile=<AWS_SSO_PROFILE_NAME> --catalog-name=<CATALOG_NAME> --database-name=<DATABASE_NAME>`
 
 > Argument placeholder|Replace with
 > -|-
