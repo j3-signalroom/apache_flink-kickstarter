@@ -1,12 +1,12 @@
 from pyflink.table import TableEnvironment, Schema, DataTypes, FormatDescriptor
 from pyflink.table.catalog import ObjectPath
-from pyflink.table.confluent import ConfluentSettings, ConfluentTableDescriptor, ConfluentTools
+from pyflink.table.confluent import ConfluentTableDescriptor
 from pyflink.table.expressions import col, lit
 import argparse
 import uuid
 from functools import reduce
 
-from ccaf.helper.settings import get_secrets, FLINK_CLOUD, FLINK_REGION, FLINK_COMPUTE_POOL_ID, FLINK_API_KEY, FLINK_API_SECRET, ORGANIZATION_ID, ENVIRONMENT_ID 
+from ccaf.helper.common import get_cc_properties
 
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
@@ -45,24 +45,9 @@ def run():
     database_name = known_args.database_name.lower()
     aws_region = known_args.aws_region.lower()
 
-    # Retrieve the Confluent Cloud settings from AWS Secrets Manager.
+    # Create the TableEnvironment with the Confluent Cloud for Apache Flink settings.
     secret_name = f"/confluent_cloud_resource/{catalog_name}/flink_compute_pool"
-    settings = get_secrets(aws_region, secret_name)
-
-    # Build the ConfluentSettings object.
-    confluent_settings = (
-        ConfluentSettings
-            .new_builder()
-            .set_cloud(settings[FLINK_CLOUD])
-            .set_region(settings[FLINK_REGION])
-            .set_flink_api_key(settings[FLINK_API_KEY])
-            .set_flink_api_secret(settings[FLINK_API_SECRET])
-            .set_organization_id(settings[ORGANIZATION_ID])
-            .set_environment_id(settings[ENVIRONMENT_ID])
-            .set_compute_pool_id(settings[FLINK_COMPUTE_POOL_ID])
-            .build()
-    )
-    tbl_env = TableEnvironment.create(confluent_settings)
+    tbl_env = TableEnvironment.create(get_cc_properties(aws_region, secret_name))
 
     # The catalog name and database name are used to set the current catalog and database.
     tbl_env.use_catalog(catalog_name)
