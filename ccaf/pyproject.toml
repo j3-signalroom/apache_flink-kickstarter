@@ -9,7 +9,7 @@ authors = [
 requires-python = "~=3.11.9"
 dependencies = [
     "boto3>=1.36.2",
-    "confluent-flink-table-api-python-plugin>=1.20.48",
+    "confluent-flink-table-api-python-plugin>=1.20.50",
 ]
 
 [project.scripts]
