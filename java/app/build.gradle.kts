@@ -22,7 +22,7 @@ val hadoopVersion: String = "3.3.6"
 val kafkaVersion: String = "3.7.0"
 val junitVersion: String = "5.10.0"
 val awssdkVersion: String = "2.26.29"
-var icebergVersion: String = "1.7.0"
+var icebergVersion: String = "1.8.1"
 var confluentKafkaVersion: String = "7.7.1"
 var jacksonVersion: String = "2.18.1"
 
@@ -79,7 +79,7 @@ version = appVersion ?: "x.xx.xx.xxx"
 description = rootProject.name
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 application {
