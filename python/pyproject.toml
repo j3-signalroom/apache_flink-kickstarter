@@ -1,6 +1,6 @@
 [project]
 name = "apache_flink_kickstarter"
-version = "0.58.00.000"
+version = "0.58.01.000"
 description = "Apache Flink Kickstarter"
 readme = "README.md"
 requires-python = "~=3.11.9"
