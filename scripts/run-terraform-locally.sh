@@ -212,8 +212,8 @@ else
     aws secretsmanager delete-secret $AWS_PROFILE --secret-id /snowflake_resource/${service_account_user}/rsa_private_key_pem_2 --force-delete-without-recovery || true
 
     # Delete the AWS Glue Data Catalog Database, and all associated tables within database will also be deleted
-    aws glue delete-database $AWS_PROFILE --name airlines || true
+    # aws glue delete-database $AWS_PROFILE --name airlines || true
 
     # Delete the AWS S3 bucket and all objects within the bucket
-    aws s3 rb $AWS_PROFILE s3://${service_account_user} --force || true
+    # aws s3 rb $AWS_PROFILE s3://${service_account_user} --force || true
 fi
