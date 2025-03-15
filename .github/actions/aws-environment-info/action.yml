@@ -17,19 +17,26 @@ inputs:
     description: 'The AWS Prod Account ID'
   aws_region:
     required: true
+    description: The AWS Region.
   snowflake_warehouse:
     required: true
+    description: The Snowflake Warehouse.
   service_account_user:
     required: true
+    description: The Service Account User.
   auto_offset_reset:
     required: false
+    description: The Auto Offset Reset.
   number_of_api_keys_to_retain:
     required: false
+    description: The Number of API Keys to Retain.
   day_count:
     required: false
+    description: The Day Count.
 outputs:
   aws_account_id:
     value: ${{ steps.workflow-inputs-output.outputs.AWS_ACCOUNT_ID }}
+    description: The AWS Account ID.
 
 runs:
   using: composite
