@@ -71,7 +71,7 @@ To help you start quickly, the repo comes with **_Docker containers_** for Mac M
     > - [AWS CLI version 2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
     > - [Confluent CLI version 3 or higher](https://docs.confluent.io/confluent-cli/4.0/overview.html)
     > - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-    > - [Java JDK (Java Development Kit) 11](https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html)
+    > - [Java JDK (Java Development Kit) 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
     > - [Python 3.11](https://www.python.org/downloads/release/python-3119/)
     > - [Terraform CLI version 1.9.3 or higher](https://developer.hashicorp.com/terraform/install)
 
