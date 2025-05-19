@@ -14,15 +14,15 @@ terraform {
   required_providers {
         confluent = {
             source  = "confluentinc/confluent"
-            version = "~> 2.28.0"
+            version = "2.29.0"
         }
         aws = {
             source  = "hashicorp/aws"
-            version = "~> 5.97.0"
+            version = "5.98.0"
         }
         snowflake = {
-            source = "Snowflake-Labs/snowflake"
-            version = "~> 1.0.5"
+            source = "snowflakedb/snowflake"
+            version = "2.1.0"
         }
     }
 }
