@@ -14,11 +14,11 @@ terraform {
   required_providers {
         confluent = {
             source  = "confluentinc/confluent"
-            version = "2.29.0"
+            version = "2.30.0"
         }
         aws = {
             source  = "hashicorp/aws"
-            version = "5.98.0"
+            version = "5.99.1"
         }
         snowflake = {
             source = "snowflakedb/snowflake"
@@ -43,7 +43,6 @@ module "snowflake_user_rsa_key_pairs_rotation" {
 
     # Required Input(s)
     aws_region           = var.aws_region
-    aws_account_id       = var.aws_account_id
     snowflake_account    = jsondecode(data.aws_secretsmanager_secret_version.admin_public_keys.secret_string)["account"]
     service_account_user = var.service_account_user
 
