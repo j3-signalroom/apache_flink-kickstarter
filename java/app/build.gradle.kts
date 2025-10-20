@@ -17,22 +17,22 @@ repositories {
 
 // --- Dependency version numbers
 val flinkVersion: String = "1.20"
-val flinkVersionWithPatch: String = flinkVersion + ".0"
-val hadoopVersion: String = "3.3.6"
-val kafkaVersion: String = "3.7.0"
-val junitVersion: String = "5.10.0"
-val awssdkVersion: String = "2.26.29"
-var icebergVersion: String = "1.8.1"
-var confluentKafkaVersion: String = "7.7.1"
+val flinkVersionWithPatch: String = flinkVersion + ".3"
+val hadoopVersion: String = "3.4.2"
+val kafkaVersion: String = "4.0.1"
+val junitVersion: String = "6.0.0"
+val awssdkVersion: String = "2.35.10"
+var icebergVersion: String = "1.10.0"
+var confluentKafkaVersion: String = "8.0.0"
 var jacksonVersion: String = "2.18.1"
 
 dependencies {
     implementation("org.apache.kafka:kafka-clients:${kafkaVersion}")
-    implementation("org.apache.avro:avro:1.12.0")
+    implementation("org.apache.avro:avro:1.12.1")
     implementation("io.confluent:kafka-avro-serializer:${confluentKafkaVersion}")
     implementation("io.confluent:kafka-schema-registry-client:${confluentKafkaVersion}")
     implementation("io.confluent:confluent-log4j:1.2.17-cp12")
-    implementation("tech.allegro.schema.json2avro:converter:0.2.15")
+    implementation("tech.allegro.schema.json2avro:converter:0.3.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-avro:${jacksonVersion}")
     implementation("org.apache.hadoop:hadoop-common:${hadoopVersion}")
@@ -43,12 +43,12 @@ dependencies {
     compileOnly("org.apache.flink:flink-table-api-java-bridge:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-clients:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-connector-base:${flinkVersionWithPatch}")
-    implementation("org.apache.flink:flink-connector-kafka:3.3.0-${flinkVersion}")
+    implementation("org.apache.flink:flink-connector-kafka:4.0.1-2.0")
     implementation("org.apache.flink:flink-connector-datagen:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-avro:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-avro-confluent-registry:${flinkVersionWithPatch}")
     implementation("org.apache.flink:flink-json:${flinkVersionWithPatch}")
-    implementation("org.slf4j:slf4j-log4j12:2.0.7")
+    implementation("org.slf4j:slf4j-log4j12:2.0.17")
     implementation("software.amazon.awssdk:sdk-core:${awssdkVersion}")
     implementation("software.amazon.awssdk:secretsmanager:${awssdkVersion}")
     implementation("software.amazon.awssdk:ssm:${awssdkVersion}")
@@ -64,7 +64,7 @@ dependencies {
     implementation("org.apache.iceberg:iceberg-flink-runtime-${flinkVersion}:$icebergVersion") {
         exclude(group = "io.dropwizard.metrics", module = "metrics-core")
     }
-    implementation("net.snowflake:snowflake-jdbc:3.19.0")
+    implementation("net.snowflake:snowflake-jdbc:3.27.0")
     
     testImplementation("org.apache.flink:flink-test-utils:${flinkVersionWithPatch}")
     testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
@@ -79,7 +79,7 @@ version = appVersion ?: "x.xx.xx.xxx"
 description = rootProject.name
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 application {
