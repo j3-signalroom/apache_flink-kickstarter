@@ -39,7 +39,7 @@ locals {
 
 # Create the Snowflake user RSA keys pairs
 module "snowflake_user_rsa_key_pairs_rotation" {   
-    source  = "github.com/j3-signalroom/iac-snowflake-user-rsa_key_pairs_rotation-tf_module"
+    source  = "github.com/j3-signalroom/iac-snowflake-service_user-rsa_key_pairs_rotation-tf_module"
 
     # Required Input(s)
     aws_region           = var.aws_region
