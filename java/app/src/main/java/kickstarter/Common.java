@@ -15,15 +15,17 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.util.CloseableIterator;
-import org.slf4j.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.PropertyNamingStrategies;
 
 
 public class Common {
-    private static final Logger logger = LoggerFactory.getLogger(Common.class);
-    
+    private static final Logger logger = Logger.getLogger(Common.class.getName());
+
     public static final String ARG_SERVICE_ACCOUNT_USER = "--service-account-user";
     public static final String ARG_AWS_REGION = "--aws-region";
     
@@ -100,7 +102,7 @@ public class Common {
         try (CloseableIterator<Properties> iterator = dataStreamProperties.executeAndCollect()) {
             iterator.forEachRemaining(properties::putAll);
         } catch (Exception e) {
-            logger.error("Error collecting Kafka properties: {}", e.getMessage());
+            logger.log(Level.SEVERE, "Error collecting Kafka properties: ", e.getMessage());
             System.exit(1);
         }
         return properties;

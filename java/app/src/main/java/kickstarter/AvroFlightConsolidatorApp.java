@@ -31,13 +31,15 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import java.util.*;
 import java.time.*;
 import java.time.format.*;
-import org.slf4j.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 
 import kickstarter.model.*;
 
 
 public class AvroFlightConsolidatorApp {
-    private static final Logger logger = LoggerFactory.getLogger(AvroFlightConsolidatorApp.class);
+    private static final Logger logger = Logger.getLogger(AvroFlightConsolidatorApp.class.getName());
     
 
 	/**
@@ -134,7 +136,7 @@ public class AvroFlightConsolidatorApp {
             // --- Execute the Flink job graph (DAG)
             env.execute("AvroFlightConsolidatorApp");
         } catch (Exception e) {
-            logger.error("The App stopped early due to the following: {}", e.getMessage());
+            logger.log(Level.SEVERE, "The App stopped early due to the following: ", e.getMessage());
         }
     }
 

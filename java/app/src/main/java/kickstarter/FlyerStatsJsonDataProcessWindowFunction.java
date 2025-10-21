@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * Copyright (c) 2024-2025 Jeffrey Jonathan Jennings
  * 
  * @author Jeffrey Jonathan Jennings (J3)
  * 
@@ -7,35 +7,23 @@
  */
 package kickstarter;
 
-import org.apache.flink.api.common.state.*;
-import org.apache.flink.configuration.Configuration;
+import org.apache.flink.api.common.state.ValueState;
+import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-import org.apache.flink.util.*;
+import org.apache.flink.util.Collector;
 
-import kickstarter.model.*;
+import kickstarter.model.FlyerStatsJsonData;
 
 
 class FlyerStatsJsonDataProcessWindowFunction extends ProcessWindowFunction<FlyerStatsJsonData, FlyerStatsJsonData, String, TimeWindow> {
     private ValueStateDescriptor<FlyerStatsJsonData> stateDescriptor;
 
     /**
-     * The open method is called when the function is first initialized.  It instantiates a new ValueStateDescriptor
+     * The process method is called for each window, and it processes the elements in the window.  It instantiates a new ValueStateDescriptor
      * to create a ValueState object for the function.  The ValueState object is used to store a single value for
      * each key in a keyed stream.  The state is used to store the accumulated statistics for the user.  The state is 
      * updated each time the function processes a new element.
-     * 
-     * @param parameters The configuration parameters for the function.
-     * @throws Exception - Implementations may forward exceptions, which are caught
-     */
-    @Override
-    public void open(Configuration parameters) throws Exception {
-        stateDescriptor = new ValueStateDescriptor<>("User Statistics", FlyerStatsJsonData.class);
-        super.open(parameters);
-    }
-
-    /**
-     * The process method is called for each window, and it processes the elements in the window.
      * 
      * @param emailAddress The email address of the user.
      * @param context The context for this window.
@@ -44,7 +32,9 @@ class FlyerStatsJsonDataProcessWindowFunction extends ProcessWindowFunction<Flye
      * @throws Exception - Implementations may forward exceptions, which are caught
      */
     @Override
-    public void process(String emailAddress, ProcessWindowFunction<FlyerStatsJsonData, FlyerStatsJsonData, String, TimeWindow>.Context context, Iterable<FlyerStatsJsonData> statsList, Collector<FlyerStatsJsonData> collector) throws Exception {
+    public void process(String emailAddress, Context context, Iterable<FlyerStatsJsonData> statsList, Collector<FlyerStatsJsonData> collector) throws Exception {
+        stateDescriptor = new ValueStateDescriptor<>("User Statistics", FlyerStatsJsonData.class);
+
         // --- Retrieve the state that is persisted across windows
         ValueState<FlyerStatsJsonData> state = 
             context

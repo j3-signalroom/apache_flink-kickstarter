@@ -21,13 +21,15 @@ import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindo
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import org.slf4j.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 
 import kickstarter.model.*;
 
 
 public class AvroFlyerStatsApp {
-    private static final Logger logger = LoggerFactory.getLogger(AvroFlyerStatsApp.class);
+    private static final Logger logger = Logger.getLogger(AvroFlyerStatsApp.class.getName());
 
 
 	/**
@@ -132,7 +134,7 @@ public class AvroFlyerStatsApp {
             // --- Execute the Flink job graph (DAG)
             env.execute("AvroFlyerStatsApp");
         } catch (Exception e) {
-            logger.error("The App stopped early due to the following: {}", e.getMessage());
+            logger.log(Level.SEVERE, "The App stopped early due to the following: ", e.getMessage());
         }        
     }
 }

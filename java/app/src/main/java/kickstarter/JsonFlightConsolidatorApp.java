@@ -21,24 +21,28 @@
  */
 package kickstarter;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.connector.kafka.sink.*;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
-import org.apache.flink.formats.json.*;
+import org.apache.flink.formats.json.JsonSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import java.util.*;
-import java.time.*;
-import java.time.format.*;
-import org.slf4j.*;
 
 import kickstarter.helper.SnakeCaseJsonDeserializationSchema;
-import kickstarter.model.*;
+import kickstarter.model.AirlineJsonData;
+import kickstarter.model.FlightJsonData;
 
 
 public class JsonFlightConsolidatorApp {
-    private static final Logger logger = LoggerFactory.getLogger(JsonFlightConsolidatorApp.class);
+    private static final Logger logger = Logger.getLogger(JsonFlightConsolidatorApp.class.getName());
     
 
 	/**
@@ -109,7 +113,7 @@ public class JsonFlightConsolidatorApp {
          */
 		KafkaRecordSerializationSchema<FlightJsonData> flightSerializer = KafkaRecordSerializationSchema.<FlightJsonData>builder()
             .setTopic("flight")
-			.setValueSerializationSchema(new JsonSerializationSchema<FlightJsonData>(Common::getMapper))
+			.setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
             .build();
 
         /*
@@ -133,7 +137,7 @@ public class JsonFlightConsolidatorApp {
             // --- Execute the Flink job graph (DAG)
             env.execute("JsonFlightConsolidatorApp");
         } catch (Exception e) {
-            logger.error("The App stopped early due to the following: {}", e.getMessage());
+            logger.log(Level.SEVERE, "The App stopped early due to the following: ", e.getMessage());
         }
     }
 

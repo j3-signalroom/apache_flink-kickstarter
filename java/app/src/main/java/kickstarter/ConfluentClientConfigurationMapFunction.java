@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * Copyright (c) 2024-2025 Jeffrey Jonathan Jennings
  * 
  * @author Jeffrey Jonathan Jennings (J3)
  * 
@@ -15,12 +15,14 @@
  */
 package kickstarter;
 
-import org.apache.flink.api.common.functions.RichMapFunction;
-import org.apache.flink.configuration.Configuration;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.*;
 
-import kickstarter.helper.*;
+import org.apache.flink.api.common.functions.OpenContext;
+import org.apache.flink.api.common.functions.RichMapFunction;
+
+import kickstarter.helper.ConfluentClientConfiguration;
+import kickstarter.helper.ObjectResult;
 
 
 /**
@@ -61,14 +63,16 @@ public class ConfluentClientConfigurationMapFunction extends RichMapFunction<Pro
      * AWS Secrets Manager, and the Kafka Client properties from the AWS Systems Manager. 
      * Then the properties are stored in the class properties.
      * 
-     * @param configuration - The configuration object that is used to pass the parameters.
+     * @param openContext - The openContext object passed to the function can be used for
+     * configuration and initialization. The openContext contains some necessary information 
+     * that were configured on the function in the program composition.
      *
      * @throws Exception - Implementations may forward exceptions, which are caught
      * by the runtime.  When the runtime catches an exception, it aborts the task and 
      * lets the fail-over logic decide whether to retry the task execution.
      */
     @Override
-    public void open(Configuration configuration) throws Exception {
+    public void open(OpenContext openContext) throws Exception {
         final String secretPathPrefix = "/confluent_cloud_resource/" + this._serviceAccountUser;
         final ConfluentClientConfiguration confluentClientConfiguration = 
             new ConfluentClientConfiguration(

@@ -7,6 +7,8 @@
  */
 package kickstarter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -28,7 +30,7 @@ import org.apache.iceberg.flink.*;
 import org.apache.iceberg.flink.sink.FlinkSink;
 import org.apache.hadoop.conf.Configuration;
 import java.util.*;
-import org.slf4j.*;
+
 
 import kickstarter.model.*;
 
@@ -39,7 +41,7 @@ import kickstarter.model.*;
  * Tables, respectively.
  */
 public class JsonDataGeneratorApp {
-    private static final Logger logger = LoggerFactory.getLogger(JsonDataGeneratorApp.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonDataGeneratorApp.class);
 
 
 	/**
@@ -255,7 +257,7 @@ public class JsonDataGeneratorApp {
         try {            
             env.execute("JsonDataGeneratorApp");
         } catch (Exception e) {
-            logger.error("The App stopped early due to the following: {}", e.getMessage());
+            LOGGER.error("The App stopped early due to the following: {}", e.getMessage());
         }
 	}
 
@@ -332,5 +334,9 @@ public class JsonDataGeneratorApp {
             .upsert(true)
             .equalityFieldColumns(Arrays.asList("email_address", "departure_airport_code", "arrival_airport_code"))
             .append();
+    }
+
+    public static Logger getLogger() {
+        return LOGGER;
     }
 }
