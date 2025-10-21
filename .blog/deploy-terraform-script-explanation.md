@@ -44,13 +44,13 @@ The script should be run with the following syntax:
 
 ```bash
 scripts/deploy-terraform.sh <create | delete> --profile=<SSO_PROFILE_NAME>
-                                                   --confluent-api-key=<CONFLUENT_API_KEY>
-                                                   --confluent-api-secret=<CONFLUENT_API_SECRET>
-                                                   --snowflake-warehouse=<SNOWFLAKE_WAREHOUSE>
-                                                   --service-account-user=<SERVICE_ACCOUNT_USER>
-                                                   --day-count=<DAY_COUNT>
-                                                   --auto-offset-reset=<earliest | latest>
-                                                   --number-of-api-keys-to-retain=<NUMBER_OF_API_KEYS_TO_RETAIN>
+                                              --confluent-api-key=<CONFLUENT_API_KEY>
+                                              --confluent-api-secret=<CONFLUENT_API_SECRET>
+                                              --snowflake-warehouse=<SNOWFLAKE_WAREHOUSE>
+                                              --service-account-user=<SERVICE_ACCOUNT_USER>
+                                              --day-count=<DAY_COUNT>
+                                              --auto-offset-reset=<earliest | latest>
+                                              --number-of-api-keys-to-retain=<NUMBER_OF_API_KEYS_TO_RETAIN>
 ```
 
 - **create**: Deploy infrastructure using Terraform.
