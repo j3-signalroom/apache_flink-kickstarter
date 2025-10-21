@@ -43,7 +43,7 @@ The script helps you manage the lifecycle of Terraform-managed infrastructure re
 The script should be run with the following syntax:
 
 ```bash
-scripts/run-terraform-locally.sh <create | delete> --profile=<SSO_PROFILE_NAME>
+scripts/deploy-terraform.sh <create | delete> --profile=<SSO_PROFILE_NAME>
                                                    --confluent-api-key=<CONFLUENT_API_KEY>
                                                    --confluent-api-secret=<CONFLUENT_API_SECRET>
                                                    --snowflake-warehouse=<SNOWFLAKE_WAREHOUSE>
