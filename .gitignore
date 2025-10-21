@@ -1,7 +1,8 @@
 .DS_Store
 .env
 .vscode/
-scratchpad.md
+scratch.pad
+scratch.pdf
 working.sql
 working.fql
 

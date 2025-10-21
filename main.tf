@@ -3,7 +3,7 @@ terraform {
       organization = "signalroom"
 
         workspaces {
-            name = "apache-flink-kickstarter-0015"
+            name = "apache-flink-kickstarter"
         }
   }
 
@@ -34,24 +34,25 @@ locals {
   snowflake_secrets_path_prefix = "/snowflake_resource/${local.secrets_insert}"
   snowflake_aws_role_name       = "snowflake_role"
   snowflake_aws_role_arn        = "arn:aws:iam::${var.aws_account_id}:role/${local.snowflake_aws_role_name}"
+  s3_bucket_warehouse_name      = "s3://${aws_s3_bucket.iceberg_bucket.bucket}/${aws_s3_object.warehouse.key}"
 }
-
 
 # Create the Snowflake user RSA keys pairs
 module "snowflake_user_rsa_key_pairs_rotation" {   
-    source  = "github.com/j3-signalroom/iac-snowflake-service_user-rsa_key_pairs_rotation-tf_module"
+  source  = "github.com/j3-signalroom/iac-snowflake-service_user-rsa_key_pairs_rotation-tf_module"
 
-    # Required Input(s)
-    aws_region           = var.aws_region
-    snowflake_account    = jsondecode(data.aws_secretsmanager_secret_version.admin_public_keys.secret_string)["account"]
-    service_account_user = var.service_account_user
+  # Required Input(s)
+  aws_region                    = var.aws_region
+  snowflake_account_identifier  = local.snowflake_account_identifier
+  snowflake_service_user        = local.secrets_insert
+  secrets_path                  = "/snowflake_resource/${local.secrets_insert}"
+  lambda_function_name          = local.secrets_insert
 
-    # Optional Input(s)
-    secret_insert             = local.secrets_insert
-    day_count                 = var.day_count
-    aws_lambda_memory_size    = var.aws_lambda_memory_size
-    aws_lambda_timeout        = var.aws_lambda_timeout
-    aws_log_retention_in_days = var.aws_log_retention_in_days
+  # Optional Input(s)
+  day_count                     = var.day_count
+  aws_lambda_memory_size        = var.aws_lambda_memory_size
+  aws_lambda_timeout            = var.aws_lambda_timeout
+  aws_log_retention_in_days     = var.aws_log_retention_in_days
 }
 
 # Reference the Confluent Cloud

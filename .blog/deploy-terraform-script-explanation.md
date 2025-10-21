@@ -18,6 +18,7 @@ The script helps you manage the lifecycle of Terraform-managed infrastructure re
      - `--day-count`: Number of days for some specific configuration.
      - `--auto-offset-reset`: Kafka offset reset behavior (`earliest` or `latest`).
      - `--number-of-api-keys-to-retain`: Number of Confluent API keys to retain.
+     - `--admin-service-user-secrets-root-path`: The root path in AWS Secrets Manager for admin service user secrets.
 
 3. **Validation Checks**:
    - Validates that all required arguments are supplied.
@@ -51,6 +52,7 @@ scripts/deploy-terraform.sh <create | delete> --profile=<SSO_PROFILE_NAME>
                                               --day-count=<DAY_COUNT>
                                               --auto-offset-reset=<earliest | latest>
                                               --number-of-api-keys-to-retain=<NUMBER_OF_API_KEYS_TO_RETAIN>
+                                              --admin-service-user-secrets-root-path=<ADMIN_SERVICE_USER_SECRETS_ROOT_PATH>
 ```
 
 - **create**: Deploy infrastructure using Terraform.
@@ -62,6 +64,7 @@ scripts/deploy-terraform.sh <create | delete> --profile=<SSO_PROFILE_NAME>
 - `--day-count`: Number of days for some retention or lifecycle policy.
 - `--auto-offset-reset=<earliest | latest>`: Specify Kafka offset reset strategy.
 - `--number-of-api-keys-to-retain`: Specify the number of API keys to retain.
+- `--admin-service-user-secrets-root-path`: The root path in AWS Secrets Manager for admin service user secrets.
 
 ### Summary
 - **Lifecycle Management**: The script allows you to create and delete infrastructure with Terraform.
