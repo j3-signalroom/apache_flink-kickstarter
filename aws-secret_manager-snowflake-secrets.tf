@@ -1,35 +1,16 @@
-data "aws_secretsmanager_secret" "admin_public_keys" {
-  name = "/snowflake_admin_credentials"
+data "aws_secretsmanager_secret" "admin_service_user" {
+  name = var.admin_service_user_secrets_root_path
 }
 
-data "aws_secretsmanager_secret_version" "admin_public_keys" {
-  secret_id = data.aws_secretsmanager_secret.admin_public_keys.id
+data "aws_secretsmanager_secret_version" "admin_service_user" {
+  secret_id = data.aws_secretsmanager_secret.admin_service_user.id
 }
 
-data "aws_secretsmanager_secret" "admin_private_key_1" {
-  name = "/snowflake_admin_credentials/rsa_private_key_pem_1"
-}
-
-data "aws_secretsmanager_secret_version" "admin_private_key_1" {
-  secret_id = data.aws_secretsmanager_secret.admin_private_key_1.id
-}
-
-data "aws_secretsmanager_secret" "admin_private_key_2" {
-  name = "/snowflake_admin_credentials/rsa_private_key_pem_2"
-}
-
-data "aws_secretsmanager_secret_version" "admin_private_key_2" {
-  secret_id = data.aws_secretsmanager_secret.admin_private_key_2.id
-}
-
-data "aws_secretsmanager_secret" "svc_public_keys" {
-  name = local.snowflake_secrets_path_prefix
-
-  depends_on = [ 
-    module.snowflake_user_rsa_key_pairs_rotation 
-  ]
-}
-
-data "aws_secretsmanager_secret_version" "svc_public_keys" {
-  secret_id = data.aws_secretsmanager_secret.svc_public_keys.id
+locals {
+  # Snowflake connection details from Secrets Manager
+  snowflake_account_identifier    = jsondecode(data.aws_secretsmanager_secret_version.admin_service_user.secret_string)["snowflake_account_identifier"]
+  snowflake_organization_name     = jsondecode(data.aws_secretsmanager_secret_version.admin_service_user.secret_string)["snowflake_organization_name"]
+  snowflake_account_name          = jsondecode(data.aws_secretsmanager_secret_version.admin_service_user.secret_string)["snowflake_account_name"]
+  snowflake_admin_service_user    = jsondecode(data.aws_secretsmanager_secret_version.admin_service_user.secret_string)["admin_service_user"]
+  snowflake_active_private_key    = base64decode(jsondecode(data.aws_secretsmanager_secret_version.admin_service_user.secret_string)["active_key_number"] == 1 ? jsondecode(data.aws_secretsmanager_secret_version.admin_service_user.secret_string)["snowflake_rsa_private_key_1_pem"] : jsondecode(data.aws_secretsmanager_secret_version.admin_service_user.secret_string)["snowflake_rsa_private_key_2_pem"])
 }

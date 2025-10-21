@@ -110,3 +110,9 @@ variable "service_account_user" {
     description = "The Snowflake service account user who is to be assigned the RSA key pairs for its authentication."
     type        = string
 }
+
+variable "admin_service_user_secrets_root_path" {
+  description = "The root path for the admin user secrets in AWS Secrets Manager."
+  type        = string
+  default     = ""
+}

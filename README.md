@@ -105,6 +105,7 @@ scripts/deploy-terraform.sh <create | delete> --profile=<SSO_PROFILE_NAME>
                                                    --day-count=<DAY_COUNT>
                                                    --auto-offset-reset=<earliest | latest>
                                                    --number-of-api-keys-to-retain=<NUMBER_OF_API_KEYS_TO_RETAIN>
+                                                   --admin-service-user-secrets-root-path=<ADMIN_SERVICE_USER_SECRETS_ROOT_PATH>
 ```
 > Argument placeholder|Replace with
 > -|-
@@ -116,6 +117,7 @@ scripts/deploy-terraform.sh <create | delete> --profile=<SSO_PROFILE_NAME>
 > `<DAY_COUNT>`|how many day(s) should the API Key be rotated for.
 > `<AUTO_OFFSET_RESET>`|Use `earliest`, when you want to read the first event in a Kafka topic.  Otherwise, specify `latest`.
 > `<NUMBER_OF_API_KEYS_TO_RETAIN>`|Specifies the number of API keys to create and retain.
+> `<ADMIN_SERVICE_USER_SECRETS_ROOT_PATH>`|the root path in AWS Secrets Manager for admin service user secrets.
 
 To learn more about this script, click [here](.blog/deploy-terraform-script-explanation.md).
 
