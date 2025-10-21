@@ -97,7 +97,7 @@ Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials
 
 #### 2.1.1 Run locally
 ```bash
-scripts/run-terraform-locally.sh <create | delete> --profile=<SSO_PROFILE_NAME>
+scripts/deploy-terraform.sh <create | delete> --profile=<SSO_PROFILE_NAME>
                                                    --confluent-api-key=<CONFLUENT_API_KEY>
                                                    --confluent-api-secret=<CONFLUENT_API_SECRET>
                                                    --snowflake-warehouse=<SNOWFLAKE_WAREHOUSE>
@@ -117,7 +117,7 @@ scripts/run-terraform-locally.sh <create | delete> --profile=<SSO_PROFILE_NAME>
 > `<AUTO_OFFSET_RESET>`|Use `earliest`, when you want to read the first event in a Kafka topic.  Otherwise, specify `latest`.
 > `<NUMBER_OF_API_KEYS_TO_RETAIN>`|Specifies the number of API keys to create and retain.
 
-To learn more about this script, click [here](.blog/run-terraform-locally-script-explanation.md).
+To learn more about this script, click [here](.blog/deploy-terraform-script-explanation.md).
 
 ### 2.2 DevOps in Action: Running Terraform in the cloud
 In order to run the Terraform configuration from GitHub, the Terraform Cloud API token and Confluent Cloud API Key are required as GitHub Secret variables.  Learn how to do to get the Terraform Cloud API token and Confluent Cloud API key [here](.blog/setup-github.md).
