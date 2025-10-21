@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * Copyright (c) 2024-2025 Jeffrey Jonathan Jennings
  * 
  * @author Jeffrey Jonathan Jennings (J3)
  * 
@@ -30,9 +30,13 @@ import org.apache.iceberg.flink.sink.FlinkSink;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.avro.Conversions.DecimalConversion;
 import org.apache.avro.Schema;
+
 import java.util.*;
-import org.slf4j.*;
+
 import org.apache.avro.*;
+import org.apache.flink.table.catalog.exceptions.CatalogException;
+import org.apache.flink.table.catalog.exceptions.DatabaseAlreadyExistException;
+import org.slf4j.*;
 
 import kickstarter.model.*;
 
@@ -43,7 +47,7 @@ import kickstarter.model.*;
  * Tables, respectively.
  */
 public class AvroDataGeneratorApp {
-    private static final Logger logger = LoggerFactory.getLogger(AvroDataGeneratorApp.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AvroDataGeneratorApp.class);
     private static final DecimalConversion DECIMAL_CONVERSION = new DecimalConversion();
     private static final LogicalTypes.Decimal DECIMAL_TYPE = LogicalTypes.decimal(10, 2);
     private static final Schema DECIMAL_SCHEMA = DECIMAL_TYPE.addToSchema(Schema.create(Schema.Type.BYTES));
@@ -59,6 +63,7 @@ public class AvroDataGeneratorApp {
      * When the runtime catches an exception, it aborts the task and lets the fail-over logic
 	 * decide whether to retry the task execution.
 	 */
+    @SuppressWarnings("CallToPrintStackTrace")
 	public static void main(String[] args) throws Exception {
         // --- Retrieve the value(s) from the command line argument(s).
         String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
@@ -143,9 +148,8 @@ public class AvroDataGeneratorApp {
                 catalog.createDatabase(databaseName, new CatalogDatabaseImpl(new HashMap<>(), "The Airlines flight data database."), false);
             }
             tblEnv.useDatabase(databaseName);
-        } catch (Exception e) {
-            System.out.println("A critical error occurred during the processing of the database because " + e.getMessage());
-            e.printStackTrace();
+        } catch (CatalogException | DatabaseAlreadyExistException e) {
+            LOGGER.error("A critical error occurred during the processing of the database because {}", e.getMessage());
             System.exit(1);
         }
 
@@ -193,7 +197,7 @@ public class AvroDataGeneratorApp {
         try {            
             env.execute("AvroDataGeneratorApp");
         } catch (Exception e) {
-            logger.error("The App stopped early due to the following: {}", e.getMessage());
+            LOGGER.error("The App stopped early due to the following: {}", e.getMessage());
         }
 	}
 
@@ -262,6 +266,7 @@ public class AvroDataGeneratorApp {
      */
     private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineAvroData> airlineDataStream) {
         // --- Convert DataStream<AirlineData> to DataStream<RowData>
+        @SuppressWarnings("Convert2Lambda")
         DataStream<RowData> skyOneRowData = airlineDataStream.map(new MapFunction<AirlineAvroData, RowData>() {
             @Override
             public RowData map(AirlineAvroData airlineData) throws Exception {
