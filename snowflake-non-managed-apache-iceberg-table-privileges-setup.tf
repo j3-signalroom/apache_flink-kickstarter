@@ -1,16 +1,12 @@
 provider "snowflake" {
-  alias = "security_admin"
-  role  = "SECURITYADMIN"
-
-  # Snowflake Terraform Provider 1.0.0 requires the `organization_name` and 
-  # `account_name` to be set, whereas the previous versions did not require
-  # this.  That is why we are setting these values here.  Plus, `account` as
-  # been deprecated in favor of `account_name`.
-  organization_name = "${split("-", jsondecode(data.aws_secretsmanager_secret_version.admin_public_keys.secret_string)["account"])[0]}"
-  account_name      = "${split("-", jsondecode(data.aws_secretsmanager_secret_version.admin_public_keys.secret_string)["account"])[1]}"
-  user              = jsondecode(data.aws_secretsmanager_secret_version.admin_public_keys.secret_string)["admin_user"]
-  authenticator     = "SNOWFLAKE_JWT"
-  private_key       = jsondecode(data.aws_secretsmanager_secret_version.admin_public_keys.secret_string)["active_rsa_public_key_number"] == 1 ? data.aws_secretsmanager_secret_version.admin_private_key_1.secret_string : data.aws_secretsmanager_secret_version.admin_private_key_2.secret_string
+  alias                       = "security_admin"
+  role                        = "SECURITYADMIN"
+  organization_name           = local.snowflake_organization_name
+  account_name                = local.snowflake_account_name
+  user                        = local.snowflake_admin_service_user
+  private_key                 = local.snowflake_active_private_key
+  authenticator               = "SNOWFLAKE_JWT"
+  validate_default_parameters = false
 }
 
 resource "snowflake_account_role" "security_admin_role" {
