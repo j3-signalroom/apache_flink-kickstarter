@@ -33,6 +33,10 @@ on:
         type: string
         description: Snowflake Service Account User
         required: true
+      admin_service_user_secrets_root_path:
+        type: string
+        description: Admin Service User Secrets Root Path
+        required: true
 
 run-name: ${{ github.workflow }} ${{ github.ref_name }} branch to the ${{ github.event.inputs.aws_region }} ${{ github.event.inputs.aws_environment }} environment
 
@@ -55,6 +59,7 @@ jobs:
             aws_region: ${{ github.event.inputs.aws_region }}
             snowflake_warehouse: ${{ github.event.inputs.snowflake_warehouse }}
             service_account_user: ${{ github.event.inputs.service_account_user }}
+            admin_service_user_secrets_root_path: ${{ github.event.inputs.admin_service_user_secrets_root_path }}
   
         - name: Configure AWS credentials
           id: aws-credentials
@@ -89,7 +94,8 @@ jobs:
             TF_VAR_aws_session_token: ${{ steps.aws-credentials.outputs.aws-session-token }}
             TF_VAR_snowflake_warehouse: ${{ github.event.inputs.snowflake_warehouse }}
             TF_VAR_service_account_user: ${{ github.event.inputs.service_account_user }}
-  
+            TF_VAR_admin_service_user_secrets_root_path: ${{ github.event.inputs.admin_service_user_secrets_root_path }}
+
         - name: Terraform Destroy Apply
           id: apply_destroy
           run: terraform apply -destroy -auto-approve
@@ -103,3 +109,4 @@ jobs:
             TF_VAR_aws_session_token: ${{ steps.aws-credentials.outputs.aws-session-token }}
             TF_VAR_snowflake_warehouse: ${{ github.event.inputs.snowflake_warehouse }}
             TF_VAR_service_account_user: ${{ github.event.inputs.service_account_user }}
+            TF_VAR_admin_service_user_secrets_root_path: ${{ github.event.inputs.admin_service_user_secrets_root_path }}

@@ -33,6 +33,9 @@ inputs:
   day_count:
     required: false
     description: The Day Count.
+  admin_service_user_secrets_root_path:
+    required: true
+    description: 'The Admin Service User Secrets Root Path'
 outputs:
   aws_account_id:
     value: ${{ steps.workflow-inputs-output.outputs.AWS_ACCOUNT_ID }}
@@ -76,3 +79,4 @@ runs:
         echo "number_of_api_keys_to_retain: ${{ inputs.number_of_api_keys_to_retain }}" >> $GITHUB_STEP_SUMMARY
         echo "auto_offset_reset           : ${{ inputs.auto_offset_reset }}" >> $GITHUB_STEP_SUMMARY
         echo "day_count                   : ${{ inputs.day_count }}" >> $GITHUB_STEP_SUMMARY
+        echo "admin_service_user_secrets_root_path: ${{ inputs.admin_service_user_secrets_root_path }}" >> $GITHUB_STEP_SUMMARY

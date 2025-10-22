@@ -52,6 +52,10 @@ on:
         default: 30
         description: Rotation Day Count
         required: true
+      admin_service_user_secrets_root_path:
+        type: string
+        description: Admin Service User Secrets Root Path
+        required: true
 
 run-name: ${{ github.workflow }} ${{ github.ref_name }} branch to the ${{ github.event.inputs.aws_region }} ${{ github.event.inputs.aws_environment }} environment
 
@@ -77,6 +81,7 @@ jobs:
           auto_offset_reset: ${{ github.event.inputs.auto_offset_reset }}
           number_of_api_keys_to_retain: ${{ github.event.inputs.number_of_api_keys_to_retain }}
           day_count: ${{ github.event.inputs.day_count }}
+          admin_service_user_secrets_root_path: ${{ github.event.inputs.admin_service_user_secrets_root_path }}
 
       - name: Configure AWS credentials
         id: aws-credentials
@@ -114,6 +119,7 @@ jobs:
           TF_VAR_auto_offset_reset: ${{ github.event.inputs.auto_offset_reset }}
           TF_VAR_number_of_api_keys_to_retain: ${{ github.event.inputs.number_of_api_keys_to_retain }}
           TF_VAR_day_count: ${{ github.event.inputs.day_count }}
+          TF_VAR_admin_service_user_secrets_root_path: ${{ github.event.inputs.admin_service_user_secrets_root_path }}
 
       - name: Terraform Apply
         id: apply
@@ -131,3 +137,4 @@ jobs:
           TF_VAR_auto_offset_reset: ${{ github.event.inputs.auto_offset_reset }}
           TF_VAR_number_of_api_keys_to_retain: ${{ github.event.inputs.number_of_api_keys_to_retain }}
           TF_VAR_day_count: ${{ github.event.inputs.day_count }}
+          TF_VAR_admin_service_user_secrets_root_path: ${{ github.event.inputs.admin_service_user_secrets_root_path }}
