@@ -39,11 +39,11 @@ Run the Docker containers (fully compatible with both **Apple Silicon (M-series)
         * [**2.5.2 Local Prerequisites**](#252-local-prerequisites)
         * [**2.5.3 Clone the Repository**](#253-clone-the-repository)
         * [**2.5.4 Set Up Your Environment**](#254-set-up-your-environment)
-        * [**2.5.5 Run Flink Locally**](#255-run-flink-locally)
+        * [**2.5.5 Deploy Flink**](#255-deploy-flink)
         * [**2.5.6 You're Ready!**](#256-youre-ready)
-    - [**2.6 DevOps in Action: Running Terraform Locally**](#26-devops-in-action-running-terraform-locally)
-        * [**2.6.1 Run locally**](#261-run-locally)
-    - [**2.7 DevOps in Action: Running Terraform in the cloud**](#27-devops-in-action-running-terraform-in-the-cloud)
+    - [**2.6 DevOps in Action: Running Terraform**](#26-devops-in-action-running-terraform)
+        * [**2.6.1 Deploy Terraform**](#261-deploy-terraform)
+    - [**2.7 DevOps in Action: Running Terraform in the cloud**](#27-devops-in-action-deploying-terraform-in-the-cloud)
         * [**2.7.1 Run from the cloud**](#271-run-from-the-cloud)
     - [**2.8 Visualizing the Terraform Configuration**](#28-visualizing-the-terraform-configuration)
 + [**3.0 Hands-On Kickoff: Practical Examples for Rapid Learning**](#30-hands-on-kickoff-practical-examples-for-rapid-learning)
@@ -144,10 +144,10 @@ You can run **Apache Flink** locally on your Mac or use the **provided Docker co
 
 Once deployed, you’ll have a **complete enterprise-grade data streaming environment**—secure, scalable, and ready to power both **real-time** and **analytical** use cases.
 
-#### **2.6 DevOps in Action: Running Terraform Locally**
+#### **2.6 DevOps in Action: Deploying Terraform**
 Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your local machine, and make sure you have an [HCP Terraform account](https://app.terraform.io/session) to run the Terraform configuration.  Learn how to set up Terraform Cloud for local use by clicking [here](.blog/setup-terraform-cloud.md).
 
-##### **2.6.1 Run locally**
+##### **2.6.1 Deploy Terraform**
 ```bash
 ./deploy-terraform.sh <create | delete> --profile=<SSO_PROFILE_NAME>
                                         --confluent-api-key=<CONFLUENT_API_KEY>
@@ -173,7 +173,7 @@ Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials
 
 To learn more about this script, click [here](.blog/deploy-terraform-script-explanation.md).
 
-#### **2.7 DevOps in Action: Running Terraform in the cloud**
+#### **2.7 DevOps in Action: Deploying Terraform in the cloud**
 In order to run the Terraform configuration from GitHub, the Terraform Cloud API token and Confluent Cloud API Key are required as GitHub Secret variables.  Learn how to do to get the Terraform Cloud API token and Confluent Cloud API key [here](.blog/setup-github.md).
 
 ##### **2.7.1 Run from the cloud**

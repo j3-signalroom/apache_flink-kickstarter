@@ -2,10 +2,10 @@
 
 #
 # *** Script Syntax ***
-# scripts/run-flink-locally.sh <on | off> --profile=<AWS_SSO_PROFILE_NAME>
-#                                         --chip=<amd64 | arm64>
-#                                         --flink-language=<python | java>
-#                                         [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]
+# ./deploy-flink.sh <on | off> --profile=<AWS_SSO_PROFILE_NAME>
+#                              --chip=<amd64 | arm64>
+#                              --flink-language=<python | java>
+#                              [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]
 #
 #
 
