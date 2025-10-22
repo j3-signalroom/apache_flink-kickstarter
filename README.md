@@ -1,4 +1,4 @@
-# ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png) Apache Flink Kickstarter
+# ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png) Apache Flink v2.1 Kickstarter
 This project showcases the exceptional capabilities of Apache Flink, known for its high performance, scalability, and advanced stream processing features, which is a core component of the signalRoom technology stack. Staying true to our mission of empowering developers by sharing practical knowledge, we demonstrate the use of Flink through real-world examples based on the blog series ["Building Apache Flink Applications in Java."](https://developer.confluent.io/courses/flink-java/overview/)
 
 ![java-python-flink-kickstarter-apps](.blog/images/java-python-flink-kickstarter-apps.png)

@@ -1,44 +1,67 @@
-resource "snowflake_warehouse" "apache_flink" {
-  name           = upper(local.secrets_insert)
-  warehouse_size = "xsmall"
-  auto_suspend   = 60
+resource "snowflake_warehouse" "warehouse" {
+	name           = local.warehouse_name
+	warehouse_size = "xsmall"
+	auto_suspend   = 60
+	provider       = snowflake
 }
 
-resource "snowflake_database" "apache_flink" {
-  name = upper(local.secrets_insert)
+resource "snowflake_database" "database" {
+	name     = local.database_name
+	provider = snowflake
+
+	depends_on = [ 
+		snowflake_warehouse.warehouse
+	]
 }
 
-resource "snowflake_schema" "apache_flink_schema" {
-  name       = upper(local.secrets_insert)
-  database   = snowflake_database.apache_flink.name
+resource "snowflake_schema" "schema" {
+	name       = local.schema_name
+	database   = local.database_name
+	provider   = snowflake
 
-  depends_on = [
-    snowflake_database.apache_flink
-  ]
+	depends_on = [
+		snowflake_database.database
+	]
 }
 
-resource "snowflake_storage_integration" "aws_s3_integration" {
-  provider                  = snowflake.account_admin
-  name                      = "AWS_S3_STORAGE_INTEGRATION"
-  storage_allowed_locations = [ "${local.s3_bucket_warehouse_name}" ]
-  storage_provider          = "S3"
-  storage_aws_object_acl    = "bucket-owner-full-control"
-  storage_aws_role_arn      = local.snowflake_aws_role_arn
-  enabled                   = true
-  type                      = "EXTERNAL_STAGE"
+resource "snowflake_external_volume" "external_volume" {
+	provider     = snowflake.account_admin
+	name         = local.volume_name
+	allow_writes = false
+	storage_location {
+		storage_location_name = "${local.secrets_insert}_LOCATION"
+		storage_base_url      = local.s3_bucket_warehouse_name
+		storage_provider      = "S3"
+		storage_aws_role_arn  = local.snowflake_aws_s3_glue_role_arn
+	}
 }
 
-resource "snowflake_stage" "skyone_airline" {
-  name                = upper("skyone_airline_stage")
-  url                 = "${local.s3_bucket_warehouse_name}/airlines.db/skyone_airline/data/"
-  database            = snowflake_database.apache_flink.name
-  schema              = snowflake_schema.apache_flink_schema.name
-  storage_integration = snowflake_storage_integration.aws_s3_integration.name
-  provider            = snowflake.account_admin
-
+# Snowflake Terraform Provider 2.9.0 does not support the creation of a catalog integration
+resource "snowflake_execute" "catalog_integration" {
+  provider = snowflake.account_admin
   depends_on = [ 
-    snowflake_storage_integration.aws_s3_integration 
+    confluent_kafka_cluster.kafka_cluster,
+    snowflake_external_volume.tableflow_kickstarter_volume 
   ]
+
+  execute = <<EOT
+    CREATE OR REPLACE CATALOG INTEGRATION ${local.catalog_integration_name}
+      CATALOG_SOURCE = GLUE
+      TABLE_FORMAT = ICEBERG
+      GLUE_AWS_ROLE_ARN = '${local.snowflake_aws_s3_glue_role_arn}'
+      GLUE_CATALOG_ID = '${data.aws_caller_identity.current.account_id}'
+      GLUE_REGION = '${var.aws_region}'
+      CATALOG_NAMESPACE = 'airlines.db'
+      ENABLED = TRUE;
+  EOT
+
+  revert = <<EOT
+    DROP CATALOG INTEGRATION ${local.catalog_integration_name};
+  EOT
+
+  query = <<EOT
+    DESCRIBE CATALOG INTEGRATION ${local.catalog_integration_name};
+  EOT
 }
 
 resource "snowflake_external_table" "skyone_airline" {
@@ -115,19 +138,6 @@ resource "snowflake_external_table" "skyone_airline" {
   ]
 }
 
-resource "snowflake_stage" "sunset_airline" {
-  name                = upper("sunset_airline_stage")
-  url                 = "${local.s3_bucket_warehouse_name}/airlines.db/sunset_airline/data/"
-  database            = snowflake_database.apache_flink.name
-  schema              = snowflake_schema.apache_flink_schema.name
-  storage_integration = snowflake_storage_integration.aws_s3_integration.name
-  provider            = snowflake.account_admin
-
-  depends_on = [ 
-    snowflake_storage_integration.aws_s3_integration
-  ]
-}
-
 resource "snowflake_external_table" "sunset_airline" {
   provider    = snowflake.account_admin
   database    = snowflake_database.apache_flink.name
@@ -199,19 +209,6 @@ resource "snowflake_external_table" "sunset_airline" {
 
   depends_on = [ 
     snowflake_stage.sunset_airline
-  ]
-}
-
-resource "snowflake_stage" "flight" {
-  name                = upper("flight_stage")
-  url                 = "${local.s3_bucket_warehouse_name}/airlines.db/flight/data/"
-  database            = snowflake_database.apache_flink.name
-  schema              = snowflake_schema.apache_flink_schema.name
-  storage_integration = snowflake_storage_integration.aws_s3_integration.name
-  provider            = snowflake.account_admin
-
-  depends_on = [ 
-    snowflake_storage_integration.aws_s3_integration 
   ]
 }
 

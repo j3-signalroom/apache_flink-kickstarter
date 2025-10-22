@@ -64,3 +64,11 @@ resource "aws_secretsmanager_secret_version" "flink_compute_pool" {
                                 "flink.compute.pool.id": "${confluent_flink_compute_pool.env.id}",
                                 "flink.principal.id": "${confluent_service_account.flink_sql_statements_runner.id}"})
 }
+
+data "aws_secretsmanager_secret" "admin_service_user" {
+  name = var.admin_service_user_secrets_root_path
+}
+
+data "aws_secretsmanager_secret_version" "admin_service_user" {
+  secret_id = data.aws_secretsmanager_secret.admin_service_user.id
+}

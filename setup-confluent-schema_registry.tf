@@ -1,3 +1,15 @@
+# Reference the Confluent Cloud
+data "confluent_organization" "env" {}
+
+# Create the Confluent Cloud Environment
+resource "confluent_environment" "env" {
+  display_name = "${local.secrets_insert}"
+
+  stream_governance {
+    package = "ESSENTIALS"
+  }
+}
+
 # Create the Service Account for the Kafka Cluster API
 resource "confluent_service_account" "schema_registry_cluster_api" {
     display_name = "${local.secrets_insert}-environment-api"
