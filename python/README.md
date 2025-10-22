@@ -21,7 +21,7 @@ Curious about the differences between the DataStream API and Table API? Click [h
 
 > **Prerequisite**
 > 
-> Before you can run `scripts/run-flink-locally.sh` Bash script, you need to install the [`aws2-wrap`](https://pypi.org/project/aws2-wrap/#description) utility.  If you have a Mac machine, run this command from your Terminal:
+> Before you can run `./deploy-flink.sh` Bash script, you need to install the [`aws2-wrap`](https://pypi.org/project/aws2-wrap/#description) utility.  If you have a Mac machine, run this command from your Terminal:
 > ````bash
 > brew install aws2-wrap
 > ````
@@ -34,10 +34,10 @@ Curious about the differences between the DataStream API and Table API? Click [h
 This section guides you through the local setup (on one machine but in separate containers) of the Apache Flink cluster in Session mode using Docker containers with support for Apache Iceberg.  Run the `bash` script below to start the Apache Flink cluster in Session Mode on your machine:
 
 ```bash
-scripts/run-flink-locally.sh <DOCKER_SWITCH> --profile=<AWS_SSO_PROFILE_NAME>
-                                             --chip=<amd64 | arm64>
-                                             --flink-language=python
-                                             [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]
+./deploy-flink.sh <DOCKER_SWITCH> --profile=<AWS_SSO_PROFILE_NAME>
+                                        --chip=<amd64 | arm64>
+                                        --flink-language=python
+                                        [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]
 ```
 > Argument placeholder|Replace with
 > -|-
@@ -47,7 +47,7 @@ scripts/run-flink-locally.sh <DOCKER_SWITCH> --profile=<AWS_SSO_PROFILE_NAME>
 > `<FLINK_LANGUAGE>`|`python` to specify Python is the language base of the Flink Apps you plan on running.  Otherwise, specifiy `java` if the language base of the Flink Apps are Java.
 > `<AWS_S3_BUCKET_NAME>`|**[Optional]** can specify the name of the AWS S3 bucket used to store Apache Iceberg files.
 
-To learn more about this script, click [here](../.blog/run-flink-locally-script-explanation.md).
+To learn more about this script, click [here](../.blog/deploy-flink-script-explanation.md).
 
 ## 3.0 Discover What You Can Do with These Flink Apps
 To access the Flink JobManager (`apache_flink-kickstarter-jobmanager-1`) container, open the interactive shell by running:
