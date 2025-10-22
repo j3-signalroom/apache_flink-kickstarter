@@ -65,7 +65,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Get AWS Environment Info
         id: aws-environment-info
