@@ -42,7 +42,7 @@ resource "aws_iam_role" "snowflake_s3_glue_role" {
   })
 
   depends_on = [ 
-    snowflake_external_volume.tableflow_kickstarter_volume,
+    snowflake_external_volume.external_volume,
     snowflake_execute.catalog_integration,
     snowflake_grant_privileges_to_account_role.integration_usage
   ]

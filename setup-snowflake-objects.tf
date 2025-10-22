@@ -51,7 +51,7 @@ resource "snowflake_execute" "catalog_integration" {
       GLUE_AWS_ROLE_ARN = '${local.snowflake_aws_s3_glue_role_arn}'
       GLUE_CATALOG_ID = '${data.aws_caller_identity.current.account_id}'
       GLUE_REGION = '${var.aws_region}'
-      CATALOG_NAMESPACE = 'airlines.db'
+      CATALOG_NAMESPACE = '${local.catalog_namespace}'
       ENABLED = TRUE;
   EOT
 
@@ -75,18 +75,7 @@ resource "snowflake_execute" "skyone_airline_iceberg_table" {
   ]
 
   execute = <<EOT
-    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SKYONE_AIRLINE (
-      email_address STRING,
-      departure_time STRING,
-      departure_airport_code STRING,
-      arrival_time STRING,
-      arrival_airport_code STRING,
-      flight_duration BIGINT,
-      flight_number STRING,
-      confirmation_code STRING,
-      ticket_price DECIMAL(10, 2),
-      booking_agency_email STRING
-    )
+    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SKYONE_AIRLINE
       EXTERNAL_VOLUME = '${local.volume_name}'
       CATALOG = '${local.catalog_integration_name}'
       CATALOG_TABLE_NAME = 'SKYONE_AIRLINE';
@@ -112,18 +101,7 @@ resource "snowflake_execute" "sunset_airline_iceberg_table" {
   ]
 
   execute = <<EOT
-    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SUNSET_AIRLINE (
-      email_address STRING,
-      departure_time STRING,
-      departure_airport_code STRING,
-      arrival_time STRING,
-      arrival_airport_code STRING,
-      flight_duration BIGINT,
-      flight_number STRING,
-      confirmation_code STRING,
-      ticket_price DECIMAL(10, 2),
-      booking_agency_email STRING
-    )
+    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SUNSET_AIRLINE 
       EXTERNAL_VOLUME = '${local.volume_name}'
       CATALOG = '${local.catalog_integration_name}'
       CATALOG_TABLE_NAME = 'SUNSET_AIRLINE';
@@ -149,16 +127,7 @@ resource "snowflake_execute" "flight_iceberg_table" {
   ]
 
   execute = <<EOT
-    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLIGHT_AIRLINE (
-      email_address STRING,
-      departure_time STRING,
-      departure_airport_code STRING,
-      arrival_time STRING,
-      arrival_airport_code STRING,
-      flight_duration BIGINT,
-      flight_number STRING,
-      airline STRING
-    )
+    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLIGHT_AIRLINE 
       EXTERNAL_VOLUME = '${local.volume_name}'
       CATALOG = '${local.catalog_integration_name}'
       CATALOG_TABLE_NAME = 'FLIGHT_AIRLINE';
@@ -184,11 +153,7 @@ resource "snowflake_execute" "flyer_stats_iceberg_table" {
   ]
 
   execute = <<EOT
-    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLYER_STATS (
-      email_address STRING,
-      total_flight_duration BIGINT,
-      number_of_flights BIGINT
-    )
+    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLYER_STATS 
       EXTERNAL_VOLUME = '${local.volume_name}'
       CATALOG = '${local.catalog_integration_name}'
       CATALOG_TABLE_NAME = 'FLYER_STATS';
