@@ -97,15 +97,15 @@ Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials
 
 #### 2.1.1 Run locally
 ```bash
-scripts/deploy-terraform.sh <create | delete> --profile=<SSO_PROFILE_NAME>
-                                                   --confluent-api-key=<CONFLUENT_API_KEY>
-                                                   --confluent-api-secret=<CONFLUENT_API_SECRET>
-                                                   --snowflake-warehouse=<SNOWFLAKE_WAREHOUSE>
-                                                   --service-account-user=<SERVICE_ACCOUNT_USER>
-                                                   --day-count=<DAY_COUNT>
-                                                   --auto-offset-reset=<earliest | latest>
-                                                   --number-of-api-keys-to-retain=<NUMBER_OF_API_KEYS_TO_RETAIN>
-                                                   --admin-service-user-secrets-root-path=<ADMIN_SERVICE_USER_SECRETS_ROOT_PATH>
+./deploy-terraform.sh <create | delete> --profile=<SSO_PROFILE_NAME>
+                                        --confluent-api-key=<CONFLUENT_API_KEY>
+                                        --confluent-api-secret=<CONFLUENT_API_SECRET>
+                                        --snowflake-warehouse=<SNOWFLAKE_WAREHOUSE>
+                                        --service-account-user=<SERVICE_ACCOUNT_USER>
+                                        --day-count=<DAY_COUNT>
+                                        --auto-offset-reset=<earliest | latest>
+                                        --number-of-api-keys-to-retain=<NUMBER_OF_API_KEYS_TO_RETAIN>
+                                        --admin-service-user-secrets-root-path=<ADMIN_SERVICE_USER_SECRETS_ROOT_PATH>
 ```
 > Argument placeholder|Replace with
 > -|-

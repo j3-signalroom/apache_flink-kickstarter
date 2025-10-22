@@ -19,10 +19,10 @@ module "snowflake_service_user_rsa_key_pairs_rotation" {
 # Emits CREATE USER <user_name> TYPE=SERVICE DEFAULT_WAREHOUSE = <warehouse_name> DEFAULT_ROLE = <system_admin_role> DEFAULT_NAMESPACE = <database_name>.<schema_name> RSA_PUBLIC_KEY = <rsa_public_key> RSA_PUBLIC_KEY_2 = NULL;
 resource "snowflake_service_user" "service_user" {
   provider          = snowflake.security_admin
-  name              = upper(var.service_account_user)
-  default_warehouse = snowflake_warehouse.apache_flink.name
-  default_role      = snowflake_account_role.security_admin_role.name
-  default_namespace = "${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}"
+  name              = local.user_name
+  default_warehouse = local.warehouse_name
+  default_role      = local.system_admin_role
+  default_namespace = "${local.database_name}.${local.schema_name}"
 
   # Setting the attributes to `null`, effectively unsets the attribute
   # Refer to this link `https://docs.snowflake.com/en/user-guide/key-pair-auth#configuring-key-pair-rotation`
@@ -135,7 +135,7 @@ resource "snowflake_grant_privileges_to_account_role" "external_volume_usage" {
   depends_on = [
     snowflake_account_role.system_admin_role,
     snowflake_grant_account_role.user_system_admin,
-    snowflake_external_volume.tableflow_kickstarter_volume
+    snowflake_external_volume.external_volume
   ]
 }
 

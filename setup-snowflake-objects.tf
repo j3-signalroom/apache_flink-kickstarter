@@ -41,7 +41,7 @@ resource "snowflake_execute" "catalog_integration" {
   provider = snowflake.account_admin
   depends_on = [ 
     confluent_kafka_cluster.kafka_cluster,
-    snowflake_external_volume.tableflow_kickstarter_volume 
+    snowflake_external_volume.external_volume 
   ]
 
   execute = <<EOT
@@ -64,257 +64,141 @@ resource "snowflake_execute" "catalog_integration" {
   EOT
 }
 
-resource "snowflake_external_table" "skyone_airline" {
-  provider    = snowflake.account_admin
-  database    = snowflake_database.apache_flink.name
-  schema      = snowflake_schema.apache_flink_schema.name
-  name        = upper("skyone_airline")
-  file_format = "TYPE = 'PARQUET'"
-  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.skyone_airline.name}"
-  auto_refresh = true
-
-  column {
-    as   = "(value:email_address::string)"
-    name = "email_address"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:departure_time::string)"
-    name = "departure_time"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:departure_airport_code::string)"
-    name = "departure_airport_code"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:arrival_time::string)"
-    name = "arrival_time"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:arrival_airport_code::string)"
-    name = "arrival_airport_code"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:flight_duration::bigint)"
-    name = "flight_duration"
-    type = "BIGINT"
-  }
-
-  column {
-    as   = "(value:flight_number::string)"
-    name = "flight_number"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:confirmation_code::string)"
-    name = "confirmation_code"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:ticket_price::decimal(10, 2))"
-    name = "ticket_price"
-    type = "NUMBER"
-  }
-
-  column {
-    as   = "(value:booking_agency_email::string)"
-    name = "booking_agency_email"
-    type = "VARCHAR"
-  }
-
+# Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
+resource "snowflake_execute" "skyone_airline_iceberg_table" {
+  provider = snowflake
   depends_on = [ 
-    snowflake_stage.skyone_airline
+    snowflake_external_volume.external_volume,
+    snowflake_execute.catalog_integration,
+    aws_iam_role_policy_attachment.snowflake_s3_glue_policy_attachment,
+    aws_iam_role.update_snowflake_s3_glue_role
   ]
+
+  execute = <<EOT
+    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SKYONE_AIRLINE (
+      email_address STRING,
+      departure_time STRING,
+      departure_airport_code STRING,
+      arrival_time STRING,
+      arrival_airport_code STRING,
+      flight_duration BIGINT,
+      flight_number STRING,
+      confirmation_code STRING,
+      ticket_price DECIMAL(10, 2),
+      booking_agency_email STRING
+    )
+      EXTERNAL_VOLUME = '${local.volume_name}'
+      CATALOG = '${local.catalog_integration_name}'
+      CATALOG_TABLE_NAME = 'SKYONE_AIRLINE';
+    EOT
+
+  revert = <<EOT
+    DROP ICEBERG TABLE ${local.database_name}.${local.schema_name}.SKYONE_AIRLINE;
+  EOT
+
+  query = <<EOT
+    DESCRIBE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SKYONE_AIRLINE;
+  EOT
 }
 
-resource "snowflake_external_table" "sunset_airline" {
-  provider    = snowflake.account_admin
-  database    = snowflake_database.apache_flink.name
-  schema      = snowflake_schema.apache_flink_schema.name
-  name        = upper("sunset_airline")
-  file_format = "TYPE = 'PARQUET'"
-  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.sunset_airline.name}"
-  auto_refresh = true
-
-  column {
-    as   = "(value:email_address::string)"
-    name = "email_address"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:departure_time::string)"
-    name = "departure_time"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:departure_airport_code::string)"
-    name = "departure_airport_code"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:arrival_time::string)"
-    name = "arrival_time"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:arrival_airport_code::string)"
-    name = "arrival_airport_code"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:flight_duration::bigint)"
-    name = "flight_duration"
-    type = "BIGINT"
-  }
-
-  column {
-    as   = "(value:flight_number::string)"
-    name = "flight_number"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:confirmation_code::string)"
-    name = "confirmation_code"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:ticket_price::decimal(10, 2))"
-    name = "ticket_price"
-    type = "NUMBER"
-  }
-
-  column {
-    as   = "(value:booking_agency_email::string)"
-    name = "booking_agency_email"
-    type = "VARCHAR"
-  }
-
+# Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
+resource "snowflake_execute" "sunset_airline_iceberg_table" {
+  provider = snowflake
   depends_on = [ 
-    snowflake_stage.sunset_airline
+    snowflake_external_volume.external_volume,
+    snowflake_execute.catalog_integration,
+    aws_iam_role_policy_attachment.snowflake_s3_glue_policy_attachment,
+    aws_iam_role.update_snowflake_s3_glue_role
   ]
+
+  execute = <<EOT
+    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SUNSET_AIRLINE (
+      email_address STRING,
+      departure_time STRING,
+      departure_airport_code STRING,
+      arrival_time STRING,
+      arrival_airport_code STRING,
+      flight_duration BIGINT,
+      flight_number STRING,
+      confirmation_code STRING,
+      ticket_price DECIMAL(10, 2),
+      booking_agency_email STRING
+    )
+      EXTERNAL_VOLUME = '${local.volume_name}'
+      CATALOG = '${local.catalog_integration_name}'
+      CATALOG_TABLE_NAME = 'SUNSET_AIRLINE';
+    EOT
+
+  revert = <<EOT
+    DROP ICEBERG TABLE ${local.database_name}.${local.schema_name}.SUNSET_AIRLINE;
+  EOT
+
+  query = <<EOT
+    DESCRIBE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SUNSET_AIRLINE;
+  EOT
 }
 
-resource "snowflake_external_table" "flight" {
-  provider    = snowflake.account_admin
-  database    = snowflake_database.apache_flink.name
-  schema      = snowflake_schema.apache_flink_schema.name
-  name        = upper("flight")
-  file_format = "TYPE = 'PARQUET'"
-  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.flight.name}"
-  auto_refresh = true
-
-  column {
-    as   = "(value:email_address::string)"
-    name = "email_address"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:departure_time::string)"
-    name = "departure_time"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:departure_airport_code::string)"
-    name = "departure_airport_code"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:arrival_time::string)"
-    name = "arrival_time"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:arrival_airport_code::string)"
-    name = "arrival_airport_code"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:flight_number::string)"
-    name = "flight_number"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:confirmation_code::string)"
-    name = "confirmation_code"
-    type = "VARCHAR"
-  }
-
-  column {
-    as   = "(value:airline::string)"
-    name = "airline"
-    type = "VARCHAR"
-  }
-
+# Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
+resource "snowflake_execute" "flight_iceberg_table" {
+  provider = snowflake
   depends_on = [ 
-    snowflake_stage.flight
+    snowflake_external_volume.external_volume,
+    snowflake_execute.catalog_integration,
+    aws_iam_role_policy_attachment.snowflake_s3_glue_policy_attachment,
+    aws_iam_role.update_snowflake_s3_glue_role
   ]
+
+  execute = <<EOT
+    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLIGHT_AIRLINE (
+      email_address STRING,
+      departure_time STRING,
+      departure_airport_code STRING,
+      arrival_time STRING,
+      arrival_airport_code STRING,
+      flight_duration BIGINT,
+      flight_number STRING,
+      airline STRING
+    )
+      EXTERNAL_VOLUME = '${local.volume_name}'
+      CATALOG = '${local.catalog_integration_name}'
+      CATALOG_TABLE_NAME = 'FLIGHT_AIRLINE';
+    EOT
+
+  revert = <<EOT
+    DROP ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLIGHT_AIRLINE;
+  EOT
+
+  query = <<EOT
+    DESCRIBE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLIGHT_AIRLINE;
+  EOT
 }
 
-resource "snowflake_stage" "flyer_stats" {
-  name                = upper("flyer_stats_stage")
-  url                 = "${local.s3_bucket_warehouse_name}/airlines.db/flyer_stats/data/"
-  database            = snowflake_database.apache_flink.name
-  schema              = snowflake_schema.apache_flink_schema.name
-  storage_integration = snowflake_storage_integration.aws_s3_integration.name
-  provider            = snowflake.account_admin
-
+# Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
+resource "snowflake_execute" "flyer_stats_iceberg_table" {
+  provider = snowflake
   depends_on = [ 
-    snowflake_storage_integration.aws_s3_integration 
+    snowflake_external_volume.external_volume,
+    snowflake_execute.catalog_integration,
+    aws_iam_role_policy_attachment.snowflake_s3_glue_policy_attachment,
+    aws_iam_role.update_snowflake_s3_glue_role
   ]
-}
 
-resource "snowflake_external_table" "flyer_stats" {
-  provider    = snowflake.account_admin
-  database    = snowflake_database.apache_flink.name
-  schema      = snowflake_schema.apache_flink_schema.name
-  name        = upper("flyer_stats")
-  file_format = "TYPE = 'PARQUET'"
-  location    = "@${snowflake_database.apache_flink.name}.${snowflake_schema.apache_flink_schema.name}.${snowflake_stage.flyer_stats.name}"
-  auto_refresh = true
+  execute = <<EOT
+    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLYER_STATS (
+      email_address STRING,
+      total_flight_duration BIGINT,
+      number_of_flights BIGINT
+    )
+      EXTERNAL_VOLUME = '${local.volume_name}'
+      CATALOG = '${local.catalog_integration_name}'
+      CATALOG_TABLE_NAME = 'FLYER_STATS';
+    EOT
 
-  column {
-    as   = "(value:email_address::string)"
-    name = "email_address"
-    type = "VARCHAR"
-  }
+  revert = <<EOT
+    DROP ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLYER_STATS;
+  EOT
 
-  column {
-    as   = "(value:total_flight_duration::bigint)"
-    name = "total_flight_duration"
-    type = "BIGINT"
-  }
-
-  column {
-    as   = "(value:number_of_flights::bigint)"
-    name = "number_of_flights"
-    type = "BIGINT"
-  }
-
-  depends_on = [ 
-    snowflake_stage.flyer_stats
-  ]
+  query = <<EOT
+    DESCRIBE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLYER_STATS;
+  EOT
 }
