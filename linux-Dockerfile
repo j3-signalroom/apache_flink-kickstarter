@@ -26,10 +26,12 @@ ENV PYTHON_PATCH=.12
 ENV PYTHON_VERSION_WITH_PATCH=${PYTHON_VERSION}${PYTHON_PATCH}
 ENV HADOOP_VERSION=3.4.2
 ENV ICEBERG_VERSION=1.10.0
+ENV GRADLE_VERSION=8.14.3
 
 # Create/set folder contianer environment variable(s)
 ENV FLINK_CONF_DIR=/opt/flink/conf
 ENV FLINK_LIB_DIR=/opt/flink/lib/
+ENV GRADLE_HOME=/opt/gradle/gradle-${GRADLE_VERSION}
 
 # Create/set URL contianer environment variable(s)
 ENV MAVEN_ROOT_URL=https://repo1.maven.org/maven2/org/apache/
@@ -63,9 +65,15 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-venv \
     zip \
-    gradle \
     file \
-    nano
+    nano \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Gradle 8.14.3
+RUN wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -P /tmp && \
+    unzip -d /opt/gradle /tmp/gradle-${GRADLE_VERSION}-bin.zip && \
+    rm /tmp/gradle-${GRADLE_VERSION}-bin.zip && \
+    gradle --version
 
 # Download JAR files for Java and Python
 RUN curl -L "${MAVEN_ROOT_URL}flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
