@@ -9,8 +9,11 @@ import json
 import os
 from re import sub
 import logging
+from aws_clients_python_lib.secrets_manager import get_secrets
+from aws_clients_python_lib.parameter_store import get_parameters
 
-__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+
+__copyright__  = "Copyright (c) 2024-2025 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
 __license__    = "MIT"
 __maintainer__ = "Jeffrey Jonathan Jennings"
@@ -89,66 +92,24 @@ class KafkaProperties(TableFunction):
         confluent_properties = {}
         
         # Retrieve the Kafka Cluster properties from the AWS Secrets Manager
-        kafka_cluster_properties = self.__get_secrets(kafka_cluster_secrets_path)
+        kafka_cluster_properties = get_secrets(self._aws_region_name, kafka_cluster_secrets_path)
         if not kafka_cluster_properties:
             return {}
         confluent_properties.update(kafka_cluster_properties)
 
         # Retrieve the Schema Registry Cluster properties from the AWS Secrets Manager
-        schema_registry_cluster_properties = self.__get_secrets(schema_registry_cluster_secrets_path)
+        schema_registry_cluster_properties = get_secrets(self._aws_region_name, schema_registry_cluster_secrets_path)
         if not schema_registry_cluster_properties:
             return {}
         confluent_properties.update(schema_registry_cluster_properties)
 
         # Retrieve the parameters from the AWS Systems Manager Parameter Store
-        parameters = self.__get_parameters(client_parameters_path)
+        parameters = get_parameters(self._aws_region_name, client_parameters_path)
         if not parameters:
             return {}
         confluent_properties.update(parameters)
 
         return confluent_properties
-        
-    def __get_secrets(self, secrets_name: str) -> Dict[str, str]:
-        """This method retrieve secrets from the AWS Secrets Manager.
-        
-        Arg(s):
-            secrets_name (str): Pass the name of the secrets you want the secrets for.
-            
-        Return(s):
-            If successful, the secrets in a dict.  Otherwise, returns an empty dict.
-        """
-        client = self._session.client(service_name='secretsmanager', region_name=self._aws_region_name)        
-        try:
-            get_secret_value_response = client.get_secret_value(SecretId=secrets_name)
-            return json.loads(get_secret_value_response['SecretString'])
-        except ClientError as e:
-            logging.error("Failed to get secrets (%s) from the AWS Secrets Manager because of %s.", secrets_name, e)
-            return {}
-
-    def __get_parameters(self, parameter_path: str) -> Dict[str, str]:
-        """This method retrieves the parameteres from the System Manager Parameter Store.
-        Moreover, it converts the values to the appropriate data type.
-        
-        Arg(s):
-            parameter_path (str): The hierarchy for the parameter.  Hierarchies start
-            with a forward slash (/). The hierarchy is the parameter name except the last
-            part of the parameter.  For the API call to succeed, the last part of the
-            parameter name can't be in the path. A parameter name hierarchy can have a
-            maximum of 15 levels.
-            
-        Return(s):
-            parameters (dict): Goes throught recursively and returns all the parameters
-            within a hierarchy.
-        """        
-        client = self._session.client(service_name='ssm', region_name=self._aws_region_name)
-        try:
-            response = client.get_parameters_by_path(Path=parameter_path, Recursive=False, WithDecryption=True)
-            parameters = { param['Name'].split('/')[-1]: param['Value'] for param in response.get('Parameters', []) }
-            return parameters
-        except ClientError as e:
-            logging.error("Failed to get parameters from the AWS Systems Manager Parameter Store because of %s.", e)
-            return {}
-
 
 def execute_kafka_properties_udtf(tbl_env: StreamTableEnvironment, is_consumer: bool, service_account_user: str) -> Tuple[Dict[str, str], Dict[str, str]]:
     """This method retrieves the Kafka Cluster and Schema Registry Cluster properties from the

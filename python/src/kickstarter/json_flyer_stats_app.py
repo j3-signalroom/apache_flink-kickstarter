@@ -19,6 +19,7 @@ except ImportError as e:
     logging.error(f"Failed to import kafka_properties_udtf: {e}")
     raise
 
+
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
 __license__    = "MIT"

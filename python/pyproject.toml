@@ -1,22 +1,62 @@
 [project]
-name = "apache_flink_kickstarter"
-version = "0.58.01.000"
+name = "apache_flink-kickstarter"
+version = "0.59.00.000"
 description = "Apache Flink Kickstarter"
 readme = "README.md"
-requires-python = "~=3.11.9"
+requires-python = ">=3.12.7"
 dependencies = [
-    "apache-flink==1.20.0",
+    "apache-beam>=2.54.0,<=2.61.0",
+    "apache-flink>=2.1.0",
     "avro-python3>=1.10.2",
-    "boto3>=1.35.36",
-    "botocore>=1.35.36",
-    "confluent-kafka==2.6.0",
-    "grpcio-tools>=1.29.0,<=1.50.0",
-    "plotly>=5.24.1",
-    "py4j==0.10.9.7",
-    "pyflink>=1.0",
-    "pyiceberg[glue,s3fs]>=0.7.1",
-    "pytest>=8.3.3",
+    "aws-clients-python-lib>=0.10.0.0",
+    "cloudpickle>=2.2.1",
+    "confluent-kafka>=2.12.1",
+    "grpcio-tools>=1.29.0,<=1.71.0",
+    "plotly>=6.3.1",
+    "py4j>=0.10.9.7",
+    "pyiceberg>=0.10.0",
+    "pytest>=8.4.2",
+    "python-dateutil>=2.8.0,<3",
     "setuptools>=37.0.0",
-    "streamlit-aggrid>=1.0.5",
-    "streamlit>=1.39.0",
+    "streamlit-aggrid>=1.1.9",
+    "streamlit>=1.50.0",
 ]
+
+[tool.setuptools]
+packages = ["src"]
+
+# Logging configuration
+[tool.logging]
+version = 1
+disable_existing_loggers = false
+
+[tool.logging.formatters.default]
+format = "%(asctime)s - %(levelname)s - %(funcName)s - %(message)s"
+datefmt = "%Y-%m-%d %H:%M:%S"
+
+[tool.logging.handlers.file]
+class = "logging.FileHandler"
+filename = "apache-flink-kickstarter.log"
+formatter = "default"
+level = "INFO"
+mode = "w"
+
+[tool.logging.handlers.console]
+class = "logging.StreamHandler"
+formatter = "default"
+level = "DEBUG"
+
+[tool.logging.loggers.root]
+level = "INFO"
+handlers = ["file", "console"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+log_file = "apache-flink-kickstarter.log"
+log_file_level = "INFO"
+log_file_format = "%(asctime)s - %(levelname)s - %(funcName)s - %(message)s"
+log_file_date_format = "%Y-%m-%d %H:%M:%S"
+log_cli = 1
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s - %(levelname)s - %(funcName)s - %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
