@@ -1,9 +1,9 @@
 plugins {
     application
+    id("com.gradleup.shadow") version "9.2.2"
 }
 
 // --- Read the Gradle properties file
-val appVersion: String? by project
 val appMainClass: String? by project
 
 repositories {
@@ -85,7 +85,7 @@ dependencies {
 }
 
 // --- If the version is not provided, use the default
-version = appVersion ?: "x.xx.xx.xxx"
+version = "dev-SNAPSHOT"
 
 description = rootProject.name
 
@@ -98,7 +98,7 @@ java {
 application {
     // --- If the main class is not provided, use the default
     if (appMainClass.isNullOrEmpty()) {
-        mainClass.set("kickstarter.JsonDataGeneratorApp")
+        mainClass.set("kickstarter.AvroDataGeneratorApp")
     } else {
         mainClass.set("kickstarter." + appMainClass)
     }    
@@ -108,25 +108,22 @@ tasks.withType<Zip> {
     isZip64 = true
 }
 
-tasks {
-    val fatJar = register<Jar>("fatJar") {
-        dependsOn.addAll(listOf("compileJava", "processResources"))
-        archiveBaseName.set(rootProject.name)
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        manifest {
-            attributes["Main-Class"] = application.mainClass
-            attributes["Implementation-Title"] = rootProject.name
-            attributes["Implementation-Version"] = project.version
-        }
-        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) } + sourceSets.main.get().output)
-    }
-    build {
-        dependsOn(fatJar)
+tasks.shadowJar {
+    archiveBaseName.set(rootProject.name)
+    archiveClassifier.set("")
+    mergeServiceFiles()
+    
+    manifest {
+        attributes(
+            "Main-Class" to application.mainClass.get(),
+            "Implementation-Title" to rootProject.name,
+            "Implementation-Version" to project.version
+        )
     }
 }
 
-tasks.compileJava {
-    options.isIncremental = false
+tasks.build {
+    dependsOn(tasks.shadowJar)
 }
 
 tasks.named<Test>("test") {
