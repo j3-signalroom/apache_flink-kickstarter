@@ -4,6 +4,7 @@ from typing import Iterable
 
 from model.flight_data import FlyerStatsData
 
+
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
 __license__    = "MIT"

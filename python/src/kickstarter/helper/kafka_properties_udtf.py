@@ -9,8 +9,10 @@ import json
 import os
 from re import sub
 import logging
+from aws_clients_python_lib.secrets_manager import get_secrets
 
-__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+
+__copyright__  = "Copyright (c) 2024-2025 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
 __license__    = "MIT"
 __maintainer__ = "Jeffrey Jonathan Jennings"
