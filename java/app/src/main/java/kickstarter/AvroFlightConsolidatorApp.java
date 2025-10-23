@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * Copyright (c) 2024-2025 Jeffrey Jonathan Jennings
  * 
  * @author Jeffrey Jonathan Jennings (J3)
  * 
