@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * Copyright (c) 2024-2025 Jeffrey Jonathan Jennings
  * 
  * @author Jeffrey Jonathan Jennings (J3)
  * 
@@ -7,32 +7,46 @@
  */
 package kickstarter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
 import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.datagen.source.DataGeneratorSource;
-import org.apache.flink.connector.kafka.sink.*;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.formats.json.JsonSerializationSchema;
-import org.apache.flink.streaming.api.datastream.*;
-import org.apache.flink.streaming.api.environment.*;
-import org.apache.flink.table.api.*;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.flink.table.data.*;
-import org.apache.flink.table.types.logical.*;
-import org.apache.flink.types.*;
-import org.apache.flink.table.catalog.*;
-import org.apache.iceberg.catalog.*;
-import org.apache.iceberg.flink.*;
-import org.apache.iceberg.flink.sink.FlinkSink;
+import org.apache.flink.table.catalog.CatalogDatabaseImpl;
+import org.apache.flink.table.catalog.CatalogDescriptor;
+import org.apache.flink.table.catalog.ObjectPath;
+import org.apache.flink.table.catalog.exceptions.CatalogException;
+import org.apache.flink.table.catalog.exceptions.DatabaseAlreadyExistException;
+import org.apache.flink.table.data.DecimalData;
+import org.apache.flink.table.data.GenericRowData;
+import org.apache.flink.table.data.RowData;
+import org.apache.flink.table.data.StringData;
+import org.apache.flink.table.types.logical.LogicalType;
+import org.apache.flink.table.types.logical.RowType;
+import org.apache.flink.types.RowKind;
 import org.apache.hadoop.conf.Configuration;
-import java.util.*;
+import org.apache.iceberg.catalog.TableIdentifier;
+import org.apache.iceberg.flink.CatalogLoader;
+import org.apache.iceberg.flink.TableLoader;
+import org.apache.iceberg.flink.sink.FlinkSink;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-
-import kickstarter.model.*;
+import kickstarter.model.AirlineJsonData;
 
 
 /**
@@ -198,8 +212,7 @@ public class JsonDataGeneratorApp {
         tblEnv.useCatalog(catalogName);
         org.apache.flink.table.catalog.Catalog catalog = tblEnv.getCatalog(catalogName).orElseThrow(() -> new RuntimeException("Catalog not found"));
 
-        // --- Print the current catalog name.
-        System.out.println("Current catalog: " + tblEnv.getCurrentCatalog());
+        LOGGER.info("Current catalog: {}", tblEnv.getCurrentCatalog());
 
         // --- Check if the database exists.  If not, create it.
         try {
@@ -207,14 +220,13 @@ public class JsonDataGeneratorApp {
                 catalog.createDatabase(databaseName, new CatalogDatabaseImpl(new HashMap<>(), "The Airlines flight data database."), false);
             }
             tblEnv.useDatabase(databaseName);
-        } catch (Exception e) {
-            System.out.println("A critical error occurred during the processing of the database because " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
+        } catch (CatalogException | DatabaseAlreadyExistException e) {
+            LOGGER.error("A critical error occurred during the processing of the database: ", e);
+            throw new RuntimeException("A critical error occurred during the processing of the database", e);
         }
 
         // --- Print the current database name.
-        System.out.println("Current database: " + tblEnv.getCurrentDatabase());
+        LOGGER.info("Current database: {}", tblEnv.getCurrentDatabase());
 
         // --- Define the RowType for the RowData.
         RowType rowType = RowType.of(
@@ -257,7 +269,8 @@ public class JsonDataGeneratorApp {
         try {            
             env.execute("JsonDataGeneratorApp");
         } catch (Exception e) {
-            LOGGER.error("The App stopped early due to the following: {}", e.getMessage());
+            LOGGER.error("The App stopped early due to the following: ", e);
+            throw e;
         }
 	}
 
@@ -274,7 +287,7 @@ public class JsonDataGeneratorApp {
      */
     private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineJsonData> airlineDataStream) {
         // --- Convert DataStream<AirlineJsonData> to DataStream<RowData>
-        DataStream<RowData> skyOneRowData = airlineDataStream.map(new MapFunction<AirlineJsonData, RowData>() {
+        DataStream<RowData> rowDataStream = airlineDataStream.map(new MapFunction<AirlineJsonData, RowData>() {
             @Override
             public RowData map(AirlineJsonData airlineJsonData) throws Exception {
                 GenericRowData rowData = new GenericRowData(RowKind.INSERT, fieldCount);
@@ -296,26 +309,33 @@ public class JsonDataGeneratorApp {
         TableIdentifier tableIdentifier = TableIdentifier.of(databaseName, tableName);
 
         // Create the table if it does not exist
-        if (!catalog.tableExists(ObjectPath.fromString(databaseName + "." + tableName))) {
-            tblEnv.executeSql(
-                        "CREATE TABLE " + databaseName + "." + tableName + " ("
-                            + "email_address STRING, "
-                            + "departure_time STRING, "
-                            + "departure_airport_code STRING, "
-                            + "arrival_time STRING, "
-                            + "arrival_airport_code STRING, "
-                            + "flight_duration BIGINT,"
-                            + "flight_number STRING, "
-                            + "confirmation_code STRING, "
-                            + "ticket_price DECIMAL(10,2), "
-                            + "aircraft STRING, "
-                            + "booking_agency_email STRING) "
-                            + "WITH ("
-                                + "'write.format.default' = 'parquet',"
-                                + "'write.target-file-size-bytes' = '134217728',"
-                                + "'partitioning' = 'arrival_airport_code',"
-                                + "'format-version' = '2');"
-                    );
+        try {
+            if (!catalog.tableExists(ObjectPath.fromString(databaseName + "." + tableName))) {
+                tblEnv.executeSql(
+                            "CREATE TABLE " + databaseName + "." + tableName + " ("
+                                + "email_address STRING, "
+                                + "departure_time STRING, "
+                                + "departure_airport_code STRING, "
+                                + "arrival_time STRING, "
+                                + "arrival_airport_code STRING, "
+                                + "flight_duration BIGINT,"
+                                + "flight_number STRING, "
+                                + "confirmation_code STRING, "
+                                + "ticket_price DECIMAL(10,2), "
+                                + "aircraft STRING, "
+                                + "booking_agency_email STRING) "
+                                + "WITH ("
+                                    + "'write.format.default' = 'parquet',"
+                                    + "'write.target-file-size-bytes' = '134217728',"
+                                    + "'partitioning' = 'arrival_airport_code',"
+                                    + "'format-version' = '2');"
+                        );
+            } else {
+                LOGGER.debug("Table {}.{} already exists.", databaseName, tableName);
+            }
+        } catch (Exception e) {
+            LOGGER.error("A critical error occurred during the processing of the table: ", e);
+            throw new RuntimeException("A critical error occurred during the processing of the table", e);
         }
 
         /*
@@ -329,11 +349,12 @@ public class JsonDataGeneratorApp {
          * are decided based on the specified equality fields (i.e., "email_address", "departure_airport_code", "arrival_airport_code").
          */
         FlinkSink
-            .forRowData(skyOneRowData)
+            .forRowData(rowDataStream)
             .tableLoader(tableLoader)
             .upsert(true)
             .equalityFieldColumns(Arrays.asList("email_address", "departure_airport_code", "arrival_airport_code"))
-            .append();
+            .append()
+            .name(tableName + "_iceberg_sink");
     }
 
     public static Logger getLogger() {

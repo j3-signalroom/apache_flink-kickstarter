@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * Copyright (c) 2024-2025 Jeffrey Jonathan Jennings
  * 
  * @author Jeffrey Jonathan Jennings (J3)
  * 
@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
@@ -122,6 +123,7 @@ public class JsonFlightConsolidatorApp {
          */
         KafkaSink<FlightJsonData> flightSink = KafkaSink.<FlightJsonData>builder()
             .setKafkaProducerConfig(producerProperties)
+            .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
             .setRecordSerializer(flightSerializer)
             .build();
 
