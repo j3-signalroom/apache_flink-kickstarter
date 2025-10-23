@@ -45,7 +45,7 @@ import kickstarter.model.FlightAvroData;
 
 
 public class AvroFlightConsolidatorApp {
-    private static final Logger logger = LoggerFactory.getLogger(AvroFlightConsolidatorApp.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AvroFlightConsolidatorApp.class);
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     
@@ -172,7 +172,7 @@ public class AvroFlightConsolidatorApp {
             // --- Execute the Flink job graph (DAG)
             env.execute("AvroFlightConsolidatorApp");
         } catch (Exception e) {
-            logger.error("The App stopped early due to the following: ", e);
+            LOGGER.error("The App stopped early due to the following: {}", e.getMessage(), e);
             throw e; // Rethrow the exception to signal failure.
         }
     }
@@ -211,14 +211,14 @@ public class AvroFlightConsolidatorApp {
         try {
             // --- Null check for flight and arrival time
             if (flight == null || flight.getArrivalTime() == null) {
-                logger.warn("Flight or arrival time is null, filtering out");
+                LOGGER.warn("Flight or arrival time is null, filtering out");
                 return false;
             }
 
             LocalDateTime arrivalTime = LocalDateTime.parse(flight.getArrivalTime(), DATE_TIME_FORMATTER);
             return arrivalTime.isAfter(LocalDateTime.now());
         } catch (DateTimeParseException e) {
-            logger.warn("Failed to parse arrival time for flight {}: {}", 
+            LOGGER.warn("Failed to parse arrival time for flight {}: {}", 
                 flight != null ? flight.getFlightNumber() : "unknown", 
                 e.getMessage());
             return false;

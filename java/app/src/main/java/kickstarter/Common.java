@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * Copyright (c) 2024-2025 Jeffrey Jonathan Jennings
  * 
  * @author Jeffrey Jonathan Jennings (J3)
  * 
@@ -8,23 +8,26 @@
  */
 package kickstarter;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.stream.Collectors;
+
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.util.CloseableIterator;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class Common {
-    private static final Logger logger = Logger.getLogger(Common.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(Common.class);
 
     public static final String ARG_SERVICE_ACCOUNT_USER = "--service-account-user";
     public static final String ARG_AWS_REGION = "--aws-region";
@@ -74,10 +77,10 @@ public class Common {
         try {
             catalog = tblEnv.getCatalog(catalogName).orElse(null);
         } catch (Exception e) {
-            System.err.println("Error while checking catalog existence: " + e.getMessage());
+            LOGGER.error( "Error while checking catalog existence: {}", e.getMessage(), e);
         }
 
-        return (catalog != null) ? true : false;
+        return catalog != null;
     }
 
     /**
@@ -102,8 +105,8 @@ public class Common {
         try (CloseableIterator<Properties> iterator = dataStreamProperties.executeAndCollect()) {
             iterator.forEachRemaining(properties::putAll);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error collecting Kafka properties: ", e.getMessage());
-            System.exit(1);
+            LOGGER.error("Error collecting Kafka properties: ", e);
+            throw new RuntimeException("Failed to collect Kafka properties", e);
         }
         return properties;
     }
