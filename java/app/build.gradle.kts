@@ -1,9 +1,9 @@
 plugins {
     application
+    id("com.gradleup.shadow") version "9.2.2"
 }
 
 // --- Read the Gradle properties file
-val appVersion: String? by project
 val appMainClass: String? by project
 
 repositories {
@@ -23,19 +23,24 @@ var confluentKafkaVersion: String = "8.0.0"
 var jacksonVersion: String = "2.18.1"
 
 dependencies {
+    // --- Logging dependencies
     implementation("org.slf4j:slf4j-api:2.0.17")
     runtimeOnly("ch.qos.logback:logback-classic:1.5.12")
     
+
+    // --- Kafka, Avro and JSON dependencies
     implementation("org.apache.kafka:kafka-clients:${kafkaVersion}")
     implementation("org.apache.avro:avro:1.12.1")
     implementation("io.confluent:kafka-avro-serializer:${confluentKafkaVersion}")
     implementation("io.confluent:kafka-schema-registry-client:${confluentKafkaVersion}")
     implementation("tech.allegro.schema.json2avro:converter:0.3.0")
+    implementation("org.json:json:20250517")
     implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-avro:${jacksonVersion}")
-    implementation("org.apache.hadoop:hadoop-common:${hadoopVersion}")
-    implementation("org.json:json:20250517")
 
+    // --- Hadoop dependencies
+    implementation("org.apache.hadoop:hadoop-common:${hadoopVersion}")
+    
     // --- Flink dependencies
     compileOnly("org.apache.flink:flink-core:${flinkVersion}")
     implementation("org.apache.flink:flink-runtime:${flinkVersion}")
@@ -69,6 +74,7 @@ dependencies {
     implementation("org.apache.iceberg:iceberg-snowflake:${icebergVersion}")
     implementation("org.apache.iceberg:iceberg-flink-2.0:${icebergVersion}")
 
+    // --- Snowflake JDBC driver
     implementation("net.snowflake:snowflake-jdbc:3.27.0")
     
     // --- Flink test dependencies
@@ -77,7 +83,6 @@ dependencies {
 
     // --- JUnit Jupiter for testing
     testImplementation(libs.junit.jupiter)
-
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // --- This dependency is used by the application.
@@ -85,7 +90,7 @@ dependencies {
 }
 
 // --- If the version is not provided, use the default
-version = appVersion ?: "x.xx.xx.xxx"
+version = "dev-SNAPSHOT"
 
 description = rootProject.name
 
@@ -98,7 +103,7 @@ java {
 application {
     // --- If the main class is not provided, use the default
     if (appMainClass.isNullOrEmpty()) {
-        mainClass.set("kickstarter.JsonDataGeneratorApp")
+        mainClass.set("kickstarter.AvroDataGeneratorApp")
     } else {
         mainClass.set("kickstarter." + appMainClass)
     }    
@@ -108,25 +113,22 @@ tasks.withType<Zip> {
     isZip64 = true
 }
 
-tasks {
-    val fatJar = register<Jar>("fatJar") {
-        dependsOn.addAll(listOf("compileJava", "processResources"))
-        archiveBaseName.set(rootProject.name)
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        manifest {
-            attributes["Main-Class"] = application.mainClass
-            attributes["Implementation-Title"] = rootProject.name
-            attributes["Implementation-Version"] = project.version
-        }
-        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) } + sourceSets.main.get().output)
-    }
-    build {
-        dependsOn(fatJar)
+tasks.shadowJar {
+    archiveBaseName.set(rootProject.name)
+    archiveClassifier.set("")
+    mergeServiceFiles()
+    
+    manifest {
+        attributes(
+            "Main-Class" to application.mainClass.get(),
+            "Implementation-Title" to rootProject.name,
+            "Implementation-Version" to project.version
+        )
     }
 }
 
-tasks.compileJava {
-    options.isIncremental = false
+tasks.build {
+    dependsOn(tasks.shadowJar)
 }
 
 tasks.named<Test>("test") {

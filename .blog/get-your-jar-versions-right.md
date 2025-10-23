@@ -81,7 +81,7 @@ dependencies {
 }
 
 // --- If the version is not provided, use the default
-version = appVersion ?: "x.xx.xx.xxx"
+version = appVersion ?: "dev-SNAPSHOT"
 
 description = rootProject.name
 

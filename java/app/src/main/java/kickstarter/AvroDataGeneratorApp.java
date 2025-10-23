@@ -7,7 +7,14 @@
  */
 package kickstarter;
 
-import org.apache.flink.formats.avro.registry.confluent.ConfluentRegistryAvroSerializationSchema;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import org.apache.avro.Conversions.DecimalConversion;
+import org.apache.avro.LogicalTypes;
+import org.apache.avro.Schema;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -15,30 +22,34 @@ import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
 import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.datagen.source.DataGeneratorSource;
-import org.apache.flink.connector.kafka.sink.*;
-import org.apache.flink.streaming.api.datastream.*;
-import org.apache.flink.streaming.api.environment.*;
-import org.apache.flink.table.api.*;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
+import org.apache.flink.formats.avro.registry.confluent.ConfluentRegistryAvroSerializationSchema;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.flink.table.data.*;
-import org.apache.flink.table.types.logical.*;
-import org.apache.flink.types.*;
-import org.apache.flink.table.catalog.*;
-import org.apache.iceberg.catalog.*;
-import org.apache.iceberg.flink.*;
-import org.apache.iceberg.flink.sink.FlinkSink;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.avro.Conversions.DecimalConversion;
-import org.apache.avro.Schema;
-
-import java.util.*;
-
-import org.apache.avro.*;
+import org.apache.flink.table.catalog.CatalogDatabaseImpl;
+import org.apache.flink.table.catalog.CatalogDescriptor;
+import org.apache.flink.table.catalog.ObjectPath;
 import org.apache.flink.table.catalog.exceptions.CatalogException;
 import org.apache.flink.table.catalog.exceptions.DatabaseAlreadyExistException;
-import org.slf4j.*;
+import org.apache.flink.table.data.DecimalData;
+import org.apache.flink.table.data.GenericRowData;
+import org.apache.flink.table.data.RowData;
+import org.apache.flink.table.data.StringData;
+import org.apache.flink.table.types.logical.RowType;
+import org.apache.flink.types.RowKind;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.iceberg.catalog.TableIdentifier;
+import org.apache.iceberg.flink.CatalogLoader;
+import org.apache.iceberg.flink.TableLoader;
+import org.apache.iceberg.flink.sink.FlinkSink;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import kickstarter.model.*;
+import kickstarter.model.AirlineAvroData;
 
 
 /**
@@ -117,8 +128,8 @@ public class AvroDataGeneratorApp {
         Map<String, String> registryConfigs = Common.extractRegistryConfigs(producerProperties);
 
         // --- Create the data streams for the two airlines.
-        DataStream<AirlineAvroData> skyOneDataStream = SinToKafkaTopic(env, "SKY1", "skyone", producerProperties, registryConfigs);
-        DataStream<AirlineAvroData> sunsetDataStream = SinToKafkaTopic(env, "SUN", "sunset", producerProperties, registryConfigs);
+        DataStream<AirlineAvroData> skyOneDataStream = SinkToKafkaTopic(env, "SKY1", "skyone", producerProperties, registryConfigs);
+        DataStream<AirlineAvroData> sunsetDataStream = SinkToKafkaTopic(env, "SUN", "sunset", producerProperties, registryConfigs);
 
         // --- Describes and configures the catalog for the Table API and Flink SQL.
         String catalogName = "apache_kickstarter";
@@ -197,7 +208,8 @@ public class AvroDataGeneratorApp {
         try {            
             env.execute("AvroDataGeneratorApp");
         } catch (Exception e) {
-            LOGGER.error("The App stopped early due to the following: {}", e.getMessage());
+            LOGGER.error("The App stopped early due to the following: {}", e.getMessage(), e);
+            throw e; // --- Rethrow the exception to signal failure.
         }
 	}
 
@@ -212,7 +224,7 @@ public class AvroDataGeneratorApp {
      * 
      * @return The data stream.
      */
-    private static DataStream<AirlineAvroData> SinToKafkaTopic(final StreamExecutionEnvironment env, final String airlinePrefix, final String airline, Properties producerProperties, Map<String, String> registryConfigs) {
+    private static DataStream<AirlineAvroData> SinkToKafkaTopic(final StreamExecutionEnvironment env, final String airlinePrefix, final String airline, Properties producerProperties, Map<String, String> registryConfigs) {
         // --- Create a data generator source.
         DataGeneratorSource<AirlineAvroData> airlineSource =
             new DataGeneratorSource<>(
@@ -267,7 +279,7 @@ public class AvroDataGeneratorApp {
     private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineAvroData> airlineDataStream) {
         // --- Convert DataStream<AirlineData> to DataStream<RowData>
         @SuppressWarnings("Convert2Lambda")
-        DataStream<RowData> skyOneRowData = airlineDataStream.map(new MapFunction<AirlineAvroData, RowData>() {
+        DataStream<RowData> rowDataStream = airlineDataStream.map(new MapFunction<AirlineAvroData, RowData>() {
             @Override
             public RowData map(AirlineAvroData airlineData) throws Exception {
                 GenericRowData rowData = new GenericRowData(RowKind.INSERT, fieldCount);
@@ -320,12 +332,16 @@ public class AvroDataGeneratorApp {
         /*
          * Writes data from the Apache Flink datastream to an Apache Iceberg table using upsert logic, where updates or insertions 
          * are decided based on the specified equality fields (i.e., "email_address", "departure_airport_code", "arrival_airport_code").
+         * 
+         * IMPORTANT: For Flink 2.x, the .append() method returns a DataStreamSink which must be used to properly attach
+         * the sink to the execution graph. We chain .name() to set the operator name.
          */
         FlinkSink
-            .forRowData(skyOneRowData)
+            .forRowData(rowDataStream)
             .tableLoader(tableLoader)
             .upsert(true)
             .equalityFieldColumns(Arrays.asList("email_address", "departure_airport_code", "arrival_airport_code"))
-            .append();
+            .append()
+            .name(tableName + "_iceberg_sink");
     }
 }
