@@ -22,7 +22,8 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import java.time.*;
 import java.util.*;
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import kickstarter.helper.SnakeCaseJsonDeserializationSchema;
 import kickstarter.model.*;
@@ -51,6 +52,33 @@ public class JsonFlyerStatsApp {
 
         // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+        /*
+         * Enable checkpointing every 5000 milliseconds (5 seconds).  Note, consider the
+         * resource cost of checkpointing frequency, as short intervals can lead to higher
+         * I/O and CPU overhead.  Proper tuning of checkpoint intervals depends on the
+         * state size, latency requirements, and resource constraints.
+         */
+        env.enableCheckpointing(5000);
+
+        /*
+         * Set checkpoint timeout to 60 seconds, which is the maximum amount of time a
+         * checkpoint attempt can take before being discarded.  Note, setting an appropriate
+         * checkpoint timeout helps maintain a balance between achieving exactly-once semantics
+         * and avoiding excessive delays that can impact real-time stream processing performance.
+         */
+        env.getCheckpointConfig().setCheckpointTimeout(60000);
+
+        /*
+         * Set the maximum number of concurrent checkpoints to 1 (i.e., only one checkpoint
+         * is created at a time).  Note, this is useful for limiting resource usage and
+         * ensuring checkpoints do not interfere with each other, but may impact throughput
+         * if checkpointing is slow.  Adjust this setting based on the nature of your job,
+         * the size of the state, and available resources. If your environment has enough
+         * resources and you want to ensure faster recovery, you could increase the limit
+         * to allow multiple concurrent checkpoints.
+         */
+        env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
 
         // --- Kafka Consumer and Producer Client Properties
         Properties consumerProperties = Common.collectConfluentProperties(env, serviceAccountUser, true);
