@@ -7,6 +7,7 @@
  */
 package kickstarter;
 
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
@@ -16,8 +17,30 @@ import org.apache.flink.util.Collector;
 import kickstarter.model.FlyerStatsAvroData;
 
 
-class FlyerStatsAvroDataProcessWindowFunction extends ProcessWindowFunction<FlyerStatsAvroData, FlyerStatsAvroData, String, TimeWindow> {
-    private ValueStateDescriptor<FlyerStatsAvroData> stateDescriptor;
+/**
+ * Window processing function that accumulates flyer statistics across time windows.
+ * Maintains global state to track cumulative statistics (total flight duration and
+ * number of flights) for each user across all processing windows.
+ */
+public class FlyerStatsAvroDataProcessWindowFunction extends ProcessWindowFunction<FlyerStatsAvroData, FlyerStatsAvroData, String, TimeWindow> {
+    // --- Best practice for Serialization classes in Flink: define a serial version UID for serialization
+    private static final long serialVersionUID = 1L;
+
+    // --- State Descriptor should not be serialized; they're recreated in open()
+    private transient ValueStateDescriptor<FlyerStatsAvroData> stateDescriptor;
+
+    /**
+     * Initializes the state descriptor. This method is called once when the function
+     * is instantiated, ensuring optimal performance by avoiding repeated descriptor creation.
+     * 
+     * @param parameters The configuration parameters for this function
+     * @throws Exception if the initialization fails
+     */
+    @Override
+    public void open(OpenContext openContext) throws Exception {
+        super.open(openContext);
+        stateDescriptor = new ValueStateDescriptor<>("user_statistics", FlyerStatsAvroData.class);
+    }
 
     /**
      * The process method is called for each window, and it processes the elements in the window.  It instantiates a new ValueStateDescriptor
@@ -33,8 +56,6 @@ class FlyerStatsAvroDataProcessWindowFunction extends ProcessWindowFunction<Flye
      */
     @Override
     public void process(String emailAddress, Context context, Iterable<FlyerStatsAvroData> statsList, Collector<FlyerStatsAvroData> collector) throws Exception {
-        stateDescriptor = new ValueStateDescriptor<>("User Statistics", FlyerStatsAvroData.class);
-
         // --- Retrieve the state that is persisted across windows
         ValueState<FlyerStatsAvroData> state = 
             context
@@ -46,11 +67,16 @@ class FlyerStatsAvroDataProcessWindowFunction extends ProcessWindowFunction<Flye
 
         // --- Merge the stats
         for (FlyerStatsAvroData newStats: statsList) {
-            if(accumulatedStats == null)
+            if(accumulatedStats == null) {
                 // --- This is the first time we've seen this flyer stats
-                accumulatedStats = newStats;
-            else
+                accumulatedStats = new FlyerStatsAvroData();
+                accumulatedStats.setEmailAddress(emailAddress);
+                accumulatedStats.setTotalFlightDuration(newStats.getTotalFlightDuration());
+                accumulatedStats.setNumberOfFlights(newStats.getNumberOfFlights());
+            } else {
+                // --- Merge with existing accumulated stats
                 accumulatedStats = merge(accumulatedStats, newStats);
+            }
         }
 
         // --- Update the stored state
@@ -61,17 +87,18 @@ class FlyerStatsAvroDataProcessWindowFunction extends ProcessWindowFunction<Flye
     }
 
     /**
-     * The merge method is called to merge two FlyerStatsAvroData objects.
+     * Merges two FlyerStatsAvroData objects by summing their flight durations and flight counts.
+     * Creates a new object to avoid mutating the state directly.
      * 
-     * @param flyerStatsAvroData1 The first FlyerStatsAvroData object. 
-     * @param flyerStatsAvroData2 The second FlyerStatsAvroData object.
-     * 
-     * @return The merged FlyerStatsAvroData object.
+     * @param existing The existing accumulated statistics
+     * @param newStats The new statistics to merge
+     * @return A new FlyerStatsAvroData object with the merged statistics
      */
-    private FlyerStatsAvroData merge(FlyerStatsAvroData flyerStatsAvroData1, FlyerStatsAvroData flyerStatsAvroData2) {
-        flyerStatsAvroData1.setTotalFlightDuration(flyerStatsAvroData1.getTotalFlightDuration() + flyerStatsAvroData2.getTotalFlightDuration());
-        flyerStatsAvroData1.setNumberOfFlights(flyerStatsAvroData1.getNumberOfFlights() + flyerStatsAvroData2.getNumberOfFlights());
-
-        return flyerStatsAvroData1;
+    private FlyerStatsAvroData merge(FlyerStatsAvroData existing, FlyerStatsAvroData newStats) {
+        FlyerStatsAvroData merged = new FlyerStatsAvroData();
+        merged.setEmailAddress(existing.getEmailAddress());
+        merged.setTotalFlightDuration(existing.getTotalFlightDuration() + newStats.getTotalFlightDuration());
+        merged.setNumberOfFlights(existing.getNumberOfFlights() + newStats.getNumberOfFlights());
+        return merged;
     }
 }
