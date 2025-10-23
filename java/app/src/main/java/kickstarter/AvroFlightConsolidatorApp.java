@@ -23,6 +23,7 @@ package kickstarter;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Properties;
 
@@ -45,6 +46,8 @@ import kickstarter.model.FlightAvroData;
 
 public class AvroFlightConsolidatorApp {
     private static final Logger logger = LoggerFactory.getLogger(AvroFlightConsolidatorApp.class);
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     
 
 	/**
@@ -161,7 +164,7 @@ public class AvroFlightConsolidatorApp {
          * Defines the workflow for the Flink job graph (DAG) by connecting the data streams and
          * applying transformations to the data streams
          */
-        consolidatesFlightData(skyOneStream, sunsetStream)
+        consolidateFlightData(skyOneStream, sunsetStream)
             .sinkTo(flightSink)
             .name("flightdata_sink");
 
@@ -181,45 +184,66 @@ public class AvroFlightConsolidatorApp {
      * @param sunsetSource - The datastream source for the `sunset_avro` Kafka topic
      * @return the consolidate flight data into one datastream.
      */
-	public static DataStream<FlightAvroData> consolidatesFlightData(DataStream<AirlineAvroData> skyOneSource, DataStream<AirlineAvroData> sunsetSource) {
+	public static DataStream<FlightAvroData> consolidateFlightData(DataStream<AirlineAvroData> skyOneSource, DataStream<AirlineAvroData> sunsetSource) {
         DataStream<FlightAvroData> skyOneFlightStream = 
             skyOneSource
-                .filter(flight -> LocalDateTime.parse(flight.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).isAfter(LocalDateTime.now()))
-                .map(flight -> 
-                    {
-                        FlightAvroData flightData = new FlightAvroData();
-
-                        flightData.setEmailAddress(flight.getEmailAddress());
-                        flightData.setDepartureTime(flight.getDepartureTime());
-                        flightData.setDepartureAirportCode(flight.getDepartureAirportCode());
-                        flightData.setArrivalTime(flight.getArrivalTime());
-                        flightData.setArrivalAirportCode(flight.getArrivalAirportCode());
-                        flightData.setFlightNumber(flight.getFlightNumber());
-                        flightData.setConfirmationCode(flight.getConfirmationCode());
-                        
-                        flightData.setAirline("SkyOne");
-                        return flightData;
-                    });
+                .filter(flight -> isFutureFlight(flight))
+                .map(flight -> transformToFlightData(flight, "SkyOne"))
+                .name("skyone_flight_transform");
 
 		DataStream<FlightAvroData> sunsetFlightStream = 
             sunsetSource
-                .filter(flight -> LocalDateTime.parse(flight.getArrivalTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).isAfter(LocalDateTime.now()))
-                .map(flight -> 
-                    {
-                        FlightAvroData flightData = new FlightAvroData();
-
-                        flightData.setEmailAddress(flight.getEmailAddress());
-                        flightData.setDepartureTime(flight.getDepartureTime());
-                        flightData.setDepartureAirportCode(flight.getDepartureAirportCode());
-                        flightData.setArrivalTime(flight.getArrivalTime());
-                        flightData.setArrivalAirportCode(flight.getArrivalAirportCode());
-                        flightData.setFlightNumber(flight.getFlightNumber());
-                        flightData.setConfirmationCode(flight.getConfirmationCode());
-                        
-                        flightData.setAirline("Sunset");
-                        return flightData;
-                    });
+                .filter(flight -> isFutureFlight(flight))
+                .map(flight -> transformToFlightData(flight, "Sunset"))
+                .name("sunset_flight_transform");
 
 		return skyOneFlightStream.union(sunsetFlightStream);
+    }
+
+    /**
+     * Checks if a flight's arrival time is in the future.
+     * Includes null safety and exception handling for malformed dates.
+     * 
+     * @param flight The airline flight data
+     * @return true if the flight arrives in the future, false otherwise
+     */
+    private static boolean isFutureFlight(AirlineAvroData flight) {
+        try {
+            // --- Null check for flight and arrival time
+            if (flight == null || flight.getArrivalTime() == null) {
+                logger.warn("Flight or arrival time is null, filtering out");
+                return false;
+            }
+
+            LocalDateTime arrivalTime = LocalDateTime.parse(flight.getArrivalTime(), DATE_TIME_FORMATTER);
+            return arrivalTime.isAfter(LocalDateTime.now());
+        } catch (DateTimeParseException e) {
+            logger.warn("Failed to parse arrival time for flight {}: {}", 
+                flight != null ? flight.getFlightNumber() : "unknown", 
+                e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Transforms airline-specific data into the unified FlightAvroData format.
+     * 
+     * @param flight The source airline data
+     * @param airlineName The name of the airline
+     * @return The transformed flight data
+     */
+    private static FlightAvroData transformToFlightData(AirlineAvroData flight, String airlineName) {
+        FlightAvroData flightData = new FlightAvroData();
+
+        flightData.setEmailAddress(flight.getEmailAddress());
+        flightData.setDepartureTime(flight.getDepartureTime());
+        flightData.setDepartureAirportCode(flight.getDepartureAirportCode());
+        flightData.setArrivalTime(flight.getArrivalTime());
+        flightData.setArrivalAirportCode(flight.getArrivalAirportCode());
+        flightData.setFlightNumber(flight.getFlightNumber());
+        flightData.setConfirmationCode(flight.getConfirmationCode());
+        
+        flightData.setAirline(airlineName);
+        return flightData;
     }
 }
