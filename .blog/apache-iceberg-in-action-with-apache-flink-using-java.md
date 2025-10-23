@@ -530,7 +530,7 @@ try {
 First, build the Java application and then execute the Flink application. Run the following command in your Flink cluster environment from the terminal command line, as shown in the example below:
 
 ```bash
-flink run -class kickstarter.DataGeneratorApp apache_flink-kickstarter-x.xx.xx.xxx.jar -service-account-user <SERVICE_ACCOUNT_USER> -aws-region <AWS_REGION_NAME>
+flink run -class kickstarter.DataGeneratorApp apache_flink-kickstarter-dev-SNAPSHOT.jar -service-account-user <SERVICE_ACCOUNT_USER> -aws-region <AWS_REGION_NAME>
 ```
 
 If you don’t have your own Flink cluster environment, you can run it from Docker. I have created one specific to this project [here](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/README.md) that you can use.
