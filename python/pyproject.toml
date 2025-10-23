@@ -12,6 +12,7 @@ dependencies = [
     "cloudpickle>=2.2.1",
     "confluent-kafka>=2.12.1",
     "grpcio-tools>=1.29.0,<=1.71.0",
+    "numpy>=2.1.3",
     "plotly>=6.3.1",
     "py4j>=0.10.9.7",
     "pyiceberg>=0.10.0",
