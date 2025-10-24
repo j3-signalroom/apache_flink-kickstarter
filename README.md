@@ -60,7 +60,7 @@ Run the Docker containers (fully compatible with both **Apple Silicon (M-series)
 <!-- tocstop -->
 
 ## **1.0 The Apache Flink Kick-Starter Just Got Smarter: From Stream Processing to Real-Time Intelligence**
-The `apache_flink-kickstarter` project has been completely refreshed to keep pace with the fast-moving evolution of **[Apache Flink 2.1](https://nightlies.apache.org/flink/flink-docs-release-2.1/docs/learn-flink/overview/)** and **[Apache Iceberg 1.10](https://github.com/apache/iceberg/releases/tag/apache-iceberg-1.10.0)**. This isn’t just a routine maintenance update— it’s a strategic move that advances your real-time data platform into the next era of streaming and AI-driven decision-making.
+The `apache_flink-kickstarter` project has been completely refreshed to keep pace with the fast-moving evolution of **[Apache Flink v2.1](https://nightlies.apache.org/flink/flink-docs-release-2.1/docs/learn-flink/overview/)** and **[Apache Iceberg v1.10](https://github.com/apache/iceberg/releases/tag/apache-iceberg-1.10.0)**. This isn’t just a routine maintenance update— it’s a strategic move that advances your real-time data platform into the next era of streaming and AI-driven decision-making.
 
 The upgrade updates the project with the latest APIs, performance improvements, and intelligent runtime hooks introduced since Apache Flink v1.20 and Apache Iceberg v1.7. The result: faster pipelines, improved observability, and new features that merge data engineering and data science.
 
