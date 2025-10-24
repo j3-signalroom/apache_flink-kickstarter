@@ -35,9 +35,8 @@ This section guides you through the local setup (on one machine but in separate 
 
 ```bash
 ./deploy-flink.sh <DOCKER_SWITCH> --profile=<AWS_SSO_PROFILE_NAME>
-                                        --chip=<amd64 | arm64>
-                                        --flink-language=python
-                                        [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]
+                                  --chip=<amd64 | arm64>
+                                  --flink-language=python
 ```
 > Argument placeholder|Replace with
 > -|-
@@ -45,7 +44,6 @@ This section guides you through the local setup (on one machine but in separate 
 > `<AWS_SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
 > `<CHIP>`|if you are running on a Mac with M1, M2, or M3 chip, use `arm64`.  Otherwise, use `amd64`.
 > `<FLINK_LANGUAGE>`|`python` to specify Python is the language base of the Flink Apps you plan on running.  Otherwise, specifiy `java` if the language base of the Flink Apps are Java.
-> `<AWS_S3_BUCKET_NAME>`|**[Optional]** can specify the name of the AWS S3 bucket used to store Apache Iceberg files.
 
 To learn more about this script, click [here](../.blog/deploy-flink-script-explanation.md).
 
@@ -62,8 +60,8 @@ Ready to launch one of those cool Java-to-Python Flink apps? Just use the [`flin
 ### 3.1 JSON formatted data
 Flink App|Flink Run Command
 -|-
-**`json_flight_consolidator_app`**|`uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/json_flight_consolidator_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>`
-**`json_flyer_stats_app`**|`uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/json_flyer_stats_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>`
+**`json_flight_consolidator_app`**|`uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/json_flight_consolidator_app.py`
+**`json_flyer_stats_app`**|`uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/json_flyer_stats_app.py`
 
 > Argument placeholder|Replace with
 > -|-
