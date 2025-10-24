@@ -156,7 +156,8 @@ public class AvroFlightConsolidatorApp {
          */
         KafkaSink<FlightAvroData> flightSink = KafkaSink.<FlightAvroData>builder()
             .setKafkaProducerConfig(producerProperties)
-            .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+            .setTransactionalIdPrefix("avro-flight-data-") // unique per job
+            .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
             .setRecordSerializer(flightSerializer)
             .build();
 

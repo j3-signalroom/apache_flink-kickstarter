@@ -253,7 +253,8 @@ public class AvroDataGeneratorApp {
             KafkaSink.<AirlineAvroData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(airlineSerializer)
-                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                .setTransactionalIdPrefix("avro-data-") // unique per job
+                .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
                 .build();
 
         /*

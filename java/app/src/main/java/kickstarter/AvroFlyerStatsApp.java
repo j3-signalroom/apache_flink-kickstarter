@@ -135,7 +135,8 @@ public class AvroFlyerStatsApp {
             KafkaSink.<FlyerStatsAvroData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(flyerStatsSerializer)
-                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                .setTransactionalIdPrefix("avro-flyer-stats-") // unique per job
+                .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
                 .build();
 
         /*
