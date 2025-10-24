@@ -75,7 +75,6 @@ public class AvroDataGeneratorApp {
      * When the runtime catches an exception, it aborts the task and lets the fail-over logic
 	 * decide whether to retry the task execution.
 	 */
-    @SuppressWarnings("CallToPrintStackTrace")
 	public static void main(String[] args) throws Exception {
         // --- Retrieve the value(s) from the command line argument(s).
         String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
