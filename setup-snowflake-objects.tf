@@ -64,106 +64,106 @@ resource "snowflake_execute" "catalog_integration" {
   EOT
 }
 
-# Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
-resource "snowflake_execute" "skyone_airline_iceberg_table" {
-  provider = snowflake
-  depends_on = [ 
-    snowflake_external_volume.external_volume,
-    snowflake_execute.catalog_integration,
-    aws_iam_role_policy_attachment.snowflake_s3_glue_policy_attachment,
-    aws_iam_role.update_snowflake_s3_glue_role
-  ]
+# # Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
+# resource "snowflake_execute" "skyone_airline_iceberg_table" {
+#   provider = snowflake
+#   depends_on = [ 
+#     snowflake_external_volume.external_volume,
+#     snowflake_execute.catalog_integration,
+#     aws_iam_role_policy_attachment.snowflake_s3_glue_policy_attachment,
+#     aws_iam_role.update_snowflake_s3_glue_role
+#   ]
 
-  execute = <<EOT
-    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SKYONE_AIRLINE
-      EXTERNAL_VOLUME = '${local.volume_name}'
-      CATALOG = '${local.catalog_integration_name}'
-      CATALOG_TABLE_NAME = 'SKYONE_AIRLINE';
-    EOT
+#   execute = <<EOT
+#     CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SKYONE_AIRLINE
+#       EXTERNAL_VOLUME = '${local.volume_name}'
+#       CATALOG = '${local.catalog_integration_name}'
+#       CATALOG_TABLE_NAME = 'SKYONE_AIRLINE';
+#     EOT
 
-  revert = <<EOT
-    DROP ICEBERG TABLE ${local.database_name}.${local.schema_name}.SKYONE_AIRLINE;
-  EOT
+#   revert = <<EOT
+#     DROP ICEBERG TABLE ${local.database_name}.${local.schema_name}.SKYONE_AIRLINE;
+#   EOT
 
-  query = <<EOT
-    DESCRIBE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SKYONE_AIRLINE;
-  EOT
-}
+#   query = <<EOT
+#     DESCRIBE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SKYONE_AIRLINE;
+#   EOT
+# }
 
-# Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
-resource "snowflake_execute" "sunset_airline_iceberg_table" {
-  provider = snowflake
-  depends_on = [ 
-    snowflake_external_volume.external_volume,
-    snowflake_execute.catalog_integration,
-    aws_iam_role_policy_attachment.snowflake_s3_glue_policy_attachment,
-    aws_iam_role.update_snowflake_s3_glue_role
-  ]
+# # Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
+# resource "snowflake_execute" "sunset_airline_iceberg_table" {
+#   provider = snowflake
+#   depends_on = [ 
+#     snowflake_external_volume.external_volume,
+#     snowflake_execute.catalog_integration,
+#     aws_iam_role_policy_attachment.snowflake_s3_glue_policy_attachment,
+#     aws_iam_role.update_snowflake_s3_glue_role
+#   ]
 
-  execute = <<EOT
-    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SUNSET_AIRLINE 
-      EXTERNAL_VOLUME = '${local.volume_name}'
-      CATALOG = '${local.catalog_integration_name}'
-      CATALOG_TABLE_NAME = 'SUNSET_AIRLINE';
-    EOT
+#   execute = <<EOT
+#     CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SUNSET_AIRLINE 
+#       EXTERNAL_VOLUME = '${local.volume_name}'
+#       CATALOG = '${local.catalog_integration_name}'
+#       CATALOG_TABLE_NAME = 'SUNSET_AIRLINE';
+#     EOT
 
-  revert = <<EOT
-    DROP ICEBERG TABLE ${local.database_name}.${local.schema_name}.SUNSET_AIRLINE;
-  EOT
+#   revert = <<EOT
+#     DROP ICEBERG TABLE ${local.database_name}.${local.schema_name}.SUNSET_AIRLINE;
+#   EOT
 
-  query = <<EOT
-    DESCRIBE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SUNSET_AIRLINE;
-  EOT
-}
+#   query = <<EOT
+#     DESCRIBE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SUNSET_AIRLINE;
+#   EOT
+# }
 
-# Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
-resource "snowflake_execute" "flight_iceberg_table" {
-  provider = snowflake
-  depends_on = [ 
-    snowflake_external_volume.external_volume,
-    snowflake_execute.catalog_integration,
-    aws_iam_role_policy_attachment.snowflake_s3_glue_policy_attachment,
-    aws_iam_role.update_snowflake_s3_glue_role
-  ]
+# # Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
+# resource "snowflake_execute" "flight_iceberg_table" {
+#   provider = snowflake
+#   depends_on = [ 
+#     snowflake_external_volume.external_volume,
+#     snowflake_execute.catalog_integration,
+#     aws_iam_role_policy_attachment.snowflake_s3_glue_policy_attachment,
+#     aws_iam_role.update_snowflake_s3_glue_role
+#   ]
 
-  execute = <<EOT
-    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLIGHT_AIRLINE 
-      EXTERNAL_VOLUME = '${local.volume_name}'
-      CATALOG = '${local.catalog_integration_name}'
-      CATALOG_TABLE_NAME = 'FLIGHT_AIRLINE';
-    EOT
+#   execute = <<EOT
+#     CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLIGHT_AIRLINE 
+#       EXTERNAL_VOLUME = '${local.volume_name}'
+#       CATALOG = '${local.catalog_integration_name}'
+#       CATALOG_TABLE_NAME = 'FLIGHT_AIRLINE';
+#     EOT
 
-  revert = <<EOT
-    DROP ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLIGHT_AIRLINE;
-  EOT
+#   revert = <<EOT
+#     DROP ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLIGHT_AIRLINE;
+#   EOT
 
-  query = <<EOT
-    DESCRIBE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLIGHT_AIRLINE;
-  EOT
-}
+#   query = <<EOT
+#     DESCRIBE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLIGHT_AIRLINE;
+#   EOT
+# }
 
-# Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
-resource "snowflake_execute" "flyer_stats_iceberg_table" {
-  provider = snowflake
-  depends_on = [ 
-    snowflake_external_volume.external_volume,
-    snowflake_execute.catalog_integration,
-    aws_iam_role_policy_attachment.snowflake_s3_glue_policy_attachment,
-    aws_iam_role.update_snowflake_s3_glue_role
-  ]
+# # Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
+# resource "snowflake_execute" "flyer_stats_iceberg_table" {
+#   provider = snowflake
+#   depends_on = [ 
+#     snowflake_external_volume.external_volume,
+#     snowflake_execute.catalog_integration,
+#     aws_iam_role_policy_attachment.snowflake_s3_glue_policy_attachment,
+#     aws_iam_role.update_snowflake_s3_glue_role
+#   ]
 
-  execute = <<EOT
-    CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLYER_STATS 
-      EXTERNAL_VOLUME = '${local.volume_name}'
-      CATALOG = '${local.catalog_integration_name}'
-      CATALOG_TABLE_NAME = 'FLYER_STATS';
-    EOT
+#   execute = <<EOT
+#     CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLYER_STATS 
+#       EXTERNAL_VOLUME = '${local.volume_name}'
+#       CATALOG = '${local.catalog_integration_name}'
+#       CATALOG_TABLE_NAME = 'FLYER_STATS';
+#     EOT
 
-  revert = <<EOT
-    DROP ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLYER_STATS;
-  EOT
+#   revert = <<EOT
+#     DROP ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLYER_STATS;
+#   EOT
 
-  query = <<EOT
-    DESCRIBE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLYER_STATS;
-  EOT
-}
+#   query = <<EOT
+#     DESCRIBE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLYER_STATS;
+#   EOT
+# }

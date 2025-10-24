@@ -13,7 +13,7 @@ locals {
     location_name                   = "${local.generic_name}_LOCATION"
     security_admin_role             = "${local.generic_name}_SECURITY_ADMIN_ROLE"
     system_admin_role               = "${local.generic_name}_SYSTEM_ADMIN_ROLE"
-    catalog_namespace               = "AIRLINES.DB"
+    catalog_namespace               = "airlines.db"
     confluent_secrets_path_prefix   = "/confluent_cloud_resource/${local.secrets_insert}"
     snowflake_secrets_path_prefix   = "/snowflake_resource/${local.secrets_insert}"
     snowflake_aws_role_name         = "snowflake_role"
