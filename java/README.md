@@ -30,9 +30,9 @@ Curious about the differences between the DataStream API and Table API? Click [h
 This section guides you through the local setup (on one machine but in separate containers) of the Apache Flink cluster in Session mode using Docker containers with support for Apache Iceberg.  Run the `bash` script below to start the Apache Flink cluster in Session Mode on your machine:
 
 ```bash
-scripts/run-flink-locally.sh <DOCKER_SWITCH> --profile=<AWS_SSO_PROFILE_NAME>
-                                             --chip=<amd64 | arm64>
-                                             --flink-language=<python | java>
+./deploy-flink.sh <DOCKER_SWITCH> --profile=<AWS_SSO_PROFILE_NAME>
+                                  --chip=<amd64 | arm64>
+                                  --flink-language=<python | java>
 ```
 > Argument placeholder|Replace with
 > -|-
