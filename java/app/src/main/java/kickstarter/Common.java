@@ -11,6 +11,7 @@ package kickstarter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -42,26 +43,38 @@ public class Common {
 	}
 
     /**
-     * This method Loops through the `args` parameter and checks for the argument.
+     * This method Loops through the `args` parameter and gets the value for the argument.
      * 
      * @param args list of strings passed to the main method.
      * @param argument the argument to check for.
-     * @return true if the flag is found, false otherwise.
+     * @return the value of the argument if found, empty string otherwise.
      */
     public static String getAppArgumentValue(final String[] args, final String argument) {
-        String serviceAccountUser = "";
-        
+        // --- Validate the args parameter
+        if (args == null) {
+            throw new IllegalArgumentException("Arguments array cannot be null");
+        }
+
+        // --- Validate the argument parameter
+        if (argument == null || argument.trim().isEmpty()) {
+            throw new IllegalArgumentException("Argument cannot be null or empty.");
+        }
+
         // --- Loop through the args parameter and check for the argument
-        Iterator <String> iterator = List.of(args).iterator();
-        while (iterator.hasNext()) {
-            String arg = iterator.next();
-			if(arg.equalsIgnoreCase(argument)) {
-                if(iterator.hasNext()) {
-                    serviceAccountUser = iterator.next();
+        for (int index = 0; index < args.length; index++) {
+            String arg = args[index];
+            if (arg == null) {
+                continue;
+            }
+            if(arg.equalsIgnoreCase(argument)) {
+                if(index + 1 < args.length) {
+                    return args[index + 1];
+                } else {
+                    throw new IllegalArgumentException("Argument " + argument + " requires a value");
                 }
             }
-		}
-        return serviceAccountUser;
+        }
+        return "";
     }
 
     /**

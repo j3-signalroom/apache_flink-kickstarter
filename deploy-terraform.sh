@@ -228,22 +228,34 @@ else
     aws secretsmanager delete-secret $AWS_PROFILE --secret-id /snowflake_resource/${service_account_user}/rsa_private_key_pem_1 --force-delete-without-recovery || true
     aws secretsmanager delete-secret $AWS_PROFILE --secret-id /snowflake_resource/${service_account_user}/rsa_private_key_pem_2 --force-delete-without-recovery || true
 
-    # Delete the AWS Glue Data Catalog Database, and all associated tables within database will also be deleted
-    glue_database_name="airlines.db"
-    echo "Getting list of tables in database '$glue_database_name'..."
-    airlines=$(aws glue get-tables --database-name "$glue_database_name" --query 'TableList[].Name' --output text)
+    # Gets glue_database_name of the Glue Database created during the apply run
+    glue_database_name=$(terraform output -raw glue_database_name)
 
-    if [ ! -z "$airlines" ]
+    # Check if the glue_database_name contains the word "warning", because the output
+    # variable may not exist
+    if echo "$glue_database_name" | grep -iq "warning"
     then
-        echo "Found tables: $airlines"
-        echo "Deleting tables first..."
-        
-        for airline in $airlines; do
-            echo "Deleting table: $airline"
-            aws glue delete-table --database-name "$glue_database_name" --name "$airline"
-        done
+       glue_database_name="" 
     fi
+
+    # Delete the AWS Glue Data Catalog Database, and all associated tables within database will also be deleted
+    if [ ! -z "$glue_database_name" ]
+    then
+        echo "Getting list of tables in database '$glue_database_name'..."
+        airlines=$(aws glue get-tables --database-name "$glue_database_name" --query 'TableList[].Name' --output text)
+
+        if [ ! -z "$airlines" ]
+        then
+            echo "Found tables: $airlines"
+            echo "Deleting tables first..."
+            
+            for airline in $airlines; do
+                echo "Deleting table: $airline"
+                aws glue delete-table --database-name "$glue_database_name" --name "$airline"
+            done
+        fi
     
-    echo "Deleting database '$glue_database_name'..."
-    aws glue delete-database --name "$glue_database_name"
+        echo "Deleting database '$glue_database_name'..."
+        aws glue delete-database --name "$glue_database_name"
+    fi
 fi
