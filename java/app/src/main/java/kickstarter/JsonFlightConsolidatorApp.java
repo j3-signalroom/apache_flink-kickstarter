@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.configuration.ExternalizedCheckpointRetention;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
@@ -71,12 +72,27 @@ public class JsonFlightConsolidatorApp {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         /*
-         * Enable checkpointing every 5000 milliseconds (5 seconds).  Note, consider the
+         * Enable checkpointing every 10,000 milliseconds (10 seconds).  Note, consider the
          * resource cost of checkpointing frequency, as short intervals can lead to higher
          * I/O and CPU overhead.  Proper tuning of checkpoint intervals depends on the
          * state size, latency requirements, and resource constraints.
          */
-        env.enableCheckpointing(5000);
+        env.enableCheckpointing(10000);
+
+        // --- Set minimum pause between checkpoints to 5,000 milliseconds (5 seconds).
+        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(5000);
+
+        // --- Set tolerable checkpoint failure number to 3.
+        env.getCheckpointConfig().setTolerableCheckpointFailureNumber(3);
+
+        /*
+         * Externalized Checkpoint Retention: RETAIN_ON_CANCELLATION" means that the system will keep the
+         * checkpoint data in persistent storage even if the job is manually canceled. This allows you to
+         * later restore the job from that last saved state, which is different from the default behavior,
+         * where checkpoints are deleted on cancellation. This setting requires you to manually clean up
+         * the checkpoint state later if it's no longer needed. 
+         */
+        env.getCheckpointConfig().setExternalizedCheckpointRetention(ExternalizedCheckpointRetention.RETAIN_ON_CANCELLATION);
 
         /*
          * Set checkpoint timeout to 60 seconds, which is the maximum amount of time a
