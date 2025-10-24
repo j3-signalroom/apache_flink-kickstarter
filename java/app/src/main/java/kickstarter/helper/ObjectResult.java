@@ -11,10 +11,10 @@ package kickstarter.helper;
 
 
 public class ObjectResult<T> {
-    private boolean successful;
-    private String errorMessageCode;
-    private String errorMessage;
-    private T t;
+    private final boolean successful;
+    private final String errorMessageCode;
+    private final String errorMessage;
+    private final T t;
 
     /**
      * This is the default constructor method for when the object is successfully created.
