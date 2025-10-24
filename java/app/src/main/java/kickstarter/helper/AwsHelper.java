@@ -1,10 +1,9 @@
 /**
- * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * Copyright (c) 2024-2025 Jeffrey Jonathan Jennings
  * 
  * @author Jeffrey Jonathan Jennings (J3)
  * 
  * 
- * AWS helper functions.
  */
 package kickstarter.helper;
 
@@ -21,6 +20,9 @@ import java.security.InvalidParameterException;
 import java.util.*;
 
 
+/**
+ * AWS helper functions.
+ */
 public class AwsHelper {
 	public static final String DEFAULT_AWS_REGION = "us-east-1";
 
@@ -120,52 +122,44 @@ public class AwsHelper {
 		}
 
 		Region region = Region.of(awsRegion);
-		SsmClient ssmClient = 
-			SsmClient.builder()
-				.region(region)
-				.build();
+            try (SsmClient ssmClient = SsmClient.builder()
+                    .region(region)
+                    .build()) {
+                GetParametersByPathRequest getParametersByPathRequest =
+                        GetParametersByPathRequest.builder()
+                                .path(prefix)
+                                .recursive(true)
+                                .withDecryption(true)
+                                .build();
+                GetParametersByPathResponse response = ssmClient.getParametersByPath(getParametersByPathRequest);
 
-		GetParametersByPathRequest getParametersByPathRequest = 
-			GetParametersByPathRequest.builder()
-				.path(prefix)
-				.recursive(true)
-				.withDecryption(true)
-				.build();
-
-		GetParametersByPathResponse response = ssmClient.getParametersByPath(getParametersByPathRequest);
-
-        // Process the response
-        for (Parameter parameter : response.parameters()) {
-			// By default assume the parameter value is a string data type
-			String paramValue = parameter.value();
-
-			/*
-			 * Check if the value has zero decimal points, if so, maybe it's an integer
-			 * if not, go with the default string value
-			 */
-			if(parameter.value().chars().filter(ch -> ch == '.').count() == 0) {
-				try {
-					paramValue = String.valueOf(Integer.parseInt(parameter.value().replace("," ,"")));
-				} catch (Exception e) {
-					// --- Ignore
-				}
-			} else if (parameter.value().chars().filter(ch -> ch == '.').count() == 1) {
-				/*
-				 * Check if the value has only one decimal point, if so, maybe it's a float
-				 * if not, go with the default string value
-				 */
-				try {
-					paramValue = String.valueOf(Float.parseFloat(parameter.value().replace("[^\\d.]", "")));
-				} catch (Exception e) {
-					// --- Ignore
-				}
-			}
-			properties.setProperty(parameter.name().replace(prefix + "/", ""), paramValue);
-        }
-
-        // Close the client
-        ssmClient.close();
+                // --- Process the response
+                for (Parameter parameter : response.parameters()) {
+					properties.setProperty(parameter.name().replace(prefix + "/", ""), parseParameterValue(parameter.value()));
+                }
+            }
 
 		return new ObjectResult<>(properties);
 	}
+
+	/**
+	 * Parse the parameter value to determine if it is an integer, float, or string.
+	 *
+	 * @param value The parameter value.
+	 * @return The parsed parameter value.
+	 */
+	private static String parseParameterValue(String value) {
+		try {
+			// --- Try integer first
+			return String.valueOf(Integer.parseInt(value.replace(",", "")));
+		} catch (NumberFormatException e1) {
+			try {
+				// --- Try float
+				return String.valueOf(Float.parseFloat(value.replace(",", "")));
+			} catch (NumberFormatException e2) {
+				// --- Return as string
+				return value;
+			}
+		}
+	}	
 }
