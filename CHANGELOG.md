@@ -24,6 +24,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 - Issue [#706](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/706).
 - Issue [#707](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/707).
 - Issue [#708](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/708).
+- Issue [#722](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/722).
 
 ### Changed
 - Issue [#659](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/659).
