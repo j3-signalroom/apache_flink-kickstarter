@@ -8,16 +8,19 @@
 package kickstarter.helper;
 
 
-import java.util.*;
-import org.json.*;
+import java.util.Iterator;
+import java.util.Properties;
 
-import kickstarter.enums.*;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import kickstarter.enums.ErrorEnum;
 
 
 public class ConfluentClientConfiguration {
-	private String kafkaClusterSecretsPath;
-	private String schemaRegistryClusterSecretsPath;
-	private String kafkaClientParametersPath;
+	private final String kafkaClusterSecretsPath;
+	private final String schemaRegistryClusterSecretsPath;
+	private final String kafkaClientParametersPath;
 
 
 	/**

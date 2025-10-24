@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * Copyright (c) 2024-2025 Jeffrey Jonathan Jennings
  * 
  * @author Jeffrey Jonathan Jennings (J3)
  * 
@@ -7,32 +7,46 @@
  */
 package kickstarter;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
-import org.apache.flink.streaming.api.datastream.*;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.junit5.MiniClusterExtension;
-import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import java.time.*;
-import java.time.format.*;
-import java.util.*;
-import static org.junit.jupiter.api.Assertions.*;
 
-import kickstarter.model.*;
+import kickstarter.model.AirlineJsonData;
+import kickstarter.model.FlightJsonData;
 
 
+/**
+ * Unit tests for JsonFlightConsolidatorApp.
+ * Tests the workflow that consolidates flight data from SkyOne and Sunset airlines,
+ * filtering out past flights and converting to a unified FlightJsonData format.
+ */
 class JsonFlightConsolidatorAppTest {
 
     StreamExecutionEnvironment env;
     DataStream.Collector<FlightJsonData> collector;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    static final MiniClusterResourceConfiguration miniClusterConfig = new MiniClusterResourceConfiguration.Builder()
+
+    static final MiniClusterResourceConfiguration MINI_CLUSTER_CONFIG = new MiniClusterResourceConfiguration.Builder()
             .setNumberSlotsPerTaskManager(2)
             .setNumberTaskManagers(1)
             .build();
 
     @RegisterExtension
-    static final MiniClusterExtension FLINK = new MiniClusterExtension(miniClusterConfig);
+    static final MiniClusterExtension FLINK = new MiniClusterExtension(MINI_CLUSTER_CONFIG);
 
     private void assertContains(DataStream.Collector<FlightJsonData> collector, List<FlightJsonData> expected) {
         List<FlightJsonData> actual = new ArrayList<>();
@@ -64,13 +78,13 @@ class JsonFlightConsolidatorAppTest {
 
     @Test
     void defineWorkflow_shouldFilterOutFlightsInThePast() throws Exception {
-        final String addMinuteToNow = LocalDateTime.now().plusMinutes(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        final String subtractSecondToNow = LocalDateTime.now().minusSeconds(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        final String futureArrivalTime = LocalDateTime.now().plusMinutes(1).format(DATE_TIME_FORMATTER);
+        final String pastArrivalTime = LocalDateTime.now().minusSeconds(1).format(DATE_TIME_FORMATTER);
 
-        AirlineJsonData newSkyOneFlight = new JsonTestHelpers.AirlineFlightDataBuilder().setArrivalTime(addMinuteToNow).build();
-        AirlineJsonData oldSkyOneFlight = new JsonTestHelpers.AirlineFlightDataBuilder().setArrivalTime(subtractSecondToNow).build();
-        AirlineJsonData newSunsetFlight = new JsonTestHelpers.AirlineFlightDataBuilder().setArrivalTime(addMinuteToNow).build();
-        AirlineJsonData oldSunsetFlight = new JsonTestHelpers.AirlineFlightDataBuilder().setArrivalTime(subtractSecondToNow).build();
+        AirlineJsonData newSkyOneFlight = new JsonTestHelpers.AirlineFlightDataBuilder().setArrivalTime(futureArrivalTime).build();
+        AirlineJsonData oldSkyOneFlight = new JsonTestHelpers.AirlineFlightDataBuilder().setArrivalTime(pastArrivalTime).build();
+        AirlineJsonData newSunsetFlight = new JsonTestHelpers.AirlineFlightDataBuilder().setArrivalTime(futureArrivalTime).build();
+        AirlineJsonData oldSunsetFlight = new JsonTestHelpers.AirlineFlightDataBuilder().setArrivalTime(pastArrivalTime).build();
 
         DataStreamSource<AirlineJsonData> skyOneStream = env.fromData(newSkyOneFlight, oldSkyOneFlight);
         DataStreamSource<AirlineJsonData> sunsetStream = env.fromData(newSunsetFlight, oldSunsetFlight);

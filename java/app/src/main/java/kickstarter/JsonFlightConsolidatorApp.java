@@ -25,19 +25,19 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.configuration.ExternalizedCheckpointRetention;
-import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.base.DeliveryGuarantee;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.formats.json.JsonSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import kickstarter.helper.SnakeCaseJsonDeserializationSchema;
 import kickstarter.model.AirlineJsonData;
@@ -142,7 +142,7 @@ public class JsonFlightConsolidatorApp {
             .setTopics("sunset")
             .setGroupId("sunset_group")
             .setStartingOffsets(OffsetsInitializer.earliest())
-            .setValueOnlyDeserializer(new SnakeCaseJsonDeserializationSchema<AirlineJsonData>(AirlineJsonData.class))
+            .setValueOnlyDeserializer(new SnakeCaseJsonDeserializationSchema<>(AirlineJsonData.class))
             .build();
 
         /*

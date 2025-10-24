@@ -9,23 +9,27 @@
  */
 package kickstarter;
 
+import java.time.Duration;
+import java.util.Properties;
+
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.configuration.ExternalizedCheckpointRetention;
 import org.apache.flink.connector.base.DeliveryGuarantee;
-import org.apache.flink.connector.kafka.sink.*;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
-import org.apache.flink.formats.json.*;
-import org.apache.flink.streaming.api.datastream.*;
+import org.apache.flink.formats.json.JsonSerializationSchema;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import java.time.*;
-import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import kickstarter.helper.SnakeCaseJsonDeserializationSchema;
-import kickstarter.model.*;
+import kickstarter.model.FlightJsonData;
+import kickstarter.model.FlyerStatsJsonData;
 
 
 public class JsonFlyerStatsApp {
@@ -126,7 +130,7 @@ public class JsonFlyerStatsApp {
             KafkaRecordSerializationSchema
                 .<FlyerStatsJsonData>builder()
                 .setTopic("flyer_stats")
-                .setValueSerializationSchema(new JsonSerializationSchema<FlyerStatsJsonData>(Common::getMapper))
+                .setValueSerializationSchema(new JsonSerializationSchema<>(Common::getMapper))
                 .build();
 
         /*
