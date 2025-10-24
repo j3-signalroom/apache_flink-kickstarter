@@ -283,7 +283,7 @@ public class AvroDataGeneratorApp {
             KafkaSink.<AirlineAvroData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(airlineSerializer)
-                .setTransactionalIdPrefix("avro-data-") // unique per job
+                .setTransactionalIdPrefix("avro-data-" + airline.toLowerCase() + "-") // to prevent the backchannel conflict and potential memory leaks
                 .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
                 .build();
 
