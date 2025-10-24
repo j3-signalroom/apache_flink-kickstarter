@@ -73,6 +73,8 @@ class JsonFlyerStatsAppTest {
         for (FlyerStatsJsonData actualStats : actual) {
             assertTrue(expected.contains(actualStats), String.format("Unexpected flyer stats found: %s. Expected stats: %s", actualStats, expected));
         }
+
+        LOGGER.debug("Assertion passed: collector contains exactly {} expected flyer stats", expected.size());
     }
 
     @BeforeEach
