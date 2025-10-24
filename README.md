@@ -85,6 +85,7 @@ The refreshed `apache_flink-kickstarter` codebase not only adopts new APIs but a
 - Optimized **serialization**, **deserialization**, and **connector performance** for Kafka, Iceberg, and S3.
 - **Cleaner configuration** and **modularized build logic** for easier deployment across environments.
 - Added **thread-safety** for random number generation in Flink applications.
+- Improved overall **performance** in all Flink applications.
 
 These changes turn the project into both a quick-start example and a **_living reference architecture_** for designing production-grade Apache Flink + Apache Iceberg applications in 2025.
 
