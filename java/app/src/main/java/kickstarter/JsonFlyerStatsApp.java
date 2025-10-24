@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * Copyright (c) 2024-2025 Jeffrey Jonathan Jennings
  * 
  * @author Jeffrey Jonathan Jennings (J3)
  * 
@@ -16,8 +16,6 @@ import org.apache.flink.connector.kafka.sink.*;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.formats.json.*;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.*;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
@@ -31,7 +29,7 @@ import kickstarter.model.*;
 
 
 public class JsonFlyerStatsApp {
-    private static final Logger logger = LoggerFactory.getLogger(JsonFlyerStatsApp.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonFlyerStatsApp.class);
 
 
 	/**
@@ -100,11 +98,6 @@ public class JsonFlyerStatsApp {
         Properties consumerProperties = Common.collectConfluentProperties(env, serviceAccountUser, true);
         Properties producerProperties = Common.collectConfluentProperties(env, serviceAccountUser, false);
 
-        // ---Configure ObjectMapper to ignore unknown properties
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
         /*
          * Sets up a Flink Kafka source to consume data from the Kafka topic `flight` with the
          * specified deserializer
@@ -161,7 +154,8 @@ public class JsonFlyerStatsApp {
             // --- Execute the Flink job graph (DAG)
             env.execute("JsonFlyerStatsApp");
         } catch (Exception e) {
-            logger.error("The App stopped early due to the following: {}", e.getMessage());
+            LOGGER.error("The App stopped early due to the following: ", e);
+            throw e;
         }        
     }
 
@@ -175,6 +169,7 @@ public class JsonFlyerStatsApp {
     public static DataStream<FlyerStatsJsonData> defineWorkflow(DataStream<FlightJsonData> flightDataSource) {
         return flightDataSource
             .map(FlyerStatsJsonData::new)
+            .name("flight_to_flyer_stats_map")
             .keyBy(FlyerStatsJsonData::getEmailAddress)
             .window(TumblingEventTimeWindows.of(Duration.ofMinutes(1)))
             .reduce(FlyerStatsJsonData::merge, new FlyerStatsJsonDataProcessWindowFunction())
