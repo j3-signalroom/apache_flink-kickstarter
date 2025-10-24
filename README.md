@@ -28,33 +28,72 @@ Run the Docker containers (fully compatible with both **Apple Silicon (M-series)
 **Table of Contents**
 
 <!-- toc -->
-+ [**1.0 Are these examples better described as Flink Jobs or Flink Applications-—and why does the distinction matter?**](#10-are-these-examples-better-described-as-flink-jobs-or-flink-applications-and-why-does-the-distinction-matter)
-+ [**2.0 Let's get started!**](#20-lets-get-started)
-    - [**2.1 What You’ll Learn**](#21-what-youll-learn)
-    - [**2.2 Beyond Kafka: Iceberg Integration**](#22-beyond-kafka-iceberg-integration)
-    - [**2.3 Run It Locally — Fast**](#23-run-it-locally--fast)
-    - [**2.4 Dive In**](#24-dive-in)
-    - [**2.5 Getting Started**](#25-getting-started)
-        * [**2.5.1 Cloud Prerequisites**](#251-cloud-prerequisites)
-        * [**2.5.2 Local Prerequisites**](#252-local-prerequisites)
-        * [**2.5.3 Clone the Repository**](#253-clone-the-repository)
-        * [**2.5.4 Set Up Your Environment**](#254-set-up-your-environment)
-        * [**2.5.5 Deploy Flink**](#255-deploy-flink)
-        * [**2.5.6 You're Ready!**](#256-youre-ready)
-    - [**2.6 DevOps in Action: Running Terraform**](#26-devops-in-action-running-terraform)
-        * [**2.6.1 Deploy Terraform**](#261-deploy-terraform)
-    - [**2.7 DevOps in Action: Running Terraform in the cloud**](#27-devops-in-action-deploying-terraform-in-the-cloud)
-        * [**2.7.1 Run from the cloud**](#271-run-from-the-cloud)
-    - [**2.8 Visualizing the Terraform Configuration**](#28-visualizing-the-terraform-configuration)
-+ [**3.0 Hands-On Kickoff: Practical Examples for Rapid Learning**](#30-hands-on-kickoff-practical-examples-for-rapid-learning)
-    - [**3.1 Flink Applications Powered by Java on a locally running Apache Flink Cluster in Docker**](#31-flink-applications-powered-by-java-on-a-locally-running-apache-flink-cluster-in-docker)
-    - [**3.2 Flink Applications Powered by Python on a locally running Apache Flink Cluster in Docker**](#32-flink-applications-powered-by-python-on-a-locally-running-apache-flink-cluster-in-docker)
-    - [**3.3 Flink Applications Powered by Python on Confluent Cloud for Apache Flink**](#33-flink-applications-powered-by-python-on-confluent-cloud-for-apache-flink)
-+ [**4.0 Powering Analytics with Apache Iceberg tables in Snowflake**](#40-powering-analytics-with-apache-iceberg-tables-in-snowflake)
-+ [**5.0 Resources**](#50-resources)
++ [**1.0 The Apache Flink Kick-Starter Just Got Smarter: From Stream Processing to Real-Time Intelligence**](#10-the-apache-flink-kick-starter-just-got-smarter-from-stream-processing-to-real-time-intelligence)
+    - [**1.1 Apache Flink v2.1: Real-Time AI and Smarter Streaming**](#11-apache-flink-v21-real-time-ai-and-smarter-streaming)
+    - [**1.2 Apache Iceberg v1.10: A Lakehouse Built for Modern Workloads**](#12-apache-iceberg-v110-a-lakehouse-built-for-modern-workloads)
+    - [**1.3 Behind the Scenes: Code, Performance, and Best Practices**](#13-behind-the-scenes-code-performance-and-best-practices)
+    - [**1.4 Why It Matters**](#14-why-it-matters)
++ [**2.0 Are these examples better described as Flink Jobs or Flink Applications-—and why does the distinction matter?**](#20-are-these-examples-better-described-as-flink-jobs-or-flink-applications-and-why-does-the-distinction-matter)
++ [**3.0 Let's get started!**](#30-lets-get-started)
+    - [**3.1 What You’ll Learn**](#31-what-youll-learn)
+    - [**3.2 Beyond Kafka: Iceberg Integration**](#32-beyond-kafka-iceberg-integration)
+    - [**3.3 Run It Locally — Fast**](#33-run-it-locally--fast)
+    - [**3.4 Dive In**](#34-dive-in)
+    - [**3.5 Getting Started**](#35-getting-started)
+        * [**3.5.1 Cloud Prerequisites**](#351-cloud-prerequisites)
+        * [**3.5.2 Local Prerequisites**](#352-local-prerequisites)
+        * [**3.5.3 Clone the Repository**](#353-clone-the-repository)
+        * [**3.5.4 Set Up Your Environment**](#354-set-up-your-environment)
+        * [**3.5.5 Deploy Flink**](#355-deploy-flink)
+        * [**3.5.6 You're Ready!**](#356-youre-ready)
+    - [**3.6 DevOps in Action: Running Terraform**](#36-devops-in-action-running-terraform)
+        * [**3.6.1 Deploy Terraform**](#361-deploy-terraform)
+    - [**3.7 DevOps in Action: Running Terraform in the cloud**](#37-devops-in-action-deploying-terraform-in-the-cloud)
+        * [**3.7.1 Run from the cloud**](#371-run-from-the-cloud)
+    - [**3.8 Visualizing the Terraform Configuration**](#38-visualizing-the-terraform-configuration)
++ [**4.0 Hands-On Kickoff: Practical Examples for Rapid Learning**](#40-hands-on-kickoff-practical-examples-for-rapid-learning)
+    - [**4.1 Flink Applications Powered by Java on a locally running Apache Flink Cluster in Docker**](#41-flink-applications-powered-by-java-on-a-locally-running-apache-flink-cluster-in-docker)
+    - [**4.2 Flink Applications Powered by Python on a locally running Apache Flink Cluster in Docker**](#42-flink-applications-powered-by-python-on-a-locally-running-apache-flink-cluster-in-docker)
+    - [**4.3 Flink Applications Powered by Python on Confluent Cloud for Apache Flink**](#43-flink-applications-powered-by-python-on-confluent-cloud-for-apache-flink)
++ [**5.0 Powering Analytics with Apache Iceberg tables in Snowflake**](#50-powering-analytics-with-apache-iceberg-tables-in-snowflake)
++ [**6.0 Resources**](#60-resources)
 <!-- tocstop -->
 
-## **1.0 Are these examples better described as Flink Jobs or Flink Applications-—and why does the distinction matter?**
+## **1.0 The Apache Flink Kick-Starter Just Got Smarter: From Stream Processing to Real-Time Intelligence**
+The `apache_flink-kickstarter` project has been completely refreshed to keep pace with the fast-moving evolution of **[Apache Flink 2.1](https://nightlies.apache.org/flink/flink-docs-release-2.1/docs/learn-flink/overview/)** and **[Apache Iceberg 1.10](https://github.com/apache/iceberg/releases/tag/apache-iceberg-1.10.0)**. This isn’t just a routine maintenance update— it’s a strategic move that advances your real-time data platform into the next era of streaming and AI-driven decision-making.
+
+The upgrade updates the project with the latest APIs, performance improvements, and intelligent runtime hooks introduced since Apache Flink v1.20 and Apache Iceberg v1.7. The result: faster pipelines, improved observability, and new features that merge data engineering and data science.
+
+### **1.1 Apache Flink v2.1: Real-Time AI and Smarter Streaming**
+If you’ve been holding steady on `v1.20`, the `v2.1` release is the inflection point where **stream processing meets machine learning**:
+- **AI/ML inside the stream:** Native model DDLs and inference functions allow you to deploy and run trained models directly in your Flink jobs—no sidecars, no hacks.
+- **Richer SQL & Table API:** Handle complex and semi-structured data with new [Process Table Functions (PTFs)](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/functions/ptfs/), faster joins, and more expressive queries.
+- **Operational superpowers:** Enhanced runtime hooks enable detailed performance tuning, state inspection, and adaptive write strategies.
+- **Evolution of purpose:** Flink’s story is shifting from *_real-time data processing_* to *_real-time intelligence_*.
+
+### **1.2 Apache Iceberg v1.10: A Lakehouse Built for Modern Workloads**
+For those on Apache Iceberg v1.7.x, version v1.10 marks the point when the open-table format truly matures:
+- **Broader ecosystem support:** Native compatibility with the latest Flink and Spark versions for a seamless hybrid stack.
+- **Smarter table specification:** Enables support for geospatial types, variant columns, and deletion vectors—enhancing advanced analytics and governance capabilities.
+- **Operational finesse:** Smarter compaction, more precise stats, and streaming-friendly enhancements that simplify managing long-running jobs.
+- **Future-proofing your platform:** Keeping it up-to-date guarantees access to the newest spec features and ongoing support from engine developers and vendors.
+
+### **1.3 Behind the Scenes: Code, Performance, and Best Practices**
+The refreshed `apache_flink-kickstarter` codebase not only adopts new APIs but also incorporates modern engineering principles:
+- Deprecated calls replaced with **new unified APIs**.
+- Best practices for **state management** and **checkpointing** to ensure reliability.
+- Optimized **serialization**, **deserialization**, and **connector performance** for Kafka, Iceberg, and S3.
+- **Cleaner configuration** and **modularized build logic** for easier deployment across environments.
+- Added **thread-safety** for random number generation in Flink applications.
+
+These changes turn the project into both a quick-start example and a **_living reference architecture_** for designing production-grade Apache Flink + Apache Iceberg applications in 2025.
+
+### **1.4 Why It Matters**
+The shift from batch analytics to continuous intelligence is occurring now.  Apache Flink v2.1 and Apache Iceberg v1.10 are not just incremental upgrades—they symbolize the merging of **_streaming_**, **_AI_**, and **_lakehouse architecture_**.
+
+By upgrading today, you’re not just boosting performance—you’re securing your data platform for the next era of real-time, model-driven decision systems.
+
+## **2.0 Are these examples better described as Flink Jobs or Flink Applications-—and why does the distinction matter?**
 
 > _"What's in a name? That which we call a rose by any other name would smell just as sweet."_
 >
@@ -68,10 +107,10 @@ By calling them *applications*, we highlight their **depth, sophistication, and 
 
 *(Curious why the terminology matters? Check out the rationale [here](.blog/rationale-behind-calling-it-flink-app.md)!)*
 
-## **2.0 Let's get started!**
+## **3.0 Let's get started!**
 As of **October 4, 2024**, **Apache Flink on Confluent Cloud** unlocks incredible potential for real-time stream processing—along with a few key nuances developers should know.  Currently, **Flink on Confluent Cloud** does **not** support the **DataStream API**, and its **Table API** has **limited functionality** (see supported features [here](https://github.com/confluentinc/flink-table-api-python-examples?tab=readme-ov-file#supported-api)), supporting Java and Python-based Flink applications. But don’t worry—**this repository bridges those gaps** with practical, production-ready examples.
 
-#### **2.1 What You’ll Learn**
+#### **3.1 What You’ll Learn**
 In this repo, you’ll find **Java-based examples using the Flink DataStream API** to go beyond Flink’s standard capabilities—like:
 
 * Securely retrieving **Kafka Cluster API keys** from **AWS Secrets Manager**
@@ -80,20 +119,20 @@ In this repo, you’ll find **Java-based examples using the Flink DataStream API
 
 Prefer Python? You’re covered there too. Using the **Flink Table API** and **User-Defined Table Functions (UDTFs)**, you can achieve the same secure, dynamic configuration loading while staying fully in Python.
 
-#### **2.2 Beyond Kafka: Iceberg Integration**
+#### **3.2 Beyond Kafka: Iceberg Integration**
 
 We don’t just stream data into Kafka topics—this project also demonstrates how to **sink data into Apache Iceberg tables**, combining **real-time event streaming** with **durable, analytical storage** for hybrid batch/stream processing.
-#### **2.3 Run It Locally — Fast**
+#### **3.3 Run It Locally — Fast**
 Spin up an **Apache Flink 2.1.0 cluster locally** in minutes using Docker—fully compatible with both **Apple Silicon (M-series)** and **x86 machines**. The Flink cluster connects seamlessly to **Confluent Cloud** for Kafka and Schema Registry resources, giving you a realistic, end-to-end development environment.
 
-#### **2.4 Dive In**
+#### **3.4 Dive In**
 Explore the examples, run the containers, and see how to build **secure, scalable, enterprise-grade Flink applications** that push the limits of what’s possible with modern data streaming.
 The future of real-time data pipelines starts here.
 
-#### **2.5 Getting Started**
+#### **3.5 Getting Started**
 Follow these steps to set up your environment and launch the complete **Apache Flink Kickstarter** stack—locally or in the cloud.
 
-##### **2.5.1 Cloud Prerequisites**
+##### **3.5.1 Cloud Prerequisites**
 
 Before you begin, ensure you have access to the following cloud accounts:
 
@@ -104,7 +143,7 @@ Before you begin, ensure you have access to the following cloud accounts:
 * **[Snowflake Account](https://app.snowflake.com/)** — for data warehousing and analytics
 * **[Terraform Cloud Account](https://app.terraform.io/)** — for automated infrastructure provisioning
 
-##### **2.5.2 Local Prerequisites**
+##### **3.5.2 Local Prerequisites**
 
 Make sure the following tools are installed on your local machine:
 
@@ -115,14 +154,14 @@ Make sure the following tools are installed on your local machine:
 * **[Python 3.12](https://www.python.org/downloads/release/python-3120/)**
 * **[Terraform CLI version 1.13.4](https://developer.hashicorp.com/terraform/install)**
 
-##### **2.5.3 Clone the Repository**
+##### **3.5.3 Clone the Repository**
 
 ```bash
 git clone https://github.com/j3-signalroom/apache_flink-kickstarter.git
 cd apache_flink-kickstarter
 ```
 
-##### **2.5.4 Set Up Your Environment**
+##### **3.5.4 Set Up Your Environment**
 
 You can set up the complete environment in one of two ways:
 
@@ -136,18 +175,18 @@ Both methods provision a fully functional **end-to-end data streaming architectu
 * **AWS Systems Manager Parameter Store** for Kafka client configuration (consumer/producer properties)
 * An **AWS S3 bucket** with a dedicated `warehouse/` folder serving as the **landing zone for Apache Iceberg Tables**—populated by two Python-based Flink applications
 
-##### **2.5.5 Run Flink Locally**
+##### **3.5.5 Run Flink Locally**
 
 You can run **Apache Flink** locally on your Mac or use the **provided Docker containers** to launch Flink and Iceberg seamlessly—compatible with both **Apple Silicon (M-series)** and **x86 architectures**.
 
-##### **2.5.6 You're Ready!**
+##### **3.5.6 You're Ready!**
 
 Once deployed, you’ll have a **complete enterprise-grade data streaming environment**—secure, scalable, and ready to power both **real-time** and **analytical** use cases.
 
-#### **2.6 DevOps in Action: Deploying Terraform**
+#### **3.6 DevOps in Action: Deploying Terraform**
 Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your local machine, and make sure you have an [HCP Terraform account](https://app.terraform.io/session) to run the Terraform configuration.  Learn how to set up Terraform Cloud for local use by clicking [here](.blog/setup-terraform-cloud.md).
 
-##### **2.6.1 Deploy Terraform**
+##### **3.6.1 Deploy Terraform**
 ```bash
 ./deploy-terraform.sh <create | delete> --profile=<SSO_PROFILE_NAME>
                                         --confluent-api-key=<CONFLUENT_API_KEY>
@@ -173,10 +212,10 @@ Install the [Terraform CLI](https://developer.hashicorp.com/terraform/tutorials
 
 To learn more about this script, click [here](.blog/deploy-terraform-script-explanation.md).
 
-#### **2.7 DevOps in Action: Deploying Terraform in the cloud**
+#### **3.7 DevOps in Action: Deploying Terraform in the cloud**
 In order to run the Terraform configuration from GitHub, the Terraform Cloud API token and Confluent Cloud API Key are required as GitHub Secret variables.  Learn how to do to get the Terraform Cloud API token and Confluent Cloud API key [here](.blog/setup-github.md).
 
-##### **2.7.1 Run from the cloud**
+##### **3.7.1 Run from the cloud**
 Follow these steps:
 
 a. **Deploy the Repository**: Ensure that you have cloned or forked the repository to your GitHub account.
@@ -207,7 +246,7 @@ d. **Select and Run the Deploy Workflow**:
 
 By following these steps, you will run the Terraform configuration directly from GitHub, leveraging GitHub Actions for automation and deployment.
 
-#### **2.8 Visualizing the Terraform Configuration**
+#### **3.8 Visualizing the Terraform Configuration**
 Below is the Terraform visualization of the Terraform configuration.  It shows the resources and their dependencies, making the infrastructure setup easier to understand.
 
 ![Terraform Visulization](.blog/images/terraform-visualization.png)
@@ -220,25 +259,25 @@ When you update the Terraform Configuration, to update the Terraform visualizati
 terraform graph | dot -Tpng > .blog/images/terraform-visualization.png
 ```
 
-## **3.0 Hands-On Kickoff: Practical Examples for Rapid Learning**
+## **4.0 Hands-On Kickoff: Practical Examples for Rapid Learning**
 
-### **3.1 Flink Applications Powered by Java on a locally running Apache Flink Cluster in Docker**
+### **4.1 Flink Applications Powered by Java on a locally running Apache Flink Cluster in Docker**
 [Let's go!](java/README.md)
 
-### **3.2 Flink Applications Powered by Python on a locally running Apache Flink Cluster in Docker**
+### **4.2 Flink Applications Powered by Python on a locally running Apache Flink Cluster in Docker**
 [Let's go!](python/README.md)
 
-### **3.3 Flink Applications Powered by Python on Confluent Cloud for Apache Flink**
+### **4.3 Flink Applications Powered by Python on Confluent Cloud for Apache Flink**
 [Let's go!](ccaf/README.md)
 
-## **4.0 Powering Analytics with Apache Iceberg tables in Snowflake**
+## **5.0 Powering Analytics with Apache Iceberg tables in Snowflake**
 After running the Flink applications, you can now leverage the data stored in the Apache Iceberg tables in Snowflake for analytics.  Click [here](.blog/using-non-managed-apache-iceberg-tables-in-snowflake.md) to learn more about using **Non-Managed Apache Iceberg tables** in Snowflake.  This blog post will help you understand the trade-offs, operational characteristics, and integration patterns of using Apache Iceberg tables in Snowflake.  These terraform configurations:
 
 - [setup-aws-s3](setup-aws-s3.tf) - creates the necessary Snowflake IAM roles and policies in AWS to get started.
 - [setup-snowflake-service_user](setup-snowflake-service_user.tf) - grants the necessary privileges to the Snowflake resources to get started.
 - [setup-snowflake-objects](setup-snowflake-objects.tf) - creates the necessary resources in Snowflake to get started.
 
-## **5.0 Resources**
+## **6.0 Resources**
 
 [Apache Flink's Core is Dataflow Programming](https://en.wikipedia.org/wiki/Dataflow_programming)
 
