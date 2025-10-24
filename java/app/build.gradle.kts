@@ -55,6 +55,7 @@ dependencies {
     implementation("org.apache.flink:flink-avro:${flinkVersion}")
     implementation("org.apache.flink:flink-avro-confluent-registry:${flinkVersion}")
     implementation("org.apache.flink:flink-json:${flinkVersion}")
+    implementation("org.apache.flink:flink-metrics-dropwizard:${flinkVersion}")
 
     // --- AWS SDK v2 dependencies
     implementation("software.amazon.awssdk:sdk-core:${awssdkVersion}")
