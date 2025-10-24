@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Jeffrey Jonathan Jennings
+ * Copyright (c) 2024-2025 Jeffrey Jonathan Jennings
  * 
  * @author Jeffrey Jonathan Jennings (J3)
  * 
@@ -61,7 +61,6 @@ public class JsonFlightConsolidatorApp {
      * When the runtime catches an exception, it aborts the task and lets the fail-over logic
 	 * decide whether to retry the task execution.
 	 */
-    @SuppressWarnings("rawtypes")
     public static void main(String[] args) throws Exception {
         /*
          * Retrieve the value(s) from the command line argument(s)
@@ -138,13 +137,12 @@ public class JsonFlightConsolidatorApp {
         /*
          * Sets up a Flink Kafka source to consume data from the Kafka topic `sunset`
          */
-		@SuppressWarnings("unchecked")
         KafkaSource<AirlineJsonData> sunsetSource = KafkaSource.<AirlineJsonData>builder()
             .setProperties(consumerProperties)
             .setTopics("sunset")
             .setGroupId("sunset_group")
             .setStartingOffsets(OffsetsInitializer.earliest())
-            .setValueOnlyDeserializer(new SnakeCaseJsonDeserializationSchema(AirlineJsonData.class))
+            .setValueOnlyDeserializer(new SnakeCaseJsonDeserializationSchema<AirlineJsonData>(AirlineJsonData.class))
             .build();
 
         /*
@@ -186,7 +184,8 @@ public class JsonFlightConsolidatorApp {
             // --- Execute the Flink job graph (DAG)
             env.execute("JsonFlightConsolidatorApp");
         } catch (Exception e) {
-            LOGGER.error("The App stopped early due to the following: {}", e.getMessage());
+            LOGGER.error("The App stopped early due to the following: ", e);
+            throw e;
         }
     }
 
