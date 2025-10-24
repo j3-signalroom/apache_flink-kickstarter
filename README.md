@@ -15,11 +15,11 @@ Originally created by [**Wade Waldron**](https://www.linkedin.com/in/wade-waldro
 
 We go beyond simple transformation and enrichment — this project **streams data into Kafka topics and *Apache Iceberg Tables***, purpose-built for **high-performance, large-scale analytics**. Iceberg brings **ACID compliance**, schema evolution, and **highly scalable, real-time data processing with durable storage**, forming the analytical backbone of this architecture.
 
-Our exploration of **Apache Flink** extends beyond Java into **Python-based applications**, showcasing the power of **Flink SQL**, **Table API**, and **DataFrame API**. Each serves a distinct purpose:
+Our exploration of **Apache Flink** extends beyond Java into **Python-based applications**, showcasing the power of **Flink SQL**, **Table API**, and **DataStream API**. Each serves a distinct purpose:
 
 * **Flink SQL** for declarative, real-time analytics
 * **Table API** for a blend of SQL expressiveness and programmatic control
-* **DataFrame API** for efficient, pandas-like data manipulation
+* **DataStream API** for efficient, event-driven stream processing
 
 Together, they deliver a **unified, flexible, and scalable approach** to solving complex streaming challenges—bridging real-time and batch processing with elegance and performance.
 
