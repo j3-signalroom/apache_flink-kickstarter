@@ -29,9 +29,8 @@ public class Common {
 
     public static final String ARG_SERVICE_ACCOUNT_USER = "--service-account-user";
     public static final String ARG_AWS_REGION = "--aws-region";
-    public static final String ARG_AWS_S3_BUCKET = "--aws-s3-bucket";
     
-
+    
     /**
      * @return returns a new instance of the Jackson ObjectMapper with the JavaTimeModule
      * registered.

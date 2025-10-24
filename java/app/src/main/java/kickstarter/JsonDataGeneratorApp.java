@@ -73,7 +73,20 @@ public class JsonDataGeneratorApp {
         // --- Retrieve the value(s) from the command line argument(s).
         String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
         String awsRegion = System.getenv().getOrDefault("AWS_REGION", Common.getAppArgumentValue(args, Common.ARG_AWS_REGION));
-        String bucketName = System.getenv().getOrDefault("AWS_S3_BUCKET", Common.getAppArgumentValue(args, Common.ARG_AWS_S3_BUCKET));
+        String bucketName = System.getenv("AWS_S3_BUCKET");
+
+        // --- Validate required configurations
+        if (awsRegion == null || awsRegion.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                "AWS Region is required. Set AWS_REGION environment variable or use --aws-region argument."
+            );
+        }
+
+        if (bucketName == null || bucketName.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                "S3 Bucket is required. Set AWS_S3_BUCKET environment variable."
+            );
+        }
 
 		// --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG).
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
