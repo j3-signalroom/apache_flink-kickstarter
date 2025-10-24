@@ -128,7 +128,8 @@ public class JsonFlyerStatsApp {
             KafkaSink.<FlyerStatsJsonData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(flyerStatsSerializer)
-                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                .setTransactionalIdPrefix("json-flyer-stats-") // unique per job
+                .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
                 .build();
 
         /*
@@ -160,6 +161,7 @@ public class JsonFlyerStatsApp {
             .map(FlyerStatsJsonData::new)
             .keyBy(FlyerStatsJsonData::getEmailAddress)
             .window(TumblingEventTimeWindows.of(Duration.ofMinutes(1)))
-            .reduce(FlyerStatsJsonData::merge, new FlyerStatsJsonDataProcessWindowFunction());
+            .reduce(FlyerStatsJsonData::merge, new FlyerStatsJsonDataProcessWindowFunction())
+            .name("flyer_stats_aggregation_window");
     }
 }

@@ -154,6 +154,8 @@ public class JsonFlightConsolidatorApp {
         KafkaSink<FlightJsonData> flightSink = KafkaSink.<FlightJsonData>builder()
             .setKafkaProducerConfig(producerProperties)
             .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+            .setTransactionalIdPrefix("json-flight-data-") // unique per job
+            .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
             .setRecordSerializer(flightSerializer)
             .build();
 

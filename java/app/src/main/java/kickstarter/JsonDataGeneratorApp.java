@@ -145,7 +145,8 @@ public class JsonDataGeneratorApp {
             KafkaSink.<AirlineJsonData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(skyOneSerializer)
-                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                .setTransactionalIdPrefix("json-data-") // unique per job
+                .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
                 .build();
 
         /*
@@ -184,7 +185,8 @@ public class JsonDataGeneratorApp {
             KafkaSink.<AirlineJsonData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(sunsetSerializer)
-                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                .setTransactionalIdPrefix("json-data-") // unique per job
+                .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
                 .build();
 
         /*
