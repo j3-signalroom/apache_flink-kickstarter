@@ -8,10 +8,7 @@
  */
 package kickstarter;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -32,6 +29,7 @@ public class Common {
 
     public static final String ARG_SERVICE_ACCOUNT_USER = "--service-account-user";
     public static final String ARG_AWS_REGION = "--aws-region";
+    public static final String ARG_AWS_S3_BUCKET = "--aws-s3-bucket";
     
 
     /**

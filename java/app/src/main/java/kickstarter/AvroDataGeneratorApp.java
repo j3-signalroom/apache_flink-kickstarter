@@ -78,7 +78,9 @@ public class AvroDataGeneratorApp {
 	public static void main(String[] args) throws Exception {
         // --- Retrieve the value(s) from the command line argument(s).
         String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
-        String awsRegion = Common.getAppArgumentValue(args, Common.ARG_AWS_REGION);
+        
+        String awsRegion = System.getenv().getOrDefault("AWS_REGION", Common.getAppArgumentValue(args, Common.ARG_AWS_REGION));
+        String bucketName = System.getenv().getOrDefault("AWS_S3_BUCKET", Common.getAppArgumentValue(args, Common.ARG_AWS_S3_BUCKET));
 
         // --- Create a configuration to force Avro serialization instead of Kyro serialization.
         org.apache.flink.configuration.Configuration config = new org.apache.flink.configuration.Configuration();
@@ -148,12 +150,11 @@ public class AvroDataGeneratorApp {
 
         // --- Describes and configures the catalog for the Table API and Flink SQL.
         String catalogName = "apache_kickstarter";
-        String bucketName = serviceAccountUser.replace("_", "-");  // --- To follow S3 bucket naming convention, replace underscores with hyphens if exist in string.
         String catalogImpl = "org.apache.iceberg.aws.glue.GlueCatalog";
         String databaseName = "airlines";
         Map<String, String> catalogProperties = new HashMap<>();
-        catalogProperties.put("type", "iceberg");
-        catalogProperties.put("warehouse", "s3://" + bucketName + "/warehouse");
+        catalogProperties.put("type", "iceberg");   
+        catalogProperties.put("warehouse", bucketName);
         catalogProperties.put("catalog-impl", catalogImpl);
         catalogProperties.put("io-impl", "org.apache.iceberg.aws.s3.S3FileIO");
         catalogProperties.put("glue.skip-archive", "true");

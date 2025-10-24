@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;
 import org.apache.flink.configuration.ExternalizedCheckpointRetention;
@@ -73,7 +72,8 @@ public class JsonDataGeneratorApp {
 	public static void main(String[] args) throws Exception {
         // --- Retrieve the value(s) from the command line argument(s).
         String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
-        String awsRegion = Common.getAppArgumentValue(args, Common.ARG_AWS_REGION);
+        String awsRegion = System.getenv().getOrDefault("AWS_REGION", Common.getAppArgumentValue(args, Common.ARG_AWS_REGION));
+        String bucketName = System.getenv().getOrDefault("AWS_S3_BUCKET", Common.getAppArgumentValue(args, Common.ARG_AWS_S3_BUCKET));
 
 		// --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG).
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -213,12 +213,11 @@ public class JsonDataGeneratorApp {
 
         // --- Describes and configures the catalog for the Table API and SQL.
         String catalogName = "apache_kickstarter";
-        String bucketName = serviceAccountUser.replace("_", "-");  // --- To follow S3 bucket naming convention, replace underscores with hyphens if exist in string.
         String catalogImpl = "org.apache.iceberg.aws.glue.GlueCatalog";
         String databaseName = "airlines";
         Map<String, String> catalogProperties = new HashMap<>();
         catalogProperties.put("type", "iceberg");
-        catalogProperties.put("warehouse", "s3://" + bucketName + "/warehouse");
+        catalogProperties.put("warehouse", bucketName);
         catalogProperties.put("catalog-impl", catalogImpl);
         catalogProperties.put("io-impl", "org.apache.iceberg.aws.s3.S3FileIO");
         catalogProperties.put("glue.skip-archive", "true");
@@ -305,23 +304,20 @@ public class JsonDataGeneratorApp {
      */
     private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineJsonData> airlineDataStream) {
         // --- Convert DataStream<AirlineJsonData> to DataStream<RowData>
-        DataStream<RowData> rowDataStream = airlineDataStream.map(new MapFunction<AirlineJsonData, RowData>() {
-            @Override
-            public RowData map(AirlineJsonData airlineJsonData) throws Exception {
-                GenericRowData rowData = new GenericRowData(RowKind.INSERT, fieldCount);
-                rowData.setField(0, StringData.fromString(airlineJsonData.getEmailAddress()));
-                rowData.setField(1, StringData.fromString(airlineJsonData.getDepartureTime()));
-                rowData.setField(2, StringData.fromString(airlineJsonData.getDepartureAirportCode()));
-                rowData.setField(3, StringData.fromString(airlineJsonData.getArrivalTime()));
-                rowData.setField(4, StringData.fromString(airlineJsonData.getArrivalAirportCode()));
-                rowData.setField(5, airlineJsonData.getFlightDuration());
-                rowData.setField(6, StringData.fromString(airlineJsonData.getFlightNumber()));
-                rowData.setField(7, StringData.fromString(airlineJsonData.getConfirmationCode()));
-                rowData.setField(8, DecimalData.fromBigDecimal(airlineJsonData.getTicketPrice(), 10, 2));
-                rowData.setField(9, StringData.fromString(airlineJsonData.getAircraft()));
-                rowData.setField(10, StringData.fromString(airlineJsonData.getBookingAgencyEmail()));
-                return rowData;
-            }
+        DataStream<RowData> rowDataStream = airlineDataStream.map((AirlineJsonData airlineJsonData) -> {
+            GenericRowData rowData = new GenericRowData(RowKind.INSERT, fieldCount);
+            rowData.setField(0, StringData.fromString(airlineJsonData.getEmailAddress()));
+            rowData.setField(1, StringData.fromString(airlineJsonData.getDepartureTime()));
+            rowData.setField(2, StringData.fromString(airlineJsonData.getDepartureAirportCode()));
+            rowData.setField(3, StringData.fromString(airlineJsonData.getArrivalTime()));
+            rowData.setField(4, StringData.fromString(airlineJsonData.getArrivalAirportCode()));
+            rowData.setField(5, airlineJsonData.getFlightDuration());
+            rowData.setField(6, StringData.fromString(airlineJsonData.getFlightNumber()));
+            rowData.setField(7, StringData.fromString(airlineJsonData.getConfirmationCode()));
+            rowData.setField(8, DecimalData.fromBigDecimal(airlineJsonData.getTicketPrice(), 10, 2));
+            rowData.setField(9, StringData.fromString(airlineJsonData.getAircraft()));
+            rowData.setField(10, StringData.fromString(airlineJsonData.getBookingAgencyEmail()));
+            return rowData;
         });
         
         TableIdentifier tableIdentifier = TableIdentifier.of(databaseName, tableName);
@@ -351,7 +347,7 @@ public class JsonDataGeneratorApp {
             } else {
                 LOGGER.debug("Table {}.{} already exists.", databaseName, tableName);
             }
-        } catch (Exception e) {
+        } catch (CatalogException e) {
             LOGGER.error("A critical error occurred during the processing of the table: ", e);
             throw new RuntimeException("A critical error occurred during the processing of the table", e);
         }
