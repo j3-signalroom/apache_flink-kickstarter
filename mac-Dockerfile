@@ -80,12 +80,12 @@ RUN gradle --version
 
 # Download JAR files for Java and Python
 RUN curl -L "${MAVEN_ROOT_URL}flink/flink-s3-fs-hadoop/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-s3-fs-hadoop-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
+    curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-flink-runtime-2.0/${ICEBERG_VERSION}/iceberg-flink-runtime-2.0-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-flink-runtime-2.0-${ICEBERG_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}hadoop/hadoop-common/${HADOOP_VERSION}/hadoop-common-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-common-${HADOOP_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}flink/flink-shaded-hadoop-2-uber/2.8.3-10.0/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" -o "${FLINK_LIB_DIR}flink-shaded-hadoop-2-uber-2.8.3-10.0.jar";
 
 # Download JAR files for Python
 RUN if [ "$FLINK_LANGUAGE" = "python" ]; then \
-    curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-flink-runtime-2.0/${ICEBERG_VERSION}/iceberg-flink-runtime-2.0-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-flink-runtime-2.0-${ICEBERG_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}iceberg/iceberg-aws-bundle/${ICEBERG_VERSION}/iceberg-aws-bundle-${ICEBERG_VERSION}.jar" -o "${FLINK_LIB_DIR}iceberg-aws-bundle-${ICEBERG_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}hadoop/hadoop-hdfs-client/${HADOOP_VERSION}/hadoop-hdfs-client-${HADOOP_VERSION}.jar" -o "${FLINK_LIB_DIR}hadoop-hdfs-client-${HADOOP_VERSION}.jar" && \
     curl -L "${MAVEN_ROOT_URL}flink/flink-sql-connector-kafka/4.0.1-2.0/flink-sql-connector-kafka-4.0.1-2.0.jar" -o "${FLINK_LIB_DIR}flink-sql-connector-kafka-4.0.1-2.0.jar" && \
