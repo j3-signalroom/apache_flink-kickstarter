@@ -105,6 +105,16 @@ then
        s3_bucket_warehouse_name="" 
     fi
 
+    # Gets service_account_user of the Service Account User created during the apply run
+    service_account_user=$(terraform output -raw service_account_user)
+
+    # Check if the service_account_user contains the word "warning", because the output
+    # variable may not exist
+    if echo "$service_account_user" | grep -iq "warning"
+    then
+       service_account_user=""
+    fi
+
     # Create and then pass the AWS environment variables to docker-compose
     printf "FLINK_LANGUAGE=${FLINK_LANGUAGE}\
     \nAWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}\
@@ -113,6 +123,7 @@ then
     \nAWS_REGION=${AWS_REGION}\
     \nAWS_DEFAULT_REGION=${AWS_REGION}\
     \nAWS_PROFILE=${AWS_PROFILE}\
+    \nSERVICE_ACCOUNT_USER=${service_account_user}\
     \nAWS_S3_BUCKET=${s3_bucket_warehouse_name}" > .env
 
     # Deploy the Docker containers via docker-compose based on the platform
