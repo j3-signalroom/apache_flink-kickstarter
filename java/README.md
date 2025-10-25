@@ -64,19 +64,19 @@ Flink App|Flink Run Command
 > `<SERVICE_ACCOUNT_USER>`|specify the name of the service account user, used in the the AWS Secrets and Parameter Store Path name.
 
 #### 2.1.1 Avro Java Classes Special Consideration
-Whenever any of the Flink Apps [`Avro models`](app/src/main/java/kickstarter/model/avro/) need to be updated, the [`avro-tools-1.12.1.jar`](https://avro.apache.org/docs/++version++/getting-started-java/#serializing-and-deserializing-with-code-generation) must be used afterwards to generate the respective Java class. This is necessary to ensure that the Avro schema is in sync with the Java class. To generate the Java class, run the following command from the [`apache_flink-kickstarter-jobmanager-1`](#20-discover-what-you-can-do-with-these-flink-apps) Docker container:
+Whenever any of the Flink Apps [`Avro models`](app/src/main/java/kickstarter/model/avro/) need to be updated, the [`avro-tools-1.12.0.jar`](https://avro.apache.org/docs/++version++/getting-started-java/#serializing-and-deserializing-with-code-generation) must be used afterwards to generate the respective Java class. This is necessary to ensure that the Avro schema is in sync with the Java class. To generate the Java class, run the following command from the [`apache_flink-kickstarter-jobmanager-1`](#20-discover-what-you-can-do-with-these-flink-apps) Docker container:
 
-> To download the `avro-tools-1.12.1.jar`, click [here](https://repo1.maven.org/maven2/org/apache/avro/avro-tools/1.12.1/avro-tools-1.12.1.jar).
+> To download the `avro-tools-1.12.0.jar`, click [here](https://repo1.maven.org/maven2/org/apache/avro/avro-tools/1.12.0/avro-tools-1.12.0.jar).
 
 ```bash 
-java -jar /path/to/avro-tools-1.12.1.jar compile -string schema app/src/main/java/kickstarter/model/avro/AirlineAvroData.avsc app/src/main/java/
+java -jar /path/to/avro-tools-1.12.0.jar compile -string schema app/src/main/java/kickstarter/model/avro/AirlineAvroData.avsc app/src/main/java/
 
-java -jar /path/to/avro-tools-1.12.1.jar compile -string schema app/src/main/java/kickstarter/model/avro/FlightAvroData.avsc app/src/main/java/
+java -jar /path/to/avro-tools-1.12.0.jar compile -string schema app/src/main/java/kickstarter/model/avro/FlightAvroData.avsc app/src/main/java/
 
-java -jar /path/to/avro-tools-1.12.1.jar compile -string schema app/src/main/java/kickstarter/model/avro/FlyerStatsAvroData.avsc app/src/main/java/
+java -jar /path/to/avro-tools-1.12.0.jar compile -string schema app/src/main/java/kickstarter/model/avro/FlyerStatsAvroData.avsc app/src/main/java/
 ```
 
-> Note: Make sure to replace `/path/to/avro-tools-1.12.1.jar` with the actual path where you downloaded the `avro-tools-1.12.1.jar` file inside the Docker container.
+> Note: Make sure to replace `/path/to/avro-tools-1.12.0.jar` with the actual path where you downloaded the `avro-tools-1.12.0.jar` file inside the Docker container.
 
 ### 2.2 JSON formatted data
 Flink App|Flink Run Command

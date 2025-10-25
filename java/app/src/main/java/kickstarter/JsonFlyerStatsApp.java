@@ -137,6 +137,8 @@ public class JsonFlyerStatsApp {
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
+        producerProperties.put("transaction.timeout.ms", "900000"); // 15m for long checkpoints
+        producerProperties.put("enable.idempotence", "true");       // typically implied, explicit is fine
         KafkaSink<FlyerStatsJsonData> flyerStatsSink = 
             KafkaSink.<FlyerStatsJsonData>builder()
                 .setKafkaProducerConfig(producerProperties)
@@ -173,10 +175,10 @@ public class JsonFlyerStatsApp {
     public static DataStream<FlyerStatsJsonData> defineWorkflow(DataStream<FlightJsonData> flightDataSource) {
         return flightDataSource
             .map(FlyerStatsJsonData::new)
-            .name("flight_to_flyer_stats_map")
+            .name("flight_to_flyer_stats_map").uid("flight_to_flyer_stats_map")
             .keyBy(FlyerStatsJsonData::getEmailAddress)
             .window(TumblingEventTimeWindows.of(Duration.ofMinutes(1)))
             .reduce(FlyerStatsJsonData::merge, new FlyerStatsJsonDataProcessWindowFunction())
-            .name("flyer_stats_aggregation_window");
+            .name("flyer_stats_aggregation_window").uid("flyer_stats_aggregation_window");
     }
 }

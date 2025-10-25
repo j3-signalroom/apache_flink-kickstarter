@@ -170,6 +170,8 @@ public class AvroFlightConsolidatorApp {
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
+        producerProperties.put("transaction.timeout.ms", "900000"); // 15m for long checkpoints
+        producerProperties.put("enable.idempotence", "true");       // typically implied, explicit is fine
         KafkaSink<FlightAvroData> flightSink = KafkaSink.<FlightAvroData>builder()
             .setKafkaProducerConfig(producerProperties)
             .setTransactionalIdPrefix("avro-flight-data-") // unique per job

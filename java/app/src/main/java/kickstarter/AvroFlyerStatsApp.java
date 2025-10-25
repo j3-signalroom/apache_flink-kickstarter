@@ -147,6 +147,8 @@ public class AvroFlyerStatsApp {
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
+        producerProperties.put("transaction.timeout.ms", "900000"); // 15m for long checkpoints
+        producerProperties.put("enable.idempotence", "true");       // typically implied, explicit is fine
         KafkaSink<FlyerStatsAvroData> flyerStatsSink = 
             KafkaSink.<FlyerStatsAvroData>builder()
                 .setKafkaProducerConfig(producerProperties)
@@ -161,9 +163,9 @@ public class AvroFlyerStatsApp {
          */
         DataStream<FlyerStatsAvroData> flyerStatsStream = flightDataStream
             .filter(flight -> isValidFlight(flight))
-            .name("filter_valid_flights")
+            .name("filter_valid_flights").uid("filter_valid_flights")
             .map(flightdata -> transformToFlyerStats(flightdata))
-            .name("transform_to_flyer_stats")
+            .name("transform_to_flyer_stats").uid("transform_to_flyer_stats")
             .keyBy(flyerStats -> flyerStats.getEmailAddress())
             .window(TumblingEventTimeWindows.of(Duration.ofMinutes(1)))
             .reduce(((flyerStats1, flyerStats2) -> {
@@ -171,7 +173,7 @@ public class AvroFlyerStatsApp {
                 flyerStats1.setNumberOfFlights(flyerStats1.getNumberOfFlights() + flyerStats2.getNumberOfFlights());
                 return flyerStats1;
             }), new FlyerStatsAvroDataProcessWindowFunction())
-            .name("aggregate_flyer_stats");
+            .name("aggregate_flyer_stats").uid("aggregate_flyer_stats");
 
         // --- Sink the aggregated stats to Kafka
         flyerStatsStream

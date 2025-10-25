@@ -41,7 +41,7 @@ dependencies {
     
     // --- Kafka, Avro and JSON dependencies
     implementation("org.apache.kafka:kafka-clients:${kafkaVersion}")
-    implementation("org.apache.avro:avro:1.12.1")
+    implementation("org.apache.avro:avro:1.12.0")
     implementation("io.confluent:kafka-avro-serializer:${confluentKafkaVersion}")
     implementation("io.confluent:kafka-schema-registry-client:${confluentKafkaVersion}")
     implementation("tech.allegro.schema.json2avro:converter:0.3.0")
