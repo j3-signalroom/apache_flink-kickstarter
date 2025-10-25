@@ -7,5 +7,5 @@ output "glue_database_name" {
 }
 
 output "service_account_user" {
-  value = var.service_account_user
+  value = lower(var.service_account_user)
 }
