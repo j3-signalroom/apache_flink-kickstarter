@@ -87,7 +87,7 @@ The refreshed `apache_flink-kickstarter` codebase not only adopts new APIs but a
 - Added **thread-safety** for random number generation in Flink applications.
 - Improved overall **performance** in all Flink applications.
 
-These changes turn the project into both a quick-start example and a **_living reference architecture_** for designing production-grade Apache Flink + Apache Iceberg applications in 2025.
+With these updates, the project isn’t just a set of examples—it’s a launchpad and a **_blueprint_**. It lets you spin up Flink + Iceberg pipelines in minutes and learn exactly how to architect streaming systems built for the scale and intelligence of 2025.
 
 ### **1.4 Why It Matters**
 The shift from batch analytics to continuous intelligence is occurring now.  Apache Flink v2.1 and Apache Iceberg v1.10 are not just incremental upgrades—they symbolize the merging of **_streaming_**, **_AI_**, and **_lakehouse architecture_**.
@@ -109,7 +109,7 @@ By calling them *applications*, we highlight their **depth, sophistication, and 
 *(Curious why the terminology matters? Check out the rationale [here](.blog/rationale-behind-calling-it-flink-app.md)!)*
 
 ## **3.0 Let's get started!**
-As of **October 4, 2024**, **Apache Flink on Confluent Cloud** unlocks incredible potential for real-time stream processing—along with a few key nuances developers should know.  Currently, **Flink on Confluent Cloud** does **not** support the **DataStream API**, and its **Table API** has **limited functionality** (see supported features [here](https://github.com/confluentinc/flink-table-api-python-examples?tab=readme-ov-file#supported-api)), supporting Java and Python-based Flink applications. But don’t worry—**this repository bridges those gaps** with practical, production-ready examples.
+As of **October 4, 2024**, **Confluent Cloud for Apache Flink (CCAF)** unlocks incredible potential for real-time stream processing—along with a few key nuances developers should know.  Currently, **Confluent Cloud for Apache Flink (CCAF)** does **not** support the **DataStream API**, and its **Table API** has **limited functionality** (see supported features [here](https://github.com/confluentinc/flink-table-api-python-examples?tab=readme-ov-file#supported-api)), supporting Java and Python-based Flink applications. But don’t worry—**this repository bridges those gaps** with practical, production-ready examples.
 
 #### **3.1 What You’ll Learn**
 In this repo, you’ll find **Java-based examples using the Flink DataStream API** to go beyond Flink’s standard capabilities—like:
@@ -122,9 +122,10 @@ Prefer Python? You’re covered there too. Using the **Flink Table API** and **U
 
 #### **3.2 Beyond Kafka: Iceberg Integration**
 
-We don’t just stream data into Kafka topics—this project also demonstrates how to **sink data into Apache Iceberg tables**, combining **real-time event streaming** with **durable, analytical storage** for hybrid batch/stream processing.
+We don’t just stream data into Kafka topics—this project also demonstrates how to **sink data into Apache Iceberg tables**, combining **real-time event streaming** with **durable, analytical storage** for hybrid batch/stream processing.  By integrating Iceberg, you gain access to features like **ACID compliance**, **schema evolution**, and **time travel queries**—all essential for building robust, enterprise-grade data platforms that support both real-time and historical analytics.
+
 #### **3.3 Run It Locally — Fast**
-Spin up an **Apache Flink 2.1.0 cluster locally** in minutes using Docker—fully compatible with both **Apple Silicon (M-series)** and **x86 machines**. The Flink cluster connects seamlessly to **Confluent Cloud** for Kafka and Schema Registry resources, giving you a realistic, end-to-end development environment.
+Spin up an **Apache Flink v2.1 cluster locally** in minutes using Docker—fully compatible with both **Apple Silicon's M-series** and **x86 machines**. The Flink cluster connects seamlessly to **Confluent Cloud** for Kafka and Schema Registry resources, giving you a realistic, end-to-end development environment.
 
 #### **3.4 Dive In**
 Explore the examples, run the containers, and see how to build **secure, scalable, enterprise-grade Flink applications** that push the limits of what’s possible with modern data streaming.
