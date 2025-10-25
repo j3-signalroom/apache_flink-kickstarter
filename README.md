@@ -1,5 +1,5 @@
 # ![apache-flink-logo](.blog/images/apache-flink_squirrel-logo.png) Apache Flink v2.1 Kickstarter
-This project demonstrates the **real-world power of [Apache Flink](https://nightlies.apache.org/flink/flink-docs-release-2.1/docs/learn-flink/overview/)**—a distributed stream processing engine built for **low-latency, high-throughput, and exactly-once stateful computation**. As a core component of the **signalRoom technology stack**, it highlights how Flink’s advanced features—such as event-time semantics, checkpointing, watermarks, and dynamic scaling—can be leveraged to build resilient, production-grade streaming pipelines. Staying true to our mission of **empowering developers through practical, open knowledge**, this project extends the concepts from our *["Building Apache Flink Applications in Java"](https://developer.confluent.io/courses/flink-java/overview/)* series into runnable, end-to-end examples that showcase how to design, deploy, and optimize Flink jobs for real business impact.
+This project demonstrates the **real-world power of [Apache Flink](https://nightlies.apache.org/flink/flink-docs-release-2.1/docs/learn-flink/overview/)**—a distributed stream processing engine built for **low-latency, high-throughput, and exactly-once stateful computation**. As a core component of the **signalRoom technology stack**, it highlights how Flink’s advanced features—such as event-time semantics, checkpointing, watermarks, and dynamic scaling—can be leveraged to build resilient, production-grade streaming pipelines. Staying true to our mission of **empowering developers through practical, open knowledge**, this project extends the concepts from Confluent's *["Building Apache Flink Applications in Java"](https://developer.confluent.io/courses/flink-java/overview/)* series into runnable, end-to-end examples that showcase how to design, deploy, and optimize Flink jobs for real business impact.
 
 Embarking on this journey, you'll explore how Flink seamlessly integrates with modern data infrastructures, including **Confluent Cloud for Apache Flink**, **AWS Secrets Manager**, **AWS Systems Manager Parameter Store**, and **Apache Iceberg tables in Snowflake**. This project not only illustrates Flink's capabilities in handling complex event processing and state management but also demonstrates best practices for secure configuration management and scalable data storage.
 
@@ -23,12 +23,12 @@ Our exploration of **Apache Flink** extends beyond Java into **Python-based appl
 
 Together, they deliver a **unified, flexible, and scalable approach** to solving complex streaming challenges—bridging real-time and batch processing with elegance and performance.
 
-Run the Docker containers (fully compatible with both **Apple Silicon (M-series)** and **x86 architectures**) and experience firsthand how Apache Flink can power **robust, enterprise-grade streaming applications** that are as practical as they are powerful.
+Run the Docker containers (fully compatible with both **Apple Silicon's M-series** and **x86 architectures**) and experience firsthand how Apache Flink can power **robust, enterprise-grade streaming applications** that are as practical as they are powerful.
 
 **Table of Contents**
 
 <!-- toc -->
-+ [**1.0 The Apache Flink Kick-Starter Just Got Smarter: From Stream Processing to Real-Time Intelligence**](#10-the-apache-flink-kick-starter-just-got-smarter-from-stream-processing-to-real-time-intelligence)
++ [**1.0 The `apache_flink-kickstarter` Just Got Smarter: From Stream Processing to Real-Time Intelligence**](#10-the-apache_flink-kickstarter-just-got-smarter-from-stream-processing-to-real-time-intelligence)
     - [**1.1 Apache Flink v2.1: Real-Time AI and Smarter Streaming**](#11-apache-flink-v21-real-time-ai-and-smarter-streaming)
     - [**1.2 Apache Iceberg v1.10: A Lakehouse Built for Modern Workloads**](#12-apache-iceberg-v110-a-lakehouse-built-for-modern-workloads)
     - [**1.3 Behind the Scenes: Code, Performance, and Best Practices**](#13-behind-the-scenes-code-performance-and-best-practices)
@@ -59,13 +59,13 @@ Run the Docker containers (fully compatible with both **Apple Silicon (M-series)
 + [**6.0 Resources**](#60-resources)
 <!-- tocstop -->
 
-## **1.0 The Apache Flink Kick-Starter Just Got Smarter: From Stream Processing to Real-Time Intelligence**
+## **1.0 The `apache_flink-kickstarter` Just Got Smarter: From Stream Processing to Real-Time Intelligence**
 The `apache_flink-kickstarter` project has been completely refreshed to keep pace with the fast-moving evolution of **[Apache Flink v2.1](https://nightlies.apache.org/flink/flink-docs-release-2.1/docs/learn-flink/overview/)** and **[Apache Iceberg v1.10](https://github.com/apache/iceberg/releases/tag/apache-iceberg-1.10.0)**. This isn’t just a routine maintenance update— it’s a strategic move that advances your real-time data platform into the next era of streaming and AI-driven decision-making.
 
 The upgrade updates the project with the latest APIs, performance improvements, and intelligent runtime hooks introduced since Apache Flink v1.20 and Apache Iceberg v1.7. The result: faster pipelines, improved observability, and new features that merge data engineering and data science.
 
 ### **1.1 Apache Flink v2.1: Real-Time AI and Smarter Streaming**
-If you’ve been holding steady on `v1.20`, the `v2.1` release is the inflection point where **stream processing meets machine learning**:
+If you’ve been holding steady on `v1.20`, the `v2.1` release is the _inflection point_ where **stream processing meets machine learning**:
 - **AI/ML inside the stream:** Native model DDLs and inference functions allow you to deploy and run trained models directly in your Flink jobs—no sidecars, no hacks.
 - **Richer SQL & Table API:** Handle complex and semi-structured data with new [Process Table Functions (PTFs)](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/functions/ptfs/), faster joins, and more expressive queries.
 - **Operational superpowers:** Enhanced runtime hooks enable detailed performance tuning, state inspection, and adaptive write strategies.
