@@ -77,11 +77,17 @@ public class AvroDataGeneratorApp {
 	 */
 	public static void main(String[] args) throws Exception {
         // --- Retrieve the value(s) from the command line argument(s).
-        String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
+        String serviceAccountUser = System.getenv().getOrDefault("SERVICE_ACCOUNT_USER", Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER));
         String awsRegion = System.getenv().getOrDefault("AWS_REGION", Common.getAppArgumentValue(args, Common.ARG_AWS_REGION));
         String bucketName = System.getenv("AWS_S3_BUCKET");
 
         // --- Validate required configurations
+        if (serviceAccountUser == null || serviceAccountUser.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                "Service Account User is required. Set SERVICE_ACCOUNT_USER environment variable or use --service-account-user argument."
+            );
+        }
+
         if (awsRegion == null || awsRegion.trim().isEmpty()) {
             throw new IllegalArgumentException(
                 "AWS Region is required. Set AWS_REGION environment variable or use --aws-region argument."
@@ -94,7 +100,7 @@ public class AvroDataGeneratorApp {
             );
         }
 
-        LOGGER.info("Configuration loaded - AWS Region: {}, S3 Bucket: {}", awsRegion, bucketName);
+        LOGGER.info("Configuration loaded - Service Account User: {}, AWS Region: {}, S3 Bucket: {}", serviceAccountUser, awsRegion, bucketName);
 
         // --- Create a configuration to force Avro serialization instead of Kyro serialization.
         org.apache.flink.configuration.Configuration config = new org.apache.flink.configuration.Configuration();

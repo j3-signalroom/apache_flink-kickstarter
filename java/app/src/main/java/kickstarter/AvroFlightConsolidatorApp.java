@@ -66,7 +66,14 @@ public class AvroFlightConsolidatorApp {
         /*
          * Retrieve the value(s) from the command line argument(s)
          */
-        String serviceAccountUser = Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER);
+        String serviceAccountUser = System.getenv().getOrDefault("SERVICE_ACCOUNT_USER", Common.getAppArgumentValue(args, Common.ARG_SERVICE_ACCOUNT_USER));
+
+        // --- Validate required configuration
+        if (serviceAccountUser == null || serviceAccountUser.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                "Service Account User is required. Set SERVICE_ACCOUNT_USER environment variable or use --service-account-user argument."
+            );
+        }
 
         // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
