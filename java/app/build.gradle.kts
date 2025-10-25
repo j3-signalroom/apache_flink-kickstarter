@@ -22,12 +22,23 @@ var icebergVersion: String = "1.10.0"
 var confluentKafkaVersion: String = "8.0.0"
 var jacksonVersion: String = "2.18.1"
 
+// --- Comprehensive exclusion of all metrics libraries to avoid conflicts with Flink
+configurations.all {
+    exclude(group = "io.dropwizard.metrics", module = "metrics-core")
+    exclude(group = "io.dropwizard.metrics", module = "metrics-jvm")
+    exclude(group = "io.dropwizard.metrics", module = "metrics-json")
+    exclude(group = "io.dropwizard.metrics", module = "metrics-graphite")
+    exclude(group = "io.dropwizard.metrics", module = "metrics-jmx")
+    exclude(group = "io.dropwizard.metrics")
+    exclude(group = "com.codahale.metrics", module = "metrics-core")
+    exclude(group = "com.codahale.metrics")
+}
+
 dependencies {
     // --- Logging dependencies
     implementation("org.slf4j:slf4j-api:2.0.17")
     runtimeOnly("ch.qos.logback:logback-classic:1.5.12")
     
-
     // --- Kafka, Avro and JSON dependencies
     implementation("org.apache.kafka:kafka-clients:${kafkaVersion}")
     implementation("org.apache.avro:avro:1.12.1")
@@ -38,8 +49,11 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-avro:${jacksonVersion}")
 
-    // --- Hadoop dependencies
-    implementation("org.apache.hadoop:hadoop-common:${hadoopVersion}")
+    // --- Hadoop dependencies (with metrics exclusions)
+    implementation("org.apache.hadoop:hadoop-common:${hadoopVersion}") {
+        exclude(group = "io.dropwizard.metrics")
+        exclude(group = "com.codahale.metrics")
+    }
     
     // --- Flink dependencies
     compileOnly("org.apache.flink:flink-core:${flinkVersion}")
@@ -67,19 +81,37 @@ dependencies {
     implementation("software.amazon.awssdk:sts:${awssdkVersion}")
     implementation("software.amazon.awssdk:dynamodb:${awssdkVersion}")
 
-    // --- Iceberg dependencies
-    runtimeOnly("org.apache.iceberg:iceberg-core:${icebergVersion}")
-    implementation("org.apache.iceberg:iceberg-api:${icebergVersion}")
-    runtimeOnly("org.apache.iceberg:iceberg-common:${icebergVersion}")
-    runtimeOnly("org.apache.iceberg:iceberg-aws:${icebergVersion}")
-    implementation("org.apache.iceberg:iceberg-snowflake:${icebergVersion}")
-    implementation("org.apache.iceberg:iceberg-flink-2.0:${icebergVersion}")
-
-    // --- Iceberg Flink Runtime (with metrics exclusion)
-    implementation("org.apache.iceberg:iceberg-flink-runtime-2.0:${icebergVersion}") {
-        exclude(group = "io.dropwizard.metrics", module = "metrics-core")
+    // --- Iceberg dependencies (with explicit metrics exclusions)
+    runtimeOnly("org.apache.iceberg:iceberg-core:${icebergVersion}") {
+        exclude(group = "io.dropwizard.metrics")
+        exclude(group = "com.codahale.metrics")
     }
-    
+    implementation("org.apache.iceberg:iceberg-api:${icebergVersion}") {
+        exclude(group = "io.dropwizard.metrics")
+        exclude(group = "com.codahale.metrics")
+    }
+    runtimeOnly("org.apache.iceberg:iceberg-common:${icebergVersion}") {
+        exclude(group = "io.dropwizard.metrics")
+        exclude(group = "com.codahale.metrics")
+    }
+    runtimeOnly("org.apache.iceberg:iceberg-aws:${icebergVersion}") {
+        exclude(group = "io.dropwizard.metrics")
+        exclude(group = "com.codahale.metrics")
+    }
+    implementation("org.apache.iceberg:iceberg-snowflake:${icebergVersion}") {
+        exclude(group = "io.dropwizard.metrics")
+        exclude(group = "com.codahale.metrics")
+    }
+    implementation("org.apache.iceberg:iceberg-flink-2.0:${icebergVersion}") {
+        exclude(group = "io.dropwizard.metrics")
+        exclude(group = "com.codahale.metrics")
+    }
+
+    // --- Iceberg Flink Runtime (with comprehensive metrics exclusion)
+    implementation("org.apache.iceberg:iceberg-flink-runtime-2.0:${icebergVersion}") {
+        exclude(group = "io.dropwizard.metrics")
+        exclude(group = "com.codahale.metrics")
+    }
 
     // --- Snowflake JDBC driver
     implementation("net.snowflake:snowflake-jdbc:3.27.0")
@@ -124,6 +156,14 @@ tasks.shadowJar {
     archiveBaseName.set(rootProject.name)
     archiveClassifier.set("")
     mergeServiceFiles()
+
+    // --- Comprehensive exclusion of metrics libraries from shadow JAR
+    exclude("io/dropwizard/metrics/**")
+    exclude("com/codahale/metrics/**")
+    exclude("META-INF/services/io.dropwizard.metrics.*")
+    
+    // --- Relocate problematic dependencies to avoid conflicts
+    relocate("com.google.common", "shaded.com.google.common")
     
     manifest {
         attributes(

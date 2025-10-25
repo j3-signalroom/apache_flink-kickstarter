@@ -100,6 +100,9 @@ public class AvroDataGeneratorApp {
         org.apache.flink.configuration.Configuration config = new org.apache.flink.configuration.Configuration();
         config.set(PipelineOptions.FORCE_AVRO, true);
 
+        // --- Configure parent-first classloading for metrics
+        config.setString("classloader.parent-first-patterns.additional", "com.codahale.metrics;io.dropwizard.metrics");
+
 		// --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG).
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(config);
 
