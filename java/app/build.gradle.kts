@@ -48,6 +48,7 @@ dependencies {
     compileOnly("org.apache.flink:flink-table-common:${flinkVersion}")
     compileOnly("org.apache.flink:flink-table-runtime:${flinkVersion}")
     compileOnly("org.apache.flink:flink-table-api-java-bridge:${flinkVersion}")
+    compileOnly("org.apache.flink:flink-metrics-dropwizard:${flinkVersion}")
     implementation("org.apache.flink:flink-clients:${flinkVersion}")
     compileOnly("org.apache.flink:flink-connector-base:${flinkVersion}")
     implementation("org.apache.flink:flink-connector-kafka:4.0.1-2.0")
@@ -55,7 +56,6 @@ dependencies {
     implementation("org.apache.flink:flink-avro:${flinkVersion}")
     implementation("org.apache.flink:flink-avro-confluent-registry:${flinkVersion}")
     implementation("org.apache.flink:flink-json:${flinkVersion}")
-    implementation("org.apache.flink:flink-metrics-dropwizard:${flinkVersion}")
 
     // --- AWS SDK v2 dependencies
     implementation("software.amazon.awssdk:sdk-core:${awssdkVersion}")
@@ -74,6 +74,12 @@ dependencies {
     runtimeOnly("org.apache.iceberg:iceberg-aws:${icebergVersion}")
     implementation("org.apache.iceberg:iceberg-snowflake:${icebergVersion}")
     implementation("org.apache.iceberg:iceberg-flink-2.0:${icebergVersion}")
+
+    // --- Iceberg Flink Runtime (with metrics exclusion)
+    implementation("org.apache.iceberg:iceberg-flink-runtime-2.0:${icebergVersion}") {
+        exclude(group = "io.dropwizard.metrics", module = "metrics-core")
+    }
+    
 
     // --- Snowflake JDBC driver
     implementation("net.snowflake:snowflake-jdbc:3.27.0")
