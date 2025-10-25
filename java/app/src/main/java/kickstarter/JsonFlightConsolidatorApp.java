@@ -165,6 +165,8 @@ public class JsonFlightConsolidatorApp {
          * Takes the results of the Kafka sink and attaches the unbounded data stream to the Flink
          * environment (a.k.a. the Flink job graph -- the DAG)
          */
+        producerProperties.put("transaction.timeout.ms", "900000"); // 15m for long checkpoints
+        producerProperties.put("enable.idempotence", "true");       // typically implied, explicit is fine
         KafkaSink<FlightJsonData> flightSink = KafkaSink.<FlightJsonData>builder()
             .setKafkaProducerConfig(producerProperties)
             .setTransactionalIdPrefix("json-flight-data-") // unique per job
@@ -201,16 +203,16 @@ public class JsonFlightConsolidatorApp {
         DataStream<FlightJsonData> skyOneFlightStream = 
             skyOneSource
                 .filter(flight -> isValidFutureFlight(flight))
-                .name("skyone_flight_filter")
+                .name("skyone_flight_filter").uid("skyone_flight_filter")
                 .map(flight -> flight.toFlightData("SkyOne"))
-                .name("skyone_flight_transform");
+                .name("skyone_flight_transform").uid("skyone_flight_transform");
 
 		DataStream<FlightJsonData> sunsetFlightStream = 
             sunsetSource
                 .filter(flight -> isValidFutureFlight(flight))
-                .name("sunset_flight_filter")
+                .name("sunset_flight_filter").uid("sunset_flight_filter")
                 .map(flight -> flight.toFlightData("Sunset"))
-                .name("sunset_flight_transform");
+                .name("sunset_flight_transform").uid("sunset_flight_transform");
 
 		return skyOneFlightStream.union(sunsetFlightStream);
     }
