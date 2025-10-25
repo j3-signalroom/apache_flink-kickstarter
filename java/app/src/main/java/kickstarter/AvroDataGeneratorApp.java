@@ -165,8 +165,8 @@ public class AvroDataGeneratorApp {
         Map<String, String> registryConfigs = Common.extractRegistryConfigs(producerProperties);
 
         // --- Create the data streams for the two airlines.
-        DataStream<AirlineAvroData> skyOneDataStream = SinkToKafkaTopic(env, "SKY1", "skyone", producerProperties, registryConfigs);
-        DataStream<AirlineAvroData> sunsetDataStream = SinkToKafkaTopic(env, "SUN", "sunset", producerProperties, registryConfigs);
+        DataStream<AirlineAvroData> skyOneDataStream = sinkToKafkaTopic(env, "SKY1", "skyone", producerProperties, registryConfigs);
+        DataStream<AirlineAvroData> sunsetDataStream = sinkToKafkaTopic(env, "SUN", "sunset", producerProperties, registryConfigs);
 
         // --- Describes and configures the catalog for the Table API and Flink SQL.
         String catalogName = "apache_kickstarter";
@@ -237,8 +237,8 @@ public class AvroDataGeneratorApp {
         CatalogLoader catalogLoader = CatalogLoader.custom(catalogName, catalogProperties,  new Configuration(false), catalogImpl);
 
         // --- Sink the datastreams to their respective Apache Iceberg tables.
-        SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "skyone_airline", skyOneDataStream);
-        SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "sunset_airline", sunsetDataStream);
+        sinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "skyone_airline", skyOneDataStream);
+        sinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "sunset_airline", sunsetDataStream);
 
         // --- Execute the Flink job graph (DAG)
         try {            
@@ -260,7 +260,7 @@ public class AvroDataGeneratorApp {
      * 
      * @return The data stream.
      */
-    private static DataStream<AirlineAvroData> SinkToKafkaTopic(final StreamExecutionEnvironment env, final String airlinePrefix, final String airline, Properties producerProperties, Map<String, String> registryConfigs) {
+    private static DataStream<AirlineAvroData> sinkToKafkaTopic(final StreamExecutionEnvironment env, final String airlinePrefix, final String airline, Properties producerProperties, Map<String, String> registryConfigs) {
         // --- Create a data generator source.
         DataGeneratorSource<AirlineAvroData> airlineSource =
             new DataGeneratorSource<>(
@@ -315,7 +315,7 @@ public class AvroDataGeneratorApp {
      * @param tableName The name of the table. 
      * @param airlineDataStream The input data stream.
      */
-    private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineAvroData> airlineDataStream) {
+    private static void sinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineAvroData> airlineDataStream) {
         // --- Convert DataStream<AirlineData> to DataStream<RowData>
         @SuppressWarnings("Convert2Lambda")
         DataStream<RowData> rowDataStream = airlineDataStream.map(new MapFunction<AirlineAvroData, RowData>() {

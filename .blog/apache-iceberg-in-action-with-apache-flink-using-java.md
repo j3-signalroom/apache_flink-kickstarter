@@ -178,7 +178,7 @@ public class DataGeneratorApp {
   }
 }
 ```
-- Place the code in steps 2 through 11 in the **`main()`** method, except for the **`SinkToIcebergTable()`** which goes out of the main() method but stays with the **`DataGeneratorApp`** class.
+- Place the code in steps 2 through 11 in the **`main()`** method, except for the **`sinkToIcebergTable()`** which goes out of the main() method but stays with the **`DataGeneratorApp`** class.
 
 ### Step 2 of 11. Retrieve Command-Line Arguments for the Application
 ```java
@@ -418,14 +418,14 @@ RowType rowType = RowType.of(
 
 - **`RowType`:** Defines the schema for the rows of data that will be used in the Flink data stream and written to Iceberg tables.
 
-### Step 10 of 11. Call the `SinkToIcebergTable()` helper method for both DataStreams
+### Step 10 of 11. Call the `sinkToIcebergTable()` helper method for both DataStreams
 ```java
 // --- Use the CatalogLoader since AWS Glue Catalog is used as the external metastore.
 CatalogLoader catalogLoader = CatalogLoader.custom(catalogName, catalogProperties,  new Configuration(false), catalogImpl);
 
 // --- Sink the datastreams to their respective Apache Iceberg tables.
-SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "skyone_airline", skyOneStream);
-SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "sunset_airline", sunsetStream);
+sinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "skyone_airline", skyOneStream);
+sinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "sunset_airline", sunsetStream);
 ```
 
 - **Catalog Loader:** This indicates that Apache Iceberg uses Flink as its compute engine, while AWS Glue serves as the Catalog managing the metadata and data/delete files for Apache Iceberg.
@@ -442,7 +442,7 @@ SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFiel
  * @param tableName The name of the table. 
  * @param airlineDataStream The input data stream.
  */
-private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineData> airlineDataStream) {
+private static void sinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineData> airlineDataStream) {
     // --- Convert DataStream<AirlineData> to DataStream<RowData>
     DataStream<RowData> skyOneRowData = airlineDataStream.map(new MapFunction<AirlineData, RowData>() {
         @Override

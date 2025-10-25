@@ -292,8 +292,8 @@ public class JsonDataGeneratorApp {
         CatalogLoader catalogLoader = CatalogLoader.custom(catalogName, catalogProperties,  new Configuration(false), catalogImpl);
 
         // --- Sink the datastreams to their respective Apache Iceberg tables.
-        SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "skyone_airline", skyOneStream);
-        SinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "sunset_airline", sunsetStream);
+        sinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "skyone_airline", skyOneStream);
+        sinkToIcebergTable(tblEnv, catalog, catalogLoader, databaseName, rowType.getFieldCount(), "sunset_airline", sunsetStream);
 
         // --- Execute the Flink job graph (DAG)
         try {            
@@ -315,7 +315,7 @@ public class JsonDataGeneratorApp {
      * @param tableName The name of the table. 
      * @param airlineDataStream The input data stream.
      */
-    private static void SinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineJsonData> airlineDataStream) {
+    private static void sinkToIcebergTable(final StreamTableEnvironment tblEnv, final org.apache.flink.table.catalog.Catalog catalog, final CatalogLoader catalogLoader, final String databaseName, final int fieldCount, final String tableName, DataStream<AirlineJsonData> airlineDataStream) {
         // --- Convert DataStream<AirlineJsonData> to DataStream<RowData>
         DataStream<RowData> rowDataStream = airlineDataStream.map((AirlineJsonData airlineJsonData) -> {
             GenericRowData rowData = new GenericRowData(RowKind.INSERT, fieldCount);
