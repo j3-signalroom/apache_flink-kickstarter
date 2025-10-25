@@ -148,6 +148,9 @@ public class AvroDataGeneratorApp {
          */
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
 
+        // --- Set the parallelism for the entire job.
+        env.setParallelism(6);
+
         // --- Create a StreamTableEnvironment.
         EnvironmentSettings settings = 
             EnvironmentSettings.newInstance()
