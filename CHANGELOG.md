@@ -56,6 +56,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 - Issue [#750](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/750).
 - Issue [#756](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/756).
 - Issue [#758](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/758).
+- Issue [#763](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/763).
 
 ## [0.58.00.000] - 2025-01-19
 ### Added
