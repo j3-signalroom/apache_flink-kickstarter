@@ -361,11 +361,14 @@ public class JsonDataGeneratorApp {
                                 + "ticket_price DECIMAL(10,2), "
                                 + "aircraft STRING, "
                                 + "booking_agency_email STRING) "
+                                + "PARTITIONED BY (arrival_airport_code) "
                                 + "WITH ("
                                     + "'write.format.default' = 'parquet',"
                                     + "'write.target-file-size-bytes' = '134217728',"
-                                    + "'partitioning' = 'arrival_airport_code',"
-                                    + "'format-version' = '2');"
+                                    + "'write.delete.mode' = 'merge-on-read',"
+                                    + "'write.update.mode' = 'merge-on-read',"
+                                    + "'format-version' = '2'"
+                                + ");"
                         );
             } else {
                 LOGGER.debug("Table {}.{} already exists.", databaseName, tableName);

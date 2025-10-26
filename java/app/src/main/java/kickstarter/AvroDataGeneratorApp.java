@@ -364,7 +364,10 @@ public class AvroDataGeneratorApp {
                             + "WITH ("
                                 + "'write.format.default' = 'parquet',"
                                 + "'write.target-file-size-bytes' = '134217728',"
-                                + "'format-version' = '2');"
+                                + "'write.delete.mode' = 'merge-on-read',"
+                                + "'write.update.mode' = 'merge-on-read',"
+                                + "'format-version' = '2'"
+                            + ");"
                     );
         }
 
