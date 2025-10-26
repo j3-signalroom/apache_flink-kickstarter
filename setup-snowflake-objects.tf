@@ -36,7 +36,7 @@ resource "snowflake_external_volume" "external_volume" {
 	}
 }
 
-# Snowflake Terraform Provider 2.9.0 does not support the creation of a catalog integration
+# Snowflake Create Catalog Integration Resource unavailable in Snowflake Terraform Provider 2.9.0
 resource "snowflake_execute" "catalog_integration" {
   provider = snowflake.account_admin
   depends_on = [ 
@@ -64,7 +64,7 @@ resource "snowflake_execute" "catalog_integration" {
   EOT
 }
 
-# Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
+# Snowflake Create Iceberg Table Resource unavailable in Snowflake Terraform Provider 2.9.0
 resource "snowflake_execute" "skyone_airline_iceberg_table" {
   provider = snowflake
   depends_on = [ 
@@ -77,8 +77,8 @@ resource "snowflake_execute" "skyone_airline_iceberg_table" {
   execute = <<EOT
     CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SKYONE_AIRLINE
       EXTERNAL_VOLUME = '${local.volume_name}'
-      CATALOG = '${local.catalog_integration_name}'
-      CATALOG_TABLE_NAME = 'SKYONE_AIRLINE';
+      CATALOG = '${local.catalog_namespace}'
+      CATALOG_TABLE_NAME = 'skyone_airline';
     EOT
 
   revert = <<EOT
@@ -90,7 +90,7 @@ resource "snowflake_execute" "skyone_airline_iceberg_table" {
   EOT
 }
 
-# Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
+# Snowflake Create Iceberg Table Resource unavailable in Snowflake Terraform Provider 2.9.0
 resource "snowflake_execute" "sunset_airline_iceberg_table" {
   provider = snowflake
   depends_on = [ 
@@ -103,8 +103,8 @@ resource "snowflake_execute" "sunset_airline_iceberg_table" {
   execute = <<EOT
     CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SUNSET_AIRLINE 
       EXTERNAL_VOLUME = '${local.volume_name}'
-      CATALOG = '${local.catalog_integration_name}'
-      CATALOG_TABLE_NAME = 'SUNSET_AIRLINE';
+      CATALOG = '${local.catalog_namespace}'
+      CATALOG_TABLE_NAME = 'sunset_airline';
     EOT
 
   revert = <<EOT
@@ -116,7 +116,7 @@ resource "snowflake_execute" "sunset_airline_iceberg_table" {
   EOT
 }
 
-# Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
+# Snowflake Create Iceberg Table Resource unavailable in Snowflake Terraform Provider 2.9.0
 resource "snowflake_execute" "flight_iceberg_table" {
   provider = snowflake
   depends_on = [ 
@@ -129,8 +129,8 @@ resource "snowflake_execute" "flight_iceberg_table" {
   execute = <<EOT
     CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLIGHT_AIRLINE 
       EXTERNAL_VOLUME = '${local.volume_name}'
-      CATALOG = '${local.catalog_integration_name}'
-      CATALOG_TABLE_NAME = 'FLIGHT_AIRLINE';
+      CATALOG = '${local.catalog_namespace}'
+      CATALOG_TABLE_NAME = 'flight_airline';
     EOT
 
   revert = <<EOT
@@ -142,7 +142,7 @@ resource "snowflake_execute" "flight_iceberg_table" {
   EOT
 }
 
-# Snowflake Terraform Provider 2.9.0 does not support the creation of an iceberg table
+# Snowflake Create Iceberg Table Resource unavailable in Snowflake Terraform Provider 2.9.0
 resource "snowflake_execute" "flyer_stats_iceberg_table" {
   provider = snowflake
   depends_on = [ 
@@ -155,8 +155,8 @@ resource "snowflake_execute" "flyer_stats_iceberg_table" {
   execute = <<EOT
     CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLYER_STATS 
       EXTERNAL_VOLUME = '${local.volume_name}'
-      CATALOG = '${local.catalog_integration_name}'
-      CATALOG_TABLE_NAME = 'FLYER_STATS';
+      CATALOG = '${local.catalog_namespace}'
+      CATALOG_TABLE_NAME = 'flyer_stats';
     EOT
 
   revert = <<EOT

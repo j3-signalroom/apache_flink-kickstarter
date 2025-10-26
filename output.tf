@@ -3,7 +3,7 @@ output "s3_bucket_warehouse_name" {
 }
 
 output "glue_database_name" {
-  value = "airline"
+  value = local.catalog_namespace
 }
 
 output "service_account_user" {
