@@ -536,7 +536,7 @@ flink run -class kickstarter.DataGeneratorApp apache_flink-kickstarter-dev-SNAPS
 If you don’t have your own Flink cluster environment, you can run it from Docker. I have created one specific to this project [here](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/README.md) that you can use.
 
 To check the status of the running app, visit the Apache Flink Dashboard as shown below:
-![screenshot-datageneratorapp-running-in-flink](images/screenshot-datageneratorapp-running-in-flink.png)
+![screenshot-avrodatageneratorapp-job-running](images/screenshot-avrodatageneratorapp-job-running.png)
 
 ## Summary
 The [`DataGeneratorApp`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/DataGeneratorApp.java) class is a well-rounded Flink application that demonstrates the following:

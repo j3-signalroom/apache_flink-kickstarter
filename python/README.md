@@ -42,7 +42,7 @@ This section guides you through the local setup (on one machine but in separate 
 > -|-
 > `<DOCKER_SWITCH>`|`on` to start up your very own local Apache Cluster running in Docker containers, otherwise `off` to stop the Docker containers.
 > `<AWS_SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
-> `<CHIP>`|if you are running on a Mac with M1, M2, or M3 chip, use `arm64`.  Otherwise, use `amd64`.
+> `<CHIP>`|if you’re using a Mac with Apple Silicon, choose `arm64`. Otherwise, select `amd64`.
 
 To learn more about this script, click [here](../.blog/deploy-flink-script-explanation.md).
 
