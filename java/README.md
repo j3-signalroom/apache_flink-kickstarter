@@ -55,13 +55,9 @@ Finally, to launch one of the **pre-complied** Flink applications, choose your a
 ### 2.1 Avro formatted data
 Flink App|Flink Run Command
 -|-
-**`AvroDataGeneratorApp`**|`flink run --class kickstarter.AvroDataGeneratorApp apache_flink-kickstarter-dev-SNAPSHOT.jar --service-account-user <SERVICE_ACCOUNT_USER>`
-**`AvroFlightConsolidatorApp`**|`flink run --class kickstarter.AvroFlightConsolidatorApp apache_flink-kickstarter-dev-SNAPSHOT.jar --service-account-user <SERVICE_ACCOUNT_USER>`
-**`AvroFlyerStatsApp`**|`flink run --class kickstarter.AvroFlyerStatsApp apache_flink-kickstarter-dev-SNAPSHOT.jar --service-account-user <SERVICE_ACCOUNT_USER>`
-
-> Argument placeholder|Replace with
-> -|-
-> `<SERVICE_ACCOUNT_USER>`|specify the name of the service account user, used in the the AWS Secrets and Parameter Store Path name.
+**`AvroDataGeneratorApp`**|`flink run --class kickstarter.AvroDataGeneratorApp apache_flink-kickstarter-dev-SNAPSHOT.jar`
+**`AvroFlightConsolidatorApp`**|`flink run --class kickstarter.AvroFlightConsolidatorApp apache_flink-kickstarter-dev-SNAPSHOT.jar`
+**`AvroFlyerStatsApp`**|`flink run --class kickstarter.AvroFlyerStatsApp apache_flink-kickstarter-dev-SNAPSHOT.jar`
 
 #### 2.1.1 Avro Java Classes Special Consideration
 Whenever any of the Flink Apps [`Avro models`](app/src/main/java/kickstarter/model/avro/) need to be updated, the [`avro-tools-1.12.0.jar`](https://avro.apache.org/docs/++version++/getting-started-java/#serializing-and-deserializing-with-code-generation) must be used afterwards to generate the respective Java class. This is necessary to ensure that the Avro schema is in sync with the Java class. To generate the Java class, run the following command from the [`apache_flink-kickstarter-jobmanager-1`](#20-discover-what-you-can-do-with-these-flink-apps) Docker container:
@@ -81,10 +77,6 @@ java -jar /path/to/avro-tools-1.12.0.jar compile -string schema app/src/main/jav
 ### 2.2 JSON formatted data
 Flink App|Flink Run Command
 -|-
-**`JsonDataGeneratorApp`**|`flink run --class kickstarter.JsonDataGeneratorApp apache_flink-kickstarter-dev-SNAPSHOT.jar --service-account-user <SERVICE_ACCOUNT_USER>`
-**`JsonFlightConsolidatorApp`**|`flink run --class kickstarter.JsonFlightConsolidatorApp apache_flink-kickstarter-dev-SNAPSHOT.jar --service-account-user <SERVICE_ACCOUNT_USER>`
-**`JsonFlyerStatsApp`**|`flink run --class kickstarter.JsonFlyerStatsApp apache_flink-kickstarter-dev-SNAPSHOT.jar --service-account-user <SERVICE_ACCOUNT_USER>`
-
-> Argument placeholder|Replace with
-> -|-
-> `<SERVICE_ACCOUNT_USER>`|specify the name of the service account user, used in the the AWS Secrets and Parameter Store Path name.
+**`JsonDataGeneratorApp`**|`flink run --class kickstarter.JsonDataGeneratorApp apache_flink-kickstarter-dev-SNAPSHOT.jar`
+**`JsonFlightConsolidatorApp`**|`flink run --class kickstarter.JsonFlightConsolidatorApp apache_flink-kickstarter-dev-SNAPSHOT.jar`
+**`JsonFlyerStatsApp`**|`flink run --class kickstarter.JsonFlyerStatsApp apache_flink-kickstarter-dev-SNAPSHOT.jar`
