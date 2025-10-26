@@ -75,6 +75,8 @@ public class AvroFlightConsolidatorApp {
             );
         }
 
+        LOGGER.info("Configuration loaded - Service Account User: {}", serviceAccountUser);
+
         // --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG)
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
