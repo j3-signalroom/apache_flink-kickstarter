@@ -5,9 +5,9 @@ terraform {
         workspaces {
             name = "apache-flink-kickstarter"
         }
-  }
+    }
 
-  required_providers {
+    required_providers {
         confluent = {
             source  = "confluentinc/confluent"
             version = "2.51.0"

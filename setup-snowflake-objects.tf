@@ -77,7 +77,7 @@ resource "snowflake_execute" "skyone_airline_iceberg_table" {
   execute = <<EOT
     CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SKYONE_AIRLINE
       EXTERNAL_VOLUME = '${local.volume_name}'
-      CATALOG = '${local.catalog_namespace}'
+      CATALOG = '${local.catalog_integration_name}'
       CATALOG_TABLE_NAME = 'skyone_airline';
     EOT
 
@@ -103,7 +103,7 @@ resource "snowflake_execute" "sunset_airline_iceberg_table" {
   execute = <<EOT
     CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.SUNSET_AIRLINE 
       EXTERNAL_VOLUME = '${local.volume_name}'
-      CATALOG = '${local.catalog_namespace}'
+      CATALOG = '${local.catalog_integration_name}'
       CATALOG_TABLE_NAME = 'sunset_airline';
     EOT
 
@@ -129,7 +129,7 @@ resource "snowflake_execute" "flight_iceberg_table" {
   execute = <<EOT
     CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLIGHT_AIRLINE 
       EXTERNAL_VOLUME = '${local.volume_name}'
-      CATALOG = '${local.catalog_namespace}'
+      CATALOG = '${local.catalog_integration_name}'
       CATALOG_TABLE_NAME = 'flight_airline';
     EOT
 
@@ -155,7 +155,7 @@ resource "snowflake_execute" "flyer_stats_iceberg_table" {
   execute = <<EOT
     CREATE ICEBERG TABLE ${local.database_name}.${local.schema_name}.FLYER_STATS 
       EXTERNAL_VOLUME = '${local.volume_name}'
-      CATALOG = '${local.catalog_namespace}'
+      CATALOG = '${local.catalog_integration_name}'
       CATALOG_TABLE_NAME = 'flyer_stats';
     EOT
 
