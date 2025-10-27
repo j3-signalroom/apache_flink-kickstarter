@@ -1,11 +1,12 @@
-from pyflink.common import WatermarkStrategy
+import os
+from pyflink.common import Configuration, WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
+from pyflink.datastream.checkpoint_config import ExternalizedCheckpointRetention
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
-import argparse
 
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
@@ -20,7 +21,7 @@ except ImportError as e:
     raise
 
 
-__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+__copyright__  = "Copyright (c) 2024-2025 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
 __license__    = "MIT"
 __maintainer__ = "Jeffrey Jonathan Jennings"
@@ -28,48 +29,73 @@ __email__      = "j3@thej3.com"
 __status__     = "dev"
 
 
-def main(args):
-    """The entry point to the Flight Importer Flink App (a.k.a., Flink job graph --- DAG).
-        
-    Args:
-        args (str): is the arguments passed to the script.
+def main():
+    """The entry point to the Flight Importer Flink App (a.k.a., Flink job graph --- DAG)."""
+    # --- Retrieve AWS configuration from environment variables
+    s3_bucket_name = os.getenv("AWS_S3_BUCKET_NAME", "")
+    aws_region = os.getenv("AWS_REGION", "")
+    
+    # --- Create a configuration to force Avro serialization instead of Kyro serialization.
+    config = Configuration()
+    config.set_string("pipeline.force-avro", "true")
+
+    # --- Configure parent-first classloading for metrics
+    config.set_string("classloader.parent-first-patterns.additional", 
+                    "com.codahale.metrics;io.dropwizard.metrics")
+
+    # --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG).
+    env = StreamExecutionEnvironment.get_execution_environment(config)
+
     """
-    # --- Create a blank Flink execution environment
-    env = StreamExecutionEnvironment.get_execution_environment()
+    Enable checkpointing every 10,000 milliseconds (10 seconds).  Note, consider the
+    resource cost of checkpointing frequency, as short intervals can lead to higher
+    I/O and CPU overhead.  Proper tuning of checkpoint intervals depends on the
+    state size, latency requirements, and resource constraints.
+    """
+    env.enable_checkpointing(10000)
 
-    ###
-    # Enable checkpointing every 5000 milliseconds (5 seconds).  Note, consider the
-    # resource cost of checkpointing frequency, as short intervals can lead to higher
-    # I/O and CPU overhead.  Proper tuning of checkpoint intervals depends on the
-    # state size, latency requirements, and resource constraints.
-    ###
-    env.enable_checkpointing(5000)
+    # --- Set minimum pause between checkpoints to 5,000 milliseconds (5 seconds).
+    env.get_checkpoint_config().set_min_pause_between_checkpoints(5000)
 
-    ###
-    # Set checkpoint timeout to 60 seconds, which is the maximum amount of time a
-    # checkpoint attempt can take before being discarded.  Note, setting an appropriate
-    # checkpoint timeout helps maintain a balance between achieving exactly-once semantics
-    # and avoiding excessive delays that can impact real-time stream processing performance.
-    ###
+    # --- Set tolerable checkpoint failure number to 3.
+    env.get_checkpoint_config().set_tolerable_checkpoint_failure_number(3)
+
+    """
+    Externalized Checkpoint Retention: RETAIN_ON_CANCELLATION" means that the system will keep the
+    checkpoint data in persistent storage even if the job is manually canceled. This allows you to
+    later restore the job from that last saved state, which is different from the default behavior,
+    where checkpoints are deleted on cancellation. This setting requires you to manually clean up
+    the checkpoint state later if it's no longer needed. 
+    """
+    env.get_checkpoint_config().set_externalized_checkpoint_retention(
+        ExternalizedCheckpointRetention.RETAIN_ON_CANCELLATION
+    )
+
+    """
+    Set checkpoint timeout to 60 seconds, which is the maximum amount of time a
+    checkpoint attempt can take before being discarded.  Note, setting an appropriate
+    checkpoint timeout helps maintain a balance between achieving exactly-once semantics
+    and avoiding excessive delays that can impact real-time stream processing performance.
+    """
     env.get_checkpoint_config().set_checkpoint_timeout(60000)
 
-    ###
-    # Set the maximum number of concurrent checkpoints to 1 (i.e., only one checkpoint
-    # is created at a time).  Note, this is useful for limiting resource usage and
-    # ensuring checkpoints do not interfere with each other, but may impact throughput
-    # if checkpointing is slow.  Adjust this setting based on the nature of your job,
-    # the size of the state, and available resources. If your environment has enough
-    # resources and you want to ensure faster recovery, you could increase the limit
-    # to allow multiple concurrent checkpoints.
-    ###
+    """
+    Set the maximum number of concurrent checkpoints to 1 (i.e., only one checkpoint
+    is created at a time).  Note, this is useful for limiting resource usage and
+    ensuring checkpoints do not interfere with each other, but may impact throughput
+    if checkpointing is slow.  Adjust this setting based on the nature of your job,
+    the size of the state, and available resources. If your environment has enough
+    resources and you want to ensure faster recovery, you could increase the limit
+    to allow multiple concurrent checkpoints.
+    """
     env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Get the Kafka Cluster properties for the Kafka consumer and producer
-    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
-    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
+    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, s3_bucket_name)
+    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, s3_bucket_name)
 
     producer_properties['compression.type'] = 'gzip'
 
@@ -127,7 +153,7 @@ def main(args):
                     .build())
     
     # --- Load Apache Iceberg catalog
-    catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
+    catalog = load_catalog(tbl_env, aws_region, s3_bucket_name.replace("_", "-"), "apache_kickstarter")
 
     # --- Print the current catalog name
     print(f"Current catalog: {tbl_env.get_current_catalog()}")
@@ -138,11 +164,13 @@ def main(args):
     # Print the current database name
     print(f"Current database: {tbl_env.get_current_database()}")
 
-    # An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
-    # catalog object, such as a table, view, or function.  It uniquely identifies an object
-    # within a catalog by encapsulating both the database name and the object name.  For 
-    # instance, this case we using it to get the fully qualified path of the `flight`
-    # table
+    """
+    An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
+    catalog object, such as a table, view, or function.  It uniquely identifies an object
+    within a catalog by encapsulating both the database name and the object name.  For
+    instance, this case we using it to get the fully qualified path of the `flight`
+    table
+    """
     flight_table_path = ObjectPath(tbl_env.get_current_database(), "flight")
 
     # Print the current table name
@@ -162,13 +190,16 @@ def main(args):
                     flight_number STRING,
                     confirmation STRING,
                     airline STRING
+                    PARTITIONED BY (arrival_airport_code)
                 ) WITH (
                     'write.format.default' = 'parquet',
                     'write.target-file-size-bytes' = '134217728',
-                    'partitioning' = 'arrival_airport_code',
+                    'write.delete.mode' = 'merge-on-read',
+                    'write.update.mode' = 'merge-on-read',
                     'format-version' = '2'
                 )
             """)
+
     except Exception as e:
         print(f"A critical error occurred to during the processing of the table because {e}")
         exit(1)
@@ -224,26 +255,25 @@ def combine_datastreams(skyone_stream: DataStream, sunset_stream: DataStream) ->
     # Map the data streams to the FlightData model and filter out Skyone flights that have already arrived
     skyone_flight_stream = (skyone_stream
                             .map(lambda flight: AirlineFlightData.to_flight_data("SkyOne", flight))
-                            .filter(lambda flight: parse_isoformat(flight.arrival_time) > datetime.now(timezone.utc)))
+                            .name("map_skyone_to_flight_data")
+                            .uid("map_skyone_to_flight_data")
+                            .filter(lambda flight: parse_isoformat(flight.arrival_time) > datetime.now(timezone.utc))
+                            .name("filter_skyone_future_flights")
+                            .uid("filter_skyone_future_flights"))
+    
 
     # Map the data streams to the FlightData model and filter out Sunset flights that have already arrived
     sunset_flight_stream = (sunset_stream
                             .map(lambda flight: AirlineFlightData.to_flight_data("Sunset", flight))
-                            .filter(lambda flight: parse_isoformat(flight.arrival_time) > datetime.now(timezone.utc)))
+                            .name("map_sunset_to_flight_data")
+                            .uid("map_sunset_to_flight_data")
+                            .filter(lambda flight: parse_isoformat(flight.arrival_time) > datetime.now(timezone.utc))
+                            .name("filter_sunset_future_flights")
+                            .uid("filter_sunset_future_flights"))
     
     # Return the union of the two data streams
     return skyone_flight_stream.union(sunset_flight_stream)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--aws-s3-bucket',
-                        dest='s3_bucket_name',
-                        required=True,
-                        help='The AWS S3 bucket name.')
-    parser.add_argument('--aws-region',
-                        dest='aws_region',
-                        required=True,
-                        help='The AWS Rgion name.')
-    known_args, _ = parser.parse_known_args()
-    main(known_args)
+    main()

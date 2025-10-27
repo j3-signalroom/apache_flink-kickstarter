@@ -530,7 +530,7 @@ try {
 First, build the Java application and then execute the Flink application. Run the following command in your Flink cluster environment from the terminal command line, as shown in the example below:
 
 ```bash
-flink run -class kickstarter.DataGeneratorApp apache_flink-kickstarter-dev-SNAPSHOT.jar -service-account-user <SERVICE_ACCOUNT_USER> -aws-region <AWS_REGION_NAME>
+flink run -class kickstarter.AvroDataGeneratorApp apache_flink-kickstarter-dev-SNAPSHOT.jar
 ```
 
 If you don’t have your own Flink cluster environment, you can run it from Docker. I have created one specific to this project [here](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/README.md) that you can use.
@@ -539,9 +539,9 @@ To check the status of the running app, visit the Apache Flink Dashboard as show
 ![screenshot-avrodatageneratorapp-job-running](images/screenshot-avrodatageneratorapp-job-running.png)
 
 ## Summary
-The [`DataGeneratorApp`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/DataGeneratorApp.java) class is a well-rounded Flink application that demonstrates the following:
+The [`AvroDataGeneratorApp`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/AvroDataGeneratorApp.java) class is a well-rounded Flink application that demonstrates the following:
 
-- **Data Stream Generation:** Using [`DataGenerator`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/DataGenerator.java) class object to create realistic flight data.
+- **Data Stream Generation:** Using [`AvroDataGenerator`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/AvroDataGenerator.java) class object to create realistic flight data.
 - **Integration with Kafka and Iceberg:** Consuming and Publishing data to/from Kafka for real-time analytics and to Iceberg for historical analysis.
 - **AWS Glue for Metadata Management:** Integrating AWS Glue with Iceberg to manage metadata in a centralized, consistent manner.
 - **Resiliency and Fault Tolerance:** Implementing checkpointing and delivery guarantees to ensure the stability and reliability of the data pipeline.

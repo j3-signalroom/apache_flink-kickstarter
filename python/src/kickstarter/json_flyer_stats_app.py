@@ -1,12 +1,13 @@
-from pyflink.common import WatermarkStrategy
+from pyflink.common import Configuration, WatermarkStrategy
 from pyflink.datastream.window import TumblingEventTimeWindows, Time
 from pyflink.datastream import StreamExecutionEnvironment, DataStream, TimeCharacteristic
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
+from pyflink.datastream.checkpoint_config import ExternalizedCheckpointRetention
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 import logging
-import argparse
+import os
 
 from model.flight_data import FlightData, FlyerStatsData
 from helper.flyer_stats_process_window_function import FlyerStatsProcessWindowFunction
@@ -20,7 +21,7 @@ except ImportError as e:
     raise
 
 
-__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+__copyright__  = "Copyright (c) 2024-2025 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
 __license__    = "MIT"
 __maintainer__ = "Jeffrey Jonathan Jennings"
@@ -31,44 +32,73 @@ __status__     = "dev"
 # Setup the logger
 logger = logging.getLogger('FlyerStatsApp')
 
-def main(args):
-    # Create a blank Flink execution environment
-    env = StreamExecutionEnvironment.get_execution_environment()
-    env.set_stream_time_characteristic(TimeCharacteristic.EventTime)
-    
-    ###
-    # Enable checkpointing every 5000 milliseconds (5 seconds).  Note, consider the
-    # resource cost of checkpointing frequency, as short intervals can lead to higher
-    # I/O and CPU overhead.  Proper tuning of checkpoint intervals depends on the
-    # state size, latency requirements, and resource constraints.
-    ###
-    env.enable_checkpointing(5000)
+def main():
+    """The entry point to the Flyer Stats Flink App (a.k.a., Flink job graph --- DAG)."""
+    # --- Retrieve AWS configuration from environment variables
+    s3_bucket_name = os.getenv("AWS_S3_BUCKET_NAME", "")
+    aws_region = os.getenv("AWS_REGION", "")
 
-    ###
-    # Set checkpoint timeout to 60 seconds, which is the maximum amount of time a
-    # checkpoint attempt can take before being discarded.  Note, setting an appropriate
-    # checkpoint timeout helps maintain a balance between achieving exactly-once semantics
-    # and avoiding excessive delays that can impact real-time stream processing performance.
-    ###
+    # --- Create a configuration to force Avro serialization instead of Kyro serialization.
+    config = Configuration()
+    config.set_string("pipeline.force-avro", "true")
+
+    # --- Configure parent-first classloading for metrics
+    config.set_string("classloader.parent-first-patterns.additional", 
+                    "com.codahale.metrics;io.dropwizard.metrics")
+
+    # --- Create a blank Flink execution environment (a.k.a. the Flink job graph -- the DAG).
+    env = StreamExecutionEnvironment.get_execution_environment(config)
+
+    """
+    Enable checkpointing every 10,000 milliseconds (10 seconds).  Note, consider the
+    resource cost of checkpointing frequency, as short intervals can lead to higher
+    I/O and CPU overhead.  Proper tuning of checkpoint intervals depends on the
+    state size, latency requirements, and resource constraints.
+    """
+    env.enable_checkpointing(10000)
+
+    # --- Set minimum pause between checkpoints to 5,000 milliseconds (5 seconds).
+    env.get_checkpoint_config().set_min_pause_between_checkpoints(5000)
+
+    # --- Set tolerable checkpoint failure number to 3.
+    env.get_checkpoint_config().set_tolerable_checkpoint_failure_number(3)
+
+    """
+    Externalized Checkpoint Retention: RETAIN_ON_CANCELLATION" means that the system will keep the
+    checkpoint data in persistent storage even if the job is manually canceled. This allows you to
+    later restore the job from that last saved state, which is different from the default behavior,
+    where checkpoints are deleted on cancellation. This setting requires you to manually clean up
+    the checkpoint state later if it's no longer needed. 
+    """
+    env.get_checkpoint_config().set_externalized_checkpoint_retention(
+        ExternalizedCheckpointRetention.RETAIN_ON_CANCELLATION
+    )
+
+    """
+    Set checkpoint timeout to 60 seconds, which is the maximum amount of time a
+    checkpoint attempt can take before being discarded.  Note, setting an appropriate
+    checkpoint timeout helps maintain a balance between achieving exactly-once semantics
+    and avoiding excessive delays that can impact real-time stream processing performance.
+    """
     env.get_checkpoint_config().set_checkpoint_timeout(60000)
 
-    ###
-    # Set the maximum number of concurrent checkpoints to 1 (i.e., only one checkpoint
-    # is created at a time).  Note, this is useful for limiting resource usage and
-    # ensuring checkpoints do not interfere with each other, but may impact throughput
-    # if checkpointing is slow.  Adjust this setting based on the nature of your job,
-    # the size of the state, and available resources. If your environment has enough
-    # resources and you want to ensure faster recovery, you could increase the limit
-    # to allow multiple concurrent checkpoints.
-    ###
+    """
+    Set the maximum number of concurrent checkpoints to 1 (i.e., only one checkpoint
+    is created at a time).  Note, this is useful for limiting resource usage and
+    ensuring checkpoints do not interfere with each other, but may impact throughput
+    if checkpointing is slow.  Adjust this setting based on the nature of your job,
+    the size of the state, and available resources. If your environment has enough
+    resources and you want to ensure faster recovery, you could increase the limit
+    to allow multiple concurrent checkpoints.
+    """
     env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
 
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Get the Kafka Cluster properties for the Kafka consumer and producer
-    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, args.s3_bucket_name)
-    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, args.s3_bucket_name)
+    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, s3_bucket_name)
+    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False,s3_bucket_name)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
     flight_source = (KafkaSource.builder()
@@ -109,7 +139,7 @@ def main(args):
                   .build())
 
     # --- Load Apache Iceberg catalog
-    catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
+    catalog = load_catalog(tbl_env, aws_region, s3_bucket_name.replace("_", "-"), "apache_kickstarter")
 
     # --- Print the current catalog name
     print(f"Current catalog: {tbl_env.get_current_catalog()}")
@@ -136,10 +166,12 @@ def main(args):
                     email_address STRING,
                     total_flight_duration INT,
                     number_of_flights INT
+                    PARTITIONED BY (email_address)
                 ) WITH (
                     'write.format.default' = 'parquet',
                     'write.target-file-size-bytes' = '134217728',
-                    'partitioning' = 'email_address',
+                    'write.delete.mode' = 'merge-on-read',
+                    'write.update.mode' = 'merge-on-read',
                     'format-version' = '2'
                 )
             """)
@@ -176,21 +208,15 @@ def define_workflow(flight_data_stream: DataStream) -> DataStream:
         DataStream: The defined workflow of the inputted datastream.
     """
     return (flight_data_stream
-            .map(FlightData.to_flyer_stats_data)    # Transforms each element in the datastream to a FlyerStatsData object
-            .key_by(lambda s: s.email_address)          # Groups the data by email address
-            .window(TumblingEventTimeWindows.of(Time.minutes(1)))   # Each window will contain all events that occur within that 1-minute period
-            .reduce(FlyerStatsData.merge, window_function=FlyerStatsProcessWindowFunction())) # Applies a reduce function to each window
+            .map(FlightData.to_flyer_stats_data)                                                # Transforms each element in the datastream to a FlyerStatsData object
+            .name("map_to_flyer_stats_data")                                                    # Names the map operation for easier identification in the job graph
+            .uid("map_to_flyer_stats_data")                                                     # Assigns a unique identifier to the map operation
+            .key_by(lambda s: s.email_address)                                                  # Groups the data by email address
+            .window(TumblingEventTimeWindows.of(Time.minutes(1)))                               # Each window will contain all events that occur within that 1-minute period
+            .reduce(FlyerStatsData.merge, window_function=FlyerStatsProcessWindowFunction())    # Reduces the data within each window using the merge function and applies a custom window function
+            .name("reduce_flyer_stats_data")                                                    # Names the reduce operation for easier identification in the job graph
+            .uid("reduce_flyer_stats_data"))                                                    # Assigns a unique identifier to the reduce operation
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--aws-s3-bucket',
-                        dest='s3_bucket_name',
-                        required=True,
-                        help='The AWS S3 bucket name.')
-    parser.add_argument('--aws-region',
-                        dest='aws_region',
-                        required=True,
-                        help='The AWS Rgion name.')
-    known_args, _ = parser.parse_known_args()
-    main(known_args)
+    main()
