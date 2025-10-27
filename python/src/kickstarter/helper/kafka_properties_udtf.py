@@ -60,7 +60,7 @@ class KafkaProperties(TableFunction):
         """
         # Get the Kafka Client/Schema Registry Registry properties from AWS Secrets Manager and AWS
         # Systems Manager Parameter Store.
-        secret_path_prefix = f"/confluent_cloud_resource/{self._service_account_user}"
+        secret_path_prefix = f"confluent_cloud_resource/{self._service_account_user}"
 
         properties, error_message = self.__get_confluent_properties(
             """
@@ -69,7 +69,7 @@ class KafkaProperties(TableFunction):
             """
             f"{secret_path_prefix}/kafka_cluster/java_client",
             f"{secret_path_prefix}/schema_registry_cluster/java_client",
-            f"{secret_path_prefix}/consumer_kafka_client" if self._is_consumer else f"{secret_path_prefix}/producer_kafka_client"
+            f"/{secret_path_prefix}/consumer_kafka_client" if self._is_consumer else f"{secret_path_prefix}/producer_kafka_client"
         )
         if error_message:
             raise RuntimeError(f"Failed to retrieve the Confluent Cloud properties because {error_message}")
