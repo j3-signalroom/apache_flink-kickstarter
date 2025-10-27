@@ -94,7 +94,7 @@ RUN if [ "$FLINK_LANGUAGE" = "python" ]; then \
     curl -L "${MAVEN_ROOT_URL}flink/flink-connector-kafka/4.0.1-2.0/flink-connector-kafka-4.0.1-2.0.jar" -o "${FLINK_LIB_DIR}flink-connector-kafka-4.0.1-2.0.jar" && \
     curl -L "${MAVEN_ROOT_URL}flink/flink-json/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-json-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
     curl -L "${MAVEN_ROOT_URL}flink/flink-avro/${APACHE_FLINK_VERSION_WITH_PATCH}/flink-avro-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" -o "${FLINK_LIB_DIR}flink-avro-${APACHE_FLINK_VERSION_WITH_PATCH}.jar" && \
-    curl -L "${MAVEN_ROOT_URL}avro/avro/1.12.1/avro-1.12.1.jar" -o "${FLINK_LIB_DIR}avro-1.12.1.jar"  && \
+    curl -L "${MAVEN_ROOT_URL}avro/avro/1.12.0/avro-1.12.0.jar" -o "${FLINK_LIB_DIR}avro-1.12.0.jar"  && \
     curl -L "${MAVEN_ROOT_URL}kafka/kafka-clients/4.0.1/kafka-clients-4.0.1.jar" -o "${FLINK_LIB_DIR}kafka-clients-4.0.1.jar"; \
 fi
 

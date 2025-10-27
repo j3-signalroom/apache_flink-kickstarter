@@ -1,5 +1,5 @@
-# Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!
-If you're like me and want to work with the latest versions of Apache Flink, Apache Iceberg, and AWS Glue as your metastore, I've got some key insights to share. Before diving in, I want to acknowledge [Zhe Wang’s post, Catalog Iceberg Data with AWS Glue Catalog from Flink Job](https://medium.com/@zh3w4ng/catalog-iceberg-data-with-aws-glue-catalog-from-flink-job-aecffdc7bdd1), and [Matt Slalom’s response on GitHub for Apache Iceberg Issue #3044](https://github.com/apache/iceberg/issues/3044#issuecomment-1273900117) for pointing me in the right direction.
+# UPDATED for Apache Flink v2.1 + Apache Iceberg v1.10 + AWS Glue: Get Your JAR Versions Right!
+If you're like me and want to work with the latest versions of Apache Flink, Apache Iceberg, and AWS Glue as your catalog, I've got some key insights to share.
 
 ![funny-dogs-cute](images/funny-dogs-cute.gif)
 
