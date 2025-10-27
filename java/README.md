@@ -1,4 +1,4 @@
-# Flink Applications Powered by Java on a locally running Apache Flink Cluster in Docker
+# **Kickstart Your Journey: Building Real Flink Applications in Java with Open-Source Apache Flink**
 Discover how Apache Flink® can transform your data pipelines! Explore hands-on examples of Flink applications using the [DataStream API](https://nightlies.apache.org/flink/flink-docs-release-2.1/docs/dev/datastream/overview/) and [Table API](https://nightlies.apache.org/flink/flink-docs-release-2.1/docs/dev/table/overview/) in Java. You'll see how these technologies integrate seamlessly with AWS Services, Apache Kafka, and  Apache Iceberg.
 
 Curious about the differences between the DataStream API and Table API? Click [here](../.blog/datastream-vs-table-api.md) to learn more and find the best fit for your next project.

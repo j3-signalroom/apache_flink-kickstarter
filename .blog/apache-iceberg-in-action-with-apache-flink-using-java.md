@@ -1,9 +1,9 @@
 # Apache Iceberg in Action with Apache Flink using Java
-Data engineering transforms raw data into useful, accessible data products in the Data Mesh platform-building era. Like the signalRoom GenAI Data Mesh platform, we package our data products in Apache Iceberg tables. In this article, I’ll take you through sinking your Apache Flink data into Apache Iceberg tables using Java. This is a natural follow-up to my previous short piece, [Apache Flink + Apache Iceberg + AWS Glue: Get Your JAR Versions Right!](get-your-jar-versions-right.md) where I listed out the right combination of JARs to use.
+Data engineering transforms raw data into useful, accessible data products in the Data Mesh platform-building era. Like the signalRoom GenAI Data Mesh platform, we package our data products in Apache Iceberg tables. In this article, I’ll take you through sinking your Apache Flink data into Apache Iceberg tables using Java. This is a natural follow-up to my previous short piece, [UPDATED for Apache Flink v2.1 + Apache Iceberg v1.10 + AWS Glue: Get Your JAR Versions Right!](get-your-jar-versions-right.md) where I listed out the right combination of JARs to use.
 
-In this article, I’ll walk you through how to seamlessly sink data in your Flink application to Apache Iceberg tables using AWS Glue as your Apache Iceberg catalog, ensuring reliability, performance, and future-proof data storage. We will do this using the [Apache Flink Kickstarter Data Generator Flink app](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/DataGeneratorApp.java). This app generates synthetic flight data for two fictional airlines (`Sunset Air` and `SkyOne`) and streams it into Apache Kafka and Apache Iceberg. The app provides real-time and historical analytics capabilities, demonstrating the power of Apache Iceberg as a table format for large, complex analytic datasets in distributed data lakehouses. Moreover, it illustrates how AWS Glue is used as the metadata catalog for the Apache Iceberg tables.
+In this article, I’ll walk you through how to seamlessly sink data in your Flink application to Apache Iceberg tables using AWS Glue as your Apache Iceberg catalog, ensuring reliability, performance, and future-proof data storage. We will do this using the [Apache Flink Kickstarter Avro Data Generator Flink app](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/java/app/src/main/java/kickstarter/AvroDataGeneratorApp.java). This app generates synthetic flight data for two fictional airlines (`Sunset Air` and `SkyOne`) and streams it into Apache Kafka and Apache Iceberg. The app provides real-time and historical analytics capabilities, demonstrating the power of Apache Iceberg as a table format for large, complex analytic datasets in distributed data lakehouses. Moreover, it illustrates how AWS Glue is used as the metadata catalog for the Apache Iceberg tables.
 
-![screenshot-datageneratorapp](images/screenshot-datageneratorapp.png)
+![screenshot-avrodatageneratorapp](images/screenshot-avrodatageneratorapp.png)
 
 The plan for the remainder of the article is as follows:
 
@@ -55,10 +55,15 @@ The easiest way to set up AWS Glue in your environment — assuming AWS is your 
 
 Below is a step-by-step guide with Terraform code to establish the necessary infrastructure for integrating AWS Glue and Amazon S3 with Apache Iceberg. This setup is designed to store Apache Iceberg tables in S3, manage metadata through AWS Glue, and ensure that the appropriate IAM roles and policies are in place for permissions:
 
-### Step 1 of 5. Create the `<YOUR-UNIQUE-BUCKET-NAME>` S3 Bucket for Apache Iceberg Tables
+### Step 1 of 5. Create the `<YOUR-BUCKET-NAME>` S3 Bucket for Apache Iceberg Tables
 ```hcl
+resource "random_uuid" "s3_bucket" {
+}
+
 resource "aws_s3_bucket" "iceberg_bucket" {
-  bucket = <YOUR-UNIQUE-BUCKET-NAME>
+  # Ensure the bucket name adheres to the S3 bucket naming conventions and is globally unique.
+  bucket        = "${replace(<YOUR-BUCKET-NAME>, "_", "-")}-${random_uuid.s3_bucket.id}"
+  force_destroy = true
 }
 ```
 
