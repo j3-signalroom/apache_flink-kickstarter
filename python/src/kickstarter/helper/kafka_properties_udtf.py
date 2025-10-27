@@ -63,8 +63,10 @@ class KafkaProperties(TableFunction):
         secret_path_prefix = f"/confluent_cloud_resource/{self._service_account_user}"
 
         properties = self.__get_confluent_properties(
-            # Using the `java_clent`` configuration instead of the `python_client`` configuration 
-            # because PyFlink converts into Java code and the Java code is what is executed.
+            """
+            Using the `java_client` configuration instead of the `python_client` configuration
+            because PyFlink converts into Java code and the Java code is what is executed.
+            """
             f"{secret_path_prefix}/kafka_cluster/java_client",
             f"{secret_path_prefix}/schema_registry_cluster/java_client",
             f"{secret_path_prefix}/consumer_kafka_client" if self._is_consumer else f"{secret_path_prefix}/producer_kafka_client"
@@ -152,8 +154,7 @@ def execute_kafka_properties_udtf(tbl_env: StreamTableEnvironment, is_consumer: 
     # kafka_property_table.print_schema()
 
     # Register the Python function as a PyFlink UDTF (User-Defined Table Function)
-    kafka_properties_udtf = udtf(f=KafkaProperties(is_consumer, service_account_user), 
-                                 result_types=schema)
+    kafka_properties_udtf = udtf(f=KafkaProperties(is_consumer, service_account_user), result_types=schema)
 
     # Join the Confluent Property Table with the UDTF
     func_results = confluent_property_table.join_lateral(kafka_properties_udtf.alias("key", "value")).select(col("key"), col("value"))

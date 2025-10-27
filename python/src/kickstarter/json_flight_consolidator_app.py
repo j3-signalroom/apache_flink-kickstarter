@@ -31,7 +31,8 @@ __status__     = "dev"
 
 def main():
     """The entry point to the Flight Importer Flink App (a.k.a., Flink job graph --- DAG)."""
-    # --- Retrieve AWS configuration from environment variables
+    # --- Retrieve environment variables
+    service_account_user = os.getenv("SERVICE_ACCOUNT_USER", "")
     s3_bucket_name = os.getenv("AWS_S3_BUCKET_NAME", "")
     aws_region = os.getenv("AWS_REGION", "")
     
@@ -94,8 +95,8 @@ def main():
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Get the Kafka Cluster properties for the Kafka consumer and producer
-    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, s3_bucket_name)
-    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, s3_bucket_name)
+    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, service_account_user)
+    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, service_account_user)
 
     producer_properties['compression.type'] = 'gzip'
 
@@ -153,7 +154,7 @@ def main():
                     .build())
     
     # --- Load Apache Iceberg catalog
-    catalog = load_catalog(tbl_env, aws_region, s3_bucket_name.replace("_", "-"), "apache_kickstarter")
+    catalog = load_catalog(tbl_env, aws_region, s3_bucket_name, "apache_kickstarter")
 
     # --- Print the current catalog name
     print(f"Current catalog: {tbl_env.get_current_catalog()}")
