@@ -67,7 +67,6 @@ dependencies {
     compileOnly("org.apache.flink:flink-connector-base:${flinkVersion}")
     implementation("org.apache.flink:flink-connector-kafka:4.0.1-2.0")
     implementation("org.apache.flink:flink-connector-datagen:${flinkVersion}")
-    //implementation("org.apache.flink:flink-avro:${flinkVersion}")
     implementation("org.apache.flink:flink-avro-confluent-registry:${flinkVersion}")
     implementation("org.apache.flink:flink-json:${flinkVersion}")
 
