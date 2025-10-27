@@ -62,7 +62,7 @@ class KafkaProperties(TableFunction):
         # Systems Manager Parameter Store.
         secret_path_prefix = f"/confluent_cloud_resource/{self._service_account_user}"
 
-        properties = self.__get_confluent_properties(
+        properties, error_message = self.__get_confluent_properties(
             """
             Using the `java_client` configuration instead of the `python_client` configuration
             because PyFlink converts into Java code and the Java code is what is executed.
@@ -71,13 +71,13 @@ class KafkaProperties(TableFunction):
             f"{secret_path_prefix}/schema_registry_cluster/java_client",
             f"{secret_path_prefix}/consumer_kafka_client" if self._is_consumer else f"{secret_path_prefix}/producer_kafka_client"
         )
-        if not properties:
-            raise RuntimeError(f"Failed to retrieve the Kafka Client properties from '{secret_path_prefix}' secrets.")
+        if error_message:
+            raise RuntimeError(f"Failed to retrieve the Confluent Cloud properties because {error_message}")
         
         for property_key, property_value in properties.items():
             yield Row(str(property_key), str(property_value))
 
-    def __get_confluent_properties(self, kafka_cluster_secrets_path: str, schema_registry_cluster_secrets_path: str, client_parameters_path: str) -> Dict[str, str]:
+    def __get_confluent_properties(self, kafka_cluster_secrets_path: str, schema_registry_cluster_secrets_path: str, client_parameters_path: str) -> Tuple[Dict[str, str], str]:
         """This method retrieves the Kafka Cluster and Schema Registry Cluster properties from the
         AWS Secrets Manager, and the Kafka Client properties from the AWS Systems Manager.
 
@@ -89,29 +89,29 @@ class KafkaProperties(TableFunction):
             Parameter Store.
 
         Returns:
-            Dict[str, str]: the Kafka Cluster properties collection if successful, otherwise None.
+            Tuple[Dict[str, str], str]: the Kafka Cluster properties collection if successful, otherwise None.
         """
         confluent_properties = {}
         
         # Retrieve the Kafka Cluster properties from the AWS Secrets Manager
         kafka_cluster_properties, error_message = get_secrets(self._aws_region_name, kafka_cluster_secrets_path)
         if error_message:
-            return {}
+            return {}, error_message
         confluent_properties.update(kafka_cluster_properties)
 
         # Retrieve the Schema Registry Cluster properties from the AWS Secrets Manager
         schema_registry_cluster_properties, error_message = get_secrets(self._aws_region_name, schema_registry_cluster_secrets_path)
         if error_message:
-            return {}
+            return {}, error_message
         confluent_properties.update(schema_registry_cluster_properties)
 
         # Retrieve the parameters from the AWS Systems Manager Parameter Store
         parameters, error_message = get_parameters(self._aws_region_name, client_parameters_path)
         if error_message:
-            return {}
+            return {}, error_message
         confluent_properties.update(parameters)
 
-        return confluent_properties
+        return confluent_properties, ""
 
 def execute_kafka_properties_udtf(tbl_env: StreamTableEnvironment, is_consumer: bool, service_account_user: str) -> Tuple[Dict[str, str], Dict[str, str]]:
     """This method retrieves the Kafka Cluster and Schema Registry Cluster properties from the

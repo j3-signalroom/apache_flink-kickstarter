@@ -51,10 +51,10 @@ Run the Docker containers (fully compatible with both **Apple Silicon's M-series
     - [**3.7 DevOps in Action: Running Terraform in the cloud**](#37-devops-in-action-deploying-terraform-in-the-cloud)
         * [**3.7.1 Run from the cloud**](#371-run-from-the-cloud)
     - [**3.8 Visualizing the Terraform Configuration**](#38-visualizing-the-terraform-configuration)
-+ [**4.0 Hands-On Kickoff: Practical Examples for Rapid Learning**](#40-hands-on-kickoff-practical-examples-for-rapid-learning)
-    - [**4.1 Flink Applications Powered by Java on a locally running Apache Flink Cluster in Docker**](#41-flink-applications-powered-by-java-on-a-locally-running-apache-flink-cluster-in-docker)
-    - [**4.2 Flink Applications Powered by Python on a locally running Apache Flink Cluster in Docker**](#42-flink-applications-powered-by-python-on-a-locally-running-apache-flink-cluster-in-docker)
-    - [**4.3 Flink Applications Powered by Python on Confluent Cloud for Apache Flink**](#43-flink-applications-powered-by-python-on-confluent-cloud-for-apache-flink)
++ [**4.0 Hands-On Kickoff: Learn Flink by Doing, Not Watching**](#40-hands-on-kickoff-learn-flink-by-doing-not-watching)
+    - [**4.1 Kickstart Your Journey: Building Real Flink Applications in Java with Open-Source Apache Flink**](#41-kickstart-your-journey-building-real-flink-applications-in-java-with-open-source-apache-flink)
+    - [**4.2 Kickstart Your Journey: Building Real Flink Applications in Python with Open-Source Apache Flink**](#42-kickstart-your-journey-building-real-flink-applications-in-python-with-open-source-apache-flink)
+    - [**4.3 Kickstart Your Journey: Building Real Flink Applications Powered by Python on Confluent Cloud for Apache Flink**](#43-kickstart-your-journey-building-real-flink-applications-powered-by-python-on-confluent-cloud-for-apache-flink)
 + [**5.0 Powering Analytics with Apache Iceberg tables in Snowflake**](#50-powering-analytics-with-apache-iceberg-tables-in-snowflake)
 + [**6.0 Resources**](#60-resources)
 <!-- tocstop -->
@@ -179,7 +179,7 @@ Both methods provision a fully functional **end-to-end data streaming architectu
 
 ##### **3.5.5 Run Flink Locally**
 
-You can run **Apache Flink** locally on your Mac or use the **provided Docker containers** to launch Flink and Iceberg seamlessly—compatible with both **Apple Silicon (M-series)** and **x86 architectures**.
+You can run **Apache Flink** locally on your Mac or use the **provided Docker containers** to launch Flink and Iceberg seamlessly—compatible with both **Apple Silicon's M-series** and **x86 architectures**.
 
 ##### **3.5.6 You're Ready!**
 
@@ -261,15 +261,19 @@ When you update the Terraform Configuration, to update the Terraform visualizati
 terraform graph | dot -Tpng > .blog/images/terraform-visualization.png
 ```
 
-## **4.0 Hands-On Kickoff: Practical Examples for Rapid Learning**
+## **4.0 Hands-On Kickoff: Learn Flink by Doing, Not Watching**
 
-### **4.1 Flink Applications Powered by Java on a locally running Apache Flink Cluster in Docker**
+### **4.1 Kickstart Your Journey: Building Real Flink Applications in Java with Open-Source Apache Flink**
+This section walks you through building and running **real Apache Flink® applications in Java** on a **locally running Docker-based Flink cluster** with Apache Iceberg support. You’ll learn how to power up the Flink environment, explore hands-on examples using both the **DataStream API** and **Table API**, and see how these integrate seamlessly with **AWS Services, Apache Kafka,** and **Apache Iceberg**. After installing prerequisites like `aws2-wrap`, you can deploy the cluster using a simple bash script and run pre-compiled Java apps that process **Avro** and **JSON-formatted data**. You’ll also learn how to regenerate Avro Java classes when schemas change, giving you a complete, practical foundation for mastering Flink locally before scaling to production.
+
 [Let's go!](java/README.md)
 
-### **4.2 Flink Applications Powered by Python on a locally running Apache Flink Cluster in Docker**
+### **4.2 Kickstart Your Journey: Building Real Flink Applications in Python with Open-Source Apache Flink**
+This section introduces how to build and run **Apache Flink® applications in Python** using **PyFlink** on a **locally running Docker-based Flink cluster** with Apache Iceberg support. You’ll explore hands-on examples that use the **DataStream API**, **Table API**, and **Flink SQL**, all compiled from Python to Java under the hood. Before running the apps, you’ll populate Kafka topics with sample data using a Java generator, then start the cluster via a simple Bash script. Inside the JobManager container, you can launch PyFlink jobs directly—each powered by **`uv run`**, a fast Rust-based Python package runner that ensures clean, optimized environments. This guide provides everything needed to experiment with PyFlink, integrate it with AWS, Kafka, and Iceberg, and understand how Python brings Flink’s real-time processing power to your local development workflow.
+
 [Let's go!](python/README.md)
 
-### **4.3 Flink Applications Powered by Python on Confluent Cloud for Apache Flink**
+### **4.3 Kickstart Your Journey: Building Real Flink Applications Powered by Python on Confluent Cloud for Apache Flink**
 [Let's go!](ccaf/README.md)
 
 ## **5.0 Powering Analytics with Apache Iceberg tables in Snowflake**
