@@ -239,13 +239,14 @@ def main():
         INSERT INTO {flight_table_path.get_full_name()}
         SELECT * FROM temp_flight_view
     """)
-                                                                         
-    # Add Kafka insert
     logging.info("Added Iceberg insert to statement set")
+                                                                         
+    # Add Kafka insert to the statement set
     statement_set.add_insert_sql("""
         INSERT INTO kafka_flight_sink
         SELECT * FROM temp_flight_view
     """)
+    logging.info("Added Kafka insert to statement set")
     
     logging.info("Added Kafka insert to statement set")
     logging.info("Starting unified Flink job with both Iceberg and Kafka sinks")
