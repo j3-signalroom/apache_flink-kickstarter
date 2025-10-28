@@ -170,22 +170,23 @@ dependencies = [
 
 ### Step 2 of 14.  Import the required Python libraries
 ```python
-from pyflink.common import WatermarkStrategy
+import os
+from pyflink.common import Configuration, WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
+from pyflink.datastream.checkpoint_config import ExternalizedCheckpointRetention
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
-import argparse
+import logging
 
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
-from helper.kafka_properties_udtf import execute_confluent_properties_udtf
-from helper.utilities import parse_isoformat, load_catalog, load_database
+from helper.common import load_catalog, load_database, get_confluent_properties
 ```
 
-- Since [`FlightData`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/model/flight_data.py) and [`AirlineFlightData`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/model/airline_flight_data.py) are custom classes, they must be imported into the Flink application. These classes define the flight and airline data schema, specifying the attributes and their types. The Kafka properties User-Defined Table Function (UDTF) and utility functions are also imported to manage Kafka properties and other helper functionalities efficiently. For more details on the Kafka properties, you can [click here](link_to_kafka_prhttps://thej3.com/how-to-create-a-user-defined-table-function-udtf-in-pyflink-to-fetch-data-from-an-external-source-799a93c90d2coperties_info), and to explore the helper utility methods, [click here](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/helper/utilities.py).
+- Since [`FlightData`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/model/flight_data.py) and [`AirlineFlightData`](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/model/airline_flight_data.py) are custom classes, they must be imported into the Flink application. These classes define the flight and airline data schema, specifying the attributes and their types. The utility functions are also imported to manage Kafka properties and other helper functionalities efficiently. For more details on the Kafka properties, and to explore the helper utility methods, [click here](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/python/src/kickstarter/helper/utilities.py).
 
 ```python
 def main(args):
@@ -244,16 +245,23 @@ if __name__ == "__main__":
 
 ### Step 4 of 14.  Get Kafka Consumer Client Kafka Cluster properties
 ```python
-    # Get Kafka Consumer Client Kafka Cluster properties
-    consumer_properties = execute_confluent_properties_udtf(tbl_env, True, args.s3_bucket_name)
+"""
+Using the `java_client` configuration instead of the `python_client` configuration
+because PyFlink converts into Java code and the Java code is what is executed.
+"""
+consumer_properties, error_message = get_confluent_properties(
+    aws_region_name=aws_region,
+    kafka_cluster_secrets_path=f"{secret_path_prefix}/kafka_cluster/java_client",
+    client_parameters_path=f"/{secret_path_prefix}/consumer_kafka_client"
+)
+if error_message:
+    raise RuntimeError(f"Failed to retrieve the Confluent Cloud properties for the Kafka Consumer client because {error_message}")
 ```
-- The function `execute_confluent_properties_udtf()` is designed to retrieve Kafka cluster properties by triggering the ConfluentProperties User-Defined Table Function (UDTF).
+- The function `get_confluent_properties()` is designed to retrieve Kafka cluster properties.
 
 ### Step 5 of 14.  Consumer the `airline.skyone` and `airline.sunset` Kafka topics
 ```python
 # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
-# Note: KafkaSource was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
-# you will need to use the FlinkKafkaConsumer class.
 skyone_source = (KafkaSource.builder()
                             .set_properties(consumer_properties)
                             .set_topics("airline.skyone")
@@ -288,18 +296,18 @@ sunset_stream = (env.from_source(sunset_source, WatermarkStrategy.no_watermarks(
 
 ### Step 6 of 14.  Get Kafka Producer Client Kafka Cluster properties
 ```python
-# Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flight`
-# Get the Kafka Cluster properties for the producer
-producer_properties = execute_confluent_properties_udtf(tbl_env, False, args.s3_bucket_name)
-producer_properties.update({
-    'transaction.timeout.ms': '60000'  # Set transaction timeout to 60 seconds
-})
+producer_properties, error_message = get_confluent_properties(
+    aws_region_name=aws_region,
+    kafka_cluster_secrets_path=f"{secret_path_prefix}/kafka_cluster/java_client",
+    client_parameters_path=f"/{secret_path_prefix}/producer_kafka_client"
+)
+if error_message:
+    raise RuntimeError(f"Failed to retrieve the Confluent Cloud properties for the Kafka Producer client because {error_message}")
+producer_properties['compression.type'] = 'lz4'
 ```
 
 ### Step 7 of 14.  Create Kafka Sink
 ```python
-# Note: KafkaSink was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
-# you will need to use the FlinkKafkaProducer class.
 # Initialize the KafkaSink builder
 kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
 
@@ -319,59 +327,21 @@ flight_sink = (kafka_sink_builder
                                                                         .build())
                                         .build())
                 .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                .set_transactional_id_prefix("json-flight-data-")  # apply unique prefix to prevent backchannel conflicts and potential memory leaks
                 .build())
 ```
 
 ### Step 8 of 14.  Configure, Register, and Set the Apache Iceberg Catalog
 ```python
 # --- Load Apache Iceberg catalog
-catalog = load_catalog(tbl_env, args.aws_region, args.s3_bucket_name.replace("_", "-"), "apache_kickstarter")
+catalog = load_catalog(tbl_env, aws_region, s3_bucket_name, "apache_kickstarter")
 
-# --- Print the current catalog name
-print(f"Current catalog: {tbl_env.get_current_catalog()}")
+logging.info("Current catalog: %s", tbl_env.get_current_catalog())
 ```
 
-- The `helper.utilities.load_catalog()` function configures, registers, and sets the Apache Iceberg catalog in the Flink environment. This function is essential for managing metadata and storing data in Apache Iceberg tables.
+- The `common.load_catalog()` function configures, registers, and sets the Apache Iceberg catalog in the Flink environment. This function is essential for managing metadata and storing data in Apache Iceberg tables.
 
 ```python
-def load_catalog(tbl_env: StreamExecutionEnvironment, region_name: str, bucket_name: str, catalog_name: str) -> Catalog:
-    """ This method loads the catalog into the environment.
-    
-    Args:
-        tbl_env (StreamExecutionEnvironment): The StreamExecutionEnvironment is the context
-        in which a streaming program is executed. 
-        region_name (str): The region where the bucket is located.
-        bucket_name (str): The name of the bucket where the warehouse is located.
-        catalog_name (str): The name of the catalog to be loaded into the environment.
-        
-    Returns:
-        Catalog: The catalog object is returned if the catalog is loaded into the environment.
-    """
-    try:
-        if not catalog_exist(tbl_env, catalog_name):
-            tbl_env.execute_sql(f"""
-                CREATE CATALOG {catalog_name} WITH (
-                    'type' = 'iceberg',
-                    'warehouse' = 's3://{bucket_name}/warehouse',
-                    'catalog-impl' = 'org.apache.iceberg.aws.glue.GlueCatalog',
-                    'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
-                    'glue.skip-archive' = 'True',
-                    'glue.region' = '{region_name}'
-                    );
-            """)
-        else:
-            print(f"The {catalog_name} catalog already exists.")
-    except Exception as e:
-        print(f"A critical error occurred to during the processing of the catalog because {e}")
-        exit(1)
-
-    # --- Use the Iceberg catalog
-    tbl_env.use_catalog(catalog_name)
-
-    # --- Access the Iceberg catalog to query the airlines database
-    return tbl_env.get_catalog(catalog_name)
-
-
 def catalog_exist(tbl_env: StreamExecutionEnvironment, catalog_to_check: str) -> bool:
     """This method checks if the catalog exist in the environment.
 
@@ -392,6 +362,44 @@ def catalog_exist(tbl_env: StreamExecutionEnvironment, catalog_to_check: str) ->
         return True
     else:
         return False
+    
+
+def load_catalog(tbl_env: StreamExecutionEnvironment, region_name: str, bucket_name: str, catalog_name: str) -> Catalog:
+    """ This method loads the catalog into the environment.
+    
+    Args:
+        tbl_env (StreamExecutionEnvironment): The StreamExecutionEnvironment is the context
+        in which a streaming program is executed. 
+        region_name (str): The region where the bucket is located.
+        bucket_name (str): The name of the bucket where the warehouse is located.
+        catalog_name (str): The name of the catalog to be loaded into the environment.
+        
+    Returns:
+        Catalog: The catalog object is returned if the catalog is loaded into the environment.
+    """
+    try:
+        if not catalog_exist(tbl_env, catalog_name):
+            tbl_env.execute_sql(f"""
+                CREATE CATALOG {catalog_name} WITH (
+                    'type' = 'iceberg',
+                    'warehouse' = '{bucket_name}/',
+                    'catalog-impl' = 'org.apache.iceberg.aws.glue.GlueCatalog',
+                    'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
+                    'glue.skip-archive' = 'True',
+                    'glue.region' = '{region_name}'
+                    );
+            """)
+        else:
+            print(f"The {catalog_name} catalog already exists.")
+    except Exception as e:
+        print(f"A critical error occurred to during the processing of the catalog because {e}")
+        exit(1)
+
+    # --- Use the Iceberg catalog
+    tbl_env.use_catalog(catalog_name)
+
+    # --- Access the Iceberg catalog to query the airlines database
+    return tbl_env.get_catalog(catalog_name)
 ```
 
 ### Step 9 of 14.  Check if the Apache Flink Catalog Database Exists and Create It if it Does Not
@@ -407,7 +415,7 @@ load_database(tbl_env, catalog, "airlines")
 print(f"Current database: {tbl_env.get_current_database()}")
 ```
 
--  Call the `helper.utilities.load_database()` function to load the `airlines` database into the Flink environment.
+-  Call the `common.load_database()` function to load the `airlines` database into the Flink environment.
 
 ```python
 def load_database(tbl_env: StreamExecutionEnvironment, catalog: Catalog, database_name:str) -> None:
@@ -431,12 +439,16 @@ def load_database(tbl_env: StreamExecutionEnvironment, catalog: Catalog, databas
 
 ### Step 10 of 14.  Create the `airlines.flight` Apache Iceberg Table
 ```python
-# An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
-# catalog object, such as a table, view, or function.  It uniquely identifies an object
-# within a catalog by encapsulating both the database name and the object name.  For 
-# instance, this case we using it to get the fully qualified path of the `flight`
-# table
+"""
+An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
+catalog object, such as a table, view, or function.  It uniquely identifies an object
+within a catalog by encapsulating both the database name and the object name.  For
+instance, this case we using it to get the fully qualified path of the `flight`
+table
+"""
 flight_table_path = ObjectPath(tbl_env.get_current_database(), "flight")
+
+logging.info("Current table: %s", flight_table_path.get_full_name())
 
 # Check if the table exists.  If not, create it
 try:
@@ -452,22 +464,30 @@ try:
                 flight_number STRING,
                 confirmation STRING,
                 airline STRING
-            ) WITH (
+            ) PARTITIONED BY (arrival_airport_code)
+            WITH (
                 'write.format.default' = 'parquet',
                 'write.target-file-size-bytes' = '134217728',
-                'partitioning' = 'arrival_airport_code',
+                'write.delete.mode' = 'merge-on-read',
+                'write.update.mode' = 'merge-on-read',
                 'format-version' = '2'
             )
         """)
+
 except Exception as e:
-    print(f"A critical error occurred to during the processing of the table because {e}")
+    logging.error("A critical error occurred to during the processing of the table because %s", e)
     exit(1)
 ```
 
 ### Step 11 of 14.  Combine the `skyone` and `sunset` Airline DataStreams into one DataStream
 ```python
 # Combine the Airline DataStreams into one DataStream
-flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
+flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(
+        lambda d: d.to_row(), output_type=FlightData.get_value_type_info()
+    ).name("combined_flight_datastream").uid("combined_flight_datastream")
+
+# Create a temporary view from the datastream
+tbl_env.create_temporary_view("temp_flight_view", flight_datastream)
 ```
 
 - The `combine_datastreams()` function is used to merge the `skyone` and `sunset` airline DataStreams into a single DataStream. This function is essential for combining the two streams and mapping the data to the `FlightData` schema.
@@ -517,36 +537,41 @@ def parse_isoformat(date_string: str) -> datetime:
 
 ### Step 12 of 14.  Sink the `flight_datastream` into the `airlines.flight` Apache Iceberg Table
 ```python
-# Populate the Apache Iceberg Table with the data from the data stream
-(tbl_env.from_data_stream(flight_datastream)
-        .execute_insert(flight_table_path.get_full_name()))
-```        
-> _**Upserts in PyFlink:** `PyFlink` itself does not directly expose methods like `.upsert(true)` or `equalityFieldColumns` as in Java's FlinkSink API.  Upserts can be simulated using primary keys or handling data deduplication within your source transformation logic (i.e., using the Table API `execute_insert()` method)._
+# Create a StatementSet to execute multiple statements together
+statement_set = tbl_env.create_statement_set()
+
+# Add the Iceberg table insert to the statement set
+statement_set.add_insert_sql(f"""
+    INSERT INTO {flight_table_path.get_full_name()}
+    SELECT * FROM temp_flight_view
+""")
+```
 
 ### Step 13 of 14.  Sink the `flight_datastream` into the `airline.flight` Kafka Topic
 ```python
-# Sinks the Flight DataStream into a single Kafka topic
-(flight_datastream.sink_to(flight_sink)
-                    .name("flightdata_sink")
-                    .uid("flightdata_sink"))
+# Add the Kafka sink to the DataStream (outside StatementSet since it's DataStream API)
+flight_datastream.sink_to(flight_sink).name("flight_sink").uid("flight_sink")
+
+# Execute the statement set (Iceberg insert) - this is non-blocking for SQL
+statement_set.execute()
 ```
 
 ### Step 14 of 14.  Execute the Flink Job Graph (a.k.a., DAG)
 ```python
-# Execute the Flink job graph (DAG)
-try: 
-    env.execute("FlightImporterApp")
+# Execute the Flink job graph (DAG) - this runs the entire job including Kafka sink
+try:
+    env.execute("json_flight_consolidator_app")
 except Exception as e:
-    print(f"The App stopped early due to the following: {e}.")
+    logging.error("The App stopped early due to the following: %s", e)
 ```
 - Triggers the Flink Application execution.
 
 ## Give it a spin!
-Now that you have a solid understanding of the Flight Importer Flink App, it's time to put it to the test! Run the Flink app in your environment and observe as it ingests airline flight data from Kafka topics, merges the streams, and populates an Apache Iceberg table and Kafka topic with real-time analytics. This advanced streaming analytics pipeline demonstrates the capabilities of Apache Flink and Apache Iceberg, providing valuable insights at every moment. So, what are you waiting for? Give it a try and witness the magic unfold!
+Now that you have a solid understanding of the JSON Flight Consolidator Flink App, it's time to put it to the test! Run the Flink app in your environment and observe as it ingests airline flight data from Kafka topics, merges the streams, and populates an Apache Iceberg table and Kafka topic with real-time analytics. This advanced streaming analytics pipeline demonstrates the capabilities of Apache Flink and Apache Iceberg, providing valuable insights at every moment. So, what are you waiting for? Give it a try and witness the magic unfold!
 
 Run the following command in your Flink cluster environment from the terminal command line, as shown in the example below:
 ```bash
-uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/flight_importer_app.py --aws-s3-bucket <AWS_S3_BUCKET> --aws-region <AWS_REGION_NAME>
+uv run flink run --pyFiles kickstarter/python_files.zip --python kickstarter/json_flight_consolidator_app.py
 ```
 
 If you don’t have your own Flink cluster environment, you can run it from Docker. I have created one specific to this project [here](https://github.com/j3-signalroom/apache_flink-kickstarter/blob/main/README.md) that you can use.
