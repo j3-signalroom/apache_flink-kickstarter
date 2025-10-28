@@ -121,8 +121,7 @@ dependencies = [
     { name = "apache-beam" },
     { name = "apache-flink" },
     { name = "avro" },
-    { name = "boto3" },
-    { name = "botocore" },
+    { name = "aws-clients-python-lib" },
     { name = "cloudpickle" },
     { name = "confluent-kafka" },
     { name = "grpcio-tools" },
@@ -142,8 +141,7 @@ requires-dist = [
     { name = "apache-beam", specifier = ">=2.54.0,<=2.61.0" },
     { name = "apache-flink", specifier = ">=2.1.0" },
     { name = "avro", specifier = "==1.12.0" },
-    { name = "boto3", specifier = ">=1.40.60" },
-    { name = "botocore", specifier = ">=1.40.60" },
+    { name = "aws-clients-python-lib", specifier = ">=0.10.1.0" },
     { name = "cloudpickle", specifier = ">=2.2.1" },
     { name = "confluent-kafka", specifier = ">=2.12.1" },
     { name = "grpcio-tools", specifier = ">=1.29.0,<=1.71.0" },
@@ -183,6 +181,20 @@ wheels = [
 ]
 
 [[package]]
+name = "aws-clients-python-lib"
+version = "0.10.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "boto3" },
+    { name = "botocore" },
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6f/16/1f6a7124d6947b68c356dcb2758df79c2f1029f4a65a1716b5da144fea10/aws_clients_python_lib-0.10.1.0.tar.gz", hash = "sha256:88038b44f8c4c8e78909d4e3510d22a470b4d7af39a4bad04398f7dde1265c03", size = 236148 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/27/55/2fb892a686462359b4c9e63af78b2fbf17365f7632929786830331d57531/aws_clients_python_lib-0.10.1.0-py3-none-any.whl", hash = "sha256:2148f4687d9c7b19be0f6b70e48d82858f20002b79ada048958399592b53673c", size = 42986 },
+]
+
+[[package]]
 name = "blinker"
 version = "1.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -193,16 +205,16 @@ wheels = [
 
 [[package]]
 name = "boto3"
-version = "1.40.60"
+version = "1.40.59"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/41/e1/a4c1f27d58bee960d4323251d016358547c40bc74c5460e426565d828bc4/boto3-1.40.60.tar.gz", hash = "sha256:fd3fa9de730c0f4d8a584d6b5313755923a9e181496fa6b09bbf78011e6c2ab3", size = 111568 }
+sdist = { url = "https://files.pythonhosted.org/packages/ae/f4/65f3a0a58a42abaa57cb42968535dc7c209232c2614d5ac1d8354b0bc0b7/boto3-1.40.59.tar.gz", hash = "sha256:b1a5a203511e594872b39a129365f02eb5846eea990629e8daf47a3c01e7fd49", size = 111577 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/37/21/551f36ae7b759ed348179a830896179d69d11d0d6649e1564ecf7bfa133a/boto3-1.40.60-py3-none-any.whl", hash = "sha256:5d0e5153ddc4660091838ca255b0fc1ab70ec5b04bf7d578106ae709d31e38aa", size = 139321 },
+    { url = "https://files.pythonhosted.org/packages/d4/61/25cbd486b03d4f786507584025a35ae74fa52fe2408fbf0318d91e3e96db/boto3-1.40.59-py3-none-any.whl", hash = "sha256:75752e7dc445131700a58926a50ca705794232f0f47d0e21edb59fbf1898db95", size = 139323 },
 ]
 
 [[package]]
