@@ -114,10 +114,10 @@ def main():
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
-    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
+    # Sets up a Flink Kafka source to consume data from the Kafka topic `skyone`
     skyone_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
-                                .set_topics("airline.skyone")
+                                .set_topics("skyone")
                                 .set_group_id("skyone_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
                                 .set_value_only_deserializer(JsonRowDeserializationSchema
@@ -130,10 +130,10 @@ def main():
     skyone_stream = (env.from_source(skyone_source, WatermarkStrategy.no_watermarks(), "skyone_source")
                         .uid("skyone_source"))
 
-    # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.sunset`
+    # Sets up a Flink Kafka source to consume data from the Kafka topic `sunset`
     sunset_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
-                                .set_topics("airline.sunset")
+                                .set_topics("sunset")
                                 .set_group_id("sunset_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
                                 .set_value_only_deserializer(JsonRowDeserializationSchema
@@ -163,16 +163,16 @@ def main():
     instance, this case we using it to get the fully qualified path of the `flight`
     table
     """
-    flight_table_path = ObjectPath(tbl_env.get_current_database(), "flight")
+    flight_iceberg_table_path = ObjectPath(tbl_env.get_current_database(), "flight_airline")
 
-    logging.info("Current table: %s", flight_table_path.get_full_name())
+    logging.info("Current table: %s", flight_iceberg_table_path.get_full_name())
 
     # Check if the table exists.  If not, create it
     try:
-        if not catalog.table_exists(flight_table_path):
+        if not catalog.table_exists(flight_iceberg_table_path):
             # Define the table using Flink SQL
             tbl_env.execute_sql(f"""
-                CREATE TABLE {flight_table_path.get_full_name()} (
+                CREATE TABLE {flight_iceberg_table_path.get_full_name()} (
                     email_address STRING,
                     departure_time STRING,
                     departure_airport_code STRING,
@@ -207,8 +207,9 @@ def main():
     sasl_jaas_config = producer_properties.get('sasl.jaas.config', '').replace("'", "''")
 
     # Create a Kafka table using Table API
+    flight_kafka_table_path = ObjectPath(tbl_env.get_current_database(), "flight")
     tbl_env.execute_sql(f"""
-        CREATE TABLE kafka_flight_sink (
+        CREATE TEMPORARY TABLE {flight_kafka_table_path.get_full_name()} (
             email_address STRING,
             departure_time STRING,
             departure_airport_code STRING,
@@ -219,7 +220,7 @@ def main():
             airline STRING
         ) WITH (
             'connector' = 'kafka',
-            'topic' = 'airline.flight',
+            'topic' = 'flight',
             'properties.bootstrap.servers' = '{producer_properties['bootstrap.servers']}',
             'format' = 'json',
             'properties.security.protocol' = '{producer_properties.get('security.protocol', 'PLAINTEXT')}',
@@ -236,19 +237,18 @@ def main():
 
     # Add the Iceberg table insert to the statement set
     statement_set.add_insert_sql(f"""
-        INSERT INTO {flight_table_path.get_full_name()}
+        INSERT INTO {flight_iceberg_table_path.get_full_name()}
         SELECT * FROM temp_flight_view
     """)
     logging.info("Added Iceberg insert to statement set")
                                                                          
     # Add Kafka insert to the statement set
-    statement_set.add_insert_sql("""
-        INSERT INTO kafka_flight_sink
+    statement_set.add_insert_sql(f"""
+        INSERT INTO {flight_kafka_table_path.get_full_name()}
         SELECT * FROM temp_flight_view
     """)
     logging.info("Added Kafka insert to statement set")
-    
-    logging.info("Added Kafka insert to statement set")
+
     logging.info("Starting unified Flink job with both Iceberg and Kafka sinks")
     
     # Execute both inserts as ONE job

@@ -184,7 +184,7 @@ def main():
     
     # Create Kafka sink table using Table API
     tbl_env.execute_sql(f"""
-        CREATE TABLE kafka_stats_sink (
+        CREATE TABLE {stats_table_path.get_full_name()} (
             email_address STRING,
             total_flight_duration INT,
             number_of_flights INT
@@ -216,7 +216,7 @@ def main():
     
     # Add Kafka insert to the statement set
     statement_set.add_insert_sql("""
-        INSERT INTO kafka_stats_sink
+        INSERT INTO {stats_table_path.get_full_name()}
         SELECT * FROM temp_stats_view
     """)
     
