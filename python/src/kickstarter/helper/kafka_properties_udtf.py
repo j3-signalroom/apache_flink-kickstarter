@@ -3,15 +3,8 @@ from pyflink.table import DataTypes, StreamTableEnvironment
 from pyflink.table.expressions import col
 from pyflink.table.udf import udtf, TableFunction
 from typing import Iterator, Dict, Tuple
-import boto3
-from botocore.exceptions import ClientError
-import json
-import os
-from re import sub
-import logging
-from aws_clients_python_lib.secrets_manager import get_secrets
-from aws_clients_python_lib.parameter_store import get_parameters
 
+from helper.common import get_secrets, get_parameters
 
 __copyright__  = "Copyright (c) 2024-2025 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
@@ -27,28 +20,29 @@ class KafkaProperties(TableFunction):
     the combination of Kafka Cluster properties, Schema Registry Cluster properties, and Kafka
     Client parameters.
     """
-    def __init__(self, is_consumer: bool, service_account_user: str):
+    def __init__(self, is_consumer: bool, aws_region_name: str, service_account_user: str):
         """Initializes the UDTF with the necessary parameters.
 
         Args:
             for_consumer (bool): determines if the Kafka Client is a consumer or producer.
+            aws_region_name (str): is the AWS region name where the AWS Secrets Manager and
+            AWS Systems Manager Parameter Store are located.
             service_account_user (str): is the name of the service account user.  It is used in
             the prefix to the path of the Kafka Cluster secrets in the AWS Secrets Manager and
             the Kafka Client parameters in the AWS Systems Manager Parameter Store.
         """
         self._is_consumer = is_consumer
         self._service_account_user = service_account_user
-        self._aws_region_name = os.environ['AWS_REGION']
-        self._session = boto3.session.Session()
+        self._aws_region_name = aws_region_name
 
-    def eval(self, kakfa_properties: Row) -> Iterator[Row]:
+    def eval(self, kafka_properties: Row) -> Iterator[Row]:
         """This method retrieves the Kafka Cluster and Schema Registry Cluster properties from the
         AWS Secrets Manager, and the Kafka Client properties from the AWS Systems Manager. It
         yields the combination of Kafka Cluster properties, Schema Registry Cluster properties,
         and Kafka Client parameters. 
 
         Args:
-            confluent_properties (Row): is a Row object that contains the Kafka Cluster
+            kafka_properties (Row): is a Row object that contains the Kafka Cluster
             properties, Schema Registry Cluster properties, and Kafka Client parameters.
 
         Raises:
@@ -113,7 +107,7 @@ class KafkaProperties(TableFunction):
 
         return confluent_properties, ""
 
-def execute_kafka_properties_udtf(tbl_env: StreamTableEnvironment, is_consumer: bool, service_account_user: str) -> Tuple[Dict[str, str], Dict[str, str]]:
+def execute_kafka_properties_udtf(tbl_env: StreamTableEnvironment, is_consumer: bool, aws_region_name: str, service_account_user: str) -> Tuple[Dict[str, str], Dict[str, str]]:
     """This method retrieves the Kafka Cluster and Schema Registry Cluster properties from the
     AWS Secrets Manager, and the Kafka Client properties from the AWS Systems Manager.
 
@@ -123,6 +117,8 @@ def execute_kafka_properties_udtf(tbl_env: StreamTableEnvironment, is_consumer: 
         is used to convert a DataStream into a Table or vice versa.  It is also used to
         register a Table in a catalog.
         is_consumer (bool): determines if the Kafka Client is a consumer or producer.
+        aws_region_name (str): is the AWS region name where the AWS Secrets Manager and
+        AWS Systems Manager Parameter Store are located.
         service_account_user (str): is the name of the service account user.  It is used in
         the prefix to the path of the Kafka Cluster and Schema Registry Cluster secrets in 
         the AWS Secrets Manager, and the Kafka Client parameters in the AWS Systems Manager 
@@ -154,7 +150,7 @@ def execute_kafka_properties_udtf(tbl_env: StreamTableEnvironment, is_consumer: 
     # kafka_property_table.print_schema()
 
     # Register the Python function as a PyFlink UDTF (User-Defined Table Function)
-    kafka_properties_udtf = udtf(f=KafkaProperties(is_consumer, service_account_user), result_types=schema)
+    kafka_properties_udtf = udtf(f=KafkaProperties(is_consumer, aws_region_name, service_account_user), result_types=schema)
 
     # Join the Confluent Property Table with the UDTF
     func_results = confluent_property_table.join_lateral(kafka_properties_udtf.alias("key", "value")).select(col("key"), col("value"))

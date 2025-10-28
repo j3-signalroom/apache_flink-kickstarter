@@ -1,6 +1,10 @@
 from pyflink.datastream import StreamExecutionEnvironment
 from datetime import datetime, timezone
 from pyflink.table.catalog import Catalog
+from typing import Tuple, Dict
+import boto3
+from botocore.exceptions import ClientError
+import json
 
 
 __copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
@@ -123,3 +127,46 @@ def load_database(tbl_env: StreamExecutionEnvironment, catalog: Catalog, databas
     except Exception as e:
         print(f"A critical error occurred to during the processing of the database because {e}")
         exit(1)
+
+def get_secrets(aws_region_name: str, secrets_name: str) -> Tuple[Dict[str, str], str]:
+    """This method retrieve secrets from the AWS Secrets Manager.
+   
+    Arg(s):
+        aws_region_name (str):  The AWS region.
+        secrets_name (str):     Thehe name of the secrets you want the secrets for.
+       
+    Returns:
+        Dict:  If successful, the secrets in a dict.  Otherwise, returns an empty dict.
+        str:   If method fails, the error message is returned.  Otherwise, empty string
+               is returned.
+    """    
+    try:
+        aws_secrets_manager = boto3.session.Session().client(service_name='secretsmanager', region_name=aws_region_name)    
+        get_secret_value_response = aws_secrets_manager.get_secret_value(SecretId=secrets_name)
+        return json.loads(get_secret_value_response['SecretString']), ""
+    except KeyError as e:
+        return {}, f"KeyError with ({secrets_name}) from the AWS Secrets Manager because of {e}."    
+    except ClientError as e:
+        return {}, f"ClientError with ({secrets_name}) from the AWS Secrets Manager because of {e}."
+    
+def get_parameters(aws_region_name: str, parameter_path: str) -> Tuple[Dict[str, str], str]:
+    """This method retrieves the parameteres from the System Manager Parameter Store.
+    
+    Arg(s):
+        aws_region_name (str):  The AWS region.
+        parameter_path (str):   The hierarchy for the parameter.  Hierarchies start with a 
+                                forward slash (/). The hierarchy is the parameter name except the 
+                                last part of the parameter.  For the API call to succeed, the last
+                                part of the parameter name can't be in the path. A parameter name
+                                hierarchy can have a maximum of 15 levels.
+        
+    Return(s):
+        parameters (dict): Goes throught recursively and returns all the parameters within a hierarchy.
+    """
+    try:
+        client = boto3.session.Session().client(service_name='ssm', region_name=aws_region_name)    
+        response = client.get_parameters_by_path(Path=parameter_path, Recursive=False, WithDecryption=True)
+        parameters = { param['Name'].split('/')[-1]: param['Value'] for param in response.get('Parameters', []) }
+        return parameters, ""
+    except ClientError as e:
+        return {}, f"ClientError with ({parameter_path}) from the AWS Systems Manager Parameter Store because of {e}."

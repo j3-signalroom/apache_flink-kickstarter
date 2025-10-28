@@ -1,6 +1,6 @@
 from pyflink.common import Configuration, WatermarkStrategy
 from pyflink.datastream.window import TumblingEventTimeWindows, Time
-from pyflink.datastream import StreamExecutionEnvironment, DataStream, TimeCharacteristic
+from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.datastream.checkpoint_config import ExternalizedCheckpointRetention
@@ -98,8 +98,8 @@ def main():
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Get the Kafka Cluster properties for the Kafka consumer and producer
-    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, service_account_user)
-    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, service_account_user)
+    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, aws_region, service_account_user)
+    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, aws_region, service_account_user)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
     flight_source = (KafkaSource.builder()

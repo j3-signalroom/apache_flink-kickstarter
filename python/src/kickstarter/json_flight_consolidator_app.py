@@ -7,6 +7,7 @@ from pyflink.datastream.checkpoint_config import ExternalizedCheckpointRetention
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
+import logging
 
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
@@ -17,7 +18,7 @@ from helper.common import load_catalog, load_database
 try:
     from helper.kafka_properties_udtf import execute_kafka_properties_udtf
 except ImportError as e:
-    print(f"Failed to import kafka_properties_udtf: {e}")
+    logging.error("Failed to import kafka_properties_udtf: %s", e)
     raise
 
 
@@ -28,6 +29,9 @@ __maintainer__ = "Jeffrey Jonathan Jennings"
 __email__      = "j3@thej3.com"
 __status__     = "dev"
 
+
+# Setup the logger
+logger = logging.getLogger('FlyerStatsApp')
 
 def main():
     """The entry point to the Flight Importer Flink App (a.k.a., Flink job graph --- DAG)."""
@@ -95,8 +99,8 @@ def main():
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
     # Get the Kafka Cluster properties for the Kafka consumer and producer
-    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, service_account_user)
-    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, service_account_user)
+    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, aws_region, service_account_user)
+    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, aws_region, service_account_user)
 
     producer_properties['compression.type'] = 'gzip'
 
@@ -156,14 +160,12 @@ def main():
     # --- Load Apache Iceberg catalog
     catalog = load_catalog(tbl_env, aws_region, s3_bucket_name, "apache_kickstarter")
 
-    # --- Print the current catalog name
-    print(f"Current catalog: {tbl_env.get_current_catalog()}")
+    logging.info("Current catalog: %s", tbl_env.get_current_catalog())
 
     # --- Load database
     load_database(tbl_env, catalog, "airlines")
 
-    # Print the current database name
-    print(f"Current database: {tbl_env.get_current_database()}")
+    logging.info("Current database: %s", tbl_env.get_current_database())
 
     """
     An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
@@ -174,8 +176,7 @@ def main():
     """
     flight_table_path = ObjectPath(tbl_env.get_current_database(), "flight")
 
-    # Print the current table name
-    print(f"Current table: {flight_table_path.get_full_name()}")
+    logging.info("Current table: %s", flight_table_path.get_full_name())
 
     # Check if the table exists.  If not, create it
     try:
@@ -202,7 +203,7 @@ def main():
             """)
 
     except Exception as e:
-        print(f"A critical error occurred to during the processing of the table because {e}")
+        logging.error("A critical error occurred to during the processing of the table because %s", e)
         exit(1)
 
     # Combine the Airline DataStreams into one DataStream
@@ -219,7 +220,7 @@ def main():
     try:
         env.execute("json_flight_consolidator_app")
     except Exception as e:
-        print(f"The App stopped early due to the following: {e}.")
+        logging.error("The App stopped early due to the following: %s", e)
 
     # Combine the Airline DataStreams into one DataStream
     flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
@@ -237,7 +238,7 @@ def main():
     try:
         env.execute("json_flight_consolidator_app")
     except Exception as e:
-        print(f"The App stopped early due to the following: {e}.")
+        logging.error("The App stopped early due to the following: %s", e)
 
 
 def combine_datastreams(skyone_stream: DataStream, sunset_stream: DataStream) -> DataStream:

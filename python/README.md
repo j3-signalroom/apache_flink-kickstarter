@@ -40,7 +40,7 @@ This section guides you through the local setup (on one machine but in separate 
 ```
 > Argument placeholder|Replace with
 > -|-
-> `<DOCKER_SWITCH>`|`on` to start up your very own local Apache Cluster running in Docker containers, otherwise `off` to stop the Docker containers.
+> `<DOCKER_SWITCH>`|`on` to start up your very own local Apache Cluster running in Docker containers, otherwise select `off` to stop the Docker containers.
 > `<AWS_SSO_PROFILE_NAME>`|your AWS SSO profile name for your AWS infrastructue that host your AWS Secrets Manager.
 > `<CHIP>`|if you’re using a Mac with Apple Silicon, choose `arm64`. Otherwise, select `amd64`.
 
