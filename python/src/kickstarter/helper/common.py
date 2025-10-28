@@ -90,7 +90,7 @@ def load_catalog(tbl_env: StreamExecutionEnvironment, region_name: str, bucket_n
             tbl_env.execute_sql(f"""
                 CREATE CATALOG {catalog_name} WITH (
                     'type' = 'iceberg',
-                    'warehouse' = '{bucket_name}',
+                    'warehouse' = '{bucket_name}/',
                     'catalog-impl' = 'org.apache.iceberg.aws.glue.GlueCatalog',
                     'io-impl' = 'org.apache.iceberg.aws.s3.S3FileIO',
                     'glue.skip-archive' = 'True',
