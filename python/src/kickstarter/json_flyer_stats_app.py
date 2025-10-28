@@ -197,7 +197,7 @@ def main():
             'properties.sasl.mechanism' = '{producer_properties.get('sasl.mechanism', '')}',
             'properties.sasl.jaas.config' = '{sasl_jaas_config}',
             'sink.delivery-guarantee' = 'exactly-once',
-            'sink.transactional-id-prefix' = 'json-flyer-stats-data-'
+            'sink.transactional-id-prefix' = 'json-flyer-stats-data-',
             'properties.transaction.timeout.ms' = '900000'
         )
     """)
