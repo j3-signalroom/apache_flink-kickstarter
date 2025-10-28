@@ -118,7 +118,7 @@ In this repo, you’ll find **Java-based examples using the Flink DataStream API
 * Dynamically loading **Kafka client configuration** from **AWS Systems Manager Parameter Store**
   —all directly integrated within a running Flink job.
 
-Prefer Python? You’re covered there too. Using the **Flink Table API** and **User-Defined Table Functions (UDTFs)**, you can achieve the same secure, dynamic configuration loading while staying fully in Python.
+Prefer Python? You’re covered there too. Using the **Flink Table API**, you can achieve the same secure, dynamic configuration loading while staying fully in Python.
 
 #### **3.2 Beyond Kafka: Iceberg Integration**
 

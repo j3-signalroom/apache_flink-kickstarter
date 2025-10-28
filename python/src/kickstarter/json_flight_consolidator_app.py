@@ -1,8 +1,8 @@
 import os
 from pyflink.common import Configuration, WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
-from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
-from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
+from pyflink.datastream.connectors.kafka import KafkaSource, KafkaOffsetsInitializer
+from pyflink.datastream.formats.json import JsonRowDeserializationSchema
 from pyflink.datastream.checkpoint_config import ExternalizedCheckpointRetention
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
@@ -25,11 +25,12 @@ __status__     = "dev"
 # Setup the logger
 logger = logging.getLogger('FlyerStatsApp')
 
+
 def main():
     """The entry point to the Flight Importer Flink App (a.k.a., Flink job graph --- DAG)."""
     # --- Retrieve environment variables
     service_account_user = os.getenv("SERVICE_ACCOUNT_USER", "")
-    s3_bucket_name = os.getenv("AWS_S3_BUCKET", "")
+    aws_s3_bucket = os.getenv("AWS_S3_BUCKET", "")
     aws_region = os.getenv("AWS_REGION", "")
 
     # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
@@ -145,30 +146,8 @@ def main():
     sunset_stream = (env.from_source(sunset_source, WatermarkStrategy.no_watermarks(), "sunset_source")
                         .uid("sunset_source"))
 
-    # Initialize the KafkaSink builder
-    kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
-
-    # Loop through the producer properties and set each property
-    for key, value in producer_properties.items():
-        if key != 'bootstrap.servers':  # Skip the bootstrap.servers as it is already set
-            kafka_sink_builder.set_property(key, value)
-
-    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
-    flight_sink = (kafka_sink_builder                            
-                   .set_record_serializer(KafkaRecordSerializationSchema
-                                          .builder()
-                                          .set_topic("airline.flight")
-                                          .set_value_serialization_schema(JsonRowSerializationSchema
-                                                                          .builder()
-                                                                          .with_type_info(FlightData.get_value_type_info())
-                                                                          .build())
-                                          .build())
-                    .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                    .set_transactional_id_prefix("json-flight-data-")  # apply unique prefix to prevent backchannel conflicts and potential memory leaks
-                    .build())
-    
     # --- Load Apache Iceberg catalog
-    catalog = load_catalog(tbl_env, aws_region, s3_bucket_name, "apache_kickstarter")
+    catalog = load_catalog(tbl_env, aws_region, aws_s3_bucket, "apache_kickstarter")
 
     logging.info("Current catalog: %s", tbl_env.get_current_catalog())
 
@@ -217,36 +196,64 @@ def main():
         exit(1)
 
     # Combine the Airline DataStreams into one DataStream
-    flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
-
-    # Populate the Apache Iceberg Table with the data from the data stream
-    (tbl_env.from_data_stream(flight_datastream)
-            .execute_insert(flight_table_path.get_full_name()))
-
-    # Sinks the Flight DataStream into a single Kafka topic
-    flight_datastream.sink_to(flight_sink).name("json_flight_data_sink").uid("json_flight_data_sink")
+    flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(
+            lambda d: d.to_row(), output_type=FlightData.get_value_type_info()
+        ).name("combined_flight_datastream").uid("combined_flight_datastream")
     
-    # Execute the Flink job graph (DAG)
-    try:
-        env.execute("json_flight_consolidator_app")
-    except Exception as e:
-        logging.error("The App stopped early due to the following: %s", e)
+    # Create a temporary view from the datastream
+    tbl_env.create_temporary_view("temp_flight_view", flight_datastream)
 
-    # Combine the Airline DataStreams into one DataStream
-    flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
+    # Escape single quotes in JAAS config for SQL
+    sasl_jaas_config = producer_properties.get('sasl.jaas.config', '').replace("'", "''")
 
-    # Populate the Apache Iceberg Table with the data from the data stream
-    (tbl_env.from_data_stream(flight_datastream)
-            .execute_insert(flight_table_path.get_full_name()))
-
-    # Sinks the Flight DataStream into a single Kafka topic
-    (flight_datastream.sink_to(flight_sink)
-                      .name("flight_sink")
-                      .uid("flight_sink"))
+    # Create a Kafka table using Table API
+    tbl_env.execute_sql(f"""
+        CREATE TABLE kafka_flight_sink (
+            email_address STRING,
+            departure_time STRING,
+            departure_airport_code STRING,
+            arrival_time STRING,
+            arrival_airport_code STRING,
+            flight_number STRING,
+            confirmation STRING,
+            airline STRING
+        ) WITH (
+            'connector' = 'kafka',
+            'topic' = 'airline.flight',
+            'properties.bootstrap.servers' = '{producer_properties['bootstrap.servers']}',
+            'format' = 'json',
+            'properties.security.protocol' = '{producer_properties.get('security.protocol', 'PLAINTEXT')}',
+            'properties.sasl.mechanism' = '{producer_properties.get('sasl.mechanism', '')}',
+            'properties.sasl.jaas.config' = '{sasl_jaas_config}',
+            'sink.delivery-guarantee' = 'exactly-once',
+            'sink.transactional-id-prefix' = 'json-flight-data-'
+        )
+    """)
     
-    # Execute the Flink job graph (DAG)
+    # Create a StatementSet to execute multiple statements together
+    logging.info("Created Kafka sink table")
+    statement_set = tbl_env.create_statement_set()
+
+    # Add the Iceberg table insert to the statement set
+    statement_set.add_insert_sql(f"""
+        INSERT INTO {flight_table_path.get_full_name()}
+        SELECT * FROM temp_flight_view
+    """)
+    logging.info("Added Iceberg insert to statement set")
+                                                                         
+    # Add Kafka insert to the statement set
+    statement_set.add_insert_sql("""
+        INSERT INTO kafka_flight_sink
+        SELECT * FROM temp_flight_view
+    """)
+    logging.info("Added Kafka insert to statement set")
+    
+    logging.info("Added Kafka insert to statement set")
+    logging.info("Starting unified Flink job with both Iceberg and Kafka sinks")
+    
+    # Execute both inserts as ONE job
     try:
-        env.execute("json_flight_consolidator_app")
+        statement_set.execute().wait()
     except Exception as e:
         logging.error("The App stopped early due to the following: %s", e)
 

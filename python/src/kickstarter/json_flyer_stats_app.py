@@ -1,8 +1,8 @@
 from pyflink.common import Configuration, WatermarkStrategy
 from pyflink.datastream.window import TumblingEventTimeWindows, Time
 from pyflink.datastream import StreamExecutionEnvironment, DataStream
-from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
-from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
+from pyflink.datastream.connectors.kafka import KafkaSource, KafkaOffsetsInitializer
+from pyflink.datastream.formats.json import JsonRowDeserializationSchema
 from pyflink.datastream.checkpoint_config import ExternalizedCheckpointRetention
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
@@ -128,41 +128,15 @@ def main():
     # Takes the results of the Kafka source and attaches the unbounded data stream
     flight_data_stream = env.from_source(flight_source, WatermarkStrategy.for_monotonous_timestamps(), "flight_data_source")
 
-    # Note: KafkaSink was introduced in Flink 1.14.0.  If you are using an older version of Flink, 
-    # you will need to use the FlinkKafkaProducer class.
-    # Initialize the KafkaSink builder
-    kafka_sink_builder = KafkaSink.builder().set_bootstrap_servers(producer_properties['bootstrap.servers'])
-
-    # Loop through the producer properties and set each property
-    for key, value in producer_properties.items():
-        if key != 'bootstrap.servers':  # Skip the bootstrap.servers as it is already set
-            kafka_sink_builder.set_property(key, value)
-
-    # Sets up a Flink Kafka sink to produce data to the Kafka topic `airline.flyer_stats`
-    stats_sink = (kafka_sink_builder
-                  .set_record_serializer(KafkaRecordSerializationSchema
-                                         .builder()
-                                         .set_topic("airline.flyer_stats")
-                                         .set_value_serialization_schema(JsonRowSerializationSchema
-                                                                         .builder()
-                                                                         .with_type_info(FlyerStatsData.get_value_type_info())
-                                                                         .build())
-                                         .build())
-                  .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                  .set_transactional_id_prefix("json-flyer_stats-data-")  # apply unique prefix to prevent backchannel conflicts and potential memory leaks
-                  .build())
-
     # --- Load Apache Iceberg catalog
     catalog = load_catalog(tbl_env, aws_region, s3_bucket_name, "apache_kickstarter")
 
-    # --- Print the current catalog name
-    print(f"Current catalog: {tbl_env.get_current_catalog()}")
+    logging.info("Current catalog: %s", tbl_env.get_current_catalog())
 
     # --- Load database
     load_database(tbl_env, catalog, "airlines")
     
-    # Print the current database name
-    print(f"Current database: {tbl_env.get_current_database()}")
+    logging.info("Current database: %s", tbl_env.get_current_database())
 
     # An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
     # catalog object, such as a table, view, or function.  It uniquely identifies an object
@@ -190,22 +164,68 @@ def main():
                 )
             """)
     except Exception as e:
-        print(f"A critical error occurred to during the processing of the table because {e}")
+        logging.error("A critical error occurred to during the processing of the table because %s", e)
         exit(1)
 
     # Define the workflow for the Flink job graph (DAG)
-    stats_datastream = define_workflow(flight_data_stream).map(lambda d: d.to_row(), output_type=FlyerStatsData.get_value_type_info())
+    stats_datastream = define_workflow(flight_data_stream)
+    
+    # Convert to Row type for sinks
+    stats_row_stream = stats_datastream.map(
+        lambda d: d.to_row(), 
+        output_type=FlyerStatsData.get_value_type_info()
+    ).name("map_stats_to_row").uid("map_stats_to_row")
 
-    # Populate the table with the data from the data stream
-    (tbl_env.from_data_stream(stats_datastream)
-            .execute_insert(stats_table_path.get_full_name()))
-
-    # Sinks the User Statistics DataStream Kafka topic
-    stats_datastream.sink_to(stats_sink).name("json_flyer_stats_sink").uid("json_flyer_stats_sink")
-
-    # Execute the Flink job graph (DAG)
+    # Create a temporary view from the datastream
+    tbl_env.create_temporary_view("temp_stats_view", stats_row_stream)
+    
+    # Escape single quotes in JAAS config for SQL
+    sasl_jaas_config = producer_properties.get('sasl.jaas.config', '').replace("'", "''")
+    
+    # Create Kafka sink table using Table API
+    tbl_env.execute_sql(f"""
+        CREATE TABLE kafka_stats_sink (
+            email_address STRING,
+            total_flight_duration INT,
+            number_of_flights INT
+        ) WITH (
+            'connector' = 'kafka',
+            'topic' = 'airline.flyer_stats',
+            'properties.bootstrap.servers' = '{producer_properties['bootstrap.servers']}',
+            'format' = 'json',
+            'properties.security.protocol' = '{producer_properties.get('security.protocol', 'PLAINTEXT')}',
+            'properties.sasl.mechanism' = '{producer_properties.get('sasl.mechanism', '')}',
+            'properties.sasl.jaas.config' = '{sasl_jaas_config}',
+            'sink.delivery-guarantee' = 'exactly-once',
+            'sink.transactional-id-prefix' = 'json-flyer-stats-data-'
+        )
+    """)
+    
+    logging.info("Created Kafka sink table")
+    
+    # Create a StatementSet to execute both inserts as ONE unified job
+    statement_set = tbl_env.create_statement_set()
+    
+    # Add the Iceberg table insert to the statement set
+    statement_set.add_insert_sql(f"""
+        INSERT INTO {stats_table_path.get_full_name()}
+        SELECT * FROM temp_stats_view
+    """)
+    
+    logging.info("Added Iceberg insert to statement set")
+    
+    # Add Kafka insert to the statement set
+    statement_set.add_insert_sql("""
+        INSERT INTO kafka_stats_sink
+        SELECT * FROM temp_stats_view
+    """)
+    
+    logging.info("Added Kafka insert to statement set")
+    logging.info("Starting unified Flink job with both Iceberg and Kafka sinks")
+    
+    # Execute both inserts as ONE job
     try:
-        env.execute("json_flyer_stats_app")
+        statement_set.execute().wait()
     except Exception as e:
         logger.error("The App stopped early due to the following: %s", e)
 
