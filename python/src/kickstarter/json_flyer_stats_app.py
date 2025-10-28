@@ -194,7 +194,7 @@ def main():
             number_of_flights INT
         ) WITH (
             'connector' = 'kafka',
-            'topic' = 'airline.flyer_stats',
+            'topic' = 'flyer_stats',
             'properties.bootstrap.servers' = '{producer_properties['bootstrap.servers']}',
             'format' = 'json',
             'properties.security.protocol' = '{producer_properties.get('security.protocol', 'PLAINTEXT')}',
