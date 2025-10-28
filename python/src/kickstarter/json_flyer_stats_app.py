@@ -117,7 +117,7 @@ def main():
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
     flight_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
-                                .set_topics("airline.flight")
+                                .set_topics("flight")
                                 .set_group_id("flight_group")
                                 .set_starting_offsets(KafkaOffsetsInitializer.earliest())
                                 .set_value_only_deserializer(JsonRowDeserializationSchema
