@@ -8,6 +8,7 @@ from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 import logging
 import os
+import uuid
 
 from model.flight_data import FlightData, FlyerStatsData
 from helper.flyer_stats_process_window_function import FlyerStatsProcessWindowFunction
@@ -138,19 +139,21 @@ def main():
     
     logging.info("Current database: %s", tbl_env.get_current_database())
 
-    # An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
-    # catalog object, such as a table, view, or function.  It uniquely identifies an object
-    # within a catalog by encapsulating both the database name and the object name.  For 
-    # instance, this case we using it to get the fully qualified path of the `flyer_stats`
-    # table
-    stats_table_path = ObjectPath(tbl_env.get_current_database(), "flyer_stats")
-
-    # Check if the table exists.  If not, create it
+    """
+    An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
+    catalog object, such as a table, view, or function.  It uniquely identifies an object
+    within a catalog by encapsulating both the database name and the object name.  For 
+    instance, this case we using it to get the fully qualified path of the `flyer_stats_airline`
+    table
+    """
+    stats_iceberg_table_path = ObjectPath(tbl_env.get_current_database(), "flyer_stats_airline")
+    
+    # Check if the table exists.  If not, create it.
     try:
-        if not catalog.table_exists(stats_table_path):
+        if not catalog.table_exists(stats_iceberg_table_path):
             # Define the table using Flink SQL
             tbl_env.execute_sql(f"""
-                CREATE TABLE {stats_table_path.get_full_name()} (
+                CREATE TABLE {stats_iceberg_table_path.get_full_name()} (
                     email_address STRING,
                     total_flight_duration INT,
                     number_of_flights INT
@@ -183,8 +186,9 @@ def main():
     sasl_jaas_config = producer_properties.get('sasl.jaas.config', '').replace("'", "''")
     
     # Create Kafka sink table using Table API
+    stats_kafka_table_path = ObjectPath(tbl_env.get_current_database(), "flyer_stats_airline")
     tbl_env.execute_sql(f"""
-        CREATE TABLE {stats_table_path.get_full_name()} (
+        CREATE TABLE {stats_kafka_table_path.get_full_name()} (
             email_address STRING,
             total_flight_duration INT,
             number_of_flights INT
@@ -197,7 +201,7 @@ def main():
             'properties.sasl.mechanism' = '{producer_properties.get('sasl.mechanism', '')}',
             'properties.sasl.jaas.config' = '{sasl_jaas_config}',
             'sink.delivery-guarantee' = 'exactly-once',
-            'sink.transactional-id-prefix' = 'json-flyer-stats-data-',
+            'sink.transactional-id-prefix' = 'json-flyer-stats-data-{uuid.uuid4()}-',
             'properties.transaction.timeout.ms' = '900000'
         )
     """)
@@ -209,7 +213,7 @@ def main():
     
     # Add the Iceberg table insert to the statement set
     statement_set.add_insert_sql(f"""
-        INSERT INTO {stats_table_path.get_full_name()}
+        INSERT INTO {stats_iceberg_table_path.get_full_name()}
         SELECT * FROM temp_stats_view
     """)
     
@@ -217,7 +221,7 @@ def main():
     
     # Add Kafka insert to the statement set
     statement_set.add_insert_sql(f"""
-        INSERT INTO {stats_table_path.get_full_name()}
+        INSERT INTO {stats_kafka_table_path.get_full_name()}
         SELECT * FROM temp_stats_view
     """)
     
