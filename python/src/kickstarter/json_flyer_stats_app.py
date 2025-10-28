@@ -186,9 +186,9 @@ def main():
     sasl_jaas_config = producer_properties.get('sasl.jaas.config', '').replace("'", "''")
     
     # Create Kafka sink table using Table API
-    stats_kafka_table_path = ObjectPath(tbl_env.get_current_database(), "flyer_stats_airline")
+    stats_kafka_table_path = ObjectPath(tbl_env.get_current_database(), "flyer_stats")
     tbl_env.execute_sql(f"""
-        CREATE TABLE {stats_kafka_table_path.get_full_name()} (
+        CREATE TEMPORARY TABLE {stats_kafka_table_path.get_full_name()} (
             email_address STRING,
             total_flight_duration INT,
             number_of_flights INT
