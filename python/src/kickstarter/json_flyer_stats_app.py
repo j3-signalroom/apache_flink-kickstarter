@@ -29,7 +29,7 @@ def main():
     """The entry point to the Flyer Stats Flink App (a.k.a., Flink job graph --- DAG)."""
     # --- Retrieve environment variables
     service_account_user = os.getenv("SERVICE_ACCOUNT_USER", "")
-    s3_bucket_name = os.getenv("AWS_S3_BUCKET_NAME", "")
+    s3_bucket_name = os.getenv("AWS_S3_BUCKET", "")
     aws_region = os.getenv("AWS_REGION", "")
 
     # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
@@ -149,6 +149,7 @@ def main():
                                                                          .build())
                                          .build())
                   .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                  .set_transactional_id_prefix("json-flyer_stats-data-")  # apply unique prefix to prevent backchannel conflicts and potential memory leaks
                   .build())
 
     # --- Load Apache Iceberg catalog
@@ -179,8 +180,8 @@ def main():
                     email_address STRING,
                     total_flight_duration INT,
                     number_of_flights INT
-                    PARTITIONED BY (email_address)
-                ) WITH (
+                ) PARTITIONED BY (email_address)
+                WITH (
                     'write.format.default' = 'parquet',
                     'write.target-file-size-bytes' = '134217728',
                     'write.delete.mode' = 'merge-on-read',

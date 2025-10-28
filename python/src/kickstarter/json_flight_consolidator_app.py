@@ -29,7 +29,7 @@ def main():
     """The entry point to the Flight Importer Flink App (a.k.a., Flink job graph --- DAG)."""
     # --- Retrieve environment variables
     service_account_user = os.getenv("SERVICE_ACCOUNT_USER", "")
-    s3_bucket_name = os.getenv("AWS_S3_BUCKET_NAME", "")
+    s3_bucket_name = os.getenv("AWS_S3_BUCKET", "")
     aws_region = os.getenv("AWS_REGION", "")
 
     # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
@@ -164,6 +164,7 @@ def main():
                                                                           .build())
                                           .build())
                     .set_delivery_guarantee(DeliveryGuarantee.EXACTLY_ONCE)
+                    .set_transactional_id_prefix("json-flight-data-")  # apply unique prefix to prevent backchannel conflicts and potential memory leaks
                     .build())
     
     # --- Load Apache Iceberg catalog
@@ -201,8 +202,8 @@ def main():
                     flight_number STRING,
                     confirmation STRING,
                     airline STRING
-                    PARTITIONED BY (arrival_airport_code)
-                ) WITH (
+                ) PARTITIONED BY (arrival_airport_code)
+                WITH (
                     'write.format.default' = 'parquet',
                     'write.target-file-size-bytes' = '134217728',
                     'write.delete.mode' = 'merge-on-read',

@@ -162,7 +162,7 @@ public class AvroFlyerStatsApp {
             KafkaSink.<FlyerStatsAvroData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(flyerStatsSerializer)
-                .setTransactionalIdPrefix("avro-flyer-stats-") // unique per job
+                .setTransactionalIdPrefix("avro-flyer-stats-") // apply unique prefix to prevent backchannel conflicts and potential memory leaks
                 .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
                 .build();
 

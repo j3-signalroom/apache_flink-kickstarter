@@ -183,7 +183,7 @@ public class AvroFlightConsolidatorApp {
         producerProperties.put("enable.idempotence", "true");       // typically implied, explicit is fine
         KafkaSink<FlightAvroData> flightSink = KafkaSink.<FlightAvroData>builder()
             .setKafkaProducerConfig(producerProperties)
-            .setTransactionalIdPrefix("avro-flight-data-") // unique per job
+            .setTransactionalIdPrefix("avro-flight-data-") // apply unique prefix to prevent backchannel conflicts and potential memory leaks
             .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
             .setRecordSerializer(flightSerializer)
             .build();

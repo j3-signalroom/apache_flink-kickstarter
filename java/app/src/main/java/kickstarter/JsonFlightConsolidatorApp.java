@@ -178,7 +178,7 @@ public class JsonFlightConsolidatorApp {
         producerProperties.put("enable.idempotence", "true");       // typically implied, explicit is fine
         KafkaSink<FlightJsonData> flightSink = KafkaSink.<FlightJsonData>builder()
             .setKafkaProducerConfig(producerProperties)
-            .setTransactionalIdPrefix("json-flight-data-") // unique per job
+            .setTransactionalIdPrefix("json-flight-data-") // apply unique prefix to prevent backchannel conflicts and potential memory leaks
             .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
             .setRecordSerializer(flightSerializer)
             .build();

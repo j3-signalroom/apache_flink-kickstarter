@@ -152,7 +152,7 @@ public class JsonFlyerStatsApp {
             KafkaSink.<FlyerStatsJsonData>builder()
                 .setKafkaProducerConfig(producerProperties)
                 .setRecordSerializer(flyerStatsSerializer)
-                .setTransactionalIdPrefix("json-flyer-stats-") // unique per job
+                .setTransactionalIdPrefix("json-flyer-stats-")  // apply unique prefix to prevent backchannel conflicts and potential memory leaks
                 .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
                 .build();
 
