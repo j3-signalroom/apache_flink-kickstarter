@@ -194,13 +194,27 @@ def main():
         exit(1)
 
     # Define the workflow for the Flink job graph (DAG)
-    stats_datastream = define_workflow(flight_data_stream).map(lambda d: d.to_row(), output_type=FlyerStatsData.get_value_type_info())
+    stats_datastream = define_workflow(flight_data_stream).map(
+        lambda d: d.to_row(), 
+        output_type=FlyerStatsData.get_value_type_info()
+    ).name("map_stats_to_row").uid("map_stats_to_row")
 
-    # Populate the table with the data from the data stream
-    (tbl_env.from_data_stream(stats_datastream)
-            .execute_insert(stats_table_path.get_full_name()))
+    # Create a temporary view from the datastream for Iceberg insert
+    tbl_env.create_temporary_view("temp_stats_view", stats_datastream)
+    
+    # Create a StatementSet to handle the Iceberg insert
+    statement_set = tbl_env.create_statement_set()
+    
+    # Add the Iceberg table insert to the statement set
+    statement_set.add_insert_sql(f"""
+        INSERT INTO {stats_table_path.get_full_name()}
+        SELECT * FROM temp_stats_view
+    """)
+    
+    # Execute the statement set (non-blocking for mixing with DataStream API)
+    statement_set.execute()
 
-    # Sinks the User Statistics DataStream Kafka topic
+    # Add the Kafka sink to the DataStream
     stats_datastream.sink_to(stats_sink).name("json_flyer_stats_sink").uid("json_flyer_stats_sink")
 
     # Execute the Flink job graph (DAG)

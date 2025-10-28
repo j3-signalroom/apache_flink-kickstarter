@@ -217,34 +217,29 @@ def main():
         exit(1)
 
     # Combine the Airline DataStreams into one DataStream
-    flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
-
-    # Populate the Apache Iceberg Table with the data from the data stream
-    (tbl_env.from_data_stream(flight_datastream)
-            .execute_insert(flight_table_path.get_full_name()))
-
-    # Sinks the Flight DataStream into a single Kafka topic
-    flight_datastream.sink_to(flight_sink).name("json_flight_data_sink").uid("json_flight_data_sink")
+    flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(
+            lambda d: d.to_row(), output_type=FlightData.get_value_type_info()
+        ).name("combined_flight_datastream").uid("combined_flight_datastream")
     
-    # Execute the Flink job graph (DAG)
-    try:
-        env.execute("json_flight_consolidator_app")
-    except Exception as e:
-        logging.error("The App stopped early due to the following: %s", e)
-
-    # Combine the Airline DataStreams into one DataStream
-    flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
-
-    # Populate the Apache Iceberg Table with the data from the data stream
-    (tbl_env.from_data_stream(flight_datastream)
-            .execute_insert(flight_table_path.get_full_name()))
-
-    # Sinks the Flight DataStream into a single Kafka topic
-    (flight_datastream.sink_to(flight_sink)
-                      .name("flight_sink")
-                      .uid("flight_sink"))
+    # Create a temporary view from the datastream
+    tbl_env.create_temporary_view("temp_flight_view", flight_datastream)
     
-    # Execute the Flink job graph (DAG)
+    # Create a StatementSet to execute multiple statements together
+    statement_set = tbl_env.create_statement_set()
+
+    # Add the Iceberg table insert to the statement set
+    statement_set.add_insert_sql(f"""
+        INSERT INTO {flight_table_path.get_full_name()}
+        SELECT * FROM temp_flight_view
+    """)
+                                                                         
+    # Add the Kafka sink to the DataStream (outside StatementSet since it's DataStream API)
+    flight_datastream.sink_to(flight_sink).name("flight_sink").uid("flight_sink")
+    
+    # Execute the statement set (Iceberg insert) - this is non-blocking for SQL
+    statement_set.execute()
+    
+    # Execute the Flink job graph (DAG) - this runs the entire job including Kafka sink
     try:
         env.execute("json_flight_consolidator_app")
     except Exception as e:
