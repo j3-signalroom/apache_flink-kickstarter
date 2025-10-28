@@ -2,7 +2,7 @@ This script is used to manage a local Apache Flink environment using Docker Comp
 
 ### Script Overview
 - The script allows you to **start** or **stop** a Flink environment locally using Docker Compose.
-- It takes several arguments: `on` or `off`, AWS SSO profile, chip architecture (amd64 or arm64), Flink language (Python or Java), and optionally an S3 bucket name.
+- It takes several arguments: `on` or `off`, AWS SSO profile, chip architecture (amd64 or arm64), and specify the Flink language (Python or Java).
 - The script uses **AWS SSO** credentials to configure the AWS environment, which are then passed to Docker containers.
 
 ### Key Features Explained
@@ -16,7 +16,6 @@ This script is used to manage a local Apache Flink environment using Docker Comp
      - `--profile`: AWS SSO profile name.
      - `--chip`: Specifies the target architecture (amd64 or arm64).
      - `--flink-language`: Specifies the language to be used (Python or Java).
-     - `--aws-s3-bucket`: Optionally specifies the AWS S3 bucket name.
 
 3. **Validation Checks**:
    - Checks if required arguments (`--profile`, `--chip`, `--flink-language`) are provided.
@@ -41,7 +40,7 @@ This script is used to manage a local Apache Flink environment using Docker Comp
 The script should be run with the following syntax:
 
 ```bash
-./deploy-flink.sh <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink-language=<python | java> [--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]
+./deploy-flink.sh <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink-language=<python | java>
 ```
 
 - **on**: Start the environment.
@@ -49,7 +48,6 @@ The script should be run with the following syntax:
 - `--profile=<AWS_SSO_PROFILE_NAME>`: The AWS SSO profile to use.
 - `--chip=<amd64 | arm64>`: Specify the chip architecture.
 - `--flink-language=<python | java>`: Specify the language to use for Flink applications.
-- `[--aws-s3-bucket=<AWS_S3_BUCKET_NAME>]`: Optionally specify an S3 bucket name.
 
 ### Summary
 - The script helps to manage a local Apache Flink environment via Docker, tailored for different architectures and Flink languages.
