@@ -228,6 +228,7 @@ def main():
             'properties.sasl.jaas.config' = '{sasl_jaas_config}',
             'sink.delivery-guarantee' = 'exactly-once',
             'sink.transactional-id-prefix' = 'json-flight-data-'
+            'properties.transaction.timeout.ms' = '900000'
         )
     """)
     
