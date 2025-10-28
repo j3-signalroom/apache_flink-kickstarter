@@ -7,18 +7,11 @@ from pyflink.datastream.checkpoint_config import ExternalizedCheckpointRetention
 from pyflink.table import StreamTableEnvironment
 from pyflink.table.catalog import ObjectPath
 from datetime import datetime, timezone
+import logging
 
 from model.flight_data import FlightData
 from model.airline_flight_data import AirlineFlightData
-from helper.common import load_catalog, load_database
-
-
-# Ensure the kafka_properties_udtf module is available
-try:
-    from helper.kafka_properties_udtf import execute_kafka_properties_udtf
-except ImportError as e:
-    print(f"Failed to import kafka_properties_udtf: {e}")
-    raise
+from helper.common import load_catalog, load_database, get_confluent_properties
 
 
 __copyright__  = "Copyright (c) 2024-2025 Jeffrey Jonathan Jennings"
@@ -29,13 +22,39 @@ __email__      = "j3@thej3.com"
 __status__     = "dev"
 
 
+# Setup the logger
+logger = logging.getLogger('FlyerStatsApp')
+
 def main():
     """The entry point to the Flight Importer Flink App (a.k.a., Flink job graph --- DAG)."""
     # --- Retrieve environment variables
     service_account_user = os.getenv("SERVICE_ACCOUNT_USER", "")
     s3_bucket_name = os.getenv("AWS_S3_BUCKET_NAME", "")
     aws_region = os.getenv("AWS_REGION", "")
-    
+
+    # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
+    secret_path_prefix = f"confluent_cloud_resource/{service_account_user}"
+
+    """
+    Using the `java_client` configuration instead of the `python_client` configuration
+    because PyFlink converts into Java code and the Java code is what is executed.
+    """
+    consumer_properties, error_message = get_confluent_properties(
+        aws_region_name=aws_region,
+        kafka_cluster_secrets_path=f"{secret_path_prefix}/kafka_cluster/java_client",
+        client_parameters_path=f"/{secret_path_prefix}/consumer_kafka_client"
+    )
+    if error_message:
+        raise RuntimeError(f"Failed to retrieve the Confluent Cloud properties for the Kafka Consumer client because {error_message}")
+    producer_properties, error_message = get_confluent_properties(
+        aws_region_name=aws_region,
+        kafka_cluster_secrets_path=f"{secret_path_prefix}/kafka_cluster/java_client",
+        client_parameters_path=f"/{secret_path_prefix}/producer_kafka_client"
+    )
+    if error_message:
+        raise RuntimeError(f"Failed to retrieve the Confluent Cloud properties for the Kafka Producer client because {error_message}")
+    producer_properties['compression.type'] = 'lz4'
+
     # --- Create a configuration to force Avro serialization instead of Kyro serialization.
     config = Configuration()
     config.set_string("pipeline.force-avro", "true")
@@ -94,12 +113,6 @@ def main():
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
 
-    # Get the Kafka Cluster properties for the Kafka consumer and producer
-    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, service_account_user)
-    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, service_account_user)
-
-    producer_properties['compression.type'] = 'gzip'
-
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.skyone`
     skyone_source = (KafkaSource.builder()
                                 .set_properties(consumer_properties)
@@ -156,14 +169,12 @@ def main():
     # --- Load Apache Iceberg catalog
     catalog = load_catalog(tbl_env, aws_region, s3_bucket_name, "apache_kickstarter")
 
-    # --- Print the current catalog name
-    print(f"Current catalog: {tbl_env.get_current_catalog()}")
+    logging.info("Current catalog: %s", tbl_env.get_current_catalog())
 
     # --- Load database
     load_database(tbl_env, catalog, "airlines")
 
-    # Print the current database name
-    print(f"Current database: {tbl_env.get_current_database()}")
+    logging.info("Current database: %s", tbl_env.get_current_database())
 
     """
     An ObjectPath in Apache Flink is a class that represents the fully qualified path to a
@@ -174,8 +185,7 @@ def main():
     """
     flight_table_path = ObjectPath(tbl_env.get_current_database(), "flight")
 
-    # Print the current table name
-    print(f"Current table: {flight_table_path.get_full_name()}")
+    logging.info("Current table: %s", flight_table_path.get_full_name())
 
     # Check if the table exists.  If not, create it
     try:
@@ -202,7 +212,7 @@ def main():
             """)
 
     except Exception as e:
-        print(f"A critical error occurred to during the processing of the table because {e}")
+        logging.error("A critical error occurred to during the processing of the table because %s", e)
         exit(1)
 
     # Combine the Airline DataStreams into one DataStream
@@ -219,7 +229,7 @@ def main():
     try:
         env.execute("json_flight_consolidator_app")
     except Exception as e:
-        print(f"The App stopped early due to the following: {e}.")
+        logging.error("The App stopped early due to the following: %s", e)
 
     # Combine the Airline DataStreams into one DataStream
     flight_datastream = combine_datastreams(skyone_stream, sunset_stream).map(lambda d: d.to_row(), output_type=FlightData.get_value_type_info())
@@ -237,7 +247,7 @@ def main():
     try:
         env.execute("json_flight_consolidator_app")
     except Exception as e:
-        print(f"The App stopped early due to the following: {e}.")
+        logging.error("The App stopped early due to the following: %s", e)
 
 
 def combine_datastreams(skyone_stream: DataStream, sunset_stream: DataStream) -> DataStream:

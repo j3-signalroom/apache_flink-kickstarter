@@ -1,9 +1,13 @@
+from typing import Dict, Tuple
 from pyflink.datastream import StreamExecutionEnvironment
 from datetime import datetime, timezone
 from pyflink.table.catalog import Catalog
 
+from aws_clients_python_lib.secrets_manager import get_secrets
+from aws_clients_python_lib.parameter_store import get_parameters
 
-__copyright__  = "Copyright (c) 2024 Jeffrey Jonathan Jennings"
+
+__copyright__  = "Copyright (c) 2024-2025 Jeffrey Jonathan Jennings"
 __credits__    = ["Jeffrey Jonathan Jennings"]
 __license__    = "MIT"
 __maintainer__ = "Jeffrey Jonathan Jennings"
@@ -123,3 +127,34 @@ def load_database(tbl_env: StreamExecutionEnvironment, catalog: Catalog, databas
     except Exception as e:
         print(f"A critical error occurred to during the processing of the database because {e}")
         exit(1)
+
+
+def get_confluent_properties(aws_region_name: str, kafka_cluster_secrets_path: str, client_parameters_path: str) -> Tuple[Dict[str, str], str]:
+    """This method retrieves the Kafka Cluster properties from the AWS Secrets Manager, and the Kafka Client 
+    properties from the AWS Systems Manager.
+
+    Args:
+        aws_region_name (str): is the AWS region name where the AWS Secrets Manager and
+        AWS Systems Manager Parameter Store are located.
+        kafka_cluster_secrets_path (str): the path to the Kafka Cluster secrets in the AWS Secrets Manager.
+        client_parameters_path (str): the path to the Kafka Client parameters in the AWS Systems Manager
+        Parameter Store.
+
+    Returns:
+        Tuple[Dict[str, str], str]: the Kafka Cluster properties collection if successful, otherwise None.
+    """
+    confluent_properties = {}
+    
+    # Retrieve the Kafka Cluster properties from the AWS Secrets Manager
+    kafka_cluster_properties, error_message = get_secrets(aws_region_name, kafka_cluster_secrets_path)
+    if error_message:
+        return {}, error_message
+    confluent_properties.update(kafka_cluster_properties)
+
+    # Retrieve the parameters from the AWS Systems Manager Parameter Store
+    parameters, error_message = get_parameters(aws_region_name, client_parameters_path)
+    if error_message:
+        return {}, error_message
+    confluent_properties.update(parameters)
+
+    return confluent_properties, ""

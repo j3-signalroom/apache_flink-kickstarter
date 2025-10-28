@@ -219,14 +219,14 @@ else
 
     # Delete the secrets created by the Terraform configurations
     service_account_user=$(echo $service_account_user | tr '[:upper:]' '[:lower:]')
-    aws secretsmanager delete-secret $AWS_PROFILE --secret-id /confluent_cloud_resource/${service_account_user}/schema_registry_cluster/java_client --force-delete-without-recovery || true
-    aws secretsmanager delete-secret $AWS_PROFILE --secret-id /confluent_cloud_resource/${service_account_user}/schema_registry_cluster/python_client --force-delete-without-recovery || true
-    aws secretsmanager delete-secret $AWS_PROFILE --secret-id /confluent_cloud_resource/${service_account_user}/kafka_cluster/java_client --force-delete-without-recovery || true
-    aws secretsmanager delete-secret $AWS_PROFILE --secret-id /confluent_cloud_resource/${service_account_user}/kafka_cluster/python_client --force-delete-without-recovery || true
-    aws secretsmanager delete-secret $AWS_PROFILE --secret-id /confluent_cloud_resource/${service_account_user}/flink_compute_pool --force-delete-without-recovery || true
-    aws secretsmanager delete-secret $AWS_PROFILE --secret-id /snowflake_resource/${service_account_user} --force-delete-without-recovery || true
-    aws secretsmanager delete-secret $AWS_PROFILE --secret-id /snowflake_resource/${service_account_user}/rsa_private_key_pem_1 --force-delete-without-recovery || true
-    aws secretsmanager delete-secret $AWS_PROFILE --secret-id /snowflake_resource/${service_account_user}/rsa_private_key_pem_2 --force-delete-without-recovery || true
+    aws secretsmanager delete-secret $AWS_PROFILE --secret-id confluent_cloud_resource/${service_account_user}/schema_registry_cluster/java_client --force-delete-without-recovery || true
+    aws secretsmanager delete-secret $AWS_PROFILE --secret-id confluent_cloud_resource/${service_account_user}/schema_registry_cluster/python_client --force-delete-without-recovery || true
+    aws secretsmanager delete-secret $AWS_PROFILE --secret-id confluent_cloud_resource/${service_account_user}/kafka_cluster/java_client --force-delete-without-recovery || true
+    aws secretsmanager delete-secret $AWS_PROFILE --secret-id confluent_cloud_resource/${service_account_user}/kafka_cluster/python_client --force-delete-without-recovery || true
+    aws secretsmanager delete-secret $AWS_PROFILE --secret-id confluent_cloud_resource/${service_account_user}/flink_compute_pool --force-delete-without-recovery || true
+    aws secretsmanager delete-secret $AWS_PROFILE --secret-id snowflake_resource/${service_account_user} --force-delete-without-recovery || true
+    aws secretsmanager delete-secret $AWS_PROFILE --secret-id snowflake_resource/${service_account_user}/rsa_private_key_pem_1 --force-delete-without-recovery || true
+    aws secretsmanager delete-secret $AWS_PROFILE --secret-id snowflake_resource/${service_account_user}/rsa_private_key_pem_2 --force-delete-without-recovery || true
 
     # Gets glue_database_name of the Glue Database created during the apply run
     glue_database_name=$(terraform output -raw glue_database_name)

@@ -1,6 +1,6 @@
 from pyflink.common import Configuration, WatermarkStrategy
 from pyflink.datastream.window import TumblingEventTimeWindows, Time
-from pyflink.datastream import StreamExecutionEnvironment, DataStream, TimeCharacteristic
+from pyflink.datastream import StreamExecutionEnvironment, DataStream
 from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaRecordSerializationSchema, KafkaOffsetsInitializer, DeliveryGuarantee
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema, JsonRowSerializationSchema
 from pyflink.datastream.checkpoint_config import ExternalizedCheckpointRetention
@@ -11,14 +11,7 @@ import os
 
 from model.flight_data import FlightData, FlyerStatsData
 from helper.flyer_stats_process_window_function import FlyerStatsProcessWindowFunction
-from helper.common import load_catalog, load_database
-
-# Ensure the kafka_properties_udtf module is available
-try:
-    from helper.kafka_properties_udtf import execute_kafka_properties_udtf
-except ImportError as e:
-    logging.error(f"Failed to import kafka_properties_udtf: {e}")
-    raise
+from helper.common import load_catalog, load_database, get_confluent_properties
 
 
 __copyright__  = "Copyright (c) 2024-2025 Jeffrey Jonathan Jennings"
@@ -38,6 +31,29 @@ def main():
     service_account_user = os.getenv("SERVICE_ACCOUNT_USER", "")
     s3_bucket_name = os.getenv("AWS_S3_BUCKET_NAME", "")
     aws_region = os.getenv("AWS_REGION", "")
+
+    # Get the Kafka Client properties from AWS Secrets Manager and AWS Systems Manager Parameter Store.
+    secret_path_prefix = f"confluent_cloud_resource/{service_account_user}"
+
+    """
+    Using the `java_client` configuration instead of the `python_client` configuration
+    because PyFlink converts into Java code and the Java code is what is executed.
+    """
+    consumer_properties, error_message = get_confluent_properties(
+        aws_region_name=aws_region,
+        kafka_cluster_secrets_path=f"{secret_path_prefix}/kafka_cluster/java_client",
+        client_parameters_path=f"/{secret_path_prefix}/consumer_kafka_client"
+    )
+    if error_message:
+        raise RuntimeError(f"Failed to retrieve the Confluent Cloud properties for the Kafka Consumer client because {error_message}")
+    producer_properties, error_message = get_confluent_properties(
+        aws_region_name=aws_region,
+        kafka_cluster_secrets_path=f"{secret_path_prefix}/kafka_cluster/java_client",
+        client_parameters_path=f"/{secret_path_prefix}/producer_kafka_client"
+    )
+    if error_message:
+        raise RuntimeError(f"Failed to retrieve the Confluent Cloud properties for the Kafka Producer client because {error_message}")
+    producer_properties['compression.type'] = 'lz4'
 
     # --- Create a configuration to force Avro serialization instead of Kyro serialization.
     config = Configuration()
@@ -96,10 +112,6 @@ def main():
 
     # Create a Table Environment
     tbl_env = StreamTableEnvironment.create(stream_execution_environment=env)
-
-    # Get the Kafka Cluster properties for the Kafka consumer and producer
-    consumer_properties, _ = execute_kafka_properties_udtf(tbl_env, True, service_account_user)
-    producer_properties, _ = execute_kafka_properties_udtf(tbl_env, False, service_account_user)
 
     # Sets up a Flink Kafka source to consume data from the Kafka topic `airline.flight`
     flight_source = (KafkaSource.builder()
