@@ -215,7 +215,7 @@ def main():
     logging.info("Added Iceberg insert to statement set")
     
     # Add Kafka insert to the statement set
-    statement_set.add_insert_sql("""
+    statement_set.add_insert_sql(f"""
         INSERT INTO {stats_table_path.get_full_name()}
         SELECT * FROM temp_stats_view
     """)
