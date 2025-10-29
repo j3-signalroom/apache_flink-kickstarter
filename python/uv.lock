@@ -115,7 +115,7 @@ wheels = [
 
 [[package]]
 name = "apache-flink-kickstarter"
-version = "0.59.0.0"
+version = "0.59.2.0"
 source = { virtual = "." }
 dependencies = [
     { name = "apache-beam" },

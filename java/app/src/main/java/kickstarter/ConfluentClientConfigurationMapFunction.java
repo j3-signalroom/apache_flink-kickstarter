@@ -73,12 +73,12 @@ public class ConfluentClientConfigurationMapFunction extends RichMapFunction<Pro
      */
     @Override
     public void open(OpenContext openContext) throws Exception {
-        final String secretPathPrefix = "/confluent_cloud_resource/" + this._serviceAccountUser;
+        final String secretPathPrefix = "confluent_cloud_resource/" + this._serviceAccountUser;
         final ConfluentClientConfiguration confluentClientConfiguration = 
             new ConfluentClientConfiguration(
                 secretPathPrefix + "/kafka_cluster/java_client", 
                 secretPathPrefix + "/schema_registry_cluster/java_client",
-                secretPathPrefix + (this._isConsumer ? "/consumer_kafka_client" : "/producer_kafka_client"));
+                "/" + secretPathPrefix + (this._isConsumer ? "/consumer_kafka_client" : "/producer_kafka_client"));
         ObjectResult<Properties> properties = confluentClientConfiguration.getConfluentPropertiesFromAws();
 
 		if(!properties.isSuccessful()) { 

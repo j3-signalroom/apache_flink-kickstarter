@@ -5,8 +5,6 @@ Serialize data between operators and user functions within Flink
 
 It is recommended to use the POJO Serializer
 
-
-
 Kryo is an open-source Java serialization framework that provides efficient and fast object serialization. Serialization is the process of converting an object into a byte stream that can be persisted to disk, transferred across a network, or otherwise stored and reconstructed later. Kryo aims to do this with a focus on speed, flexibility, and reduced object size compared to Java’s default serialization.
 
 ### Key Features of Kryo:
