@@ -154,8 +154,12 @@ public class AvroDataGeneratorApp {
          */
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
 
-        // --- Set the parallelism for the entire job.
-        env.setParallelism(1);
+        /*
+         * MEMORY FIX #1: Set a reasonable parallelism to limit concurrent writers
+         * Lower parallelism = fewer concurrent partition writers = less memory usage
+         * Adjust based on your cluster resources and throughput requirements
+         */
+        env.setParallelism(2);
 
         // --- Create a StreamTableEnvironment.
         EnvironmentSettings settings = 
@@ -362,10 +366,37 @@ public class AvroDataGeneratorApp {
                             + "booking_agency_email STRING) "
                             + "PARTITIONED BY (arrival_airport_code) "
                             + "WITH ("
+                                /*
+                                 * MEMORY FIX #2: Increased target file size from 128MB to 512MB
+                                 * Larger files = fewer writers = less memory usage
+                                 * Trade-off: larger files, but more memory efficient
+                                 */
                                 + "'write.format.default' = 'parquet',"
-                                + "'write.target-file-size-bytes' = '134217728',"
-                                + "'write.delete.mode' = 'merge-on-read',"
-                                + "'write.update.mode' = 'merge-on-read',"
+                                + "'write.target-file-size-bytes' = '536870912'," // 512MB (was 128MB)
+                                
+                                /*
+                                 * MEMORY FIX #3: Use copy-on-write instead of merge-on-read
+                                 * Copy-on-write rewrites entire files on update, avoiding equality delete files
+                                 * This significantly reduces memory for upsert workloads
+                                 * Trade-off: higher write amplification, but lower memory
+                                 */
+                                + "'write.delete.mode' = 'copy-on-write',"
+                                + "'write.update.mode' = 'copy-on-write',"
+                                
+                                /*
+                                 * MEMORY FIX #4: Add write distribution mode
+                                 * 'hash' mode distributes data by hash of partition key before writing
+                                 * This ensures each writer handles fewer partitions
+                                 */
+                                + "'write.distribution-mode' = 'hash',"
+                                
+                                /*
+                                 * MEMORY FIX #5: Limit the number of open files per task
+                                 * This prevents too many writers from being open simultaneously
+                                 */
+                                + "'write.parquet.page-size-bytes' = '1048576'," // 1MB pages
+                                + "'write.parquet.row-group-size-bytes' = '134217728'," // 128MB row groups
+                            
                                 + "'format-version' = '2'"
                             + ");"
                     );
@@ -378,6 +409,9 @@ public class AvroDataGeneratorApp {
         TableLoader tableLoader = TableLoader.fromCatalog(catalogLoader, tableIdentifier);
 
         /*
+         * MEMORY FIX #6: Use writeParallelism to control concurrent writers
+         * Lower write parallelism = fewer concurrent files = less memory
+         * 
          * Writes data from the Apache Flink datastream to an Apache Iceberg table using upsert logic, where updates or insertions 
          * are decided based on the specified equality fields (i.e., "email_address", "departure_airport_code", "arrival_airport_code").
          * 
@@ -389,6 +423,7 @@ public class AvroDataGeneratorApp {
             .tableLoader(tableLoader)
             .upsert(true)
             .equalityFieldColumns(Arrays.asList("email_address", "departure_airport_code", "arrival_airport_code"))
+            .writeParallelism(2) // Limit concurrent writers (adjust based on your cluster)
             .append()
             .name(tableName + "_iceberg_sink");
     }

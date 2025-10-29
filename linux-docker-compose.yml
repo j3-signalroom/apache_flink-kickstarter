@@ -25,6 +25,8 @@ services:
         web.backpressure.refresh-interval: 10000
         classloader.check-leaked-classloader: false
         python.executable: /opt/flink/python_apps/.venv/bin/python
+      # MEMORY FIX: JVM options for JobManager
+      - FLINK_ENV_JAVA_OPTS=--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/opt/flink/log/jobmanager-heap-dump.hprof
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
@@ -33,7 +35,17 @@ services:
       - AWS_S3_BUCKET=${AWS_S3_BUCKET}
       - FLINK_LANGUAGE=${FLINK_LANGUAGE}
       - SERVICE_ACCOUNT_USER=${SERVICE_ACCOUNT_USER}
-  # Apache Flink Task Manager
+    # Resource limits for JobManager
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 2G
+    volumes:
+      - flink-jobmanager-logs:/opt/flink/log
+
+  # Apache Flink Task Manager - OPTIMIZED FOR ICEBERG
   taskmanager:
     build:
       context: .
@@ -54,12 +66,19 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 2
+        taskmanager.memory.process.size: 8192m
+        taskmanager.memory.flink.size: 6144m
+        taskmanager.memory.jvm-metaspace.size: 512m
+        taskmanager.memory.jvm-overhead.fraction: 0.1
         taskmanager.memory.task.off-heap.size: 256m
-        taskmanager.memory.process.size: 2048m
-        taskmanager.memory.network.fraction: 0.2
+        taskmanager.memory.network.fraction: 0.15
+        taskmanager.memory.managed.fraction: 0.35
         python.fn-execution.memory.limit: 512mb
         classloader.check-leaked-classloader: false
         python.executable: /opt/flink/python_apps/.venv/bin/python
+        parallelism.default: 2
+      # MEMORY FIX: Critical JVM options for Iceberg
+      - FLINK_ENV_JAVA_OPTS=--add-opens=java.base/java.util=ALL-UNNAMED -Xmx6g -Xms6g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/opt/flink/log/taskmanager-heap-dump.hprof -XX:MaxDirectMemorySize=2g
       - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
@@ -68,3 +87,18 @@ services:
       - AWS_S3_BUCKET=${AWS_S3_BUCKET}
       - FLINK_LANGUAGE=${FLINK_LANGUAGE}
       - SERVICE_ACCOUNT_USER=${SERVICE_ACCOUNT_USER}
+    # MEMORY FIX: Critical - Docker container limits must match Flink memory
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: '4'
+        reservations:
+          memory: 8G
+          cpus: '2'
+    volumes:
+      - flink-taskmanager-logs:/opt/flink/log
+
+volumes:
+  flink-jobmanager-logs:
+  flink-taskmanager-logs:
