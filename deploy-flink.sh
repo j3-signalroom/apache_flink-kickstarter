@@ -139,31 +139,42 @@ then
     then
         if [ $extend_resources = true ]
         then
-            docker-compose -f linux-docker-compose-extend.yml up -d 
+            docker-compose -f linux-docker-compose-extend-resources.yml up -d 
         else
             docker-compose -f linux-docker-compose.yml up -d 
         fi
     else
         if [ $extend_resources = true ]
         then
-            docker-compose -f mac-docker-compose-extend.yml up -d 
+            docker-compose -f mac-docker-compose-extend-resources.yml up -d 
         else
             docker-compose -f mac-docker-compose.yml up -d
         fi
     fi
 else
+    # Check required --chip argument was supplied
+    if [ $chip_arg_provider = false ]
+    then
+        echo
+        echo "(Error Message 002)  You did not include the proper use of the --chip=<amd64 | amd64-extend | arm64 | arm64-extend> argument in the call."
+        echo
+        echo "Usage:  Require ---> `basename $0` <on | off> --chip=<amd64 | amd64-extend | arm64 | arm64-extend>"
+        echo
+        exit 85 # Common GNU/Linux Exit Code for 'Interrupted system call should be restarted'
+    fi
+
     if [ $use_non_mac = true ]
     then
         if [ $extend_resources = true ]
         then
-            docker-compose -f linux-docker-compose-extend.yml down
+            docker-compose -f linux-docker-compose-extend-resources.yml down
         else
             docker-compose -f linux-docker-compose.yml down
         fi
     else
         if [ $extend_resources = true ]
         then
-            docker-compose -f mac-docker-compose-extend.yml down
+            docker-compose -f mac-docker-compose-extend-resources.yml down
         else
             docker-compose -f mac-docker-compose.yml down
         fi
