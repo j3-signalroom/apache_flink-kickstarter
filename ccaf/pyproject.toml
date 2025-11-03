@@ -1,6 +1,6 @@
 [project]
 name = "ccaf"
-version = "0.58.00.000"
+version = "0.59.02.000"
 description = "Confluent Cloud for Apache Flink (CCAF) Python Table API examples"
 readme = "README.md"
 authors = [
@@ -9,7 +9,7 @@ authors = [
 requires-python = "~=3.11.9"
 dependencies = [
     "boto3>=1.36.2",
-    "confluent-flink-table-api-python-plugin>=1.20.50",
+    "confluent-flink-table-api-python-plugin==1.20.56",
 ]
 
 [project.scripts]

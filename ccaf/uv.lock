@@ -31,7 +31,7 @@ wheels = [
 
 [[package]]
 name = "ccaf"
-version = "0.58.0.0"
+version = "0.59.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
@@ -41,7 +41,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "boto3", specifier = ">=1.36.2" },
-    { name = "confluent-flink-table-api-python-plugin", specifier = ">=1.20.50" },
+    { name = "confluent-flink-table-api-python-plugin", specifier = "==1.20.56" },
 ]
 
 [[package]]
@@ -86,13 +86,13 @@ wheels = [
 
 [[package]]
 name = "confluent-flink-jars"
-version = "1.20.50"
+version = "1.20.56"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/bc/42/729b4d5ea00a9a800177e94957f43918a3b7499664eccacfc376a40830f5/confluent_flink_jars-1.20.50.tar.gz", hash = "sha256:35aac175e21475bf34d8ebc8b0851b5b38cd6a2b1cad919f52ed88f80b575dda", size = 60152975 }
+sdist = { url = "https://files.pythonhosted.org/packages/71/9a/6458c2bb2579cefdf6b446b9edbb5f0c26899aac0d1fddbd3a639096e6ce/confluent_flink_jars-1.20.56.tar.gz", hash = "sha256:034db46445daaa3cfb0332dd758240bef429a1c2e1865f5b3de941ca8e2dd675", size = 60155161 }
 
 [[package]]
 name = "confluent-flink-table-api-python-plugin"
-version = "1.20.50"
+version = "1.20.56"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cloudpickle" },
@@ -105,9 +105,9 @@ dependencies = [
     { name = "requests" },
     { name = "ruamel-yaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2a/03/4efa64e904c3cc8effe7be88ca7dad054805159190a0c6e98cd320a6bad7/confluent_flink_table_api_python_plugin-1.20.50.tar.gz", hash = "sha256:3b4c51d1d974549542775482ebb32c1b16a05bc362f9217712e438fc8844c030", size = 304627 }
+sdist = { url = "https://files.pythonhosted.org/packages/f2/0c/efdd1645d73bcc850511c0a385950ff9d032da9af19f24735ddb3b4cf8ae/confluent_flink_table_api_python_plugin-1.20.56.tar.gz", hash = "sha256:77321931f78686d04b4fb74bcc68298dfec4196700d9728cf7f68491b07af6ae", size = 304917 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7b/41/c8b2df82f9de8a3833e5a515edf98942977a9534568e5d98229555b86d1e/confluent_flink_table_api_python_plugin-1.20.50-py2.py3-none-any.whl", hash = "sha256:155ffc57a1ce80bd96cd4115140a97af67ead6d2f9b51f272cd1d5914d50c0ad", size = 382365 },
+    { url = "https://files.pythonhosted.org/packages/b0/d2/efe2511be8e91945e87a6074e7f14bec67a1fcd8cb51c68aa63023884fd8/confluent_flink_table_api_python_plugin-1.20.56-py2.py3-none-any.whl", hash = "sha256:cd94e2d08e2af4c60199feda7075119612aa83fe6c3ffd8020f0ea58b0ce8099", size = 382532 },
 ]
 
 [[package]]
