@@ -44,7 +44,7 @@ Run the Docker containers (fully compatible with both **Apple Silicon's M-series
         * [**3.5.2 Local Prerequisites**](#352-local-prerequisites)
         * [**3.5.3 Clone the Repository**](#353-clone-the-repository)
         * [**3.5.4 Set Up Your Environment**](#354-set-up-your-environment)
-        * [**3.5.5 Deploy Flink**](#355-deploy-flink)
+        * [**3.5.5 Deploy Flink**](#355-run-flink-locally)
         * [**3.5.6 You're Ready!**](#356-youre-ready)
     - [**3.6 DevOps in Action: Running Terraform**](#36-devops-in-action-running-terraform)
         * [**3.6.1 Deploy Terraform**](#361-deploy-terraform)
@@ -178,8 +178,7 @@ Both methods provision a fully functional **end-to-end data streaming architectu
 * An **AWS S3 bucket** with a dedicated `warehouse/` folder serving as the **landing zone for Apache Iceberg Tables**—populated by two Python-based Flink applications
 
 ##### **3.5.5 Run Flink Locally**
-
-You can run **Apache Flink** locally on your Mac or use the **provided Docker containers** to launch Flink and Iceberg seamlessly—compatible with both **Apple Silicon's M-series** and **x86 architectures**.
+You can run **Apache Flink** locally in the **provided Docker containers** to launch Flink and Iceberg seamlessly on either **Apple Silicon's M-series** and **x86 architectures**.
 
 ##### **3.5.6 You're Ready!**
 

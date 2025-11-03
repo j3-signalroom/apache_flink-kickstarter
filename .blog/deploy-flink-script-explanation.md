@@ -14,7 +14,7 @@ This script is used to manage a local Apache Flink environment using Docker Comp
 2. **Argument Parsing**:
    - Parses optional arguments such as:
      - `--profile`: AWS SSO profile name.
-     - `--chip`: Specifies the target architecture (amd64 or arm64).
+     - `--chip`: Specify the chip architecture, and if extended resources are needed.
      - `--flink-language`: Specifies the language to be used (Python or Java).
 
 3. **Validation Checks**:
@@ -39,14 +39,14 @@ This script is used to manage a local Apache Flink environment using Docker Comp
 ### Usage Example
 The script should be run with the following syntax:
 
-```bash
+```shell
 ./deploy-flink.sh <on | off> --profile=<AWS_SSO_PROFILE_NAME> --chip=<amd64 | arm64> --flink-language=<python | java>
 ```
 
 - **on**: Start the environment.
 - **off**: Stop the environment.
 - `--profile=<AWS_SSO_PROFILE_NAME>`: The AWS SSO profile to use.
-- `--chip=<amd64 | arm64>`: Specify the chip architecture.
+- `--chip=<amd64 | amd64-extend | arm64 | arm64-extend>`: Specify the chip architecture, and if extended resources are needed.
 - `--flink-language=<python | java>`: Specify the language to use for Flink applications.
 
 ### Summary
