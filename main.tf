@@ -14,7 +14,7 @@ terraform {
         }
         aws = {
             source  = "hashicorp/aws"
-            version = "6.21.0"
+            version = "6.22.1"
         }
         snowflake = {
             source = "snowflakedb/snowflake"
