@@ -13,6 +13,7 @@ The format is base on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), 
 - Issue [#811](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/811).
 - Issue [#813](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/813).
 - Issue [#815](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/815).
+- Issue [#817](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/817).
 
 ### Fixed
 - Issue [#794](https://github.com/j3-signalroom/apache_flink-kickstarter/issues/794).
