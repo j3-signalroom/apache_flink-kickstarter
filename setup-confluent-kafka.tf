@@ -48,9 +48,6 @@ module "kafka_cluster_api_key_rotation" {
         }
     }
 
-    confluent_api_key    = var.confluent_api_key
-    confluent_api_secret = var.confluent_api_secret
-
     # Optional Input(s)
     key_display_name = "Confluent Kafka Cluster Service Account API Key - {date} - Managed by Terraform Cloud"
     number_of_api_keys_to_retain = var.number_of_api_keys_to_retain
